@@ -1,0 +1,161 @@
+2004-01-29  Joe Riel  <joer@k-online.com>
+
+	* maplev.el (maplev--compute-indent): 
+	Set case-fold-search to nil when checking for 
+	maplev--declaration-re.
+
+2003-10-10  Joe Riel  <joer@k-online.com>
+
+	* maplev.el (complete-symbol-function): removed.
+
+2003-10-09  Joe Riel  <joe.riel@incep.com>
+
+	* maplev.el 
+	- Added (require info) so maplev-goto-info-node compiles (still
+	doesn't work).
+	- Fixed all mode-map assignments; used characters for letter
+	symbols (a -> ?a).
+	(event-window): Used defun rather than defsubst so that it would
+	byte-compile in Xemacs.  I don't understand why this is necessary.
+	(event-point):  Used defun rather than defsubst, see above.
+	(maplev-cmaple--lock-access): forward-quoted 'maplev-release in put.
+	(maplev-cmaple--unlock-access): forward-quoted 'maplev-release in put.
+	(maplev-cmaple--locked-p): forward-quoted 'maplev-release in get.
+	(maplev-cmaple-status): forward-quoted 'maplev-release in get.
+	(complete-symbol-function): added variable to permit the user to
+	bind maplev-complete-symbol to a particular key.
+	(maplev-mode): Make complete-symbol-function local to the MapleV
+	buffer and set it to maplev-complete-symbol.
+	(maplev-complete-symbol): Added optional prefix argument.  
+	This isn't currently used, but permits passing an optional prefix,
+	which could be used to choose a particular symbol list.
+
+2003-10-09  Roland Winkler  <Roland.Winkler@physik.uni-erlangen.de>
+
+	* maplev.el
+	(maplev-align-exclude-rules-list): Fix docstring.
+	(maplev-completion-release): New variable used for selecting the
+	correct maple release when calculating the lazy minibuffer
+	completion.
+	(maplev--list-to-word-re) Use eval-and-compile.
+	(maplev--grammar-keyword-re): Use eval-when-compile.
+	(maplev-cmaple--start-process) Use identity for mapconcat.
+	(maplev-cmaple-pop-to-buffer): Don't call
+	maplev--completion-initialize.
+	(maplev-ident-around-point-interactive): Use new function
+	maplev--completion.
+	(maplev--completion-initialize): Removed.
+	(maplev--completion): New function for lazily calculating the
+	minibuffer completion. The first time it is used for a certain
+	Maple release it calculates and stores the completion table in
+	maplev-completion-alist. Subsequent calls merely extract the
+	relevant portion of maplev-completion-alist.
+	(maplev-complete-symbol): Use maplev--completion.
+
+
+
+2003-10-08  Joe Riel  <joe.riel@incep.com>
+
+	* maplev.el 
+	- Changed all mode-map assignments to define keys using a notation
+	  that is compatible with both FSF Emacs and Xemacs.
+	- Modified all mouse key maps to use maplev--mouse-keymap (see below).
+	- Added Time-Stamp field.
+	(maplev--list-to-word-re): assigned inside eval-when-compile
+	(maplev--special-words-re): added eval-when-compile
+	(maplev--initial-variables-re): added eval-when-compile
+	(maplev--mouse-keymap): new function to handle defining mouse
+	button keymaps, specifically differences between Emacs and Xemacs.
+
+2003-10-07  Joe Riel  <joe.riel@incep.com>
+
+	* maplev.el 
+	(maplev--special-words-re): removed eval-when-compile
+	(maplev--initial-variables-re): removed eval-when-compile
+
+2003-10-05  Joe Riel  <joer@k-online.com>
+
+	* maplev.el 
+	(maplev-executable-alist): Added items for Maple 9.
+	(maplev-default-release): Made Maple 9 the default
+	(maplev-init-string-alist): Added Maple 9 item
+	(maplev--reserved-words-alist): Added Maple 9 reserved word list (same 8)
+	(maplev--builtin-functions-alist): Added Maple 9 builtin function list
+
+2003-02-17  Joe Riel  <joer@k-online.com>
+
+	* maplev.el 
+	(maplev--string-re): Fixed to match when the sring contains an escaped newline.
+	
+
+2003-02-15  Joe Riel  <joe@clifford>
+
+	* maplev.el 
+	(maplev-include-path): Defined custom variable for setting include path.
+	(maplev-cmaple--start-process): Added code to insert include path option.
+	(maplev-mint-region): Added code to insert include path option.
+	
+2003-02-10  Joe Riel  <joe@clifford>
+
+	* maplev.el
+	(maplev-dont-indent-re): Changed default value to include `$' so
+	that Maple preprocessor directives are not indented.
+	(maplev--preprocessor-directives-re): Assigned regex constant to
+	match a preprocessor directive.
+	(maplev-font-lock-keywords-1): Added font-locking of preprocessor
+	directives.
+	(maplev-preprocessor-face): Added custom face for font-locking
+	preprocessor directives.  Xemacs may define font-lock-preprocessor-face.
+
+	
+
+2002-10-04  Joe Riel  <joe.riel@incep.com>
+
+	* maplev.el:
+	(maplev-goto-info-node): Added this interactive function [NOT WORKING!]
+	(maplev-menu): Added menu item to run `maplev-goto-info-node'.
+	(maplev--grammar-alist): Changed grammar for `use' so
+	that it doesn't look for an `in'.  This is part of the kludge
+	to allow the use of the Maple `in' operator.
+	(maplev--completion-initialize): renamed from maplev-completion-initialize.
+	(maplev-help--cleanup-buffer): renamed from maplev-help-cleanup-buffer.
+	(maplev--short-delay): renamed from maplev-short-delay.
+	(maplev-cmaple--start-process): renamed from maplev-cmaple-start-process.
+	(maplev-cmaple--send-string): renamed from maplev-cmaple-send-string.
+	(maplev-cmaple-send-region): Changed so that it calls maplev-cmaple--clear-buffer
+	if a prefix was applied to the command.
+	(maplev-cmaple--clear-buffer): New function.  Clears the cmaple buffer.
+
+2002-10-03  Joe Riel  <joe.riel@incep.com>
+
+	* maplev.el (v2.15)
+	(maplev-align-rules-list): 
+	Added rules for aligning commas and columns (|);
+	they are applied only if a prefix argument is applied.
+
+2002-10-02  Joe Riel  <joe.riel@incep.com>
+
+	* maplev.el 
+	(maplev-insert-copyright-flag): Corrected docstring.
+	Changed coding system to unix; this may get reset
+	when the file is uploaded/downloaded to the website.
+	Removed iso-latin copyright symbol, replaced with `(C)'.
+
+2002-10-01  Joe Riel  <joe.riel@incep.com>
+
+	* maplev.el 
+	Added (require 'align) to customize alignment rules for Maple.
+	Added variables for aligning Maple assignments.
+	Created a new custom group, maplev-align. 
+
+2002-09-30  Joe Riel  <joe.riel@incep.com>
+
+	* maplev.el
+	(maplev-initial-abbrev-mode-flag): Changed default value to nil so
+	that abbreviations are initially disabled.  This was done to
+	prevent a new user from being unable to figure out how to type,
+	say, ``wh'', as a variable.  With abbreviations enabled this would
+	expand to ``while''.
+	(maplev--statement-terminator): modified regexp; removed match to
+	start of line and removed first match group.
+

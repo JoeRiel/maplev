@@ -1,0 +1,5 @@
+
+junk := proc(x,y)
+option `Copyright (C) 2003 by Joseph S. Riel. All rights reserved.`;
+    conv :=
+end: # junk
