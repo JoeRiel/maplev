@@ -10,7 +10,7 @@
 ;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.7 2003-10-11 05:47:47 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.8 2004-05-20 05:40:48 joe Exp $
 
 ;;{{{ License
 ;; This program is free software; you can redistribute it and/or
@@ -3494,6 +3494,11 @@ The title is the phrase following the function name."
           "\\([A-Za-z][a-z-]*\\)?:?[ \t]*$"
           "\\)")
   "Regular expression for subsections in a Maple help page.")
+
+(defconst maplev--help-definition-re
+  "([ \t\n]*\\(Definition/[^) \t\n]+\\)[ \t\n]*)"
+  "Regular expression for dictionary hyperlinks")
+
 ;;}}}
 ;;{{{     functions
 (defun maplev-help-fontify-node ()
@@ -3565,10 +3570,18 @@ The title is the phrase following the function name."
       (and (re-search-backward "^See Also:?" nil 'move)
            (maplev--activate-hyperlinks (match-end 0) (point-max)))
 
-      ;; Activate hyperlinks forllowing "Multiple matches:".
+      ;; Activate hyperlinks following "Multiple matches:".
       (goto-char (point-min))
       (and (re-search-forward "^Multiple matches found:" nil 'move)
-           (maplev--activate-hyperlinks (match-end 0) (point-max))))))
+           (maplev--activate-hyperlinks (match-end 0) (point-max)))
+
+      ;; Active dictionary hyperlinks
+      (goto-char (point-min))
+      (while (re-search-forward maplev--help-definition-re nil 'move)
+           (let ((beg (match-beginning 1))
+                 (end (match-end 1)))
+             (put-text-property beg end 'mouse-face 'highlight)
+             (put-text-property beg end 'face maplev-help-function-face))))))
 
 (defun maplev--activate-hyperlinks (beg end)
   "Font lock and activate Maple keywords in the region from BEG to END."
