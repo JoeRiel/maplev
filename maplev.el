@@ -9,7 +9,7 @@
 ;; Version:    2.152
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $$
+;; X-RCS:      $Id: maplev.el,v 1.2 2003-10-06 04:53:24 joe Exp $
 
 ;;{{{ License
 ;; This program is free software; you can redistribute it and/or
