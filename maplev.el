@@ -10,7 +10,7 @@
 ;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.9 2004-05-20 22:52:26 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.10 2004-05-25 00:30:48 joe Exp $
 
 ;;{{{ License
 ;; This program is free software; you can redistribute it and/or
@@ -27,6 +27,7 @@
 ;; 02111-1307, USA.
 ;;}}}
 ;;{{{ Introduction
+
 ;;; Commentary:
 ;;
 ;; This package defines five major modes:
@@ -79,6 +80,7 @@
 ;;; History:
 
 ;; Oct 99:  Initial release.
+
 ;;}}}
 ;;{{{ To Do
 ;; High Priority:
@@ -224,6 +226,7 @@ is an integer correspond to the button number; preceding items are optional modi
 ;;}}}
 ;;{{{ Configurable options
 ;;{{{   executables
+
 (defcustom maplev-executable-alist
   (if (string-match "windows-nt\\|ms-dos" (symbol-name system-type))
       '(
@@ -393,7 +396,6 @@ specified in Maple preprocessor $include directives."
   :type '(choice (const nil) (repeat string))
   :group 'maplev-executables
   :group 'maplev-mint)
-
 
 ;;}}}
 ;;{{{   comments
@@ -606,6 +608,7 @@ See the documentation for `align-exclude-rules-list' for more info."
 (defvar maplev-history-list nil
   "History list used by maplev.")
 
+
 ;;}}}
 ;;{{{ Regular expressions
 
@@ -695,6 +698,70 @@ including double-quotes.")
   (defun maplev--list-to-word-re (words)
     "Generate a regular expression that matches one of WORDS, a list."
     (concat "\\<\\(" (regexp-opt words) "\\)\\>")))
+
+;;}}}
+;;{{{ Syntax table
+
+(defvar maplev-mode-syntax-table nil
+  "Syntax table used in MapleV mode buffers \(except R4\).")
+
+(unless maplev-mode-syntax-table
+  (setq maplev-mode-syntax-table (make-syntax-table))
+  (modify-syntax-entry ?_  "_"  maplev-mode-syntax-table) ; symbol constituent
+  (modify-syntax-entry ?\\ "\\" maplev-mode-syntax-table) ; escape
+  (modify-syntax-entry ?#  "<"  maplev-mode-syntax-table) ; comment starter
+  (modify-syntax-entry ?\n ">"  maplev-mode-syntax-table) ; newline = comment ender
+  (modify-syntax-entry ?\f ">"  maplev-mode-syntax-table) ; formfeed = comment ender
+  (modify-syntax-entry ?\r " "  maplev-mode-syntax-table) ; return = whitespace
+  (modify-syntax-entry ?\t " "  maplev-mode-syntax-table) ; tab = whitespace
+
+  (modify-syntax-entry ?*  "."  maplev-mode-syntax-table) ; punctuation
+  (modify-syntax-entry ?/  "."  maplev-mode-syntax-table)
+  (modify-syntax-entry ?+  "."  maplev-mode-syntax-table)
+  (modify-syntax-entry ?-  "."  maplev-mode-syntax-table)
+  (modify-syntax-entry ?=  "."  maplev-mode-syntax-table)
+  (modify-syntax-entry ?<  "."  maplev-mode-syntax-table)
+  (modify-syntax-entry ?>  "."  maplev-mode-syntax-table)
+  (modify-syntax-entry ?.  "."  maplev-mode-syntax-table)
+
+  (modify-syntax-entry ?\' "\"" maplev-mode-syntax-table) ; string quotes
+  (modify-syntax-entry ?\` "\"" maplev-mode-syntax-table) ; string quotes
+  (modify-syntax-entry ?\{ "(}" maplev-mode-syntax-table) ; balanced brackets
+  (modify-syntax-entry ?\[ "(]" maplev-mode-syntax-table)
+  (modify-syntax-entry ?\( "()" maplev-mode-syntax-table)
+  (modify-syntax-entry ?\} "){" maplev-mode-syntax-table)
+  (modify-syntax-entry ?\] ")[" maplev-mode-syntax-table)
+  (modify-syntax-entry ?\) ")(" maplev-mode-syntax-table)
+
+  ;; Entries for R5 and later
+  (modify-syntax-entry ?%  "."  maplev-mode-syntax-table)
+  (modify-syntax-entry ?\" "\"" maplev-mode-syntax-table)
+  )
+
+(defvar maplev-mode-4-syntax-table nil
+  "Syntax table used in MapleV mode buffers for R4.")
+
+;; In R4 the ditto operator is `"'
+
+(unless maplev-mode-4-syntax-table
+  (setq maplev-mode-4-syntax-table
+        (copy-syntax-table maplev-mode-syntax-table))
+  (modify-syntax-entry ?\" "." maplev-mode-4-syntax-table))
+
+(defvar maplev--symbol-syntax-table nil
+  "Syntax table for Maple, where `_' is a word consituent.")
+
+(unless maplev--symbol-syntax-table
+  (setq maplev--symbol-syntax-table (copy-syntax-table maplev-mode-syntax-table))
+  (modify-syntax-entry ?_  "w"  maplev--symbol-syntax-table))
+
+(defvar maplev-help-mode-syntax-table nil
+  "Syntax table used in Maple help buffer.")
+
+(unless maplev-help-mode-syntax-table
+  (let ((table (make-syntax-table)))
+    (modify-syntax-entry ?_ "w" table)
+    (setq maplev-help-mode-syntax-table table)))
 
 ;;}}}
 
@@ -791,6 +858,7 @@ character position of the beginning of the change.  UNUSED is not used."
        (maplev--clear-indent-info)))
 ;;}}}
 ;;{{{   grammar
+
 (defconst maplev--grammar-alist nil
   "Assoc list defining the grammar for Maple indentation.
 Each entry has the form \(KEY . \(MATCH-RE OPEN-P INDENT ADJUST-FUNC
@@ -850,6 +918,7 @@ is handled.  Currently it is only used by the keyword `end'.")
 (defconst maplev--grammar-keyword-re
   (eval-when-compile
     (concat
+     ;;     (maplev--list-to-word-re
      (maplev--list-to-word-re
       '("proc" "module" "end"
 ;;;      "for" "from" "to" "by" "while" "in" "do" "od"
@@ -862,10 +931,11 @@ is handled.  Currently it is only used by the keyword `end'.")
   "Regular expression of keywords used in Maple grammar for indentation.")
 
 (defun maplev--skip-optional-end-keyword ()
-  "Skip the optional keyword following an end statement."
-  (if (looking-at (concat "[ \t]+"
-                          (maplev--list-to-word-re '("proc" "module" "do" "use" "if" "try"))))
-      (goto-char (match-end 0))))
+"Skip the optional keyword following an end statement."
+(if (looking-at (concat "[ \t]+"
+                        (maplev--list-to-word-re '("proc" "module" "do" "use" "if" "try"))))
+    (goto-char (match-end 0))))
+
 ;;}}}
 ;;{{{   errors
 
@@ -936,104 +1006,112 @@ Otherwise point is moved to left of assignee and point is returned."
 
 
 (defun maplev--update-indent-info ()
-  "Update the variable `maplev--indent-info' at point.
+"Update the variable `maplev--indent-info' at point.
 Scan the source for keywords and parentheses from the previous valid
 indent position to point.  Update the stack and state according to the
 syntax table and the grammar, `maplev--grammar-alist'.  Restore point.
 The calling function must ensure that the previous info point is not
 beyond \(point\)."
-  (save-excursion
-    (let ((point (maplev--indent-info-point))
-          (stack (maplev--indent-info-stack))
-          (state (maplev--indent-info-state))
-          (end (point))
-          keyword keyword-beginning key-list indent indent-close
-          adjust-func post-func top-stack old-keyword match-re
-          case-fold-search)
-      (goto-char point)
-      (while (re-search-forward maplev--grammar-keyword-re end 'move)
+(save-excursion
+  (let ((point (maplev--indent-info-point))
+        (stack (maplev--indent-info-stack))
+        (state (maplev--indent-info-state))
+        (end (point))
+        (previous-syntax-table (syntax-table))
 
-        ;; Assign loop variables.  KEY-POINT is assigned the position
-        ;; after the next keyword.  If no keyword exists in the line,
-        ;; KEY-POINT is nil.
+        keyword keyword-beginning key-list indent indent-close
+        adjust-func post-func top-stack old-keyword match-re
+        case-fold-search)
 
-        (setq keyword (match-string-no-properties 0)
-              key-list (cdr (assoc keyword maplev--grammar-alist))
-              indent (nth 2 key-list)
-              adjust-func (nth 3 key-list)
-              post-func (nth 4 key-list)
-              top-stack (car stack)
-              indent-close (nth 1 top-stack)
-              old-keyword (car top-stack) ; Don't set to (old) KEYWORD, it might have been matched
-              match-re (and old-keyword
-                            (car (cdr (assoc old-keyword maplev--grammar-alist))))
-              keyword-beginning (match-beginning 0)
-              state (parse-partial-sexp point (point) nil nil state)
-              point (point))
-        (cond
+    (unwind-protect
+        (progn
+          (set-syntax-table maplev--symbol-syntax-table)
+          (goto-char point)
+          (while (re-search-forward maplev--grammar-keyword-re end 'move)
 
-         ;; If KEYWORD is in a comment or a quote, do nothing.
-         ((or (nth 4 state) (nth 3 state))) ; comments are more frequent, so check first
+            ;; Assign loop variables.  KEY-POINT is assigned the position
+            ;; after the next keyword.  If no keyword exists in the line,
+            ;; KEY-POINT is nil.
+              
+            (setq keyword (match-string-no-properties 0)
+                  key-list (cdr (assoc keyword maplev--grammar-alist))
+                  indent (nth 2 key-list)
+                  adjust-func (nth 3 key-list)
+                  post-func (nth 4 key-list)
+                  top-stack (car stack)
+                  indent-close (nth 1 top-stack)
+                  old-keyword (car top-stack) ; Don't set to (old) KEYWORD, it might have been matched
+                  match-re (and old-keyword
+                                (car (cdr (assoc old-keyword maplev--grammar-alist))))
+                  keyword-beginning (match-beginning 0)
+                  state (parse-partial-sexp point (point) nil nil state)
+                  point (point))
+            (cond
+               
+             ;; If KEYWORD is in a comment or a quote, do nothing.
+             ((or (nth 4 state) (nth 3 state))) ; comments are more frequent, so check first
+               
+             ;; Does KEYWORD pair with the top one on STACK?
+             ((and match-re (string-match match-re keyword))
+              ;; Should more keywords follow KEYWORD?
+              (if (nth 0 key-list)
+                  ;; If so, replace the top of STACK with a new list.  The
+                  ;; new list has the new KEYWORD, the INDENT-CLOSE from
+                  ;; the old list, and
+                  (setcar stack (list keyword
+                                      indent-close
+                                      (+ indent-close indent)))
+                ;; otherwise pop the top of STACK.
+                (and post-func (funcall post-func))
+                (setq stack (cdr stack))))
 
-         ;; Does KEYWORD pair with the top one on STACK?
-         ((and match-re (string-match match-re keyword))
-          ;; Should more keywords follow KEYWORD?
-          (if (nth 0 key-list)
-              ;; If so, replace the top of STACK with a new list.  The
-              ;; new list has the new KEYWORD, the INDENT-CLOSE from
-              ;; the old list, and
-              (setcar stack (list keyword
-                                  indent-close
-                                  (+ indent-close indent)))
-            ;; otherwise pop the top of STACK.
-            (and post-func (funcall post-func))
-            (setq stack (cdr stack))))
+             ;; Is KEYWORD an opening keyword?  Push a new item onto
+             ;; STACK.
 
-         ;; Is KEYWORD an opening keyword?  Push a new item onto
-         ;; STACK.
+             ((nth 1 key-list)
+              (setq stack
+                    (cons
+                     (cons
+                      keyword
+                      ;; Handle keywords and parentheses
+                      ;; differently. Indentation for keywords that start
+                      ;; a Maple statement is from `keyword-beginning';
+                      ;; however, if the keyword is an assigned proc then
+                      ;; the actual beginning of the keyword is the start
+                      ;; of the assigned name.
+                      (if indent
+                          (save-excursion
+                            (goto-char keyword-beginning)
+                            (and adjust-func (funcall adjust-func))
+                            (list (current-column) ; alignment for closing keyword
+                                  (+ (current-column) indent))) ; alignment for subblock
 
-         ((nth 1 key-list)
-          (setq stack
-                (cons
-                 (cons
-                  keyword
-                  ;; Handle keywords and parentheses
-                  ;; differently. Indentation for keywords that start
-                  ;; a Maple statement is from `keyword-beginning';
-                  ;; however, if the keyword is an assigned proc then
-                  ;; the actual beginning of the keyword is the start
-                  ;; of the assigned name.
-                  (if indent
-                      (save-excursion
-                        (goto-char keyword-beginning)
-                        (and adjust-func (funcall adjust-func))
-                        (list (current-column) ; alignment for closing keyword
-                              (+ (current-column) indent))) ; alignment for subblock
+                        ;; Handle an open parenthesis.  INDENT-CLOSE is
+                        ;; set to the same column as the parerenthesis so
+                        ;; that the closing parenthesis is aligned.  If
+                        ;; space or a a comment follows the parenthesis,
+                        ;; then the following block of code is indented
+                        ;; from the current indentation.  Otherwise
+                        ;; following code indents to first character
+                        ;; following the parenthesis.
+                        (list
+                         (1- (current-column)) ; INDENT-CLOSE
+                         (progn
+                           (skip-chars-forward " \t")
+                           (if (looking-at "#\\|$") ; no code on remainder of line
+                               (+ (current-indentation) maplev-indent-level)
+                             (current-column))))))
+                     stack)))
 
-                    ;; Handle an open parenthesis.  INDENT-CLOSE is
-                    ;; set to the same column as the parerenthesis so
-                    ;; that the closing parenthesis is aligned.  If
-                    ;; space or a a comment follows the parenthesis,
-                    ;; then the following block of code is indented
-                    ;; from the current indentation.  Otherwise
-                    ;; following code indents to first character
-                    ;; following the parenthesis.
-                    (list
-                     (1- (current-column)) ; INDENT-CLOSE
-                     (progn
-                       (skip-chars-forward " \t")
-                       (if (looking-at "#\\|$") ; no code on remainder of line
-                           (+ (current-indentation) maplev-indent-level)
-                         (current-column))))))
-                 stack)))
-
-         ;; KEYWORD is out of sequence.  Move point before KEYWORD and
-         ;; signal an error.
-         (t (re-search-backward keyword)
-            (signal 'keyword-out-of-sequence (list keyword (point))))))
-      (if (< point end)
-          (setq state (parse-partial-sexp point (point) nil nil state)))
-      (maplev--indent-info-assign end state stack))))
+             ;; KEYWORD is out of sequence.  Move point before KEYWORD and
+             ;; signal an error.
+             (t (re-search-backward keyword)
+                (signal 'keyword-out-of-sequence (list keyword (point))))))
+          (if (< point end)
+              (setq state (parse-partial-sexp point (point) nil nil state)))
+          (maplev--indent-info-assign end state stack))
+      ;; Restore the syntax table
+      (set-syntax-table previous-syntax-table)))))
 
 ;;}}}
 ;;{{{   commands
@@ -1381,65 +1459,6 @@ controls the expansion."
   "List the currently defined abbreviations."
   (interactive)
   (list-one-abbrev-table maplev-mode-abbrev-table "*Abbrevs*"))
-
-;;}}}
-;;{{{ Syntax table
-
-(defvar maplev-mode-syntax-table nil
-  "Syntax table used in MapleV mode buffers \(except R4\).")
-
-(unless maplev-mode-syntax-table
-  (setq maplev-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?_  "_"  maplev-mode-syntax-table) ; symbol constituent
-  (modify-syntax-entry ?\\ "\\" maplev-mode-syntax-table) ; escape
-  (modify-syntax-entry ?#  "<"  maplev-mode-syntax-table) ; comment starter
-  (modify-syntax-entry ?\n ">"  maplev-mode-syntax-table) ; newline = comment ender
-  (modify-syntax-entry ?\f ">"  maplev-mode-syntax-table) ; formfeed = comment ender
-  (modify-syntax-entry ?\r " "  maplev-mode-syntax-table) ; return = whitespace
-  (modify-syntax-entry ?\t " "  maplev-mode-syntax-table) ; tab = whitespace
-
-  (modify-syntax-entry ?*  "."  maplev-mode-syntax-table) ; punctuation
-  (modify-syntax-entry ?/  "."  maplev-mode-syntax-table)
-  (modify-syntax-entry ?+  "."  maplev-mode-syntax-table)
-  (modify-syntax-entry ?-  "."  maplev-mode-syntax-table)
-  (modify-syntax-entry ?=  "."  maplev-mode-syntax-table)
-  (modify-syntax-entry ?<  "."  maplev-mode-syntax-table)
-  (modify-syntax-entry ?>  "."  maplev-mode-syntax-table)
-  (modify-syntax-entry ?.  "."  maplev-mode-syntax-table)
-
-  (modify-syntax-entry ?\' "\"" maplev-mode-syntax-table) ; string quotes
-  (modify-syntax-entry ?\` "\"" maplev-mode-syntax-table) ; string quotes
-  (modify-syntax-entry ?\{ "(}" maplev-mode-syntax-table) ; balanced brackets
-  (modify-syntax-entry ?\[ "(]" maplev-mode-syntax-table)
-  (modify-syntax-entry ?\( "()" maplev-mode-syntax-table)
-  (modify-syntax-entry ?\} "){" maplev-mode-syntax-table)
-  (modify-syntax-entry ?\] ")[" maplev-mode-syntax-table)
-  (modify-syntax-entry ?\) ")(" maplev-mode-syntax-table)
-
-  ;; Entries for R5 and later
-  (modify-syntax-entry ?%  "."  maplev-mode-syntax-table)
-  (modify-syntax-entry ?\" "\"" maplev-mode-syntax-table)
-  )
-
-(defvar maplev-mode-4-syntax-table nil
-  "Syntax table used in MapleV mode buffers for R4.")
-
-;; In R4 the ditto operator is `"'
-(unless maplev-mode-4-syntax-table
-  (setq maplev-mode-4-syntax-table
-        (copy-syntax-table maplev-mode-syntax-table))
-  (modify-syntax-entry ?\" "." maplev-mode-4-syntax-table))
-
-(defvar maplev-help-mode-syntax-table nil
-  "Syntax table used in Maple help buffer.")
-
-(unless maplev-help-mode-syntax-table
-  (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?_ "w" table)
-    ;;    (modify-syntax-entry ?[ "w" table)
-    ;;    (modify-syntax-entry ?] "w" table)
-    ;;    (modify-syntax-entry ?/ "w" table)
-    (setq maplev-help-mode-syntax-table table)))
 
 ;;}}}
 ;;{{{ Imenu support
