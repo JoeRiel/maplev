@@ -10,7 +10,7 @@
 ;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.6 2003-10-10 05:51:18 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.7 2003-10-11 05:47:47 joe Exp $
 
 ;;{{{ License
 ;; This program is free software; you can redistribute it and/or
@@ -599,9 +599,6 @@ See the documentation for `align-exclude-rules-list' for more info."
 
 (defvar maplev-history-list nil
   "History list used by maplev.")
-
-(defvar complete-symbol-function nil
-  "Mode-specific function to complete a symbol at point.")
 
 ;;}}}
 ;;{{{ Regular expressions
@@ -1708,10 +1705,6 @@ Maple libraries.
   (unless maplev-xemacsp
     (setq align-mode-rules-list maplev-align-rules-list)
     (setq align-mode-exclude-rules-list maplev-align-exclude-rules-list))
-
-  ;; completion
-
-  (set (make-local-variable 'complete-symbol-function) 'maplev-complete-symbol)
 
   ;; Font lock support: make these variables buffer-local
   ;; so that we can change the decoration level
