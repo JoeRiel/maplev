@@ -10,7 +10,7 @@
 ;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.8 2004-05-20 05:40:48 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.9 2004-05-20 22:52:26 joe Exp $
 
 ;;{{{ License
 ;; This program is free software; you can redistribute it and/or
@@ -116,6 +116,15 @@
   (message "maplev-mode version %s, (C) %s" maplev-version maplev-developer))
 ;;}}}
 
+(require 'abbrevlist)
+(require 'font-lock)
+(require 'comint)
+(require 'info)
+
+(eval-and-compile
+  (condition-case nil (require 'imenu) (error nil))
+  (condition-case nil (require 'align) (error nil)))
+
 ;;{{{ Compatibility assignments
 
 (eval-and-compile
@@ -182,15 +191,6 @@ is an integer correspond to the button number; preceding items are optional modi
       (vector (reverse rkeys)))))
 
 ;;}}}
-
-(require 'abbrevlist)
-(require 'font-lock)
-(require 'imenu)
-(require 'comint)
-(require 'info)
-
-(unless maplev-xemacsp
-  (require 'align))
 
 ;;{{{ Group definitions
 (defgroup maplev nil
@@ -310,6 +310,10 @@ Used to index `maplev-executable-alist'.")
           "warnlevel=2"))
         (maplev-kernelopts "kernelopts(printbytes=false):\n"))
     `(
+      ("9.5" . ,(concat maplev-print-R6+
+                      "interface(" maplev-interface-string
+                      ",errorcursor=false):\n"
+                      maplev-kernelopts))
       ("9" . ,(concat maplev-print-R6+
                       "interface(" maplev-interface-string
                       ",errorcursor=false):\n"
@@ -480,6 +484,7 @@ double quote.  Procbody, alas, does not handle a double quote."
   "*Maple assignment operator.  Used by `maplev-insert-assignment-operator'."
   :type 'string
   :group 'maplev-templates)
+
 ;;}}}
 ;;{{{   completion
 
@@ -522,60 +527,61 @@ Nil means do not expand in either."
 ;; the prefix argument is active (i.e. C-u M-x align).
 ;; The comment rule is the last rule so that comments are properly aligned.
 
-(unless maplev-xemacsp
-  (defcustom maplev-align-rules-list
-    '((maple-assignment-rule
-       (regexp   . "\\s-*\\w+\\(\\s-*:\\)=\\(\\s-*\\)")
-       (group    . (1 2))
-       (justify  . t)
-       (tab-stop . nil))
-      (maple-equals-rule
-       (regexp   . "\\s-*\\w+\\(\\s-*\\)=\\(\\s-*\\)")
-       (group    . (1 2))
-       (repeat   . t)
-       (tab-stop . nil))
-      (maple-column-delimiter
-       (regexp . "\\(\\s-*\\)\|\\(\\s-*\\)")
-       (group  . (1 2))
-       (repeat . t)
-       (run-if lambda nil current-prefix-arg))
-      (maple-comma-delimiter
-       (regexp . ",\\(\\s-*\\)\\S-")
-       (repeat . t)
-       (run-if lambda nil current-prefix-arg))
-      (maple-comment
-       (regexp . "\\(\\s-+\\)\\s<")
-       (column . comment-column)))
-    "*A list describing the maplev alignment rules.
+(eval-and-compile
+  (when (featurep 'align)
+    (defcustom maplev-align-rules-list
+      '((maple-assignment-rule
+         (regexp   . "\\s-*\\w+\\(\\s-*:\\)=\\(\\s-*\\)")
+         (group    . (1 2))
+         (justify  . t)
+         (tab-stop . nil))
+        (maple-equals-rule
+         (regexp   . "\\s-*\\w+\\(\\s-*\\)=\\(\\s-*\\)")
+         (group    . (1 2))
+         (repeat   . t)
+         (tab-stop . nil))
+        (maple-column-delimiter
+         (regexp . "\\(\\s-*\\)\|\\(\\s-*\\)")
+         (group  . (1 2))
+         (repeat . t)
+         (run-if lambda nil current-prefix-arg))
+        (maple-comma-delimiter
+         (regexp . ",\\(\\s-*\\)\\S-")
+         (repeat . t)
+         (run-if lambda nil current-prefix-arg))
+        (maple-comment
+         (regexp . "\\(\\s-+\\)\\s<")
+         (column . comment-column)))
+      "*A list describing the maplev alignment rules.
 See the documentation for `align-rules-list' for more info on the format."
-    :type align-rules-list-type
-    :group 'maplev-align)
+      :type align-rules-list-type
+      :group 'maplev-align)
 
-;; Define the alignment exclusion rules.
-;; The prevent changing quoted material and comments.
+    ;; Define the alignment exclusion rules.
+    ;; The prevent changing quoted material and comments.
 
-  (defcustom maplev-align-exclude-rules-list
-    `((exc-dq-string
-       (regexp . "\"\\([^\"\n]+\\)\"")
-       (repeat . t))
-      (exc-sq-string
-       (regexp . "'\\([^'\n]+\\)'")
-       (repeat . t))
-      (exc-bq-string
-       (regexp . "`\\([^`\n]+\\)`")
-       (repeat . t))
-      (exc-open-comment
-       (regexp . ,(function
-                   (lambda (end reverse)
-                     (funcall (if reverse 're-search-backward
-                                're-search-forward)
-                              (concat "[^ \t\n\\\\]"
-                                      (regexp-quote comment-start)
-                                      "\\(.+\\)$") end t))))))
-    "*A list describing text that should be excluded from alignment.
+    (defcustom maplev-align-exclude-rules-list
+      `((exc-dq-string
+         (regexp . "\"\\([^\"\n]+\\)\"")
+         (repeat . t))
+        (exc-sq-string
+         (regexp . "'\\([^'\n]+\\)'")
+         (repeat . t))
+        (exc-bq-string
+         (regexp . "`\\([^`\n]+\\)`")
+         (repeat . t))
+        (exc-open-comment
+         (regexp . ,(function
+                     (lambda (end reverse)
+                       (funcall (if reverse 're-search-backward
+                                  're-search-forward)
+                                (concat "[^ \t\n\\\\]"
+                                        (regexp-quote comment-start)
+                                        "\\(.+\\)$") end t))))))
+      "*A list describing text that should be excluded from alignment.
 See the documentation for `align-exclude-rules-list' for more info."
-    :type align-rules-list-type
-    :group 'maplev-align))
+      :type align-rules-list-type
+      :group 'maplev-align)))
 
 
 ;;}}}
@@ -602,6 +608,7 @@ See the documentation for `align-exclude-rules-list' for more info."
 
 ;;}}}
 ;;{{{ Regular expressions
+
 (defconst maplev--declaration-re
   "\\<\\(local\\|options?\\|global\\|description\\|export\\)\\>"
   "Regular expression for a Maple procedure declaration statement.")
@@ -1044,7 +1051,8 @@ is returned.  Point must be at current indentation."
         (cond
          ;; Handle declarations in procedures (and modules)
          ((and (string-match maplev--defun-re (car indent-info))
-               (looking-at maplev--declaration-re))
+               (let (case-fold-search)
+                 (looking-at maplev--declaration-re)))
           (+  maplev-indent-declaration
               (nth 1 indent-info)))
          ;; Continued dotted quotes, e.g. ``."a string".''
@@ -1702,7 +1710,7 @@ Maple libraries.
 
   ;; aligning rules
 
-  (unless maplev-xemacsp
+  (when (featurep 'align)
     (setq align-mode-rules-list maplev-align-rules-list)
     (setq align-mode-exclude-rules-list maplev-align-exclude-rules-list))
 
