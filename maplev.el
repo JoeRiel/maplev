@@ -5,12 +5,12 @@
 
 ;; Authors:    Joseph S. Riel <joer@k-online.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
-;; Time-stamp: "2003-10-09 13:32:59 jriel"
+;; Time-stamp: "2003-10-09 22:49:16 joe"
 ;; Created:    June 1999
-;; Version:    2.154
+;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $$
+;; X-RCS:      $Id: maplev.el,v 1.6 2003-10-10 05:51:18 joe Exp $
 
 ;;{{{ License
 ;; This program is free software; you can redistribute it and/or
@@ -103,7 +103,7 @@
 
 ;;{{{ Information
 (defconst maplev-version 
-  "2.154"
+  "2.155"
   "Version of MapleV mode.")
 
 (defconst maplev-developer 
@@ -115,15 +115,6 @@
   (sit-for 0)
   (message "maplev-mode version %s, (C) %s" maplev-version maplev-developer))
 ;;}}}
-
-
-(require 'abbrevlist)
-(require 'font-lock)
-(require 'imenu)
-(require 'comint)
-(require 'info)
-(require 'align)
-
 
 ;;{{{ Compatibility assignments
 
@@ -191,6 +182,16 @@ is an integer correspond to the button number; preceding items are optional modi
       (vector (reverse rkeys)))))
 
 ;;}}}
+
+(require 'abbrevlist)
+(require 'font-lock)
+(require 'imenu)
+(require 'comint)
+(require 'info)
+
+(unless maplev-xemacsp
+  (require 'align))
+
 ;;{{{ Group definitions
 (defgroup maplev nil
   "Major mode for editing Maple source in Emacs"
@@ -521,59 +522,60 @@ Nil means do not expand in either."
 ;; the prefix argument is active (i.e. C-u M-x align).
 ;; The comment rule is the last rule so that comments are properly aligned.
 
-(defcustom maplev-align-rules-list
-  '((maple-assignment-rule
-     (regexp   . "\\s-*\\w+\\(\\s-*:\\)=\\(\\s-*\\)")
-     (group    . (1 2))
-     (justify  . t)
-     (tab-stop . nil))
-    (maple-equals-rule
-     (regexp   . "\\s-*\\w+\\(\\s-*\\)=\\(\\s-*\\)")
-     (group    . (1 2))
-     (repeat   . t)
-     (tab-stop . nil))
-    (maple-column-delimiter
-     (regexp . "\\(\\s-*\\)\|\\(\\s-*\\)")
-     (group  . (1 2))
-     (repeat . t)
-     (run-if lambda nil current-prefix-arg))
-    (maple-comma-delimiter
-     (regexp . ",\\(\\s-*\\)\\S-")
-     (repeat . t)
-     (run-if lambda nil current-prefix-arg))
-    (maple-comment
-     (regexp . "\\(\\s-+\\)\\s<")
-     (column . comment-column)))
-  "*A list describing the maplev alignment rules.
+(unless maplev-xemacsp
+  (defcustom maplev-align-rules-list
+    '((maple-assignment-rule
+       (regexp   . "\\s-*\\w+\\(\\s-*:\\)=\\(\\s-*\\)")
+       (group    . (1 2))
+       (justify  . t)
+       (tab-stop . nil))
+      (maple-equals-rule
+       (regexp   . "\\s-*\\w+\\(\\s-*\\)=\\(\\s-*\\)")
+       (group    . (1 2))
+       (repeat   . t)
+       (tab-stop . nil))
+      (maple-column-delimiter
+       (regexp . "\\(\\s-*\\)\|\\(\\s-*\\)")
+       (group  . (1 2))
+       (repeat . t)
+       (run-if lambda nil current-prefix-arg))
+      (maple-comma-delimiter
+       (regexp . ",\\(\\s-*\\)\\S-")
+       (repeat . t)
+       (run-if lambda nil current-prefix-arg))
+      (maple-comment
+       (regexp . "\\(\\s-+\\)\\s<")
+       (column . comment-column)))
+    "*A list describing the maplev alignment rules.
 See the documentation for `align-rules-list' for more info on the format."
-  :type align-rules-list-type
-  :group 'maplev-align)
+    :type align-rules-list-type
+    :group 'maplev-align)
 
 ;; Define the alignment exclusion rules.
 ;; The prevent changing quoted material and comments.
 
-(defcustom maplev-align-exclude-rules-list
-  `((exc-dq-string
-     (regexp . "\"\\([^\"\n]+\\)\"")
-     (repeat . t))
-    (exc-sq-string
-     (regexp . "'\\([^'\n]+\\)'")
-     (repeat . t))
-    (exc-bq-string
-     (regexp . "`\\([^`\n]+\\)`")
-     (repeat . t))
-     (exc-open-comment
-      (regexp . ,(function
- 	  (lambda (end reverse)
- 	    (funcall (if reverse 're-search-backward
- 		       're-search-forward)
- 		     (concat "[^ \t\n\\\\]"
- 			     (regexp-quote comment-start)
- 			     "\\(.+\\)$") end t))))))
-  "*A list describing text that should be excluded from alignment.
+  (defcustom maplev-align-exclude-rules-list
+    `((exc-dq-string
+       (regexp . "\"\\([^\"\n]+\\)\"")
+       (repeat . t))
+      (exc-sq-string
+       (regexp . "'\\([^'\n]+\\)'")
+       (repeat . t))
+      (exc-bq-string
+       (regexp . "`\\([^`\n]+\\)`")
+       (repeat . t))
+      (exc-open-comment
+       (regexp . ,(function
+                   (lambda (end reverse)
+                     (funcall (if reverse 're-search-backward
+                                're-search-forward)
+                              (concat "[^ \t\n\\\\]"
+                                      (regexp-quote comment-start)
+                                      "\\(.+\\)$") end t))))))
+    "*A list describing text that should be excluded from alignment.
 See the documentation for `align-exclude-rules-list' for more info."
-  :type align-rules-list-type
-  :group 'maplev-align)
+    :type align-rules-list-type
+    :group 'maplev-align))
 
 
 ;;}}}
@@ -1703,8 +1705,9 @@ Maple libraries.
 
   ;; aligning rules
 
-  (setq align-mode-rules-list maplev-align-rules-list)
-  (setq align-mode-exclude-rules-list maplev-align-exclude-rules-list)
+  (unless maplev-xemacsp
+    (setq align-mode-rules-list maplev-align-rules-list)
+    (setq align-mode-exclude-rules-list maplev-align-exclude-rules-list))
 
   ;; completion
 
