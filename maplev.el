@@ -5,11 +5,12 @@
 
 ;; Authors:    Joseph S. Riel <joer@k-online.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
+;; Time-stamp: "2003-10-08 18:38:40 jriel"
 ;; Created:    June 1999
 ;; Version:    2.152
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.3 2003-10-08 04:56:32 joe Exp $
+;; X-RCS:      $$
 
 ;;{{{ License
 ;; This program is free software; you can redistribute it and/or
@@ -102,7 +103,7 @@
 
 ;;{{{ Information
 (defconst maplev-version 
-  "2.15 (1 October 2002)"
+  "2.152"
   "Version of MapleV mode.")
 
 (defconst maplev-developer 
@@ -176,7 +177,16 @@ STRING should be given if the last search was by `string-match' on STRING."
       (nth 0 (nth 1 event)))
     (defsubst event-point (event)
       "Return the character position of the mouse EVENT."
-      (posn-point (event-start event)))))
+      (posn-point (event-start event))))
+
+  (defun maplev--mouse-keymap (keys)
+    "Generate vector keymap for KEYS corresponding to a mouse button.
+It handles the difference between Emacs and Xemacs.  KEYS is a list, the last item
+is an integer correspond to the button number; preceding items are optional modifiers"
+    (let ((rkeys (reverse keys)))
+      (setcar rkeys (intern (concat (if maplev-xemacsp "button" "mouse-")
+                                    (number-to-string (car rkeys)))))
+      (vector (reverse rkeys)))))
 
 ;;}}}
 ;;{{{ Group definitions
@@ -290,7 +300,6 @@ Used to index `maplev-executable-alist'.")
           "fi:\n"))
         (maplev-interface-string
          (concat
-          "ansi=false,"
           "prettyprint=1,"
           "verboseproc=2,"
           "errorbreak=0,\n"
@@ -667,10 +676,6 @@ including double-quotes.")
   (concat maplev--quoted-name-re
           "\\|"
           maplev--string-re))
-
-;; Use eval-when-compile so that maplev--liste-to-word-re can be used
-;; to compile regexs at compile time.  I'm not sure that this makes a
-;; difference, but it seems like the right thing to do.
 
 (eval-when-compile
   (defun maplev--list-to-word-re (words)
@@ -1168,72 +1173,98 @@ regardless of where you click."
 ;;}}}
 
 ;;{{{ Mode map
+
 (defvar maplev-mode-map nil
   "Keymap used in Maple mode.")
 
 (unless maplev-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "<tab>")           'maplev-electric-tab)
-    (define-key map (kbd "M-<tab>")         'maplev-complete-symbol)
-    (define-key map (kbd "<backspace>")     'backward-delete-char-untabify)
-    (define-key map (kbd "C-<backspace>")   'maplev-untab)
-    (define-key map (kbd "C-;")             'maplev-insert-assignment-operator)
-    (define-key map "\C-c\C-tp"             'maplev-template-proc)
-    (define-key map "\C-c\C-tm"             'maplev-template-module)
-    (define-key map "\C-j"                  'maplev-indent-newline)
-    (define-key map (kbd "C-<return>")      'maplev-newline-and-comment)
-    (define-key map "\M-\C-h"               'maplev-mark-proc)
-    (define-key map "\M-\C-a"               'maplev-beginning-of-proc)
-    (define-key map "\M-\C-e"               'maplev-end-of-proc)
-    (define-key map "\C-xnd"                'maplev-narrow-to-proc)
+    (define-key map [(tab)]                     'maplev-electric-tab)
+    (define-key map [(meta tab)]                'maplev-complete-symbol)
+    (define-key map [(backspace)]               'backward-delete-char-untabify)
+    (define-key map [(control backspace)]       'maplev-untab)
+    (define-key map [(control ?\;)]             'maplev-insert-assignment-operator)
+    (define-key map [(control c) (control t) p] 'maplev-template-proc)
+    (define-key map [(control c) (control t) m] 'maplev-template-module)
+    (define-key map [(control j)]               'maplev-indent-newline)
+    (define-key map [(control return)]          'maplev-newline-and-comment)
+    (define-key map [(meta control h)]          'maplev-mark-proc)
+    (define-key map [(meta control a)]          'maplev-beginning-of-proc)
+    (define-key map [(meta control e)]          'maplev-end-of-proc)
+    (define-key map [(control x) n d]           'maplev-narrow-to-proc)
 
     ;; These two bindings are needed only under linux / unix
-    (define-key map "\M-\C-y"               'maplev-insert-cut-buffer)
-    (define-key map (if maplev-xemacsp [(control meta button2)] [(control meta mouse-2)])
-      'maplev-mouse-yank-cut-buffer)
+    (define-key map [(meta control y)]          'maplev-insert-cut-buffer)
+    (define-key map (if maplev-xemacsp 
+                        [(control meta button2)] 
+                      [(control meta mouse-2)])
+                                                'maplev-mouse-yank-cut-buffer)
 
-    (define-key map "\C-c\C-l"              'maplev-add-local-variable)
-    (define-key map "\C-c\C-g"              'maplev-add-global-variable)
-    (define-key map "\C-c\C-e"              'maplev-add-export-variable)
+    (define-key map [(control c) (control l)]   'maplev-add-local-variable)
+    (define-key map [(control c) (control g)]   'maplev-add-global-variable)
+    (define-key map [(control c) (control e)]   'maplev-add-export-variable)
 
     ;; Indent commands
-    (define-key map "\C-c\tb"               'maplev-indent-buffer)
-    (define-key map "\C-c\t\t"              'maplev-indent-buffer)
-    (define-key map "\C-c\tp"               'maplev-indent-procedure)
-    (define-key map "\C-c\tr"               'maplev-indent-region)
+    (define-key map [(control c) (tab) b]       'maplev-indent-buffer)
+    (define-key map [(control c) (tab) tab]     'maplev-indent-buffer)
+    (define-key map [(control c) (tab) p]       'maplev-indent-procedure)
+    (define-key map [(control c) (tab) r]       'maplev-indent-region)
 
     ;; Cmaple commands
-    (define-key map "\C-c\C-cb"             'maplev-cmaple-send-buffer)
-    (define-key map "\C-c\C-cp"             'maplev-cmaple-send-procedure)
-    (define-key map "\C-c\C-cr"             'maplev-cmaple-send-region)
-    (define-key map (kbd "C-c C-c <return>") 'maplev-cmaple-send-line)
-    (define-key map "\C-c\C-cg"             'maplev-cmaple-pop-to-buffer)
-    (define-key map "\C-c\C-ci"             'maplev-cmaple-interrupt)
-    (define-key map "\C-c\C-ck"             'maplev-cmaple-kill)
-    (define-key map "\C-c\C-cs"             'maplev-cmaple-status)
+    (define-key map [(control c) (control c) b]      'maplev-cmaple-send-buffer)
+    (define-key map [(control c) (control c) p]      'maplev-cmaple-send-procedure)
+    (define-key map [(control c) (control c) r]      'maplev-cmaple-send-region)
+    (define-key map [(control c) (control c) return] 'maplev-cmaple-send-line)
+    (define-key map [(control c) (control c) g]      'maplev-cmaple-pop-to-buffer)
+    (define-key map [(control c) (control c) i]      'maplev-cmaple-interrupt)
+    (define-key map [(control c) (control c) k]      'maplev-cmaple-kill)
+    (define-key map [(control c) (control c) s]      'maplev-cmaple-status)
 
-    ;; Mint commands
-    (define-key map (kbd "C-c <return> b")  'maplev-mint-buffer)
-    (define-key map (kbd "C-c <return> p")  'maplev-mint-procedure)
-    (define-key map (kbd "C-c <return> r")  'maplev-mint-region)
-    (define-key map (kbd "C-c <return> <return>") 'maplev-mint-rerun)
+    ;; Mint commands    
+      
 
-    ;; Help and proc commands
-    (define-key map (kbd "C-?")             'maplev-help-at-point)
-    (define-key map (kbd "M-?")             'maplev-proc-at-point)
-    ;; GNU Emacs won't allow (kbd "C-S-button2")
-    (define-key map (if maplev-xemacsp [(control shift button2)] [(control shift mouse-2)])
-      'maplev-help-follow-mouse)
-    (define-key map (if maplev-xemacsp [(meta shift button2)] [(meta shift mouse-2)])
-      'maplev-proc-follow-mouse)
-    (define-key map "\C-c\C-sh"             'maplev-switch-buffer-help)
-    (define-key map "\C-c\C-sl"             'maplev-switch-buffer-proc)
-    (define-key map "\C-c\C-sc"             'maplev-switch-buffer-cmaple)
+    (define-key map [(control c) (return) b]         'maplev-mint-buffer)
+    (define-key map [(control c) (return) p]         'maplev-mint-procedure)
+    (define-key map [(control c) (return) r]         'maplev-mint-region)
+    (define-key map [(control c) (return) return]    'maplev-mint-rerun)
+
+    ;; Help and proc comma    
+      
+    (define-key map [(control ?\?)]                  'maplev-help-at-point)
+    (define-key map [(meta ?\?)]                     'maplev-proc-at-point)
+
+
+    ;; Xemacs and FSF Emacs use different terms for mouse buttons
+
+;;     (if maplev-xemacsp
+;;         (progn
+;;           (define-key map [(control shift button2)] 'maplev-help-follow-mouse)
+;;           (define-key map [(meta shift button2)]    'maplev-proc-follow-mouse))
+
+;;       (define-key map [(control shift mouse-2)]    'maplev-help-follow-mouse)
+;;       (define-key map [(meta shift mouse-2)]   'maplev-proc-follow-mouse))
+
+
+    (define-key map (maplev--mouse-keymap '(control shift 2)) 'maplev-help-follow-mouse)
+    (define-key map (maplev--mouse-keymap '(meta shift 2))    'maplev-proc-follow-mouse)
+
+
+
+
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(control shift button2)] 
+;;                       [(control shift mouse-2)])    'maplev-help-follow-mouse)
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(meta shift button2)] 
+;;                       [(meta shift mouse-2)])   'maplev-proc-follow-mouse)
+
+    (define-key map [(control c) (control s) h] 'maplev-switch-buffer-help)
+    (define-key map [(control c) (control s) l] 'maplev-switch-buffer-proc)
+    (define-key map [(control c) (control s) c] 'maplev-switch-buffer-cmaple)
 
     (setq maplev-mode-map map)))
 ;;}}}
 ;;{{{ Menu
-
 (defvar maplev--menu-decoration
   '(["reserved words"  (maplev-reset-font-lock 1) :style radio
      :selected (equal font-lock-maximum-decoration 1)]
@@ -1302,7 +1333,6 @@ regardless of where you click."
       "---"
       ["Info"  maplev-goto-info-node t]
       ["About" maplev-about t])))
-
 ;;}}}
 ;;{{{ Abbreviations
 
@@ -2873,9 +2903,7 @@ Interactively use \\[maplev-cmaple-interrupt]."
         (comint-send-input))))
 
 (defun maplev-cmaple--send-string (process string)
-  "Send STRING to the cmaple process PROCESS.
-Maple commands that set interface and kernelopts options 
-are appended to a restart command."
+  "Send STRING to the cmaple process PROCESS."
   ;; handle Maple `restart' by adding the initialization according to
   ;; maplev-init-string-alist
   (let ((str "") case-fold-search)
@@ -3004,7 +3032,6 @@ PROCESS is the Maple process, STRING its output."
   (while (re-search-forward "\e\\[[0-9;]+m" nil t) (replace-match ""))
   (goto-char (point-min))
   (while (re-search-forward "\r+" nil t) (replace-match "\n")))
-
 ;;}}}
 ;;{{{   mode map
 (defvar maplev-cmaple-map nil
@@ -3012,31 +3039,43 @@ PROCESS is the Maple process, STRING its output."
 
 (unless maplev-cmaple-map
   (let ((map (copy-keymap comint-mode-map)))
-    (define-key map (kbd "<return>")   'maplev-cmaple-send)
-    (define-key map "\C-c\C-c"         'maplev-cmaple-interrupt)
-    (define-key map "?"                'maplev-help-at-point)
-    (define-key map (kbd "C-?")        'maplev-help-at-point)
-    (define-key map (kbd "M-?")        'maplev-proc-at-point)
-    (define-key map (kbd "M-<tab>")    'maplev-complete-symbol)
-    (define-key map "\C-a"             'comint-bol)
+    (define-key map [(return)]   'maplev-cmaple-send)
+    (define-key map [(control c) (control c)] 'maplev-cmaple-interrupt)
+    (define-key map [?\?]              'maplev-help-at-point)
+    (define-key map [(control ?\?)]    'maplev-help-at-point)
+    (define-key map [(meta ?\?)]       'maplev-proc-at-point)
+    (define-key map [(meta tab)]       'maplev-complete-symbol)
+    (define-key map [(control a)]      'comint-bol)
 
     ;; These two bindings are needed only under linux / unix
-    (define-key map "\M-\C-y"          'maplev-insert-cut-buffer)
-    (define-key map (if maplev-xemacsp [(control meta button2)] [(control meta mouse-2)])
-      'maplev-mouse-yank-cut-buffer)
+    (define-key map [(meta control y)]    'maplev-insert-cut-buffer)
 
-    (define-key map (if maplev-xemacsp [(shift button2)] [(shift mouse-2)])
-      'maplev-help-follow-mouse)
-    (define-key map (if maplev-xemacsp [(control shift button2)] [(control shift mouse-2)])
-      'maplev-help-follow-mouse)
-    (define-key map (if maplev-xemacsp [(meta shift button2)] [(meta shift mouse-2)])
-      'maplev-proc-follow-mouse)
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(control meta button2)] 
+;;                       [(control meta mouse-2)])      'maplev-mouse-yank-cut-buffer)
+
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(shift button2)] 
+;;                       [(shift mouse-2)])      'maplev-help-follow-mouse)
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(control shift button2)] 
+;;                       [(control shift mouse-2)])      'maplev-help-follow-mouse)
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(meta shift button2)] 
+;;                       [(meta shift mouse-2)])     'maplev-proc-follow-mouse)
+
+    ;; mouse button bindings
+    (define-key map (maplev--mouse-keymap '(control meta 2))  'maplev-mouse-yank-cut-buffer)
+    (define-key map (maplev--mouse-keymap '(shift 2))         'maplev-help-follow-mouse)
+    (define-key map (maplev--mouse-keymap '(control shift 2)) 'maplev-help-follow-mouse)
+    (define-key map (maplev--mouse-keymap '(meta shift 2))    'maplev-proc-follow-mouse)
+
     ;; in comint-mode-map of emacs 21, `C-c C-s' is bound to comint-write-output.
     ;; Remove it so that it can be used as a prefix key to switch buffers.
-    (define-key map "\C-c\C-s"         nil)
-    (define-key map "\C-c\C-sh"        'maplev-switch-buffer-help)
-    (define-key map "\C-c\C-sl"        'maplev-switch-buffer-proc)
-    (define-key map (kbd "S-<return>") 'newline)
+    (define-key map [(control c) (control s)]         nil)
+    (define-key map [(control c) (control s) h]        'maplev-switch-buffer-help)
+    (define-key map [(control c) (control s) l]        'maplev-switch-buffer-proc)
+    (define-key map [(shift return)]                   'newline)
     (setq maplev-cmaple-map map)))
 ;;}}}
 ;;{{{   mode
@@ -3087,37 +3126,53 @@ cmaple.
 
 (unless maplev-help-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "<space>")     'scroll-up)
-    (define-key map (kbd "<backspace>") 'scroll-down)
-    (define-key map "q"                 'quit-window)
-    (define-key map "s"                 'isearch-forward)
-    (define-key map "r"                 'maplev-redo-item)
-    (define-key map "p"                 'maplev-prev-item)
-    (define-key map "n"                 'maplev-next-item)
-    (define-key map "d"                 'maplev-delete-item)
-    (define-key map "P"                 'maplev-help-parent)
-    (define-key map "?"                 'maplev-help-at-point)
-    (define-key map (kbd "C-?")         'maplev-help-at-point)
-    (define-key map (kbd "M-?")         'maplev-proc-at-point)
-    (define-key map "f"                 'maplev-tear-off-window)
-    (define-key map "\C-c\C-sh"         'maplev-switch-buffer-help)
-    (define-key map "\C-c\C-sl"         'maplev-switch-buffer-proc)
-    (define-key map "\C-c\C-sc"         'maplev-switch-buffer-cmaple)
-    (define-key map "h"                 'maplev-switch-buffer-help) ; short-cut
-    (define-key map "l"                 'maplev-switch-buffer-proc) ; short-cut
-    (define-key map "c"                 'maplev-switch-buffer-cmaple) ; short-cut
-    (define-key map (kbd "<return>")    'maplev-help-at-point)
-    (define-key map (kbd "M-<return>")  'maplev-proc-at-point)
-    (define-key map (if maplev-xemacsp [(button2)] [(mouse-2)])
-      'maplev-help-follow-mouse) ; short-cut
-    (define-key map (if maplev-xemacsp [(shift button2)] [(shift mouse-2)])
-      'maplev-help-follow-mouse) ; standard
-    (define-key map (if maplev-xemacsp [(control shift button2)] [(control shift mouse-2)])
-      'maplev-help-follow-mouse) ; standard
-    (define-key map (if maplev-xemacsp [(meta button2)] [(meta mouse-2)])
-      'maplev-proc-follow-mouse) ; short-cut
-    (define-key map (if maplev-xemacsp [(meta shift button2)] [(meta shift mouse-2)])
-      'maplev-proc-follow-mouse) ; standard
+    (define-key map [(space>)]     'scroll-up)
+    (define-key map [(backspace)]  'scroll-down)
+    (define-key map [q]                 'quit-window)
+    (define-key map [s]                 'isearch-forward)
+    (define-key map [r]                 'maplev-redo-item)
+    (define-key map [p]                 'maplev-prev-item)
+    (define-key map [n]                 'maplev-next-item)
+    (define-key map [d]                 'maplev-delete-item)
+    (define-key map [P]                 'maplev-help-parent)
+    (define-key map [?\?]               'maplev-help-at-point)
+    (define-key map [(control ?\?)]     'maplev-help-at-point)
+    (define-key map [(meta ?\?)]        'maplev-proc-at-point)
+    (define-key map [f]                 'maplev-tear-off-window)
+    (define-key map [(control c) (control s) h]         'maplev-switch-buffer-help)
+    (define-key map [(control c) (control s) l]         'maplev-switch-buffer-proc)
+    (define-key map [(control c) (control s) c]         'maplev-switch-buffer-cmaple)
+    (define-key map [h]                 'maplev-switch-buffer-help) ; short-cut
+    (define-key map [l]                 'maplev-switch-buffer-proc) ; short-cut
+    (define-key map [c]                 'maplev-switch-buffer-cmaple) ; short-cut
+    (define-key map [(return)]          'maplev-help-at-point)
+    (define-key map [(meta return)]     'maplev-proc-at-point)
+
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(button2)] 
+;;                       [(mouse-2)])                   'maplev-help-follow-mouse) ; short-cut
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(shift button2)] 
+;;                       [(shift mouse-2)])            'maplev-help-follow-mouse) ; standard
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(control shift button2)] 
+;;                       [(control shift mouse-2)])    'maplev-help-follow-mouse) ; standard
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(meta button2)] 
+;;                       [(meta mouse-2)])             'maplev-proc-follow-mouse) ; short-cut
+;;     (define-key map (if maplev-xemacsp 
+;;                         [(meta shift button2)] 
+;;                       [(meta shift mouse-2)])       'maplev-proc-follow-mouse) ; standard
+
+
+    ;; Bind mouse buttons
+    (define-key map (maplev--mouse-keymap '(2))               'maplev-help-follow-mouse)
+    (define-key map (maplev--mouse-keymap '(shift 2))         'maplev-help-follow-mouse)
+    (define-key map (maplev--mouse-keymap '(control shift 2)) 'maplev-help-follow-mouse)
+
+    (define-key map (maplev--mouse-keymap '(meta 2))          'maplev-proc-follow-mouse)
+    (define-key map (maplev--mouse-keymap '(meta shift 2))    'maplev-proc-follow-mouse)
+
     (setq maplev-help-mode-map map)))
 
 (defvar maplev-help-mode-menu nil)
@@ -3144,7 +3199,6 @@ cmaple.
 
 ;;}}}
 ;;{{{   mode definition
-
 (defun maplev-help-mode (&optional release)
   "Major mode for displaying Maple help pages.
 RELEASE is the Maple release, if nil, `maplev-default-release' is used.
@@ -3171,7 +3225,6 @@ RELEASE is the Maple release, if nil, `maplev-default-release' is used.
 
 ;;}}}
 ;;{{{   mode functions
-
 (defun maplev-help-follow-mouse (click)
   "Display the Maple help page of the topic at the mouse CLICK."
   (interactive "e")
@@ -3575,7 +3628,7 @@ The title is the phrase following the function name."
 
 (unless maplev-proc-mode-map
   (setq maplev-proc-mode-map (copy-keymap maplev-help-mode-map))
-  (define-key maplev-proc-mode-map "P" 'self-insert-command))
+  (define-key maplev-proc-mode-map [P] 'self-insert-command))
 
 ;;}}}
 ;;{{{   mode definition
@@ -3738,15 +3791,17 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 
 (unless maplev-mint-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map " "                               'scroll-up)
-    (define-key map [backspace]                       'scroll-down) ; bksp
-    (define-key map (kbd "<return>")                  'maplev-mint-rerun)
-    (define-key map (kbd "C-c <return> <return>")     'maplev-mint-rerun)
-    (define-key map "q"                               'quit-window)
-    (define-key map "s"                               'isearch-forward)
-    (define-key map "r"                               'isearch-backward)
-    (define-key map (if maplev-xemacsp [button2] [mouse-2])  'maplev-mint-click)
-    (define-key map "\C-c\C-c"                        'maplev-mint-handler)
+    (define-key map [(space)]                         'scroll-up)
+    (define-key map [(backspace)]                     'scroll-down)
+    (define-key map [(return)]                        'maplev-mint-rerun)
+    (define-key map [(control c) (return) return]     'maplev-mint-rerun)
+    (define-key map [q]                               'quit-window)
+    (define-key map [s]                               'isearch-forward)
+    (define-key map [r]                               'isearch-backward)
+;;  (define-key map (if maplev-xemacsp [button2] [mouse-2])  'maplev-mint-click)
+    (define-key map (maplev--mouse-keymap '(2))       'maplev-mint-click)
+    
+    (define-key map [(control c) (control c)]         'maplev-mint-handler)
     (setq maplev-mint-mode-map map)))
 
 ;;}}}
@@ -4070,7 +4125,6 @@ FORM and VARS are used for y-or-n-p query."
 
 ;;}}}
 ;;{{{   regions
-
 (defun maplev-mint-region (beg end)
   "Run Mint on the current region \(from BEG to END\).
 Return exit code of mint."
@@ -4161,7 +4215,6 @@ If no region has been selected, run Mint on the buffer."
         (maplev-mint-buffer)
       (maplev-mint-region (marker-position maplev-mint--code-beginning)
                           (marker-position maplev-mint--code-end)))))
-
 ;;}}}
 
 ;;}}}
