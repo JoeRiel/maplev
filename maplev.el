@@ -10,7 +10,7 @@
 ;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.11 2004-09-21 15:54:44 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.12 2004-10-01 17:50:43 joe Exp $
 
 ;;{{{ License
 
@@ -206,7 +206,6 @@ is an integer correspond to the button number; preceding items are optional modi
 ;;}}}
 
 ;;{{{ Group definitions
-
 
 (defgroup maplev nil
   "Major mode for editing Maple source in Emacs"
@@ -453,19 +452,19 @@ Use \\[indent-for-comment] to insert or align an inline comment."
   "*Lines starting with this regular expression will not be auto-indented."
   :type '(choice string (const :tag "default" nil))
   :group 'maplev-indentation)
-
+ 
 ;;}}}
 ;;{{{   templates
 
 (defcustom maplev-copyright-owner "John Q. Public"
-  "*Copyright owner inserted in the copyright string by `maplev-template-proc'."
+  "*Copyright owner inserted in the copyright string by `maplev--template-proc-module'."
   :type 'string
   :group 'maplev-templates
   :group 'maplev-important)
 
 (defcustom maplev-comment-end-flag t
   "*Non-nil means add a template's name as a comment following the end.
-See `maplev-template-proc'."
+See `maplev--template-proc-module'."
   :type 'boolean
   :group 'maplev-templates)
 
@@ -543,7 +542,7 @@ Nil means do not expand in either."
 
 ;; Define the maplev alignment rules.
 ;; Align the assignment operator (`:='), equals signs,
-;; columns (`|'), commas, and comments.  
+;; columns (`|'), commas, double colons (`::'), and comments.  
 ;; Columns and commas are aligned only if the
 ;; the prefix argument is active (i.e. C-u M-x align).
 ;; The comment rule is the last rule so that comments are properly aligned.
@@ -558,6 +557,11 @@ Nil means do not expand in either."
          (tab-stop . nil))
         (maple-equals-rule
          (regexp   . "\\s-*\\w+\\(\\s-*\\)=\\(\\s-*\\)")
+         (group    . (1 2))
+         (repeat   . t)
+         (tab-stop . nil))
+        (maple-type-rule
+         (regexp   . "\\s-*\\w+\\(\\s-*\\)::\\(\\s-*\\)")
          (group    . (1 2))
          (repeat   . t)
          (tab-stop . nil))
@@ -1334,6 +1338,8 @@ regardless of where you click."
     (define-key map [(control ?\;)]              'maplev-insert-assignment-operator)
     (define-key map [(control c) (control t) ?p] 'maplev-template-proc)
     (define-key map [(control c) (control t) ?m] 'maplev-template-module)
+    (define-key map [(control c) (control t) ?u] 'maplev-template-use-statement)
+
     (define-key map [(control j)]                'maplev-indent-newline)
     (define-key map [(control return)]           'maplev-newline-and-comment)
     (define-key map [(meta control h)]           'maplev-mark-defun)
@@ -1724,6 +1730,8 @@ RELEASE. If in `maplev-mode' also refontify the buffer."
 
 \\[maplev-insert-assignment-operator] inserts `:=' with spaces at end of line.
 \\[maplev-template-proc] inserts a procedure template after querying for options.
+\\[maplev-template-module] inserts a module template after querying for options.
+\\[maplev-template-use-statement] inserts a use statement after querying for the expression sequence.
 
 There are functions and keys for indenting code, syntax checking \(via mint\),
 displaying Maple help pages and printing the source code of procedures from the
@@ -2270,7 +2278,7 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
 ;;}}}
 ;;{{{ Templates
 
-(defun maplev-template (function name args description)
+(defun maplev--template-proc-module (function name args description)
   "Insert a template for a Maple FUNCTION \(\"proc\" or \"module\"\).
 Use NAME, ARGUMENTS, and DESCRIPTION. Move point to body of FUNCTION.
 
@@ -2322,15 +2330,27 @@ end statement.  Point is moved to the start of the function body."
 
 (defun maplev-template-proc (name args description)
   "Insert a template for a Maple procedure and move point to its body.
-Prompt for the NAME, ARGS, and DESCRIPTION. See `maplev-template'."
+Prompt for the NAME, ARGS, and DESCRIPTION.  See `maplev-template'."
   (interactive "*sName (return for anonymous) \nsArguments: \nsDescription: ")
-  (maplev-template "proc" name args description))
+  (maplev--template-proc-module "proc" name args description))
 
 (defun maplev-template-module (name args description)
   "Insert a template for a Maple module and move point to its body.
-Prompt for the NAME, ARGUMENTS, and DESCRIPTION. See `maplev-template'."
+Prompt for the NAME, ARGUMENTS, and DESCRIPTION.  See `maplev-template'."
   (interactive "*sName (return for anonymous) \nsArguments: \nsDescription: ")
-  (maplev-template "module" name args description))
+  (maplev--template-proc-module "module" name args description))
+
+(defun maplev-template-use-statement (exprseq)
+  "Insert a template for a Maple use statement and move point to its 
+first statement.  Prompt fo the EXPRSEQ."
+  (interactive "*sExpression Sequence: ")
+  (insert "use " exprseq " in")
+  (maplev-indent-newline)
+  (insert "\nend use")
+  (maplev-indent-line)
+  (forward-line -1)
+  (maplev-indent-line))
+  
 
 ;;}}}
 ;;{{{ Completion
@@ -3248,7 +3268,7 @@ an error."
 If called interactively use the marked region.
 If called with a prefix the cmaple buffer is first cleared."
   (interactive "r")
-  (let ((maplev-mint-info-level maplev-mint-error-level))
+  (let ((maplev-mint-info-level maplev-mint-error-level)) ;; TODO: Change to -S for syntax only!
     (when (equal 0 (maplev-mint-region beg end))
       (and current-prefix-arg (maplev-cmaple--clear-buffer))
       (maplev-cmaple--send-string (maplev--cmaple-process)
@@ -3466,7 +3486,7 @@ cmaple.
 
 (unless maplev-help-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(space>)]     'scroll-up)
+    (define-key map [(space)]      'scroll-up)
     (define-key map [(backspace)]  'scroll-down)
     (define-key map [?q]                         'quit-window)
     (define-key map [?s]                         'isearch-forward)
@@ -3775,14 +3795,15 @@ The title is the phrase following the function name."
 
 ;;}}}
 ;;{{{     regular expressions
-                                        ; (defconst maplev--help-section-re
-                                        ;   (concat "^[A-Z]"                      ; Must start with a capital.
-                                        ;           "\\([^\n]*:\\|\\("            ; If it ends with a colon (and whitespace) it matches.
-                                        ;           "\\([a-z]+ ?\\)?"             ; If it consists of no more than three alphabetic words,
-                                        ;           "\\([A-Za-z][a-z]* ?\\)?"     ; possibly with capitals, then it matches.
-                                        ;           "\\([A-Za-z][a-z]* ?\\)?\\)"
-                                        ;           "\\)[ \t]*$")
-                                        ;   "Regular expression for sections in a Maple help page.")
+
+;; (defconst maplev--help-section-re
+;;   (concat "^[A-Z]"                      ; Must start with a capital.
+;;           "\\([^\n]*:\\|\\("            ; If it ends with a colon (and whitespace) it matches.
+;;           "\\([a-z]+ ?\\)?"             ; If it consists of no more than three alphabetic words,
+;;           "\\([A-Za-z][a-z]* ?\\)?"     ; possibly with capitals, then it matches.
+;;           "\\([A-Za-z][a-z]* ?\\)?\\)"
+;;           "\\)[ \t]*$")
+;;   "Regular expression for sections in a Maple help page.")
 
 (defconst maplev--help-section-re
   (concat "^\\(Calling Sequences?"
@@ -3790,6 +3811,8 @@ The title is the phrase following the function name."
           "\\|Description"
           "\\|Examples"
           "\\|See Also"
+          "\\|References"
+          "\\|\\(?:List of \\([][a-zA-Z_]+ \\)?\\(Package\\|Subpackage\\|Module\\) Commands\\)"
           "\\):?")
   "Regular expression for sections in a Maple help page.")
 
@@ -3868,12 +3891,16 @@ The title is the phrase following the function name."
         (put-text-property (match-beginning 0) (match-end 0)
                            'face 'maplev-input-face))
 
-      ;; Activate hyperlinks following "See Also:".  R4 does not
-      ;; insert a carriage return so font-lock the section title,
-      ;; which would not have matched `maplev-help-section-face'.
+
+      ;; Activate hyperlinks following "See Also".
+      ;; Stop when encountering a blank line.
       (goto-char (point-max))
       (and (re-search-backward "^See Also:?" nil 'move)
-           (maplev--activate-hyperlinks (match-end 0) (point-max)))
+           (maplev--activate-hyperlinks 
+            (match-end 0) 
+            (progn
+              (re-search-forward "^[ \t\n]*$" nil 'move)
+              (point))))
 
       ;; Activate hyperlinks following "Multiple matches:".
       (goto-char (point-min))
@@ -4315,7 +4342,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
 (defconst maplev-mint-fontify-alist
   '(("\\(^on line[ \t]*[0-9]+:\\)" maplev-mint-note-face)
     ("^[ \t]*\\(\\^.*$\\)" maplev-mint-error-face 'error)
-    ("^\\(?:Nested \\)?\\(?:Procedure\\|Operator\\)[ ]*\\([^(]*\\)" maplev-mint-proc-face 'proc)
+    ("^\\(?:Nested \\)?\\(?:Procedure\\|Operator\\|Module\\)[ ]*\\([^(]*\\)" maplev-mint-proc-face 'proc)
     ("^\\(?:Nested \\)?Anonymous \\(?:Procedure\\|Operator\\)[ ]*\\(proc([^)]*)\\)" maplev-mint-proc-face 'proc)
     ("These parameters were never used\\(?: explicitly\\)?:" maplev-mint-warning-face 'unused-arg t)
     ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
