@@ -5,9 +5,9 @@
 
 ;; Authors:    Joseph S. Riel <joer@k-online.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
-;; Time-stamp: "2003-10-08 18:38:40 jriel"
+;; Time-stamp: "2003-10-09 13:32:59 jriel"
 ;; Created:    June 1999
-;; Version:    2.152
+;; Version:    2.154
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
 ;; X-RCS:      $$
@@ -103,7 +103,7 @@
 
 ;;{{{ Information
 (defconst maplev-version 
-  "2.152"
+  "2.154"
   "Version of MapleV mode.")
 
 (defconst maplev-developer 
@@ -121,7 +121,9 @@
 (require 'font-lock)
 (require 'imenu)
 (require 'comint)
+(require 'info)
 (require 'align)
+
 
 ;;{{{ Compatibility assignments
 
@@ -172,10 +174,10 @@ STRING should be given if the last search was by `string-match' on STRING."
   ;; The following two inline functions are needed by GNU emacs.
   ;; They mimic the builtin Xemacs functions.
   (unless maplev-xemacsp
-    (defsubst event-window (event)
+    (defun event-window (event)
       "Return the window over which mouse EVENT occurred."
       (nth 0 (nth 1 event)))
-    (defsubst event-point (event)
+    (defun event-point (event)
       "Return the character position of the mouse EVENT."
       (posn-point (event-start event))))
 
@@ -569,7 +571,7 @@ See the documentation for `align-rules-list' for more info on the format."
  			     (regexp-quote comment-start)
  			     "\\(.+\\)$") end t))))))
   "*A list describing text that should be excluded from alignment.
-See the documentation for `align-rules-list' for more info."
+See the documentation for `align-exclude-rules-list' for more info."
   :type align-rules-list-type
   :group 'maplev-align)
 
@@ -590,8 +592,14 @@ See the documentation for `align-rules-list' for more info."
 (defvar maplev-completion-alist nil
   "Alist for minibuffer completion.")
 
+(defvar maplev-completion-release nil
+  "Maple release for which completion has been requested.")
+
 (defvar maplev-history-list nil
   "History list used by maplev.")
+
+(defvar complete-symbol-function nil
+  "Mode-specific function to complete a symbol at point.")
 
 ;;}}}
 ;;{{{ Regular expressions
@@ -677,7 +685,7 @@ including double-quotes.")
           "\\|"
           maplev--string-re))
 
-(eval-when-compile
+(eval-and-compile
   (defun maplev--list-to-word-re (words)
     "Generate a regular expression that matches one of WORDS, a list."
     (concat "\\<\\(" (regexp-opt words) "\\)\\>")))
@@ -834,16 +842,17 @@ is handled.  Currently it is only used by the keyword `end'.")
 
 
 (defconst maplev--grammar-keyword-re
-  (concat
-   (maplev--list-to-word-re
-    '("proc" "module" "end"
+  (eval-when-compile
+    (concat
+     (maplev--list-to-word-re
+      '("proc" "module" "end"
 ;;;      "for" "from" "to" "by" "while" "in" "do" "od"
-      "for" "from" "to" "by" "while" "do" "od"
-      "if" "elif" "else" "then" "fi"
-      "use" "try" "catch" "finally"))
-   "\\|\\("
-   (regexp-opt '("{" "}" "[" "]" "(" ")" ))
-   "\\)")
+        "for" "from" "to" "by" "while" "do" "od"
+        "if" "elif" "else" "then" "fi"
+        "use" "try" "catch" "finally"))
+     "\\|\\("
+     (regexp-opt '("{" "}" "[" "]" "(" ")" ))
+     "\\)"))
   "Regular expression of keywords used in Maple grammar for indentation.")
 
 (defun maplev--skip-optional-end-keyword ()
@@ -1179,92 +1188,69 @@ regardless of where you click."
 
 (unless maplev-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(tab)]                     'maplev-electric-tab)
-    (define-key map [(meta tab)]                'maplev-complete-symbol)
-    (define-key map [(backspace)]               'backward-delete-char-untabify)
-    (define-key map [(control backspace)]       'maplev-untab)
-    (define-key map [(control ?\;)]             'maplev-insert-assignment-operator)
-    (define-key map [(control c) (control t) p] 'maplev-template-proc)
-    (define-key map [(control c) (control t) m] 'maplev-template-module)
-    (define-key map [(control j)]               'maplev-indent-newline)
-    (define-key map [(control return)]          'maplev-newline-and-comment)
-    (define-key map [(meta control h)]          'maplev-mark-proc)
-    (define-key map [(meta control a)]          'maplev-beginning-of-proc)
-    (define-key map [(meta control e)]          'maplev-end-of-proc)
-    (define-key map [(control x) n d]           'maplev-narrow-to-proc)
+    (define-key map [(tab)]                      'maplev-electric-tab)
+    (define-key map [(meta tab)]                 'maplev-complete-symbol)
+    (define-key map [(backspace)]                'backward-delete-char-untabify)
+    (define-key map [(control backspace)]        'maplev-untab)
+    (define-key map [(control ?\;)]              'maplev-insert-assignment-operator)
+    (define-key map [(control c) (control t) ?p] 'maplev-template-proc)
+    (define-key map [(control c) (control t) ?m] 'maplev-template-module)
+    (define-key map [(control j)]                'maplev-indent-newline)
+    (define-key map [(control return)]           'maplev-newline-and-comment)
+    (define-key map [(meta control h)]           'maplev-mark-proc)
+    (define-key map [(meta control a)]           'maplev-beginning-of-proc)
+    (define-key map [(meta control e)]           'maplev-end-of-proc)
+    (define-key map [(control x) ?n ?d]          'maplev-narrow-to-proc)
 
     ;; These two bindings are needed only under linux / unix
     (define-key map [(meta control y)]          'maplev-insert-cut-buffer)
-    (define-key map (if maplev-xemacsp 
-                        [(control meta button2)] 
-                      [(control meta mouse-2)])
-                                                'maplev-mouse-yank-cut-buffer)
+    (define-key map (maplev--mouse-keymap '(control meta 2)) 'maplev-mouse-yank-cut-buffer)
 
-    (define-key map [(control c) (control l)]   'maplev-add-local-variable)
-    (define-key map [(control c) (control g)]   'maplev-add-global-variable)
-    (define-key map [(control c) (control e)]   'maplev-add-export-variable)
+    (define-key map [(control c) (control l)] 'maplev-add-local-variable)
+    (define-key map [(control c) (control g)] 'maplev-add-global-variable)
+    (define-key map [(control c) (control e)] 'maplev-add-export-variable)
 
     ;; Indent commands
-    (define-key map [(control c) (tab) b]       'maplev-indent-buffer)
-    (define-key map [(control c) (tab) tab]     'maplev-indent-buffer)
-    (define-key map [(control c) (tab) p]       'maplev-indent-procedure)
-    (define-key map [(control c) (tab) r]       'maplev-indent-region)
+    (define-key map [(control c) (tab) ?b]  'maplev-indent-buffer)
+    (define-key map [(control c) (tab) tab] 'maplev-indent-buffer)
+    (define-key map [(control c) (tab) ?p]  'maplev-indent-procedure)
+    (define-key map [(control c) (tab) ?r]  'maplev-indent-region)
 
     ;; Cmaple commands
-    (define-key map [(control c) (control c) b]      'maplev-cmaple-send-buffer)
-    (define-key map [(control c) (control c) p]      'maplev-cmaple-send-procedure)
-    (define-key map [(control c) (control c) r]      'maplev-cmaple-send-region)
+    (define-key map [(control c) (control c) ?b]      'maplev-cmaple-send-buffer)
+    (define-key map [(control c) (control c) ?p]      'maplev-cmaple-send-procedure)
+    (define-key map [(control c) (control c) ?r]      'maplev-cmaple-send-region)
     (define-key map [(control c) (control c) return] 'maplev-cmaple-send-line)
-    (define-key map [(control c) (control c) g]      'maplev-cmaple-pop-to-buffer)
-    (define-key map [(control c) (control c) i]      'maplev-cmaple-interrupt)
-    (define-key map [(control c) (control c) k]      'maplev-cmaple-kill)
-    (define-key map [(control c) (control c) s]      'maplev-cmaple-status)
+    (define-key map [(control c) (control c) ?g]      'maplev-cmaple-pop-to-buffer)
+    (define-key map [(control c) (control c) ?i]      'maplev-cmaple-interrupt)
+    (define-key map [(control c) (control c) ?k]      'maplev-cmaple-kill)
+    (define-key map [(control c) (control c) ?s]      'maplev-cmaple-status)
 
     ;; Mint commands    
-      
 
-    (define-key map [(control c) (return) b]         'maplev-mint-buffer)
-    (define-key map [(control c) (return) p]         'maplev-mint-procedure)
-    (define-key map [(control c) (return) r]         'maplev-mint-region)
-    (define-key map [(control c) (return) return]    'maplev-mint-rerun)
+    (define-key map [(control c) (return) ?b] 'maplev-mint-buffer)
+    (define-key map [(control c) (return) ?p] 'maplev-mint-procedure)
+    (define-key map [(control c) (return) ?r] 'maplev-mint-region)
+    (define-key map [(control c) (return) return] 'maplev-mint-rerun)
 
     ;; Help and proc comma    
       
-    (define-key map [(control ?\?)]                  'maplev-help-at-point)
-    (define-key map [(meta ?\?)]                     'maplev-proc-at-point)
-
+    (define-key map [(control ?\?)] 'maplev-help-at-point)
+    (define-key map [(meta ?\?)]    'maplev-proc-at-point)
 
     ;; Xemacs and FSF Emacs use different terms for mouse buttons
-
-;;     (if maplev-xemacsp
-;;         (progn
-;;           (define-key map [(control shift button2)] 'maplev-help-follow-mouse)
-;;           (define-key map [(meta shift button2)]    'maplev-proc-follow-mouse))
-
-;;       (define-key map [(control shift mouse-2)]    'maplev-help-follow-mouse)
-;;       (define-key map [(meta shift mouse-2)]   'maplev-proc-follow-mouse))
-
 
     (define-key map (maplev--mouse-keymap '(control shift 2)) 'maplev-help-follow-mouse)
     (define-key map (maplev--mouse-keymap '(meta shift 2))    'maplev-proc-follow-mouse)
 
-
-
-
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(control shift button2)] 
-;;                       [(control shift mouse-2)])    'maplev-help-follow-mouse)
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(meta shift button2)] 
-;;                       [(meta shift mouse-2)])   'maplev-proc-follow-mouse)
-
-    (define-key map [(control c) (control s) h] 'maplev-switch-buffer-help)
-    (define-key map [(control c) (control s) l] 'maplev-switch-buffer-proc)
-    (define-key map [(control c) (control s) c] 'maplev-switch-buffer-cmaple)
+    (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
+    (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
+    (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-cmaple)
 
     (setq maplev-mode-map map)))
 ;;}}}
 ;;{{{ Menu
+
 (defvar maplev--menu-decoration
   '(["reserved words"  (maplev-reset-font-lock 1) :style radio
      :selected (equal font-lock-maximum-decoration 1)]
@@ -1333,6 +1319,7 @@ regardless of where you click."
       "---"
       ["Info"  maplev-goto-info-node t]
       ["About" maplev-about t])))
+
 ;;}}}
 ;;{{{ Abbreviations
 
@@ -1719,6 +1706,10 @@ Maple libraries.
   (setq align-mode-rules-list maplev-align-rules-list)
   (setq align-mode-exclude-rules-list maplev-align-exclude-rules-list)
 
+  ;; completion
+
+  (set (make-local-variable 'complete-symbol-function) 'maplev-complete-symbol)
+
   ;; Font lock support: make these variables buffer-local
   ;; so that we can change the decoration level
   (make-local-variable 'font-lock-defaults)
@@ -1743,9 +1734,6 @@ Maple libraries.
   ;; make-local-hook is obsolete in GNU emacs 21.1
   (make-local-hook 'hack-local-variables-hook)
   (add-hook 'hack-local-variables-hook 'maplev-mode-name nil t)
-
-
-;;  (add-hook 'hack-local-variables-hook 'maplev--completion-initialize nil t)
 
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
@@ -2843,7 +2831,7 @@ restart it."
                                     maplev-start-options;; add include path to argument list
                                     (and maplev-include-path
                                          (list (concat "-I " 
-                                                       (mapconcat (lambda(s) s) maplev-include-path ",")))))
+                                                       (mapconcat 'identity maplev-include-path ",")))))
                             ))
        'maplev--cmaple-filter)
       (maplev-cmaple-mode release)
@@ -2866,21 +2854,29 @@ If access is already locked, generate an error
 unless optional arg NO-ERROR is non-nil."
   (if (and (not no-error) (maplev-cmaple--locked-p))
       (error "Maple busy")
-    (put 'maplev-cmaple-state maplev-release 'locked)))
+;hieida:
+;    (put 'maplev-cmaple-state maplev-release 'locked)))
+    (put 'maplev-cmaple-state 'maplev-release 'locked)))
 
 (defun maplev-cmaple--unlock-access ()
   "Unlock access to cmaple.
 Interactively use \\[maplev-cmaple-interrupt]."
-  (put 'maplev-cmaple-state maplev-release nil))
+;hieida:
+;  (put 'maplev-cmaple-state maplev-release nil))
+  (put 'maplev-cmaple-state 'maplev-release nil))
 
 (defun maplev-cmaple--locked-p ()
   "Return non-nil if the Maple process is locked."
-  (eq (get 'maplev-cmaple-state maplev-release) 'locked))
+;hieida:
+;  (eq (get 'maplev-cmaple-state maplev-release) 'locked))
+  (eq (get 'maplev-cmaple-state 'maplev-release) 'locked))
 
 (defun maplev-cmaple-status ()
   "Status of Maple process."
   (interactive)
-  (let ((status (get 'maplev-cmaple-state maplev-release)))
+;hieida:
+;  (let ((status (get 'maplev-cmaple-state maplev-release)))
+  (let ((status (get 'maplev-cmaple-state 'maplev-release)))
     (message "Maple R%s %s" maplev-release
              (cond ((eq status 'locked) "locked")
                    ((not status) "unlocked")
@@ -3003,8 +2999,7 @@ Optional arg RELEASE defaults to `maplev-release'."
   (let ((maplev-release release))
     (maplev--cmaple-process)
     (pop-to-buffer (maplev--cmaple-buffer))
-    (goto-char (point-max))
-    (maplev--completion-initialize)))
+    (goto-char (point-max))))
 
 (defalias 'cmaple 'maplev-cmaple-pop-to-buffer)
 
@@ -3032,6 +3027,7 @@ PROCESS is the Maple process, STRING its output."
   (while (re-search-forward "\e\\[[0-9;]+m" nil t) (replace-match ""))
   (goto-char (point-min))
   (while (re-search-forward "\r+" nil t) (replace-match "\n")))
+
 ;;}}}
 ;;{{{   mode map
 (defvar maplev-cmaple-map nil
@@ -3039,30 +3035,16 @@ PROCESS is the Maple process, STRING its output."
 
 (unless maplev-cmaple-map
   (let ((map (copy-keymap comint-mode-map)))
-    (define-key map [(return)]   'maplev-cmaple-send)
+    (define-key map [(return)]                'maplev-cmaple-send)
     (define-key map [(control c) (control c)] 'maplev-cmaple-interrupt)
-    (define-key map [?\?]              'maplev-help-at-point)
-    (define-key map [(control ?\?)]    'maplev-help-at-point)
-    (define-key map [(meta ?\?)]       'maplev-proc-at-point)
-    (define-key map [(meta tab)]       'maplev-complete-symbol)
-    (define-key map [(control a)]      'comint-bol)
+    (define-key map [?\?]                     'maplev-help-at-point)
+    (define-key map [(control ?\?)]           'maplev-help-at-point)
+    (define-key map [(meta ?\?)]              'maplev-proc-at-point)
+    (define-key map [(meta tab)]              'maplev-complete-symbol)
+    (define-key map [(control a)]             'comint-bol)
 
     ;; These two bindings are needed only under linux / unix
     (define-key map [(meta control y)]    'maplev-insert-cut-buffer)
-
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(control meta button2)] 
-;;                       [(control meta mouse-2)])      'maplev-mouse-yank-cut-buffer)
-
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(shift button2)] 
-;;                       [(shift mouse-2)])      'maplev-help-follow-mouse)
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(control shift button2)] 
-;;                       [(control shift mouse-2)])      'maplev-help-follow-mouse)
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(meta shift button2)] 
-;;                       [(meta shift mouse-2)])     'maplev-proc-follow-mouse)
 
     ;; mouse button bindings
     (define-key map (maplev--mouse-keymap '(control meta 2))  'maplev-mouse-yank-cut-buffer)
@@ -3072,11 +3054,12 @@ PROCESS is the Maple process, STRING its output."
 
     ;; in comint-mode-map of emacs 21, `C-c C-s' is bound to comint-write-output.
     ;; Remove it so that it can be used as a prefix key to switch buffers.
-    (define-key map [(control c) (control s)]         nil)
-    (define-key map [(control c) (control s) h]        'maplev-switch-buffer-help)
-    (define-key map [(control c) (control s) l]        'maplev-switch-buffer-proc)
-    (define-key map [(shift return)]                   'newline)
+    (define-key map [(control c) (control s)]     nil)
+    (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
+    (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
+    (define-key map [(shift return)]             'newline)
     (setq maplev-cmaple-map map)))
+
 ;;}}}
 ;;{{{   mode
 (defconst maplev-input-line-keyword
@@ -3128,42 +3111,25 @@ cmaple.
   (let ((map (make-sparse-keymap)))
     (define-key map [(space>)]     'scroll-up)
     (define-key map [(backspace)]  'scroll-down)
-    (define-key map [q]                 'quit-window)
-    (define-key map [s]                 'isearch-forward)
-    (define-key map [r]                 'maplev-redo-item)
-    (define-key map [p]                 'maplev-prev-item)
-    (define-key map [n]                 'maplev-next-item)
-    (define-key map [d]                 'maplev-delete-item)
-    (define-key map [P]                 'maplev-help-parent)
-    (define-key map [?\?]               'maplev-help-at-point)
-    (define-key map [(control ?\?)]     'maplev-help-at-point)
-    (define-key map [(meta ?\?)]        'maplev-proc-at-point)
-    (define-key map [f]                 'maplev-tear-off-window)
-    (define-key map [(control c) (control s) h]         'maplev-switch-buffer-help)
-    (define-key map [(control c) (control s) l]         'maplev-switch-buffer-proc)
-    (define-key map [(control c) (control s) c]         'maplev-switch-buffer-cmaple)
-    (define-key map [h]                 'maplev-switch-buffer-help) ; short-cut
-    (define-key map [l]                 'maplev-switch-buffer-proc) ; short-cut
-    (define-key map [c]                 'maplev-switch-buffer-cmaple) ; short-cut
-    (define-key map [(return)]          'maplev-help-at-point)
-    (define-key map [(meta return)]     'maplev-proc-at-point)
-
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(button2)] 
-;;                       [(mouse-2)])                   'maplev-help-follow-mouse) ; short-cut
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(shift button2)] 
-;;                       [(shift mouse-2)])            'maplev-help-follow-mouse) ; standard
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(control shift button2)] 
-;;                       [(control shift mouse-2)])    'maplev-help-follow-mouse) ; standard
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(meta button2)] 
-;;                       [(meta mouse-2)])             'maplev-proc-follow-mouse) ; short-cut
-;;     (define-key map (if maplev-xemacsp 
-;;                         [(meta shift button2)] 
-;;                       [(meta shift mouse-2)])       'maplev-proc-follow-mouse) ; standard
-
+    (define-key map [?q]                         'quit-window)
+    (define-key map [?s]                         'isearch-forward)
+    (define-key map [?r]                         'maplev-redo-item)
+    (define-key map [?p]                         'maplev-prev-item)
+    (define-key map [?n]                         'maplev-next-item)
+    (define-key map [?d]                         'maplev-delete-item)
+    (define-key map [?P]                         'maplev-help-parent)
+    (define-key map [?\?]                        'maplev-help-at-point)
+    (define-key map [(control ?\?)]              'maplev-help-at-point)
+    (define-key map [(meta ?\?)]                 'maplev-proc-at-point)
+    (define-key map [?f]                         'maplev-tear-off-window)
+    (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
+    (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
+    (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-cmaple)
+    (define-key map [?h]                         'maplev-switch-buffer-help) ; short-cut
+    (define-key map [?l]                         'maplev-switch-buffer-proc) ; short-cut
+    (define-key map [?c]                         'maplev-switch-buffer-cmaple) ; short-cut
+    (define-key map [(return)]                   'maplev-help-at-point)
+    (define-key map [(meta return)]              'maplev-proc-at-point)
 
     ;; Bind mouse buttons
     (define-key map (maplev--mouse-keymap '(2))               'maplev-help-follow-mouse)
@@ -3262,14 +3228,13 @@ Minibuffer completion is used if COMPLETE is non-nil."
   (if (not default) (setq default t))
   (let ((enable-recursive-minibuffers t)
         (ident (maplev-ident-around-point default))
+        (maplev-completion-release maplev-release)
         choice)
     (setq prompt (concat prompt (unless (string-equal ident "")
                                   (concat " (default " ident ")"))
                          ": ")
           choice (if complete
-                     (completing-read prompt
-                                      (cadr (assoc maplev-release
-                                                   maplev-completion-alist))
+                     (completing-read prompt 'maplev--completion
                                       nil nil nil maplev-history-list ident)
                    (read-string prompt nil maplev-history-list ident)))
     ;; Are there situations where we want to suppress the error message??
@@ -3343,35 +3308,46 @@ PROCESS calls this filter.  STRING is the output."
   (maplev-help-fontify-node)
   (set-buffer-modified-p nil))
 
-(defun maplev--completion-initialize ()
-  "Initialize minibuffer completion."
-  (unless (assoc maplev-release maplev-completion-alist)
-    (let (list)
-      (save-excursion
-        ;; processing node "index/function"
-        (maplev-help-show-topic "index/function" t)
-        (set-buffer (maplev--help-buffer))
-        (while (maplev-cmaple--locked-p) (maplev--short-delay))
-        (save-restriction
-          ;; does this work with all releases?
-          (narrow-to-region (save-excursion (goto-line 7) (point))
-                            (save-excursion (goto-char (point-max))
-                                            (forward-line -3) (point)))
-          (goto-char (point-max))
-          (while (forward-word -1)
-            (setq list (cons (cons (buffer-substring-no-properties
-                                    (point)
-                                    (save-excursion (forward-word 1) (point)))
-                                   nil)
-                             list))))
-        (maplev-delete-item)
+(defun maplev--completion (word predicate mode)
+  "Generate minibuffer completion using maple function names.
+For the meaning of args see Info node `(elisp)Programmed Completion'."
+  ;; Make sure we are using the correct value of maplev-release.
+  ;; (Inside the minibuffer maplev-release equals maplev-default-release.)
+  (let ((maplev-release maplev-completion-release))
+    (unless (assoc maplev-release maplev-completion-alist)
+      ;; processing node "index/function"
+      (let (possibilities)
+        (save-excursion
+          (maplev-help-show-topic "index/function" t)
+          (set-buffer (maplev--help-buffer))
+          (while (maplev-cmaple--locked-p) (maplev--short-delay))
+          (save-restriction
+            ;; does this work with all releases?
+            (narrow-to-region (save-excursion (goto-line 7) (point))
+                              (save-excursion (goto-char (point-max))
+                                              (forward-line -3) (point)))
+            (goto-char (point-max))
+            (while (forward-word -1)
+              (setq possibilities
+                    (cons (cons (buffer-substring-no-properties
+                                 (point)
+                                 (save-excursion (forward-word 1) (point)))
+                                nil)
+                        possibilities))))
+          (maplev-delete-item))
         ;; processing node "index[package]" -- suggestions welcome!
-        )
-      (setq maplev-completion-alist
-            (cons (cons maplev-release (list list))
-                  maplev-completion-alist)))))
+        (setq maplev-completion-alist
+              (cons (cons maplev-release (list possibilities))
+                    maplev-completion-alist))))
+    (let ((possibilities (cadr (assoc maplev-release maplev-completion-alist))))
+      (cond ((eq mode t)
+             (all-completions word possibilities predicate))
+            ((not mode)
+             (try-completion word possibilities predicate))
+            ((eq mode 'lambda)
+             (assoc word possibilities))))))
 
-(defun maplev-complete-symbol ()
+(defun maplev-complete-symbol (&optional prefix)
   "Perform completion on maple symbol preceding point.
 Compare that symbol against `maplev-completion-alist'."
   ;; Code borrowed from lisp-complete-symbol.
@@ -3384,8 +3360,8 @@ Compare that symbol against `maplev-completion-alist'."
                   (forward-char 1))
                 (point)))
 	 (pattern (buffer-substring-no-properties beg end))
-         (alist (cadr (assoc maplev-release maplev-completion-alist)))
-	 (completion (try-completion pattern alist)))
+         (maplev-completion-release maplev-release)
+	 (completion (try-completion pattern 'maplev--completion)))
     (cond ((eq completion t))
 	  ((null completion)
 	   (message "Can't find completion for \"%s\"" pattern)
@@ -3395,7 +3371,8 @@ Compare that symbol against `maplev-completion-alist'."
 	   (insert completion))
 	  (t
 	   (message "Making completion list...")
-	   (let ((list (sort (all-completions pattern alist) 'string<)))
+	   (let ((list (sort (all-completions pattern 'maplev--completion)
+                             'string<)))
 	     (with-output-to-temp-buffer "*Completions*"
 	       (display-completion-list list)))
 	   (message "Making completion list...%s" "done")))))
@@ -3628,7 +3605,7 @@ The title is the phrase following the function name."
 
 (unless maplev-proc-mode-map
   (setq maplev-proc-mode-map (copy-keymap maplev-help-mode-map))
-  (define-key maplev-proc-mode-map [P] 'self-insert-command))
+  (define-key maplev-proc-mode-map [?P] 'self-insert-command))
 
 ;;}}}
 ;;{{{   mode definition
@@ -3791,17 +3768,16 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 
 (unless maplev-mint-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(space)]                         'scroll-up)
-    (define-key map [(backspace)]                     'scroll-down)
-    (define-key map [(return)]                        'maplev-mint-rerun)
-    (define-key map [(control c) (return) return]     'maplev-mint-rerun)
-    (define-key map [q]                               'quit-window)
-    (define-key map [s]                               'isearch-forward)
-    (define-key map [r]                               'isearch-backward)
-;;  (define-key map (if maplev-xemacsp [button2] [mouse-2])  'maplev-mint-click)
-    (define-key map (maplev--mouse-keymap '(2))       'maplev-mint-click)
+    (define-key map [(space)]                     'scroll-up)
+    (define-key map [(backspace)]                 'scroll-down)
+    (define-key map [(return)]                    'maplev-mint-rerun)
+    (define-key map [(control c) (return) return] 'maplev-mint-rerun)
+    (define-key map [?q]                          'quit-window)
+    (define-key map [?s]                          'isearch-forward)
+    (define-key map [?r]                          'isearch-backward)
+    (define-key map (maplev--mouse-keymap '(2))   'maplev-mint-click)
     
-    (define-key map [(control c) (control c)]         'maplev-mint-handler)
+    (define-key map [(control c) (control c)]     'maplev-mint-handler)
     (setq maplev-mint-mode-map map)))
 
 ;;}}}
@@ -4125,6 +4101,7 @@ FORM and VARS are used for y-or-n-p query."
 
 ;;}}}
 ;;{{{   regions
+
 (defun maplev-mint-region (beg end)
   "Run Mint on the current region \(from BEG to END\).
 Return exit code of mint."
@@ -4215,6 +4192,7 @@ If no region has been selected, run Mint on the buffer."
         (maplev-mint-buffer)
       (maplev-mint-region (marker-position maplev-mint--code-beginning)
                           (marker-position maplev-mint--code-end)))))
+
 ;;}}}
 
 ;;}}}
