@@ -9,7 +9,7 @@
 ;; Version:    2.152
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.2 2003-10-06 04:53:24 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.3 2003-10-08 04:56:32 joe Exp $
 
 ;;{{{ License
 ;; This program is free software; you can redistribute it and/or
@@ -290,6 +290,7 @@ Used to index `maplev-executable-alist'.")
           "fi:\n"))
         (maplev-interface-string
          (concat
+          "ansi=false,"
           "prettyprint=1,"
           "verboseproc=2,"
           "errorbreak=0,\n"
@@ -667,9 +668,15 @@ including double-quotes.")
           "\\|"
           maplev--string-re))
 
-(defun maplev--list-to-word-re (words)
-  "Generate a regular expression that matches one of WORDS, a list."
-  (concat "\\<\\(" (regexp-opt words) "\\)\\>"))
+;; Use eval-when-compile so that maplev--liste-to-word-re can be used
+;; to compile regexs at compile time.  I'm not sure that this makes a
+;; difference, but it seems like the right thing to do.
+
+(eval-when-compile
+  (defun maplev--list-to-word-re (words)
+    "Generate a regular expression that matches one of WORDS, a list."
+    (concat "\\<\\(" (regexp-opt words) "\\)\\>")))
+
 ;;}}}
 
 ;;{{{ Indentation
@@ -2866,7 +2873,9 @@ Interactively use \\[maplev-cmaple-interrupt]."
         (comint-send-input))))
 
 (defun maplev-cmaple--send-string (process string)
-  "Send STRING to the cmaple process PROCESS."
+  "Send STRING to the cmaple process PROCESS.
+Maple commands that set interface and kernelopts options 
+are appended to a restart command."
   ;; handle Maple `restart' by adding the initialization according to
   ;; maplev-init-string-alist
   (let ((str "") case-fold-search)
@@ -3135,6 +3144,7 @@ cmaple.
 
 ;;}}}
 ;;{{{   mode definition
+
 (defun maplev-help-mode (&optional release)
   "Major mode for displaying Maple help pages.
 RELEASE is the Maple release, if nil, `maplev-default-release' is used.
@@ -3161,6 +3171,7 @@ RELEASE is the Maple release, if nil, `maplev-default-release' is used.
 
 ;;}}}
 ;;{{{   mode functions
+
 (defun maplev-help-follow-mouse (click)
   "Display the Maple help page of the topic at the mouse CLICK."
   (interactive "e")
