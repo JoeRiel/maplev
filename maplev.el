@@ -10,7 +10,7 @@
 ;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.12 2004-10-01 17:50:43 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.13 2005-02-03 05:35:43 joe Exp $
 
 ;;{{{ License
 
@@ -265,6 +265,7 @@ is an integer correspond to the button number; preceding items are optional modi
                   nil
                   "c:/maplev4/bin.win/mint.exe")))
     '(
+      ("10"  . ("maple" nil "mint"))
       ("9"   . ("maple" nil "mint"))
       ("8"   . ("maple" nil "mint"))
       ("7"   . ("maple" nil "mint"))
@@ -326,6 +327,10 @@ Used to index `maplev-executable-alist'.")
           "warnlevel=2"))
         (maplev-kernelopts "kernelopts(printbytes=false):\n"))
     `(
+      ("10"  . ,(concat maplev-print-R6+
+                        "interface(" maplev-interface-string
+                        ",errorcursor=false):\n"
+                        maplev-kernelopts))
       ("9.5" . ,(concat maplev-print-R6+
                         "interface(" maplev-interface-string
                         ",errorcursor=false):\n"
@@ -2615,6 +2620,16 @@ Compare that symbol against `maplev-completion-alist'."
           "return"  "save"      "stop"   "subset" "then"
           "to"     "try"        "union"  "use"    "while"
           "xor"))
+    (10 . ("and"     "assuming"  "break"  "by"     "catch"
+          "description" "do"    "done"   "elif"   "else"
+          "end"     "error"     "export" "fi"     "finally"
+          "for"     "from"      "global" "if"     "implies"
+          "in"      "intersect" "local"  "minus"  "mod"
+          "module"  "next"      "not"    "od"     "option"
+          "options" "or"        "proc"   "quit"   "read"
+          "return"  "save"      "stop"   "subset" "then"
+          "to"     "try"        "union"  "use"    "while"
+          "xor"))
     )
   "Alist of Maple reserved words.  The key is the major release.")
 
@@ -2857,7 +2872,7 @@ Compare that symbol against `maplev-completion-alist'."
           "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" 
           "OrderedNE" "RETURN" "Re" "SFloatExponent" "SFloatMantissa" 
           "Scale10" "Scale2" "SearchText" "TRACE" "ToInert" 
-          "Unordered" "UpdateSource" "^" 
+          "Unordered" "UpdateSource" "`^`" 
           "_jvm" "_maplet" "_treeMatch" "_unify" "_xml" 
           "abs" "add" "addressof" "alias" "anames" "and" "andmap" 
           "appendto" "array" "assemble" "assigned" "attributes" 
@@ -2883,9 +2898,44 @@ Compare that symbol against `maplev-completion-alist'."
           "ssystem" "stop" "streamcall" "subs" "subset" "subsop" 
           "substring" "system" "table" "taylor" "tcoeff" "time" 
           "timelimit" "traperror" "trunc" "type" "typematch" 
-          "unames" "unbind" "union" "userinfo" "writeto" "xor" "||"))
-    )
-  "Alist of Maple builtin funtions.  The key is the major release.")
+          "unames" "unbind" "union" "userinfo" "writeto" "xor" "`||`"))
+    (10 . ("`$`" "`*`" "`**`" "`+`" "`..`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`?()`" "`?[]`"
+           "ASSERT" "Array" "ArrayOptions" "CopySign" 
+           "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" 
+           "ERROR" "EqualEntries" "EqualStructure" "FromInert" 
+           "Im" "MPFloat" "MorrBrilCull" "NextAfter" "Normalizer" 
+           "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" 
+           "OrderedNE" "RETURN" "Re" "SDMPolynom" "SFloatExponent" "SFloatMantissa" 
+           "Scale10" "Scale2" "SearchText" "TRACE" "ToInert" 
+           "Unordered" "UpdateSource" "`[]`" "`^`"
+           "_jvm" "_maplet" "_treeMatch" "_unify" "_xml" 
+           "abs" "add" "addressof" "alias" "anames" "and" "andmap" 
+           "appendto" "array" "assemble" "assigned" "attributes" 
+           "bind" "call_external" "callback" "cat" "coeff" "coeffs" 
+           "conjugate" "convert" "crinterp" "debugopts" "define_external" 
+           "degree" "denom" "diff" "disassemble" "divide"
+           "dlclose" "done" "entries" "eval" "evalb" "evalf"
+           "evalf/hypergeom/kernel" "evalgf1" "evalhf" "evaln" "expand"
+           "exports" "factorial" "frem" "frontend" "gc" "genpoly" "gmp_isprime"
+           "goto" "has" "hastype" "hfarray" "icontent" "if" "igcd" "ilog10"
+           "ilog2" "implies" "indets" "indices" "inner" "int/series"
+           "intersect" "iolib" "iquo" "irem" "is_gmp" "isqrt"
+           "kernel/transpose" "kernelopts" "lcoeff" "ldegree" "length"
+           "lexorder" "lhs" "lprint" "macro" "map" "map2" "max" "maxnorm"
+           "member" "min" "minus" "mod" "modp" "modp1" "modp2" "mods" "mul"
+           "mvMultiply" "negate" "nops" "normal" "not" "numboccur" "numer"
+           "op" "or" "order" "ormap" "overload" "parse" "piecewise" "pointto"
+           "print" "quit" "readlib" "reduce_opr" "remove" "rhs" "rtable"
+           "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
+           "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
+           "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_redim"
+           "rtable_scale" "rtable_scanblock" "rtable_sort_indices" "rtable_zip"
+           "savelib" "searchtext" "select" "selectremove" "seq" "series"
+           "setattribute" "sign" "sort" "ssystem" "stop" "streamcall" "subs"
+           "subset" "subsop" "substring" "system" "table" "taylor" "tcoeff"
+           "time" "timelimit" "traperror" "trunc" "type" "typematch" "unames"
+           "unbind" "union" "userinfo" "writeto" "xor" "`{}`" "`||`"))
+    "Alist of Maple builtin funtions.  The key is the major release."))
 
 (defun maplev--ditto-operators-re ()
   "Return a regexp that matches the ditto operators."
@@ -3720,6 +3770,7 @@ PROCESS calls this filter.  STRING is the output."
 
 ;;}}}
 ;;{{{   history mechanism
+
 (defun maplev-help-parent ()
   "Display the parent node of the current help page.
 The parent node is extracted from the context of the help page, not
@@ -3729,6 +3780,7 @@ from the parent defined in the Maple help system."
   (if (looking-at "\\(Function: ?\\)?\\([a-zA-Z0-9]*\\)\\[")
       (maplev-help-show-topic (match-string 2))
     (maplev-help-show-topic "index")))
+
 ;;}}}
 ;;{{{   fontify
 ;;{{{     fonts
