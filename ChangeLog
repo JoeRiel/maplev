@@ -1,3 +1,10 @@
+2004-05-19  Joe Riel  <joer@k-online.com>
+
+	* maplev.el (maplev--help-definition-re): Assign regular
+	expression for dictionary references (hyperlinks) in help pages.
+	(maplev-help-fontify-node): Add code for activating dictionary
+	hyperlinks.
+
 2004-01-29  Joe Riel  <joer@k-online.com>
 
 	* maplev.el (maplev--compute-indent): 
