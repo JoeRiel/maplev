@@ -10,7 +10,7 @@
 ;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.13 2005-02-03 05:35:43 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.14 2006-06-02 14:02:38 joe Exp $
 
 ;;{{{ License
 
@@ -323,7 +323,7 @@ Used to index `maplev-executable-alist'.")
           "prettyprint=1,"
           "verboseproc=2,"
           "errorbreak=0,\n"
-          "screenheight=9999,"
+          "screenheight=infinity,"
           "warnlevel=2"))
         (maplev-kernelopts "kernelopts(printbytes=false):\n"))
     `(
@@ -642,7 +642,7 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
 ;;{{{ Regular expressions
 
 (defconst maplev--declaration-re
-  "\\<\\(?:local\\|options?\\|global\\|description\\|export\\)\\>"
+  "\\<\\(?:local\\|options?\\|global\\|description\\|export\\|uses\\)\\>"
   "Regular expression for a Maple procedure declaration statement.")
 
 (defconst maplev--simple-name-re  "\\<[a-zA-Z_][a-zA-Z0-9_]*\\>"
@@ -869,9 +869,11 @@ amount for source between KEYWORD and its closing keyword.")
   "Assign POINT, STATE, and STACK to the variable `maplev--indent-info'."
   (setq maplev--indent-info (list point state stack)))
 
-(defsubst maplev--clear-indent-info ()
+(defsubst maplev-clear-indent-info ()
   "Clear the indent information."
+  (interactive)
   (setq maplev--indent-info nil))
+
 
 (defun maplev--validate-indent-info ()
   "Update the variable `maplev--indent-info' if nil.
@@ -886,14 +888,21 @@ Set STATE and STACK in variable to nil."
     ;; of the buffer.  WHAT ABOUT NARROWING AND/OR FOLDING?
     (maplev--indent-info-assign
      (or (and (looking-at maplev--top-defun-begin-re) (point))
+         ;; Handle noweb mode.
+         ;; If noweb is active in the buffer, then search for
+         ;; the chunk starter.
+         (and (boundp 'noweb-minor-mode) noweb-minor-mode
+              (save-excursion
+                (when (re-search-backward "^<<\\(.*\\)>>=$" nil t)
+                  (1+ (match-end 0)))))
          (save-excursion
            (when (re-search-backward
                   (concat "\\(" maplev--top-defun-begin-re "\\)\\|"
                           "\\(" maplev--top-defun-end-re "\\)") nil t)
              (if (nth 2 (match-data))   ; found proc?
-                 (match-beginning 0)    ;   goto start of proc
-               (match-end 0))))         ;   goto end of proc
-         (point-min))                   ; goto top of buffer
+                 (match-beginning 0)    ;   start of proc
+               (match-end 0))))         ;   end of proc
+         (point-min))                   ; top of buffer
      nil nil)))
 
 (defun maplev--before-change-function (beg &rest unused)
@@ -902,7 +911,7 @@ This function is called whenever the buffer is changed.  BEG is the
 character position of the beginning of the change.  UNUSED is not used."
   (and maplev--indent-info
        (< beg (maplev--indent-info-point))
-       (maplev--clear-indent-info)))
+       (maplev-clear-indent-info)))
 
 ;;}}}
 ;;{{{   grammar
@@ -1235,7 +1244,7 @@ BEG and END may also be passed to the function."
           (goto-char beg)
           (beginning-of-line)
           (setq end (set-marker (make-marker) end))
-          (maplev--clear-indent-info)   ; temporary
+          (maplev-clear-indent-info)   ; temporary
           (maplev--validate-indent-info)
 
           ;; THE FOLLOWING LINE IS EXPERIMENTAL BUT SEEMS NECESSARY
@@ -1365,6 +1374,8 @@ regardless of where you click."
     (define-key map [(control c) (tab) tab] 'maplev-indent-buffer)
     (define-key map [(control c) (tab) ?p]  'maplev-indent-procedure)
     (define-key map [(control c) (tab) ?r]  'maplev-indent-region)
+    (define-key map [(control c) (tab) ?k]  'maplev-clear-indent-info)
+    
 
     ;; Cmaple commands
     (define-key map [(control c) (control c) ?b]      'maplev-cmaple-send-buffer)
@@ -1600,7 +1611,7 @@ Assigned to `fill-paragraph-function'.  If any of the current line is
 a comment, fill the comment or the paragraph of it that point is in,
 preserving the comment's indentation and initial comment symbol.
 Prefix JUSTIFY means justify as well."
-  (interactive "P")
+  (interactive "*P")
   (let (has-code      ; Non-nil if line contains code (possibly blank)
         comment-fill-prefix)  ; Appropriate fill-prefix for a comment.
 
@@ -2205,7 +2216,7 @@ The entire statement is deleted if it is left with no variables."
 
 (defun maplev-delete-vars-old (start end vars &optional leave-one)
   "In region between START and END delete occurrences of VARS.
-VARS must be eiter a string or a list of strings. If optional
+VARS must be either a string or a list of strings. If optional
 argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
   (let (case-fold-search lo)
     (save-excursion
@@ -2235,7 +2246,7 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
 
 (defun maplev-delete-vars (start end vars &optional leave-one)
   "In region between START and END delete occurrences of VARS.
-VARS must be eiter a string or a list of strings. If optional
+VARS must be either a string or a list of strings. If optional
 argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
   (let ((parse-sexp-ignore-comments)
         case-fold-search lo )
@@ -2628,7 +2639,7 @@ Compare that symbol against `maplev-completion-alist'."
           "module"  "next"      "not"    "od"     "option"
           "options" "or"        "proc"   "quit"   "read"
           "return"  "save"      "stop"   "subset" "then"
-          "to"     "try"        "union"  "use"    "while"
+          "to"     "try"        "union"  "use"    "uses" "while"
           "xor"))
     )
   "Alist of Maple reserved words.  The key is the major release.")
@@ -3536,8 +3547,9 @@ cmaple.
 
 (unless maplev-help-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(space)]      'scroll-up)
-    (define-key map [(backspace)]  'scroll-down)
+;;    (define-key map [(SPC)]                      'scroll-up)
+    (define-key map (read-kbd-macro "SPC")       'scroll-up)
+    (define-key map [(backspace)]                'scroll-down)
     (define-key map [?q]                         'quit-window)
     (define-key map [?s]                         'isearch-forward)
     (define-key map [?r]                         'maplev-history-redo-item)
@@ -3701,13 +3713,13 @@ If optional arg HIDE is non-nil do not display buffer."
       ;; Push TOPIC onto history stack
       (maplev--history-stack-process topic hide))))
 
-(setq maplev-cmaple-screenheight 24)
+;;(setq maplev-cmaple-screenheight 24)
 
 (defun maplev--help-process (topic)
   "Display Maple help for TOPIC in `maplev--help-buffer'."
   (let ((process (maplev--cmaple-process)))
     ;; TODO this doesn't quite work, it echos in the cmaple buffer
-    (maplev-cmaple-direct "interface('screenheight'='infinity'):")
+;;    (maplev-cmaple-direct "interface('screenheight'='infinity'):")
     (maplev-cmaple--lock-access)
     (set-process-filter process 'maplev--help-filter)
     (set-buffer (maplev--help-buffer))
@@ -3715,11 +3727,11 @@ If optional arg HIDE is non-nil do not display buffer."
     (let (buffer-read-only)
       (delete-region (point-min) (point-max)))
     (comint-simple-send process (concat "?" topic))
-    (maplev-cmaple--send-end-notice process)
-    ;; TODO this doesn't quite work, it echos in the cmaple buffer
-    (maplev-cmaple-direct (concat "interface('screenheight'="
-                               (number-to-string maplev-cmaple-screenheight)
-                               "):"))))
+    (maplev-cmaple--send-end-notice process)))
+;;    ;; TODO this doesn't quite work, it echos in the cmaple buffer
+;;     (maplev-cmaple-direct (concat "interface('screenheight'="
+;;                                (number-to-string maplev-cmaple-screenheight)
+;;                                "):"))))
 
 (defun maplev--help-filter (process string)
   "Pipe the output of a help command into `maplev--help-buffer'.
@@ -3783,6 +3795,7 @@ from the parent defined in the Maple help system."
 
 ;;}}}
 ;;{{{   fontify
+
 ;;{{{     fonts
 
 (defcustom maplev-help-function-face 'font-lock-function-name-face
@@ -3993,6 +4006,12 @@ The title is the phrase following the function name."
 
 ;;{{{   mode map
 
+;; The mode map for maplev-proc-map is identical to that for
+;; maplev-help-mode, with one exception: the parent function is not
+;; needed, so its key is redefined to self-insert (which generates an
+;; error, as does any other insertion, because the buffer if
+;; read-only).
+
 (defvar maplev-proc-mode-map nil
   "Keymap used in `maplev-proc-mode'.")
 
@@ -4143,6 +4162,13 @@ PROCESS calls this filter.  STRING is the Maple procedure."
   :type 'boolean
   :group 'maplev-mint)
 
+(defcustom maplev-mint-include-dir nil
+  "*Directory of mint include files.
+This should probably be a list of directories."
+  :type 'string
+  :group 'maplev-mint)
+  
+
 ;;}}}
 ;;{{{   syntax table
 
@@ -4208,12 +4234,15 @@ CODE-BUFFER is the buffer that contains the source code.
 ;;}}}
 ;;{{{   mode functions
 
-(defun maplev-mint--goto-source-pos (l c)
-  "Move to position in `maplev-mint--code-buffer' relative to `maplev-mint--code-beginning'.
-The source code buffer is popped up and point is moved L lines forward
-and then C columns forward from the origin. Return position of point."
-  (pop-to-buffer maplev-mint--code-buffer)
-  (goto-char maplev-mint--code-beginning)
+(defun maplev-mint--goto-source-pos (l c &optional file)
+  "Move to position in source file and return position.
+If FILE is nil, use buffer `maplev-mint--code-buffer'.
+Pop up the buffer, move to either `point-min', if FILE is non-nil,
+or `maplev-mint--code-beginning' otherwise,
+and move forward L lines and C columns."
+  (pop-to-buffer (if file (find-file-noselect file)
+                   maplev-mint--code-buffer))
+  (goto-char (if file (point-min)  maplev-mint--code-beginning))
   (if (> l 0) (forward-line l))
   (forward-char c)
   (point))
@@ -4317,6 +4346,7 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
       (goto-char (maplev--scan-lists 1)))))
 
 
+
 (defun maplev-mint--goto-source-proc (pos)
   "According to Mint buffer position POS, move point to the end of the
 initial assignment statement of a source procedure/module.  This would
@@ -4328,10 +4358,23 @@ declaration.  Return non-nil if this is a procedure, nil if an operator."
   (goto-char pos)
   (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
   (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
-
   ;; move point to the beginning of that line in the source
-  (maplev-mint--goto-source-pos (1- (string-to-number (match-string 1))) 0)
-    
+  (maplev-mint--goto-source-pos 
+   (1- (string-to-number (match-string 1)))
+   0
+   ;; Optional file name, if applicable.
+   ;; If looking at something like " to 123 in filename", then
+   ;; the source is in filename, which is relative to the
+   ;; mint includedir.  Search for that file, using first the current
+   ;; directory, then maplev-mint-include-dir.
+   (when (looking-at "\\s-+to\\s-+\\(?:[0-9]+\\)\\s-+of\\s-+\\(.*\\)$")
+     (let* ((base (match-string 1))
+            (file (if (file-exists-p base) 
+                      base
+                    (concat (file-name-as-directory maplev-mint-include-dir) base))))
+       (if (not (file-readable-p file))
+           (error (concat "File " file " does not exist or is unreadable"))
+         file))))
   ;; move to the end of the defun opening statement
   (re-search-forward ":=")
   (goto-char (maplev--scan-lists 1))
