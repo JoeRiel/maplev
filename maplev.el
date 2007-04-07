@@ -10,7 +10,7 @@
 ;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.14 2006-06-02 14:02:38 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.15 2007-04-07 16:37:20 joe Exp $
 
 ;;{{{ License
 
@@ -243,6 +243,12 @@ is an integer correspond to the button number; preceding items are optional modi
 (defcustom maplev-executable-alist
   (if (string-match "windows-nt\\|ms-dos" (symbol-name system-type))
       '(
+        ("11" . ("c:/Program Files/Maple Release 11/bin.wnt/cmaple11.exe"
+                nil
+                "c:/Program Files/Maple Release 10/bin.wnt/mint10.exe"))
+        ("10" . ("c:/Program Files/Maple Release 10/bin.wnt/cmaple10.exe"
+                nil
+                "c:/Program Files/Maple Release 10/bin.wnt/mint10.exe"))
         ("9" . ("c:/Program Files/Maple Release 9/bin.wnt/cmaple9.exe"
                 nil
                 "c:/Program Files/Maple Release 9/bin.wnt/mint9.exe"))
@@ -265,6 +271,7 @@ is an integer correspond to the button number; preceding items are optional modi
                   nil
                   "c:/maplev4/bin.win/mint.exe")))
     '(
+      ("11"  . ("maple" nil "mint"))
       ("10"  . ("maple" nil "mint"))
       ("9"   . ("maple" nil "mint"))
       ("8"   . ("maple" nil "mint"))
@@ -291,7 +298,7 @@ if nil the default initialization file is used."
 ;; this isn't quite right, it doesn't permit assigning
 ;; a new release.
 
-(defcustom maplev-default-release "9"
+(defcustom maplev-default-release "11"
   "*Release of Maple used as the default executable.
 It must be a key in `maplev-executable-alist'."
   :type `(choice ,@(mapcar (lambda (item)
@@ -327,6 +334,10 @@ Used to index `maplev-executable-alist'.")
           "warnlevel=2"))
         (maplev-kernelopts "kernelopts(printbytes=false):\n"))
     `(
+      ("11"  . ,(concat maplev-print-R6+
+                        "interface(" maplev-interface-string
+                        ",errorcursor=false):\n"
+                        maplev-kernelopts))
       ("10"  . ,(concat maplev-print-R6+
                         "interface(" maplev-interface-string
                         ",errorcursor=false):\n"
@@ -679,8 +690,11 @@ A backslash at the end of the line does not continue the comment.")
   ;; Use "^" to anchor the regular expression.  This forces
   ;; re-search-backward to match the complete assignee name, provided
   ;; that the name is not a split between lines, a very poor practice.
-  (concat "^\\s-*"
-	  "\\(" maplev--name-re "\\)[ \t\n]*:=[ \t\n]*")
+;;  (concat "^\\s-*"
+;;	  "\\(" maplev--name-re "\\)[ \t\n]*:=[ \t\n]*")
+;;  "Regular expression that matches a Maple assignment.")
+  (concat "\\(?:^\\|\\s-\\|[,]\\)"
+	  "\\('?" maplev--name-re "'?\\)[ \t\n]*:?=[ \t\n]*")
   "Regular expression that matches a Maple assignment.")
 
 
@@ -1360,6 +1374,7 @@ regardless of where you click."
     ;;  (define-key map [(meta control a)]           'maplev-beginning-of-proc)
     ;;  (define-key map [(meta control e)]           'maplev-end-of-proc)
     (define-key map [(control x) ?n ?d]          'maplev-narrow-to-defun)
+
 
     ;; These two bindings are needed only under linux / unix
     (define-key map [(meta control y)]          'maplev-insert-cut-buffer)
@@ -2641,13 +2656,26 @@ Compare that symbol against `maplev-completion-alist'."
           "return"  "save"      "stop"   "subset" "then"
           "to"     "try"        "union"  "use"    "uses" "while"
           "xor"))
+    (11 . ("and"     "assuming"  "break"  "by"     "catch"
+          "description" "do"    "done"   "elif"   "else"
+          "end"     "error"     "export" "fi"     "finally"
+          "for"     "from"      "global" "if"     "implies"
+          "in"      "intersect" "local"  "minus"  "mod"
+          "module"  "next"      "not"    "od"     "option"
+          "options" "or"        "proc"   "quit"   "read"
+          "return"  "save"      "stop"   "subset" "then"
+          "to"     "try"        "union"  "use"    "uses" "while"
+          "xor"))
     )
   "Alist of Maple reserved words.  The key is the major release.")
 
 (defconst maplev--special-words-re
   (eval-when-compile
     (maplev--list-to-word-re
-     (list "args" "nargs" "procname" "RootOf" "Float" "thismodule")))
+     (list "args" "nargs" "procname" "RootOf" "Float" "thismodule"
+           "_options" "_noptions" "_rest" "_nrest"
+           "_params" "_nparams" "_passed" "_npassed"
+           "_nresults" )))
   "Regex of special words in Maple.")
 
 (defconst maplev--initial-variables-re
@@ -2911,6 +2939,42 @@ Compare that symbol against `maplev-completion-alist'."
           "timelimit" "traperror" "trunc" "type" "typematch" 
           "unames" "unbind" "union" "userinfo" "writeto" "xor" "`||`"))
     (10 . ("`$`" "`*`" "`**`" "`+`" "`..`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`?()`" "`?[]`"
+           "ASSERT" "Array" "ArrayOptions" "CopySign" 
+           "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" 
+           "ERROR" "EqualEntries" "EqualStructure" "FromInert" 
+           "Im" "MPFloat" "MorrBrilCull" "NextAfter" "Normalizer" 
+           "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" 
+           "OrderedNE" "RETURN" "Re" "SDMPolynom" "SFloatExponent" "SFloatMantissa" 
+           "Scale10" "Scale2" "SearchText" "TRACE" "ToInert" 
+           "Unordered" "UpdateSource" "`[]`" "`^`"
+           "_jvm" "_maplet" "_treeMatch" "_unify" "_xml" 
+           "abs" "add" "addressof" "alias" "anames" "and" "andmap" 
+           "appendto" "array" "assemble" "assigned" "attributes" 
+           "bind" "call_external" "callback" "cat" "coeff" "coeffs" 
+           "conjugate" "convert" "crinterp" "debugopts" "define_external" 
+           "degree" "denom" "diff" "disassemble" "divide"
+           "dlclose" "done" "entries" "eval" "evalb" "evalf"
+           "evalf/hypergeom/kernel" "evalgf1" "evalhf" "evaln" "expand"
+           "exports" "factorial" "frem" "frontend" "gc" "genpoly" "gmp_isprime"
+           "goto" "has" "hastype" "hfarray" "icontent" "if" "igcd" "ilog10"
+           "ilog2" "implies" "indets" "indices" "inner" "int/series"
+           "intersect" "iolib" "iquo" "irem" "is_gmp" "isqrt"
+           "kernel/transpose" "kernelopts" "lcoeff" "ldegree" "length"
+           "lexorder" "lhs" "lprint" "macro" "map" "map2" "max" "maxnorm"
+           "member" "min" "minus" "mod" "modp" "modp1" "modp2" "mods" "mul"
+           "mvMultiply" "negate" "nops" "normal" "not" "numboccur" "numer"
+           "op" "or" "order" "ormap" "overload" "parse" "piecewise" "pointto"
+           "print" "quit" "readlib" "reduce_opr" "remove" "rhs" "rtable"
+           "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
+           "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
+           "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_redim"
+           "rtable_scale" "rtable_scanblock" "rtable_sort_indices" "rtable_zip"
+           "savelib" "searchtext" "select" "selectremove" "seq" "series"
+           "setattribute" "sign" "sort" "ssystem" "stop" "streamcall" "subs"
+           "subset" "subsop" "substring" "system" "table" "taylor" "tcoeff"
+           "time" "timelimit" "traperror" "trunc" "type" "typematch" "unames"
+           "unbind" "union" "userinfo" "writeto" "xor" "`{}`" "`||`"))
+    (11 . ("`$`" "`*`" "`**`" "`+`" "`..`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`?()`" "`?[]`"
            "ASSERT" "Array" "ArrayOptions" "CopySign" 
            "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" 
            "ERROR" "EqualEntries" "EqualStructure" "FromInert" 
