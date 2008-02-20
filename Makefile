@@ -1,31 +1,36 @@
+base = maplev
+installdir = ~/elisp
 
-# extract the version number from maplev.el
-version := $(shell head --lines=20 maplev.el | grep 'Version:' | sed 's/^[^0-9]*//' )
+emacs	= emacs --debug-init --no-site-file --no-init-file --eval '(setq debug-on-error t)'
 
-xemacs-dir := ~/elisp/xemacs21/maplev
+# ELFLAGS	= --eval '(setq load-path (append (list "." "$(elibdir)" "$(lispdir)") load-path))'
 
-default: get
+ELFLAGS = 
+ELC	= $(emacs) --batch $(ELFLAGS) --funcall=batch-byte-compile
 
-# download maplev.el and ChangeLog from my website.
-# wget will add a numbered suffix to uniquely identify the files
-get:
-	wget \
-	http://www.k-online.com/~joer/maplev/maplev.el \
-	http://www.k-online.com/~joer/maplev/ChangeLog
+elfile  = $(base).el
+elcfile = $(elfile:.el=.elc)
 
+installed_elfile  = $(addprefix $(installdir)/, $(elfile))
+installed_elcfile = $(installed_elfile:.el=.elc)
 
-X:
-	xemacs -nw -batch -f batch-byte-compile maplev.el 2> compilation.log.x
+default: elcfile installedfiles
+install: installedfiles
+elcfile: $(elcfile)
+dist: $(base).zip
 
+%.elc : %.el
+	$(ELC) $<
 
-
-# copy elisp file to xemacs directory
-xemacs: $(xemacs-dir)/maplev.el
-
-$(xemacs-dir)/maplev.el: maplev.el
+$(installed_elfile): $(elfile)
 	cp $< $@
 
-getxemacs:
-	cp $(xemacs-dir)/maplev.el .
+$(installed_elcfile): $(elcfile)
+	cp $< $@
 
-.PHONY: get xemacs default X
+installedfiles: $(installed_elfile) $(installed_elcfile)
+
+$(base).zip: $(elfile) doc/$(base).texi
+	zip $@ $?
+
+.PHONY: elcfile installedfiles default install dist
