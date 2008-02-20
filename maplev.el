@@ -3,14 +3,14 @@
 ;;
 ;; Copyright (C) 2001,2003 Joseph S. Riel
 
-;; Authors:    Joseph S. Riel <joer@k-online.com>
+;; Authors:    Joseph S. Riel <joer@san.rr.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Time-stamp: "2003-10-09 22:49:16 joe"
 ;; Created:    June 1999
 ;; Version:    2.155
 ;; Keywords:   Maple, languages
 ;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.15 2007-04-07 16:37:20 joe Exp $
+;; X-RCS:      $Id: maplev.el,v 1.16 2008-02-20 22:02:33 joe Exp $
 
 ;;{{{ License
 
@@ -243,6 +243,9 @@ is an integer correspond to the button number; preceding items are optional modi
 (defcustom maplev-executable-alist
   (if (string-match "windows-nt\\|ms-dos" (symbol-name system-type))
       '(
+        ("12" . ("c:/Program Files/Maple Release 12/bin.wnt/cmaple11.exe"
+                nil
+                "c:/Program Files/Maple Release 10/bin.wnt/mint10.exe"))
         ("11" . ("c:/Program Files/Maple Release 11/bin.wnt/cmaple11.exe"
                 nil
                 "c:/Program Files/Maple Release 10/bin.wnt/mint10.exe"))
@@ -271,6 +274,7 @@ is an integer correspond to the button number; preceding items are optional modi
                   nil
                   "c:/maplev4/bin.win/mint.exe")))
     '(
+      ("12"  . ("maple" nil "mint"))
       ("11"  . ("maple" nil "mint"))
       ("10"  . ("maple" nil "mint"))
       ("9"   . ("maple" nil "mint"))
@@ -334,6 +338,10 @@ Used to index `maplev-executable-alist'.")
           "warnlevel=2"))
         (maplev-kernelopts "kernelopts(printbytes=false):\n"))
     `(
+      ("12"  . ,(concat maplev-print-R6+
+                        "interface(" maplev-interface-string
+                        ",errorcursor=false):\n"
+                        maplev-kernelopts))
       ("11"  . ,(concat maplev-print-R6+
                         "interface(" maplev-interface-string
                         ",errorcursor=false):\n"
@@ -468,7 +476,7 @@ Use \\[indent-for-comment] to insert or align an inline comment."
   "*Lines starting with this regular expression will not be auto-indented."
   :type '(choice string (const :tag "default" nil))
   :group 'maplev-indentation)
- 
+
 ;;}}}
 ;;{{{   templates
 
@@ -648,6 +656,10 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
 (defvar maplev-history-list nil
   "History list used by maplev.")
 
+(defvar maplev-use-indent-info t
+  "Buffer local variable that speeds up indentation when non nil.
+May interfere with some modes (e.g. noweb).")
+(make-variable-buffer-local 'maplev-use-indent-info)
 
 ;;}}}
 ;;{{{ Regular expressions
@@ -775,27 +787,30 @@ including double-quotes.")
     (modify-syntax-entry ?\r " "  table) ; return = whitespace
     (modify-syntax-entry ?\t " "  table) ; tab = whitespace
 
-    (modify-syntax-entry ?*  "."  table) ; punctuation
+    (modify-syntax-entry ?*  ". 23b"  table) ; punctuation and used in multiline comments (* ... *)
     (modify-syntax-entry ?/  "."  table)
     (modify-syntax-entry ?+  "."  table)
     (modify-syntax-entry ?-  "."  table)
     (modify-syntax-entry ?=  "."  table)
-    (modify-syntax-entry ?<  "."  table)
-    (modify-syntax-entry ?>  "."  table)
+    (modify-syntax-entry ?<  ". 12"  table)
+    (modify-syntax-entry ?>  ". 34"  table)
     (modify-syntax-entry ?.  "."  table)
 
     (modify-syntax-entry ?\' "\"" table) ; string quotes
     (modify-syntax-entry ?\` "\"" table) ; string quotes
     (modify-syntax-entry ?\{ "(}" table) ; balanced brackets
     (modify-syntax-entry ?\[ "(]" table)
-    (modify-syntax-entry ?\( "()" table)
+    (modify-syntax-entry ?\( "()1n" table)
     (modify-syntax-entry ?\} "){" table)
     (modify-syntax-entry ?\] ")[" table)
-    (modify-syntax-entry ?\) ")(" table)
+    (modify-syntax-entry ?\) ")(4n" table)
 
     ;; Entries for R5 and later
     (modify-syntax-entry ?%  "."  table)
     (modify-syntax-entry ?\" "\"" table)
+
+    ;; Entries for R12 and later.
+    ;; Define the multiline comment delimiters `(*' and `*)'.
 
     (setq maplev-mode-syntax-table table)))
 
@@ -893,7 +908,9 @@ amount for source between KEYWORD and its closing keyword.")
   "Update the variable `maplev--indent-info' if nil.
 Set POINT in variable to closest valid starting point.
 Set STATE and STACK in variable to nil."
-  (unless (and maplev--indent-info
+  (unless (and 
+           maplev-use-indent-info
+           maplev--indent-info
                (>= (point) (maplev--indent-info-point)))
     ;; Set POINT to (point) if we're at the beginning of a top level
     ;; procedure assignment, otherwise search backwards for the
@@ -905,10 +922,12 @@ Set STATE and STACK in variable to nil."
          ;; Handle noweb mode.
          ;; If noweb is active in the buffer, then search for
          ;; the chunk starter.
-         (and (boundp 'noweb-minor-mode) noweb-minor-mode
-              (save-excursion
-                (when (re-search-backward "^<<\\(.*\\)>>=$" nil t)
-                  (1+ (match-end 0)))))
+         ;;(and 
+          ;;(boundp 'noweb-minor-mode) noweb-minor-mode
+          ;;(eq mmm-classes 'noweb)
+         (save-excursion
+           (when (re-search-backward "^<<\\(.*\\)>>=$" nil t)
+             (1+ (match-end 0))))
          (save-excursion
            (when (re-search-backward
                   (concat "\\(" maplev--top-defun-begin-re "\\)\\|"
@@ -997,7 +1016,7 @@ is handled.  Currently it is only used by the keyword `end'.")
         "if" "elif" "else" "then" "fi"
         "use" "try" "catch" "finally"))
      "\\|\\("
-     (regexp-opt '("{" "}" "[" "]" "(" ")" ))
+     (regexp-opt '("{" "}" "[" "]" "(" ")" "(*" "*)" ))
      "\\)"))
   "Regular expression of keywords used in Maple grammar for indentation.")
 
@@ -1133,7 +1152,7 @@ beyond \(point\)."
               (cond
                
                ;; If KEYWORD is in a comment or a quote, do nothing.
-               ((or (nth 4 state) (nth 3 state))) ; comments are more frequent, so check first
+               ((or (nth 4 state) (nth 3 state) (string= keyword "*)"))) ; comments are more frequent, so check first
                
                ;; Does KEYWORD pair with the top one on STACK?
                ((and match-re (string-match match-re keyword))
@@ -2647,27 +2666,43 @@ Compare that symbol against `maplev-completion-alist'."
           "to"     "try"        "union"  "use"    "while"
           "xor"))
     (10 . ("and"     "assuming"  "break"  "by"     "catch"
-          "description" "do"    "done"   "elif"   "else"
-          "end"     "error"     "export" "fi"     "finally"
-          "for"     "from"      "global" "if"     "implies"
-          "in"      "intersect" "local"  "minus"  "mod"
-          "module"  "next"      "not"    "od"     "option"
-          "options" "or"        "proc"   "quit"   "read"
-          "return"  "save"      "stop"   "subset" "then"
-          "to"     "try"        "union"  "use"    "uses" "while"
-          "xor"))
+           "description" "do"    "done"   "elif"   "else"
+           "end"     "error"     "export" "fi"     "finally"
+           "for"     "from"      "global" "if"     "implies"
+           "in"      "intersect" "local"  "minus"  "mod"
+           "module"  "next"      "not"    "od"     "option"
+           "options" "or"        "proc"   "quit"   "read"
+           "return"  "save"      "stop"   "subset" "then"
+           "to"     "try"        "union"  "use"    "uses" "while"
+           "xor"))
     (11 . ("and"     "assuming"  "break"  "by"     "catch"
-          "description" "do"    "done"   "elif"   "else"
-          "end"     "error"     "export" "fi"     "finally"
-          "for"     "from"      "global" "if"     "implies"
-          "in"      "intersect" "local"  "minus"  "mod"
-          "module"  "next"      "not"    "od"     "option"
-          "options" "or"        "proc"   "quit"   "read"
-          "return"  "save"      "stop"   "subset" "then"
-          "to"     "try"        "union"  "use"    "uses" "while"
-          "xor"))
+           "description" "do"    "done"   "elif"   "else"
+           "end"     "error"     "export" "fi"     "finally"
+           "for"     "from"      "global" "if"     "implies"
+           "in"      "intersect" "local"  "minus"  "mod"
+           "module"  "next"      "not"    "od"     "option"
+           "options" "or"        "proc"   "quit"   "read"
+           "return"  "save"      "stop"   "subset" "then"
+           "to"     "try"        "union"  "use"    "uses" "while"
+           "xor"))
+    (12 . ("and"     "assuming"  "break"  "by"     "catch"
+           "description" "do"    "done"   "elif"   "else"
+           "end"     "error"     "export" "fi"     "finally"
+           "for"     "from"      "global" "if"     "implies"
+           "in"      "intersect" "local"  "minus"  "mod"
+           "module"  "next"      "not"    "od"     "option"
+           "options" "or"        "proc"   "quit"   "read"
+           "return"  "save"      "stop"   "subset" "then"
+           "to"     "try"        "union"  "use"    "uses" "while"
+           "xor"))
     )
   "Alist of Maple reserved words.  The key is the major release.")
+
+(defconst maplev--deprecated-re
+  (eval-when-compile
+    (maplev--list-to-word-re
+     (list "fi" "od" "traperror" "linalg" "solvefor" "ERROR")))
+  "Regex of deprecated keywords and procedures.")
 
 (defconst maplev--special-words-re
   (eval-when-compile
@@ -3010,7 +3045,44 @@ Compare that symbol against `maplev-completion-alist'."
            "subset" "subsop" "substring" "system" "table" "taylor" "tcoeff"
            "time" "timelimit" "traperror" "trunc" "type" "typematch" "unames"
            "unbind" "union" "userinfo" "writeto" "xor" "`{}`" "`||`"))
+    (12 . ("`$`" "`*`" "`**`" "`+`" "`..`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`?()`" "`?[]`"
+           "ASSERT" "Array" "ArrayOptions" "CopySign" 
+           "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" 
+           "ERROR" "EqualEntries" "EqualStructure" "FromInert" 
+           "Im" "MPFloat" "MorrBrilCull" "NextAfter" "Normalizer" 
+           "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" 
+           "OrderedNE" "RETURN" "Re" "SDMPolynom" "SFloatExponent" "SFloatMantissa" 
+           "Scale10" "Scale2" "SearchText" "TRACE" "ToInert" 
+           "Unordered" "UpdateSource" "`[]`" "`^`"
+           "_jvm" "_maplet" "_treeMatch" "_unify" "_xml" 
+           "abs" "add" "addressof" "alias" "anames" "and" "andmap" 
+           "appendto" "array" "assemble" "assigned" "attributes" 
+           "bind" "call_external" "callback" "cat" "coeff" "coeffs" 
+           "conjugate" "convert" "crinterp" "debugopts" "define_external" 
+           "degree" "denom" "diff" "disassemble" "divide"
+           "dlclose" "done" "entries" "eval" "evalb" "evalf"
+           "evalf/hypergeom/kernel" "evalgf1" "evalhf" "evaln" "expand"
+           "exports" "factorial" "frem" "frontend" "gc" "genpoly" "gmp_isprime"
+           "goto" "has" "hastype" "hfarray" "icontent" "if" "igcd" "ilog10"
+           "ilog2" "implies" "indets" "indices" "inner" "int/series"
+           "intersect" "iolib" "iquo" "irem" "is_gmp" "isqrt"
+           "kernel/transpose" "kernelopts" "lcoeff" "ldegree" "length"
+           "lexorder" "lhs" "lprint" "macro" "map" "map2" "max" "maxnorm"
+           "member" "min" "minus" "mod" "modp" "modp1" "modp2" "mods" "mul"
+           "mvMultiply" "negate" "nops" "normal" "not" "numboccur" "numer"
+           "op" "or" "order" "ormap" "overload" "parse" "piecewise" "pointto"
+           "print" "quit" "readlib" "reduce_opr" "remove" "rhs" "rtable"
+           "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
+           "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
+           "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_redim"
+           "rtable_scale" "rtable_scanblock" "rtable_sort_indices" "rtable_zip"
+           "savelib" "searchtext" "select" "selectremove" "seq" "series"
+           "setattribute" "sign" "sort" "ssystem" "stop" "streamcall" "subs"
+           "subset" "subsop" "substring" "system" "table" "taylor" "tcoeff"
+           "time" "timelimit" "traperror" "trunc" "type" "typematch" "unames"
+           "unbind" "union" "userinfo" "writeto" "xor" "`{}`" "`||`"))
     "Alist of Maple builtin funtions.  The key is the major release."))
+
 
 (defun maplev--ditto-operators-re ()
   "Return a regexp that matches the ditto operators."
@@ -3052,7 +3124,8 @@ Add builtin functions to the medium decoration keywords."
                          (cdr (assoc (maplev--major-release)
                                      maplev--builtin-functions-alist)))
                         ;; Xemacs doesn't have font-lock-builtin-face
-                        '(0 font-lock-variable-name-face))))))
+                        '(0 font-lock-variable-name-face))
+                  (list maplev--deprecated-re '(0 font-lock-warning-face))))))
 (defun maplev--font-lock-keywords ()
   "Return a list of symbols for font locking MapleV mode buffers."
   '(maplev-font-lock-keywords-3        ; default is maximum decoration
@@ -3945,6 +4018,9 @@ The title is the phrase following the function name."
           "\\):?")
   "Regular expression for sections in a Maple help page.")
 
+;;(defconst maplev--help-subsection-re
+;;  "^\\([A-Z].*\\)"
+;;  "Regular expression for subsections in a Maple help page.")
 (defconst maplev--help-subsection-re
   (concat "^\\([A-Z][a-z-0-9-]+ ?\\([A-Za-z0-9-][a-z]* ?\\)?"
           "\\([A-Za-z][a-z-]*\\)?:?[ \t]*$"
