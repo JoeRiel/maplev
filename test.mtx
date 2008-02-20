@@ -1,5 +1,10 @@
+restart;
 
-junk := proc(x,y)
-option `Copyright (C) 2003 by Joseph S. Riel. All rights reserved.`;
-    conv :=
-end: # junk
+g1 := f(x-y,z-y);
+dg1 := diff(g1,y);
+convert(dg1, D);
+
+dg2 := subs(x-y=`x-y`, z-y=`z-y`, dg1);
+dg3 := convert(dg2,diff);
+
+
