@@ -1,7 +1,9 @@
 base = maplev
-installdir = ~/elisp
+installdir = ~/emacs
 
-emacs	= emacs --debug-init --no-site-file --no-init-file --eval '(setq debug-on-error t)'
+#emacs	= emacs --debug-init --no-site-file --no-init-file --eval '(setq debug-on-error t)'
+#emacs	= emacs --debug-init --no-site-file --eval '(setq debug-on-error t)'
+emacs	= emacs --debug-init --no-init-file --eval '(setq debug-on-error t)'
 
 # ELFLAGS	= --eval '(setq load-path (append (list "." "$(elibdir)" "$(lispdir)") load-path))'
 
