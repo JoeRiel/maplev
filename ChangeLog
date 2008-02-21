@@ -1,3 +1,9 @@
+2008-02-20  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev--help-section-re): 
+	Added "Notes" and "Algorithm" to section headers.
+	These mainly appear in internal help pages.
+
 2007-11-01  Joe Riel  <joer@san.rr.com>
 
 	* maplev.el (maplev--preprocessor-directives-re): 

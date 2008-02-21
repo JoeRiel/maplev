@@ -4014,6 +4014,9 @@ The title is the phrase following the function name."
           "\\|Examples"
           "\\|See Also"
           "\\|References"
+          "\\|Returns"
+          "\\|Notes"
+          "\\|Algorithm"
           "\\|\\(?:List of \\([][a-zA-Z_]+ \\)?\\(Package\\|Subpackage\\|Module\\) Commands\\)"
           "\\):?")
   "Regular expression for sections in a Maple help page.")
