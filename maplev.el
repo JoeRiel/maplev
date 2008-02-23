@@ -1,7 +1,7 @@
 ;;; maplev.el --- Maple mode for GNU Emacs
 ;;
 ;;
-;; Copyright (C) 2001,2003 Joseph S. Riel
+;; Copyright (C) 2001,2003,2008 Joseph S. Riel
 
 ;; Authors:    Joseph S. Riel <joer@san.rr.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
@@ -949,7 +949,46 @@ character position of the beginning of the change.  UNUSED is not used."
 ;;}}}
 ;;{{{   grammar
 
-(defconst maplev--grammar-alist nil
+(defconst maplev--grammar-alist 
+
+;; Removed "in" from grammar to allow its use as a binary operator in Maple R8.
+;; The change in the indentation is minor; rarely is there a line break between 
+;; an "in" and the "do" in a loop.
+
+  (list
+   (list "proc" . ("\\<end\\>" t maplev-indent-level 'maplev--indent-point-of-proc))
+   (list "module" . ("\\<end\\>" t maplev-indent-level 'maplev--indent-point-of-proc))
+   (list "end"  . (nil nil 0 nil 'maplev--skip-optional-end-keyword))
+;;;          (list "for"  . ((maplev--list-to-word-re '("from" "to" "by" "while" "in" "do")) t 0))
+   (list "for"  . ((maplev--list-to-word-re '("from" "to" "by" "while" "do")) t 0))
+   (list "for"  . ((maplev--list-to-word-re '("from" "to" "by" "while""do")) t 0))
+   (list "from" . ((maplev--list-to-word-re '("to" "by" "while" "do")) t 0))
+   (list "to"   . ((maplev--list-to-word-re '("by" "while" "do")) t 0))
+   (list "by"   . ((maplev--list-to-word-re '("from" "to" "while" "do")) t 0))
+   (list "while" . ((maplev--list-to-word-re '("from" "to" "by" "do")) t 0))
+;;;          (list "in"   . ((maplev--list-to-word-re '("while" "do" "end")) t maplev-indent-level))
+   (list "do"   . ((maplev--list-to-word-re '("od" "end")) t maplev-indent-level))
+   (list "od"   . (nil nil 0))
+   
+   (list "if"   . ("\\<then\\>" t 0))
+   (list "elif" . ("\\<then\\>" nil 0))
+   (list "else" . ((maplev--list-to-word-re '("fi" "end")) nil maplev-indent-level))
+   (list "then" . ((maplev--list-to-word-re '("elif" "else" "fi" "end")) nil maplev-indent-level))
+   (list "fi"   . (nil nil 0))
+   
+;;;          (list "use"  . ("\\<in\\>" t maplev-indent-level))
+   (list "use"  . ("\\<end\\>" t maplev-indent-level))
+   (list "try"  . ((maplev--list-to-word-re '("catch" "finally" "end")) t maplev-indent-level))
+   (list "catch". ((maplev--list-to-word-re '("catch" "finally" "end")) t maplev-indent-level))
+   (list "finally". ((maplev--list-to-word-re '("end")) t maplev-indent-level))
+   
+   (list "{"    . ("}" t nil))
+   (list "["    . ("]" t nil))
+   (list "("    . (")" t nil))
+   (list "}"    . (nil nil 0))
+   (list "]"    . (nil nil 0))
+   (list ")"    . (nil nil 0)))
+
   "Assoc list defining the grammar for Maple indentation.
 Each entry has the form \(KEY . \(MATCH-RE OPEN-P INDENT ADJUST-FUNC
 POST-FUNC\)\).  KEY is a Maple keyword or parenthesis.  MATCH-RE is a
@@ -963,46 +1002,7 @@ to the position from where the indent is computed.  POST-FUNC is
 optional, if non-nil it is a function that is called after the keyword
 is handled.  Currently it is only used by the keyword `end'.")
 
-;; Removed "in" from grammar to allow its use as a binary operator in Maple R8.
-;; The change in the indentation is minor; rarely is there a line break between 
-;; an "in" and the "do" in a loop.
 
-(unless maplev--grammar-alist
-  (let ((alist
-         (list
-          (list "proc" . ("\\<end\\>" t maplev-indent-level 'maplev--indent-point-of-proc))
-          (list "module" . ("\\<end\\>" t maplev-indent-level 'maplev--indent-point-of-proc))
-          (list "end"  . (nil nil 0 nil 'maplev--skip-optional-end-keyword))
-;;;          (list "for"  . ((maplev--list-to-word-re '("from" "to" "by" "while" "in" "do")) t 0))
-          (list "for"  . ((maplev--list-to-word-re '("from" "to" "by" "while" "do")) t 0))
-          (list "for"  . ((maplev--list-to-word-re '("from" "to" "by" "while""do")) t 0))
-          (list "from" . ((maplev--list-to-word-re '("to" "by" "while" "do")) t 0))
-          (list "to"   . ((maplev--list-to-word-re '("by" "while" "do")) t 0))
-          (list "by"   . ((maplev--list-to-word-re '("from" "to" "while" "do")) t 0))
-          (list "while" . ((maplev--list-to-word-re '("from" "to" "by" "do")) t 0))
-;;;          (list "in"   . ((maplev--list-to-word-re '("while" "do" "end")) t maplev-indent-level))
-          (list "do"   . ((maplev--list-to-word-re '("od" "end")) t maplev-indent-level))
-          (list "od"   . (nil nil 0))
-
-          (list "if"   . ("\\<then\\>" t 0))
-          (list "elif" . ("\\<then\\>" nil 0))
-          (list "else" . ((maplev--list-to-word-re '("fi" "end")) nil maplev-indent-level))
-          (list "then" . ((maplev--list-to-word-re '("elif" "else" "fi" "end")) nil maplev-indent-level))
-          (list "fi"   . (nil nil 0))
-
-;;;          (list "use"  . ("\\<in\\>" t maplev-indent-level))
-          (list "use"  . ("\\<end\\>" t maplev-indent-level))
-          (list "try"  . ((maplev--list-to-word-re '("catch" "finally" "end")) t maplev-indent-level))
-          (list "catch". ((maplev--list-to-word-re '("catch" "finally" "end")) t maplev-indent-level))
-          (list "finally". ((maplev--list-to-word-re '("end")) t maplev-indent-level))
-
-          (list "{"    . ("}" t nil))
-          (list "["    . ("]" t nil))
-          (list "("    . (")" t nil))
-          (list "}"    . (nil nil 0))
-          (list "]"    . (nil nil 0))
-          (list ")"    . (nil nil 0)))))
-    (setq maplev--grammar-alist alist)))
 
 
 (defconst maplev--grammar-keyword-re
@@ -4016,6 +4016,7 @@ The title is the phrase following the function name."
           "\\|References"
           "\\|Returns"
           "\\|Notes"
+          "\\|Options"
           "\\|Algorithm"
           "\\|\\(?:List of \\([][a-zA-Z_]+ \\)?\\(Package\\|Subpackage\\|Module\\) Commands\\)"
           "\\):?")
@@ -4978,5 +4979,6 @@ If optional arg HIDE is non-nil do not display buffer."
 ;; end:
 
 (provide 'maplev)
+(provide 'maplev-mode)
 
 ;;; maplev.el ends here
