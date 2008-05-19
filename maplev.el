@@ -792,10 +792,11 @@ including double-quotes.")
     (modify-syntax-entry ?+  "."  table)
     (modify-syntax-entry ?-  "."  table)
     (modify-syntax-entry ?=  "."  table)
-    (modify-syntax-entry ?<  ". 12"  table)
-    (modify-syntax-entry ?>  ". 34"  table)
-    (modify-syntax-entry ?.  "."  table)
+    ;; this is for noweb-mode
+;;    (modify-syntax-entry ?<  ". 12"  table)
+;;    (modify-syntax-entry ?>  ". 34"  table)
 
+    (modify-syntax-entry ?.  "."  table)
     (modify-syntax-entry ?\' "\"" table) ; string quotes
     (modify-syntax-entry ?\` "\"" table) ; string quotes
     (modify-syntax-entry ?\{ "(}" table) ; balanced brackets
@@ -1716,21 +1717,13 @@ Prefix JUSTIFY means justify as well."
 ;;{{{ Info
 
 ;; This must go elsewhere (in maplev-mode).
-;; (put 'maplev 'info-file "maplev")
-
-;;(info 'maplev)
 
 (defun maplev-goto-info-node ()
   "Go to the info node for maplev."
   (interactive)
   (require 'info)
-  (let ((where (save-window-excursion
-		 (Info-find-emacs-command-nodes 'maplev))))
-    (if (not where)
-        (error "Could not find info file for maplev")
-      (let (same-window-buffer-names)
-	(info))
-      (Info-find-node (car (car where)) (car (cdr (car where)))))))
+  (info "maplev"))
+
 ;;}}}
 
 ;;{{{ MapleV mode
