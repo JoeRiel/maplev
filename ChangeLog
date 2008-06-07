@@ -1,3 +1,15 @@
+2008-06-07  Joe Riel  <joer@san.rr.com>
+
+	* Makefile
+	Fixed.  Added --no-site-file to emacs.
+	Without this, the elc doesn't work (is tiny).
+
+2008-06-05  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev--builtin-functions-alist): 
+	12: added Record, rtable_size.  Backquoted some names.
+	
+
 2008-05-19  Joe Riel  <joer@san.rr.com>
 
 	* maplev.el (maplev-goto-info-node): 

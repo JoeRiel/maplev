@@ -3,8 +3,8 @@ installdir = ~/emacs
 
 #emacs	= emacs --debug-init --no-site-file --no-init-file --eval '(setq debug-on-error t)'
 #emacs	= emacs --debug-init --no-site-file --eval '(setq debug-on-error t)'
-#emacs	= emacs --debug-init --no-init-file --eval '(setq debug-on-error t)'
-emacs = emacs
+#emacs	= emacs --debug-init --no-site-file --eval '(setq debug-on-error t)'
+emacs = emacs --no-site-file
 
 # ELFLAGS	= --eval '(setq load-path (append (list "." "$(elibdir)" "$(lispdir)") load-path))'
 
