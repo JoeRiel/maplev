@@ -826,7 +826,7 @@ including double-quotes.")
   (modify-syntax-entry ?\" "." maplev-mode-4-syntax-table))
 
 (defvar maplev--symbol-syntax-table nil
-  "Syntax table for Maple, where `_' is a word consituent.")
+  "Syntax table for Maple, where `_' is a word constituent.")
 
 (unless maplev--symbol-syntax-table
   (setq maplev--symbol-syntax-table (copy-syntax-table maplev-mode-syntax-table))
@@ -1235,7 +1235,8 @@ is returned.  Point must be at current indentation."
         (cond
          ;; Handle declarations in procedures (and modules)
          ((and (string-match maplev--defun-re (car indent-info))
-               (looking-at maplev--declaration-re))
+               (with-syntax-table maplev--symbol-syntax-table
+                 (looking-at maplev--declaration-re)))
           (+  maplev-indent-declaration
               (nth 1 indent-info)))
          ;; Continued dotted quotes, e.g. ``."a string".''
@@ -1424,15 +1425,16 @@ regardless of where you click."
 
     ;; Mint commands    
 
-    (define-key map [(control c) (return) ?b] 'maplev-mint-buffer)
-    (define-key map [(control c) (return) ?p] 'maplev-mint-procedure)
-    (define-key map [(control c) (return) ?r] 'maplev-mint-region)
-    (define-key map [(control c) (return) return] 'maplev-mint-rerun)
+    (define-key map [(control c) return ?b] 'maplev-mint-buffer)
+    (define-key map [(control c) return ?p] 'maplev-mint-procedure)
+    (define-key map [(control c) return ?r] 'maplev-mint-region)
+    (define-key map [(control c) return return] 'maplev-mint-rerun)
 
     ;; Help and proc comma    
       
     (define-key map [(control ?\?)] 'maplev-help-at-point)
     (define-key map [(meta ?\?)]    'maplev-proc-at-point)
+    (define-key map [(control h) (meta d)] 'maplev-what-proc)
 
     ;; Xemacs and FSF Emacs use different terms for mouse buttons
 
@@ -1660,9 +1662,9 @@ Prefix JUSTIFY means justify as well."
         (looking-at "#+[\t ]*")
         (setq comment-fill-prefix
               (concat (if indent-tabs-mode
-                          (progn
-                            (make-string (/ (current-column) tab-width) ?\t)
-                            (make-string (% (current-column) tab-width) ?\ ))
+                          (concat
+                           (make-string (/ (current-column) tab-width) ?\t)
+                           (make-string (% (current-column) tab-width) ?\ ))
                         (make-string (current-column) ?\ ))
                       (buffer-substring (match-beginning 0) (match-end 0))))
         (save-restriction
@@ -1866,13 +1868,13 @@ Maple libraries.
   ;; the file's local variables specs might change maplev-release
   ;; xemacs version of make-local-hook returns t, not the hook. (JR)
   ;; make-local-hook is obsolete in GNU emacs 21.1
-  (make-local-hook 'hack-local-variables-hook)
+  ;;(make-local-hook 'hack-local-variables-hook)
   (add-hook 'hack-local-variables-hook 'maplev-mode-name nil t)
 
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
       (add-hook 'local-write-file-hooks 'maplev-remove-trailing-spaces))
-  (make-local-hook 'before-change-functions)
+  ;;(make-local-hook 'before-change-functions)
   (add-hook 'before-change-functions 'maplev--before-change-function nil t)
   (run-hooks 'maplev-mode-hook))
 
@@ -2072,6 +2074,18 @@ The defun marked is the one that contains point."
   (widen)
   (let ((reg (maplev-current-defun)))
     (narrow-to-region (car reg) (nth 1 reg))))
+
+
+(defun maplev-what-proc ()
+  "Displays the name of the current procedure."
+  (interactive)
+  (save-restriction
+    (save-excursion
+      (widen)
+      (end-of-line)
+      (maplev-beginning-of-defun)
+      (re-search-forward maplev--assignment-re)
+      (message (match-string 1)))))
 
 ;;; stuff used by mint
 
@@ -3512,7 +3526,7 @@ that the input consists of one line and the output is on the following line."
   (comint-simple-send process (concat "lprint(" maplev-cmaple-end-notice ");")))
 
 (defun maplev-cmaple--ready (process)
-  "Return t if PROCESS \(cmaple\) ready for new input, nil otherwise.
+  "Return t if PROCESS \(cmaple\) is ready for new input, nil otherwise.
 Remove `maplev-cmaple-end-notice' from the current buffer.
 Reset the filter for PROCESS \(cmaple\) and unlock access."
   (let (case-fold-search)
