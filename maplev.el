@@ -114,7 +114,7 @@
   "Version of MapleV mode.")
 
 (defconst maplev-developer 
-  "Joseph S. Riel <joer@k-online.com> and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>"
+  "Joseph S. Riel <joer@san.rr.com> and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>"
   "Developers/maintainers of maplev-mode.")
 
 (defun maplev-about ()
@@ -1757,7 +1757,7 @@ Prefix JUSTIFY means justify as well."
                                             nil
                                           (re-search-forward comment-start-skip)
                                           (point)))))))
-      t)))
+      t))) ; return non-nil so fill-paragraph knows this succeeded
 
 ;;}}}
 ;;{{{ Info
@@ -2120,8 +2120,9 @@ The defun marked is the one that contains point."
     (narrow-to-region (car reg) (nth 1 reg))))
 
 
-(defun maplev-what-proc ()
-  "Displays the name of the current procedure."
+(defun maplev-what-proc (&optional nodisplay)
+  "Display and return the name of the current procedure.
+If optional NODISPLAY is non-nil, just return the string."
   (interactive)
   (save-restriction
     (save-excursion
@@ -2129,7 +2130,10 @@ The defun marked is the one that contains point."
       (end-of-line)
       (maplev-beginning-of-defun)
       (re-search-forward maplev--assignment-re)
-      (message (match-string 1)))))
+      (let ((proc (match-string-no-properties 1)))
+      (if nodisplay
+          proc
+        (message proc))))))
 
 ;;; stuff used by mint
 
@@ -2535,6 +2539,75 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
           (setq vars (cdr vars)))))))
 
 ;;}}}
+
+;;{{{ Movement functions
+
+(defconst maplev--operator-re
+  (concat "\\(?:"
+          (regexp-opt
+           '(":-"
+             "||"
+             "::"
+             "!"
+             "^" "@@"
+             "." "*" "&*" "/" "@" "intersect"
+             "mod"
+             "+" "-" "union" "minus"
+             ".." "subset"
+             "<" "<=" ">" ">=" "=" "<>" "in"
+             "$"
+             "not"
+             "and"
+             "or"
+             "xor"
+             "implies"
+             "->"
+             ;; ","
+             "assuming"
+             ;; ":="
+             ))
+          ;; neutral operators
+          "\\|&\\(?:[~!@$^*-+=\"<>,./?]+\\|[a-zA-Z_][a-zA-Z_0-9]*\\)"
+          "\\)")
+  "Regular expression matching a Maple operator."
+  )
+
+(defconst maplev--number-re
+  "\\=[+-]?\\(?:[0-9]+\\(\\.[0-9]*\\)?\\|\\.[0-9]+\\)\\(?:[Ee][+-]?[0-9]*\\)?"
+  "Regular expression matching a number.  This is slightly too aggressive,
+it incorrectly matches, d.Ed, which is invalid.")
+
+(defconst maplev--expr-re
+  (concat "\\s-*"
+          "\\(?:"
+          maplev--operator-re
+          "\\|"
+          maplev--number-re
+          "\\|"
+          maplev--symbol-re
+          "\\|"
+          maplev--string-re
+          "\\)"
+          "\\s-*"
+          )
+  "Regular expression to match a partial expression.")
+
+(defun maplev-forward-expr ()
+  "Move point forward over a complete expression."
+  (interactive)
+  (if
+      (cond
+       ((looking-at "\\s-*\\s(")
+        (forward-sexp)
+        t)
+       ((looking-at maplev--expr-re)
+        (goto-char (match-end 0)))
+       ((looking-at "\\s-*\\(?:#.*\\)?$")
+        (forward-line)))
+      (maplev-forward-expr)))
+
+;;}}}
+
 ;;{{{ Templates
 
 (defun maplev--template-proc-module (function name args description)
@@ -3301,6 +3374,50 @@ Compare that symbol against `maplev-completion-alist'."
        '("\"" "\"\"" "\"\"\"")
      '("%" "%%" "%%%"))))
 
+(defvar maplev-protected-face   'maplev-protected-face
+  "*Face name for Maple protected names.")
+
+(defface maplev-protected-face
+  '((((class grayscale) (background light)) (:foreground "LightGray" :bold t))
+    (((class grayscale) (background dark))  (:foreground "DimGray"   :bold t))
+    (((class color)     (background light)) (:foreground "LImeGreen"))
+    (((class color)     (background dark))  (:foreground "LimeGreen"))
+    (t (:bold t)))
+  "Font lock mode face used for Maple protected names."
+  :group 'maplev-faces)
+
+(defconst maplev--protected-names-re
+  (eval-when-compile
+    (concat "\\<\\(?:" 
+            (regexp-opt 
+             (list "And" "Matrix" "Non" "Not" "Or" "SymbolicInfinity" "TEXT" "Vector"
+                   "algebraic" "algext" "algfun" "algnum" "algnumext" "anyfunc" "anything" "arctrig" "atomic"
+                   "boolean"
+                   "complex" "complexcons" "constant" "cubic" "cx_infinity" "cx_zero"
+                   "embedded_axis" "embedded_imaginary" "embedded_real" "equation" "even" 
+                   "evenfunc" "expanded" "extended_numeric" "extended_rational"
+                   "facint" "finite" "float" "fraction" "function"
+                   "hfloat"
+                   "identical" "imaginary" "indexable" "indexed" "integer"
+                   "laurent" "linear" "list" "listlist" "literal"
+                   "mathfunc" "matrix" "moduledefinition" "monomial"
+                   "name" "neg_infinity" "negative" "negint" "negzero" "nonnegative" 
+                   "nonnegint" "nonposint" "nonpositive" "nonreal" "nothing" "numeric"
+                   "odd" "oddfunc"
+                   "package" "point" "polynom" "pos_infinity" "posint" "positive" 
+                   "poszero" "prime" "procedure" "protected"
+                   "quadratic" "quartic"
+                   "radext" "radfun" "radfunext" "radical" "radnum" "radnumext" 
+                   "range" "rational" "ratpoly" "real_infinity" "realcons" "relation"
+                   "scalar" "sequential" "set" "sfloat" "specfunc" 
+                   "sqrt" "stack" "string" "symbol" "symmfunc"
+                   "tabular" "trig" "truefalse"
+                   "uneval"
+                   "vector" "verify"
+                   "zppoly"))
+            "\\)\\>")))
+             
+            
 (defun maplev-font-lock-keywords-1 ()
   "Compute the minimum decoration `font-lock-keywords' for MapleV mode.
 Top level procedures, Maple reserved words, and preprocessor directives
@@ -3335,7 +3452,9 @@ Add builtin functions to the medium decoration keywords."
                                      maplev--builtin-functions-alist)))
                         ;; Xemacs doesn't have font-lock-builtin-face
                         '(0 font-lock-variable-name-face))
-                  (list maplev--deprecated-re '(0 font-lock-warning-face))))))
+                  (list maplev--deprecated-re '(0 font-lock-warning-face))
+                  (list maplev--protected-names-re '(0 maplev-protected-face))))))
+
 (defun maplev--font-lock-keywords ()
   "Return a list of symbols for font locking MapleV mode buffers."
   '(maplev-font-lock-keywords-3        ; default is maximum decoration
@@ -4321,6 +4440,16 @@ The title is the phrase following the function name."
               (re-search-forward "^[ \t\n]*$" nil 'move)
               (point))))
 
+      ;; Activate hyperlinks in text.  This is overly aggressive.
+      (goto-char (point-min))
+      (re-search-forward "^Description" nil t)
+      (while (re-search-forward "(\\([][a-zA-Z,]+\\))" nil 'move)
+        (save-excursion
+          (beginning-of-line)
+          (unless (looking-at "> ")
+            (maplev--activate-hyperlink (match-beginning 1) (match-end 1)))))
+                 
+
       ;; Activate hyperlinks following "Multiple matches:".
       (goto-char (point-min))
       (and (re-search-forward "^Multiple matches found:" nil 'move)
@@ -4331,8 +4460,9 @@ The title is the phrase following the function name."
       (while (re-search-forward maplev--help-definition-re nil 'move)
         (let ((beg (match-beginning 1))
               (end (match-end 1)))
-          (put-text-property beg end 'mouse-face 'highlight)
-          (put-text-property beg end 'face maplev-help-function-face))))))
+          ;;(put-text-property beg end 'mouse-face 'highlight)
+          ;;(put-text-property beg end 'face maplev-help-function-face))))))
+          (maplev--activate-hyperlink beg end))))))
 
 (defun maplev--activate-hyperlinks (beg end)
   "Font lock and activate Maple keywords in the region from BEG to END."
@@ -4347,9 +4477,14 @@ The title is the phrase following the function name."
       ;; In particular, ignore the syntactic meaning of, e.g., `[',
       ;; `]', and `,'. Thus we can use current-word to pick up
       ;; these Maple keywords.
-      (put-text-property beg end 'syntax-table '(2 . nil))
-      (put-text-property beg end 'mouse-face 'highlight)
-      (put-text-property beg end 'face maplev-help-function-face))))
+      (maplev--activate-hyperlink beg end))))
+
+(defun maplev--activate-hyperlink (beg end)
+  "Font lock and activate text in region from BEG to END."
+  (put-text-property beg end 'syntax-table '(2 . nil))
+  (put-text-property beg end 'mouse-face 'highlight)
+  (put-text-property beg end 'face maplev-help-function-face))
+  
 
 ;;}}}
 
