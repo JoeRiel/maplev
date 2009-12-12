@@ -306,7 +306,7 @@ if nil the default initialization file is used."
 ;; this isn't quite right, it doesn't permit assigning
 ;; a new release.
 
-(defcustom maplev-default-release "11"
+(defcustom maplev-default-release "13"
   "*Release of Maple used as the default executable.
 It must be a key in `maplev-executable-alist'."
   :type `(choice ,@(mapcar (lambda (item)
@@ -753,16 +753,26 @@ A backslash at the end of the line does not continue the comment.")
 	  "\\('?" maplev--name-re "'?\\)[ \t\n]*:?=[ \t\n]*")
   "Regular expression that matches a Maple assignment.")
 
+(defconst maplev--possibly-typed-assignment-re
+  (concat "^\\s-*\\(local\\|global\\|export\\)?\\s-*"
+          "\\('?" maplev--name-re "'?\\)"
+          "\\(?:[ \t\n]*::[ \t\n]*\\(" maplev--name-re "\\)\\)?"
+          "[ \t\n]*:?=[ \t\n]*")
+  "Regular expression that matches a Maple assignment that may
+include a type declaration.  The second group correponds to the
+assignee, the second group to the type.  This only works with
+an assignment to a name, it does not match an assignment to
+a sequence.")
 
 (defconst maplev--defun-begin-re
   ;; This regular expression does not match a named module,
   ;; nor does it match a procedure/module that is not an
   ;; assignment statement.  
-  (concat maplev--assignment-re
+  (concat maplev--possibly-typed-assignment-re ;; assignment-re
           "\\(?:" maplev--comment-re "\\)?"
           "[ \t\f\n]*" maplev--defun-re)
   "Regular expression for Maple defun assignments.  
-The first group corresponds to the name of the defun.")
+The second group corresponds to the name of the defun.")
 
 (defconst maplev--top-defun-begin-re
   (concat "^\\(" maplev--name-re "\\)[ \t\n]*:=[ \t\n]*"
@@ -1112,8 +1122,8 @@ Point must originally be just to the left of the \"proc\" or \"module\".
 If procedure is anonymous, point is not moved and nil is returned.
 Otherwise point is moved to left of assignee and point is returned."
   ;; Regexp does not include possible comments.
-  (and (re-search-backward (concat maplev--assignment-re "\\=") nil t)
-       (goto-char (match-beginning 1))))
+  (and (re-search-backward (concat maplev--possibly-typed-assignment-re "\\=") nil t)
+       (goto-char (match-beginning 2))))
 
 (defun maplev--indent-line-with-info ()
   "Indent the current line as Maple code.  Point must be at the left margin."
@@ -1620,12 +1630,13 @@ controls the expansion."
 
 ;;}}}
 ;;{{{ Imenu support
+
 ;; Index all the procedure assignments.  Other possiblities to index
 ;; are global variable assignments, macros and aliases; however,
 ;; selecting them is difficult.
 
 (defvar maplev-imenu-generic-expression
-  `(("Procedures" ,maplev--defun-begin-re 1)
+  `(("Procedures" ,maplev--defun-begin-re 2)
     ("Variables" ,(concat "^\\(" maplev--name-re "\\)"
                           "[ \t\n]*:=[ \t\n]*"
                           "\\([^ \t\np]\\|p\\([^r]\\|r\\([^o]\\|o\\([^c]\\|c[^ \t\n(]\\)\\)\\)\\)") 1)
@@ -1654,6 +1665,7 @@ is fixed the solution is to open the entire buffer."
 Check whether `folding-mode' is active."
   (if folding-mode (folding-open-buffer))
   (imenu-default-create-index-function))
+
 ;;}}}
 ;;{{{ Buffer edit functions
 
@@ -2874,6 +2886,30 @@ Compare that symbol against `maplev-completion-alist'."
 
 ;;}}}
 
+;;{{{ Comments to Strings
+
+(defun maplev-comment-to-string-region (beg end)
+  "Convert indented comments to strings.
+The purpose of this is to embed comments as strings into the source
+so that, when using a debugger, the showstat output appears to
+be commented.  See `maplev-string-to-comment-region'."
+  (interactive "r")
+  (save-excursion
+    (goto-char beg)
+    (while (re-search-forward "^\\(\\s-+\\)\\(#.*\\)" end t)
+      (replace-match "\\1\"\\2\";"))))
+
+(defun maplev-string-to-comment-region (beg end)
+  "Convert strings back to comments.
+This is the inverse of `maplev-comment-to-string-region.'"
+  (interactive "r")
+  (save-excursion
+    (goto-char beg)
+    (while (re-search-forward "^\\(\\s-+\\)\"\\(#.*\\)\";$" end t)
+      (replace-match "\\1\\2"))))
+
+;;}}}
+
 ;;{{{ Font lock
 
 (defvar maplev-preprocessor-face   'maplev-preprocessor-face
@@ -3390,15 +3426,15 @@ Compare that symbol against `maplev-completion-alist'."
   (eval-when-compile
     (concat "\\<\\(?:" 
             (regexp-opt 
-             (list "And" "Matrix" "Non" "Not" "Or" "SymbolicInfinity" "TEXT" "Vector"
+             (list "And" "HFloat" "Matrix" "Non" "Not" "Or" "SFloat" "SymbolicInfinity" "TEXT" "Vector" "WARNING"
                    "algebraic" "algext" "algfun" "algnum" "algnumext" "anyfunc" "anything" "arctrig" "atomic"
                    "boolean"
-                   "complex" "complexcons" "constant" "cubic" "cx_infinity" "cx_zero"
+                   "complex" "complexcons" "constant" "cubic" "curry" "cx_infinity" "cx_zero"
                    "embedded_axis" "embedded_imaginary" "embedded_real" "equation" "even" 
                    "evenfunc" "expanded" "extended_numeric" "extended_rational"
                    "facint" "finite" "float" "fraction" "function"
                    "hfloat"
-                   "identical" "imaginary" "indexable" "indexed" "integer"
+                   "identical" "imaginary" "indexable" "indexed" "integer" "is"
                    "laurent" "linear" "list" "listlist" "literal"
                    "mathfunc" "matrix" "moduledefinition" "monomial"
                    "name" "neg_infinity" "negative" "negint" "negzero" "nonnegative" 
@@ -3408,11 +3444,11 @@ Compare that symbol against `maplev-completion-alist'."
                    "poszero" "prime" "procedure" "protected"
                    "quadratic" "quartic"
                    "radext" "radfun" "radfunext" "radical" "radnum" "radnumext" 
-                   "range" "rational" "ratpoly" "real_infinity" "realcons" "relation"
+                   "range" "rational" "ratpoly" "rcurry" "real" "real_infinity" "realcons" "relation" "restart"
                    "scalar" "sequential" "set" "sfloat" "specfunc" 
                    "sqrt" "stack" "string" "symbol" "symmfunc"
                    "tabular" "trig" "truefalse"
-                   "uneval"
+                   "uneval" "with"
                    "vector" "verify"
                    "zppoly"))
             "\\)\\>")))
@@ -4103,7 +4139,23 @@ RELEASE is the Maple release, if nil, `maplev-default-release' is used.
   (interactive "e")
   (set-buffer (window-buffer (event-window click)))
   (goto-char (event-point click))
-  (maplev-help-show-topic (maplev--ident-around-point)))
+  (let ((topic (maplev--ident-around-point))
+        (pkg (maplev-help--get-package)))
+    (if pkg
+        ;; This frequently works when the help index does not have a
+        ;; link to the particular help page; I understand that that is
+        ;; a deficiency only with the tty help for smaple.
+        (setq topic (format "%s,%s" pkg topic)))
+    (maplev-help-show-topic topic)))
+
+(defun maplev-help--get-package ()
+  "Check whether the help page is a package overview.
+If so, return the name of the package, otherwise return nil."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((case-fold-search nil))
+      (and (looking-at "\\(?:Details\\|Overview\\) of the \\(\\w+\\) [Pp]ackage")
+           (match-string-no-properties 1)))))
 
 (defun maplev--ident-around-point (&optional default)
   "Return the identifier around the point as a string.
@@ -4327,15 +4379,6 @@ The title is the phrase following the function name."
 ;;}}}
 ;;{{{     regular expressions
 
-;; (defconst maplev--help-section-re
-;;   (concat "^[A-Z]"                      ; Must start with a capital.
-;;           "\\([^\n]*:\\|\\("            ; If it ends with a colon (and whitespace) it matches.
-;;           "\\([a-z]+ ?\\)?"             ; If it consists of no more than three alphabetic words,
-;;           "\\([A-Za-z][a-z]* ?\\)?"     ; possibly with capitals, then it matches.
-;;           "\\([A-Za-z][a-z]* ?\\)?\\)"
-;;           "\\)[ \t]*$")
-;;   "Regular expression for sections in a Maple help page.")
-
 (defconst maplev--help-section-re
   (concat "^\\(Calling Sequences?"
           "\\|Parameters"
@@ -4351,9 +4394,6 @@ The title is the phrase following the function name."
           "\\):?")
   "Regular expression for sections in a Maple help page.")
 
-;;(defconst maplev--help-subsection-re
-;;  "^\\([A-Z].*\\)"
-;;  "Regular expression for subsections in a Maple help page.")
 (defconst maplev--help-subsection-re
   (concat "^\\([A-Z][a-z-0-9-]+ ?\\([A-Za-z0-9-][a-z]* ?\\)?"
           "\\([A-Za-z][a-z-]*\\)?:?[ \t]*$"
@@ -4429,6 +4469,13 @@ The title is the phrase following the function name."
         (put-text-property (match-beginning 0) (match-end 0)
                            'face 'maplev-input-face))
 
+      ;; Highligt Maple comments
+      (goto-char (point-min))
+      (while (re-search-forward "^# .*$" nil t)
+        (put-text-property (match-beginning 0) (match-end 0)
+                           'face 'font-lockqq-comment-face))
+                 
+
 
       ;; Activate hyperlinks following "See Also".
       ;; Stop when encountering a blank line.
@@ -4436,9 +4483,8 @@ The title is the phrase following the function name."
       (and (re-search-backward "^See Also:?" nil 'move)
            (maplev--activate-hyperlinks 
             (match-end 0) 
-            (progn
-              (re-search-forward "^[ \t\n]*$" nil 'move)
-              (point))))
+            (point-max)))
+
 
       ;; Activate hyperlinks in text.  This is overly aggressive.
       (goto-char (point-min))
@@ -4484,7 +4530,6 @@ The title is the phrase following the function name."
   (put-text-property beg end 'syntax-table '(2 . nil))
   (put-text-property beg end 'mouse-face 'highlight)
   (put-text-property beg end 'face maplev-help-function-face))
-  
 
 ;;}}}
 
