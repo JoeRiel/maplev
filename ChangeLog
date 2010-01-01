@@ -1,3 +1,83 @@
+2009-12-11  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev-help-fontify-node): 
+	Added font-locking of comments.
+	Modified code for selecting See Also hyperlinks
+	to work with Maple 14, which generates a line space
+	after the See Also.  May need tweaking
+
+2009-12-10  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev--protected-names-re): 
+	Added 'restart' and 'with'.
+
+2009-11-01  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev-help-follow-mouse): 
+	Check whether topic is in a package overview, if so,
+	prepend the package name.  Hmm, this won't always work,
+	suppose the link is to a help page in another package.
+	Oh well...
+
+2009-09-12  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev--protected-names-re): 
+	Addede curry, rcurry, is, real
+
+2009-07-28  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el 
+	(maplev-comment-to-string-region): convert comments to embedded strings.
+	(maplev-string-to-comment-region): inverse of above.
+
+2009-06-26  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev--possibly-typed-assignment-re): 
+	New regular expression suggested by Erik; now used in
+	maplev--indent-point-of-proc to permit matching 
+	static methods of objects:  method :: static := proc()...end proc.
+
+2009-04-19  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev--protected-names-re): 
+	regex to match standard Maple protected names (circa release 13).
+	(maplev-font-lock-keywords-3): add protected names to font-lock
+	level 3.
+	(maplev-protected-face): Face for font-locking protected names.
+
+2009-02-05  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev-help-fontify-node): 
+	Added fontification of help hyperlinks.
+	It's overly aggressive...o
+	(maplev--activate-hyperlink): 
+	New function to assist activating hyperlinks;
+	split out from maplev--activate-hyperlinks.
+
+2009-01-17  Joe Riel  <joer@san.rr.com>
+	* maplev.el abstract: Implemented Erik's patch, which provides a
+	function for adding variable declarations in a multiline format.
+	Extended it to provide two multi-line formats: trailing-comma and
+	leading-comma.  Also provided option to alphabetize the
+	declarations.
+	(maplev-add-local-variable)
+	(maplev-add-declaration-trailing-comma)
+	(maplev-add-declaration-leading-comma)
+	(maplev-add-declaration-one-line)
+	(maplev-alphabetize-declarations-p)
+	(maplev-add-declaration-function)
+
+2009-01-15  Joe Riel  <joer@san.rr.com>
+
+	* maplev.el (maplev-fill-paragraph): 
+	(fixed tab insertion)
+	(maplev--compute-indent): Fixed bug where local_xxx is
+	interpreted as a 'local'.  Forced use of proper syntax table.
+	(maplev-mode-map): bound new func maplev-what-proc
+	(maplev-what-proc): new command; displays the name of the
+	current procedure in the echo area.  Bound to C-h M-d.
+	"d" was chosen because originally I named this maplev-describe-proc.
+
 2008-06-07  Joe Riel  <joer@san.rr.com>
 
 	* Makefile

@@ -1,5 +1,6 @@
 base = maplev
 installdir = ~/emacs
+CP = cp
 
 #emacs	= emacs --debug-init --no-site-file --no-init-file --eval '(setq debug-on-error t)'
 #emacs	= emacs --debug-init --no-site-file --eval '(setq debug-on-error t)'
@@ -35,5 +36,14 @@ installedfiles: $(installed_elfile) $(installed_elcfile)
 
 $(base).zip: $(elfile) doc/$(base).texi
 	zip $@ $?
+
+.PHONY: p4put p4get
+p4dir = /home/joe/work/MapleSoft/sandbox/groups/share/emacs/$(base)
+p4put: $(base).el 
+	(cd $(p4dir); p4 edit $?)
+	$(CP) $? $(p4dir)
+
+p4get: 
+	$(CP) $(pfdir)/. .
 
 .PHONY: elcfile installedfiles default install dist
