@@ -4298,6 +4298,22 @@ PROCESS calls this filter.  STRING is the output."
         (switch-to-buffer buf)
       (message "No buffer \"%s\"." buffer))))
 
+(defun maplev-help-to-source (code-only)
+  "Convert a help page to a Maple source file."
+  (interactive "P")
+  (let (buffer-read-only)
+    (goto-char (point-min))
+    (while (not (eobp))
+      (if (looking-at "> ")
+          (progn
+            (delete-char 2)
+            (forward-line))
+        (if (not code-only)
+            (progn
+              (insert "# ")
+              (forward-line))
+          (delete-region (point) (line-end-position))
+          (delete-char 1))))))
 ;;}}}
 ;;{{{   history mechanism
 
@@ -4473,7 +4489,7 @@ The title is the phrase following the function name."
       (goto-char (point-min))
       (while (re-search-forward "^# .*$" nil t)
         (put-text-property (match-beginning 0) (match-end 0)
-                           'face 'font-lockqq-comment-face))
+                           'face 'font-lock-comment-face))
                  
 
 
