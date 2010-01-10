@@ -6,6 +6,14 @@
 
 @include version.texi
 
+@dircategory Emacs
+@direntry
+* MapleV: (maplev).       A GNU-Emacs mode for developing Maple code.
+@end direntry
+
+
+@include version.texi
+
 @iftex
 @tolerance 10000
 @end iftex
@@ -16,10 +24,10 @@
 This file documents MapleV, a GNU Emacs major mode for developing code for
 Maple, a computer algebra system (CAS) produced by Waterloo Maple Inc.
 
-Copyright (C) 1999
+Copyright (C) 1999, 2010
 Joseph S. Riel
 
-This edition is for MapleV version @value{EDITION}.
+This edition is for MapleV version @value{VERSION}.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -59,7 +67,7 @@ by the Free Software Foundation.
 @vskip 0pt plus 1filll
 Maple is a registered trademarks of Waterloo Maple Inc.@*
 
-Copyright @copyright{} 1999 Joseph S. Riel@*
+Copyright @copyright{} 1999, 2010 Joseph S. Riel@*
  
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
