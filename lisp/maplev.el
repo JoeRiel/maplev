@@ -109,7 +109,7 @@
 ;;{{{ Information
 
 (defconst maplev-version 
-  "2.155"
+  "2.16"
   "Version of MapleV mode.")
 
 (defconst maplev-developer 
@@ -1825,8 +1825,8 @@ Maple libraries.
 
   ;; comments
   (set (make-local-variable 'comment-start)            maplev-comment-start)
-  (if (< emacs-major-version 22)
-      (set (make-local-variable 'block-comment-start)      maplev-block-comment-start))
+;;  (if (< emacs-major-version 22)
+;;      (set (make-local-variable 'block-comment-start)      maplev-block-comment-start))
   (set (make-local-variable 'comment-end)              "")
   (set (make-local-variable 'comment-start-skip)       "#+[ \t]*")
   (set (make-local-variable 'comment-column)           maplev-comment-column)
@@ -1922,7 +1922,8 @@ otherwise it is aligned with the previous code line."
   (newline)                             ; should we indent?
   (let ((indent (maplev--comment-line-indentation -1)))
     (and indent (indent-to indent)))
-  (insert block-comment-start))
+  (insert maplev-block-comment-start)
+  )
 
 
 (defun maplev--comment-line-indentation (&optional n)
@@ -3737,6 +3738,7 @@ cmaple.
         major-mode 'maplev-cmaple-mode
         mode-name "Maple")
   (if (< emacs-major-version 22)
+      ;; This generates a compiler warning.  Ignore.
       (setq comint-use-prompt-regexp-instead-of-fields t)
     (setq comint-use-prompt-regexp t))
 
