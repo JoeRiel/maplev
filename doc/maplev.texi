@@ -2,7 +2,7 @@
 @c {{{ Header }}}
 
 @setfilename maplev
-@settitle MapleV Emacs Mode @value{EDITION}
+@settitle MapleV Emacs Mode @value{VERSION}
 
 @include version.texi
 
@@ -96,7 +96,7 @@ approved by the Free Software Foundation.
 @c {{{endfold}}}
 @c {{{ Top Node and Master Menu }}}
 
-@ifinfo
+@ifnottex
 @node top, Copying, (dir), (dir)
 @top MapleV
 
@@ -108,7 +108,7 @@ distributed under the GNU General Public License.
 
 This is the documentation for MapleV version @value{VERSION}.
 
-@end ifinfo
+@end ifnottex
 
 @menu
 * Copying::                     Conditions for copying and changing MapleV.
