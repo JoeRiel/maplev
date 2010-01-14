@@ -1,4 +1,5 @@
-@set UPDATED 8 January 2003
-@set UPDATED-MONTH January 2003
-@set EDITION 2.16
+@set UPDATED 2 January 2010
+@c Edition of the Manual
+@set EDITION 1.1
+@c Version of the Code
 @set VERSION 2.16
