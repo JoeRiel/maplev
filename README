@@ -1,0 +1,11 @@
+This package provides Emacs modes for developing Maple code.
+Maple is computer algebra system sold by Maplesoft Inc.
+
+The major modes are
+
+ - maplev-mode : edit Maple source files 
+ - maplev-mint : view the output of mint, a Maple syntax checker
+ - maplev-help : view Maple help pages
+ - maplev-proc : view archived Maple procedures
+ - maplev-cmaple : interface with a Maple engine
+
