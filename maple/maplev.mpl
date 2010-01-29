@@ -17,10 +17,6 @@ export MemberToIndexed
         end if;
     end proc:
 
-    PrintModule := proc( M :: `module` )
-        m := sprintf("%s", eval(M));
-    end proc;
-
 
     PrintProc := proc(P :: string
                       , lines::{posint,posint..posint} := NULL
@@ -38,7 +34,7 @@ export MemberToIndexed
             opacity := kernelopts('opaquemodules'=false);
             width := interface('screenwidth'=9999);
 
-            p := parse(p);
+            p := parse(P);
 
             if not p::procedure then
                 lprint(eval(p));
