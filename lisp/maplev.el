@@ -317,7 +317,7 @@ Used to index `maplev-executable-alist'.")
 
 (defcustom maplev-default-init-string
   (concat
-   "if not assigned(maplev_print) then maplev_print := print; end if:\n"
+   "maplev_print := `if`(assigned(maplev['PrintProc']),maplev:-PrintProc,print):\n"
    maplev-interface-kernelopts-settings)
   "Default Maple commands used to initialize a Maple process.
 Use `maplev-init-string-alist' to customize initialization commands
@@ -1416,6 +1416,7 @@ regardless of where you click."
     (define-key map [(control c) (control c) ?b]      'maplev-cmaple-send-buffer)
     (define-key map [(control c) (control c) ?p]      'maplev-cmaple-send-procedure)
     (define-key map [(control c) (control c) ?r]      'maplev-cmaple-send-region)
+    (define-key map [(control c) (control c) ?l]      'maplev-cmaple-send-line)
     (define-key map [(control c) (control c) return]  'maplev-cmaple-send-line)
     (define-key map [(control c) (control c) ?g]      'maplev-cmaple-pop-to-buffer)
     (define-key map [(control c) (control c) ?i]      'maplev-cmaple-interrupt)
@@ -4191,11 +4192,6 @@ The title is the phrase following the function name."
         (put-text-property (match-beginning 0) (match-end 0)
                            'face 'maplev-help-subsection-face))
 
-      ;; Highlight section titles
-      (goto-char (point-min))
-      (while (re-search-forward maplev--help-section-re nil t)
-        (put-text-property (match-beginning 0) (match-end 0)
-                           'face 'maplev-help-section-face))
 
       ;; Highlight functions in a package. This usually works.  It
       ;; searches for `- The functions [arbitrary text] are:' and
@@ -4230,6 +4226,13 @@ The title is the phrase following the function name."
            (maplev--activate-hyperlinks 
             (match-end 0) 
             (point-max)))
+
+
+      ;; Highlight section titles
+      (goto-char (point-min))
+      (while (re-search-forward maplev--help-section-re nil t)
+        (put-text-property (match-beginning 0) (match-end 0)
+                           'face 'maplev-help-section-face))
 
 
       ;; Activate hyperlinks in text.  This is overly aggressive.
@@ -4382,7 +4385,7 @@ If optional arg HIDE is non-nil do not display buffer."
       (goto-char (point-min))
       ;;(insert proc " := ")
       )
-    (comint-simple-send process (concat "maplev_print(" proc ");"))
+    (comint-simple-send process (concat "maplev_print(\"" proc "\");"))
     (maplev-cmaple--send-end-notice process)))
 
 (defun maplev-proc-filter (process string)
