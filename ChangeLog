@@ -1,3 +1,10 @@
+2010-05-29  Joe Riel  <joer@san.rr.com>
+
+	* lisp/maplev.el (maplev-default-init-string): 
+	assign maplev_print
+	(maplev-mode-map): mapl C-c C-c l to maplev-cmaple-send-line
+	(maplev-help-fontify-node): highlight subsection titles
+
 2009-12-11  Joe Riel  <joer@san.rr.com>
 
 	* maplev.el (maplev-help-fontify-node): 
