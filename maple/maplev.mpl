@@ -89,7 +89,7 @@ export MemberToIndexed
             interface('screenwidth' = width);
             kernelopts('opaquemodules' = opacity);
         end try;
-        NULL
+        return NULL;
     end proc;
 
 end module:
