@@ -871,14 +871,16 @@ including double-quotes.")
   "Buffer local variable storing previous indent information.
 
 Nil when there is no previous, or valid, indent information.
-Otherwise it's a list: \(POINT STATE STACK\).  POINT is the character
-position at which the information applies.  STATE is the output of
-`parse-partial-sexp' \(valid from the start of the buffer to POINT\).
-STACK is a list of lists, each list having the form \(KEYWORD
-INDENT-CLOSE INDENT-FOLLOW\).  KEYWORD is a keyword or parenthesis in
-the source.  INDENT-CLOSE is the indentation amount for the closing
-keyword associated with KEYWORD.  INDENT-FOLLOW is the indentation
-amount for source between KEYWORD and its closing keyword.")
+Otherwise it's a list: \(POINT STATE STACK\).  POINT is the
+buffer character position at which the information applies.
+STATE is the output of `parse-partial-sexp' \(valid from the
+start of the buffer to POINT\).  STACK is a list of lists, each
+list having the form \(KEYWORD INDENT-CLOSE INDENT-FOLLOW\).
+KEYWORD is a keyword or parenthesis in the source.  INDENT-CLOSE
+is the indentation for the closing keyword associated with
+KEYWORD.  INDENT-FOLLOW is the indentation for source between
+KEYWORD and its closing keyword.  Indentation is measured in 
+characters, with 0 being the left margin.")
 
 ;; Procedures for accessing the contents of `maplev--indent-info'.
 
