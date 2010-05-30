@@ -4,6 +4,7 @@
 	assign maplev_print
 	(maplev-mode-map): mapl C-c C-c l to maplev-cmaple-send-line
 	(maplev-help-fontify-node): highlight subsection titles
+	(maplev--indent-info): Improve doc string
 
 2009-12-11  Joe Riel  <joer@san.rr.com>
 
