@@ -963,7 +963,6 @@ character position of the beginning of the change.  UNUSED is not used."
    (list "end"  . (nil nil 0 nil 'maplev--skip-optional-end-keyword))
 ;;;          (list "for"  . ((maplev--list-to-word-re '("from" "to" "by" "while" "in" "do")) t 0))
    (list "for"  . ((maplev--list-to-word-re '("from" "to" "by" "while" "do")) t 0))
-   (list "for"  . ((maplev--list-to-word-re '("from" "to" "by" "while""do")) t 0))
    (list "from" . ((maplev--list-to-word-re '("to" "by" "while" "do")) t 0))
    (list "to"   . ((maplev--list-to-word-re '("by" "while" "do")) t 0))
    (list "by"   . ((maplev--list-to-word-re '("from" "to" "while" "do")) t 0))
@@ -3139,31 +3138,40 @@ This is the inverse of `maplev-comment-to-string-region.'"
   (eval-when-compile
     (concat "\\<\\(?:"
             (regexp-opt
-             (list "And" "HFloat" "Matrix" "Non" "Not" "Or" "SFloat" "SymbolicInfinity" "TEXT" "Vector" "WARNING"
-                   "algebraic" "algext" "algfun" "algnum" "algnumext" "anyfunc" "anything" "arctrig" "atomic"
-                   "boolean"
-                   "complex" "complexcons" "constant" "cubic" "curry" "cx_infinity" "cx_zero"
-                   "embedded_axis" "embedded_imaginary" "embedded_real" "equation" "even"
-                   "evenfunc" "expanded" "extended_numeric" "extended_rational"
-                   "facint" "finite" "float" "fraction" "function"
-                   "hfloat"
-                   "identical" "imaginary" "indexable" "indexed" "integer" "is"
-                   "laurent" "linear" "list" "listlist" "literal"
-                   "mathfunc" "matrix" "moduledefinition" "monomial"
-                   "name" "neg_infinity" "negative" "negint" "negzero" "nonnegative"
-                   "nonnegint" "nonposint" "nonpositive" "nonreal" "nothing" "numeric"
-                   "odd" "oddfunc"
-                   "package" "point" "polynom" "pos_infinity" "posint" "positive"
-                   "poszero" "prime" "procedure" "protected"
-                   "quadratic" "quartic"
-                   "radext" "radfun" "radfunext" "radical" "radnum" "radnumext"
-                   "range" "rational" "ratpoly" "rcurry" "real" "real_infinity" "realcons" "relation" "restart"
-                   "scalar" "sequential" "set" "sfloat" "specfunc"
-                   "sqrt" "stack" "string" "symbol" "symmfunc"
-                   "tabular" "trig" "truefalse"
-                   "uneval" "with"
-                   "vector" "verify"
-                   "zppoly"))
+             (list "ARRAY" "Add" "And" "Cache" "Catalan" "Complex" "D" "DESol" "Ei" "Eval" "Expand" 
+                   "FAIL" "Float" "Fraction" "HFloat" "Implies" "ImportData" "Int" "Integer" 
+                   "JacobiAM" "JacobiCN" "JacobiCS" "JacobiNC" "JacobiNS" "JacobiSC" "JacobiSN"
+                   "LinearAlgebra" "ListTools" "Matlab" "Matrix"  "Multiply"
+                   "Non" "Normal" "Not" "NumericTools" "O" "Or" "Pi" "Plot" "Power" "Product" "RealRange"
+                   "SFloat" "Shift" "Sum" "SymbolicInfinity" "TABLE" "TEXT"
+                   "Vector" "VectorOptions" "WARNING" "Xor"
+                   "algebraic" "algext" "algfun" "algnum" "algnumext" 
+                   "ansi" "anyfunc" "anything" "apply" "arctrig" "atomic"
+                   "boolean" "bytesused"
+                   "charfcn" "collect" "combine" "complex" "complexcons" "constant" "copy" "cubic" "curry" "cx_infinity" "cx_zero"
+                   "deduced" "division_by_zero" 
+                   "echo" "embedded_axis" "embedded_imaginary" "embedded_real" "equation" "errorbreak" "errorcursor" 
+                   "evala" "evalr" "even" "evenfunc" "expanded" "extended_numeric" "extended_rational"
+                   "facint" "false" "fflush" "finite" "float" "fprintf" "fraction" "freeze" "function"
+                   "gamma" "gcfreq" "hasassumptions" "hasfun" "hfloat"
+                   "identical" "imaginary" "`in`" "indentamount" "index" "indexable" "indexed" "inexact" 
+                   "infinity" "integer" "invalid_operation" "invfunc" "iperfpow" "iroot" "is"
+                   "labelling" "laurent" "leadterm" "linear" "list" "listlist" "literal"
+                   "mathfunc" "matrix" "`module`" "moduledefinition" "monomial"
+                   "name" "negative" "neg_infinity" "negint" "negzero" "nonnegative" 
+                   "nonnegint" "nonposint" "nonpositive" "nonreal" "norm" "nothing" "numeric"
+                   "odd" "oddfunc" "overflow"
+                   "package" "plotdevice" "plotoptions" "plotoutput" "point" "polynom" "pos_infinity" "posint" "positive" 
+                   "postplot" "poszero" "preplot" "prettyprint" "prime" "primpart" "printbytes" "procedure" "prompt" "proot" "protected" "psqrt"
+                   "quadratic" "quartic" "quiet"
+                   "radext" "radfun" "radfunext" "radical" "radnormal" "radnum" "radnumext" "range" "rational" 
+                   "ratpoly" "rcurry" "real" "realcons" "real_infinity" "real_to_complex" "relation" "restart" "resultant"
+                   "scalar" "screenheight" "screenwidth" "sequential" "set" "sfloat" "shake" 
+                   "showassumed" "simplify" "specfunc" "sqrt" "stack" "string" "subtype" "symbol" "symmfunc"
+                   "tabular" "testeq" "thaw" "tracelast" "trig" "true" "truefalse"
+                   "unapply" "undefined" "underflow" "uneval" "usage"
+                   "vector" "verboseproc" "verify" "warnlevel" "with" "wordsize" "zppoly"
+                   ))
             "\\)\\>")))
 
 
