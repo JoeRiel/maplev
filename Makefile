@@ -9,7 +9,7 @@ include help-system.mak
 
 # {{{ Binaries
 
-EMACS = emacs-snapshot
+EMACS = emacs
 MAPLE = smaple
 TEXI2HTML = makeinfo --html --number-sections
 TEXI2PDF = texi2pdf
