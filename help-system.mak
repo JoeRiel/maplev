@@ -2,6 +2,16 @@
 
 help:
 	@echo $(if $(need-help),,Type \'$(MAKE)$(dash-f) help\' to get help)
+	@echo
+	@echo 'To install you probably need to do'
+	@echo '$$ sudo make install'
+	@echo
+	@echo 'A problem with that is that the default value of $$MAPLEDIR,'
+	@echo 'which is where the Maple archive is installed, is $$HOME/maple/lib,'
+	@echo 'but $$HOME, under sudo, is likely not what you want.'
+	@echo 'To install the Maple archive, do'
+	@echo
+	@echo '$$ make install-maple'
 
 need-help := $(filter help,$(MAKECMDGOALS))
 
