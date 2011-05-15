@@ -136,7 +136,7 @@ clean-maple:
 # }}}
 # {{{ Installation
 
-install: $(call print-help,install,Same as install-lisp)
+install: $(call print-help,install,Install everything)
 install: install-lisp install-info install-maple
 
 install-lisp: $(call print-help,install-lisp,Install lisp in $(subst $(DESTDIR)$(prefix),$$DESTDIR/$$prefix,$(LISPDIR)))
