@@ -252,7 +252,8 @@ is an integer correspond to the button number; preceding items are optional modi
 
 (defcustom maplev-executable-alist
   (if (string-match "windows-nt\\|ms-dos" (symbol-name system-type))
-      `(("14" . ,(maplev-windows-executables "14" t))
+      `(("15" . ,(maplev-windows-executables "15" t))
+        ("14" . ,(maplev-windows-executables "14" t))
         ("13" . ,(maplev-windows-executables "13" t))
         ("12" . ,(maplev-windows-executables "12" t))
         ("11" . ,(maplev-windows-executables "11" t))
@@ -266,6 +267,7 @@ is an integer correspond to the button number; preceding items are optional modi
         ("3"  . ,(maplev-windows-executables "3"  t)))
 
     '(
+      ("15"  . ("maple" nil "mint"))
       ("14"  . ("maple" nil "mint"))
       ("13"  . ("maple" nil "mint"))
       ("12"  . ("maple" nil "mint"))
@@ -1584,9 +1586,9 @@ controls the expansion."
 
 (defvar maplev-imenu-generic-expression
   `(("Procedures" ,maplev--defun-begin-re 2)
-    ("Variables" ,(concat "^\\(" maplev--name-re "\\)"
+    ("Modules" ,(concat "^\\(" maplev--name-re "\\)"
                           "[ \t\n]*:=[ \t\n]*"
-                          "\\([^ \t\np]\\|p\\([^r]\\|r\\([^o]\\|o\\([^c]\\|c[^ \t\n(]\\)\\)\\)\\)") 1)
+                          "module") 1)
     ("Macros" ,(concat "^macro([ \t]*\\([^ \t=]*\\)") 1))
   "Imenu expression for MapleV mode.  See `imenu-generic-expression'.")
 
@@ -2934,6 +2936,10 @@ This is the inverse of `maplev-comment-to-string-region.'"
   maplev--reserved-words-10
   "List of reserved words for Maple 14")
 
+(defconst maplev--reserved-words-15
+  maplev--reserved-words-10
+  "List of reserved words for Maple 15")
+
 (defconst maplev--reserved-words-alist
   `((3 .  ,maplev--reserved-words-3)
     (4 .  ,maplev--reserved-words-4)
@@ -2947,6 +2953,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
     (12 . ,maplev--reserved-words-12)
     (13 . ,maplev--reserved-words-13)
     (14 . ,maplev--reserved-words-14)
+    (15 . ,maplev--reserved-words-15)
    )
   "Alist of Maple reserved words.  The key is the major release.")
 
@@ -2961,7 +2968,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
 (defconst maplev--special-words-re
   (eval-when-compile
     (maplev--list-to-word-re
-     (list "args" "nargs" "procname" "RootOf" "Float" "thismodule"
+     (list "args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
            "_options" "_noptions" "_rest" "_nrest"
            "_params" "_nparams" "_passed" "_npassed"
            "_nresults" )))
@@ -3083,6 +3090,9 @@ This is the inverse of `maplev-comment-to-string-region.'"
 (defconst maplev--builtin-functions-14
  (append '("Object") maplev--builtin-functions-13))
 
+(defconst maplev--builtin-functions-15
+  (append '("numelems") maplev--builtin-functions-14))
+
 (defconst maplev--builtin-functions-alist
   `((3  . ,maplev--builtin-functions-3)
     (4  . ,maplev--builtin-functions-4)
@@ -3096,6 +3106,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
     (12 . ,maplev--builtin-functions-12)
     (13 . ,maplev--builtin-functions-13)
     (14 . ,maplev--builtin-functions-14)
+    (15 . ,maplev--builtin-functions-15)
  "Alist of Maple builtin funtions. The key is the major release."))
 
 ;; (defconst maplev--builtin-functions-alist
@@ -3174,6 +3185,9 @@ This is the inverse of `maplev-comment-to-string-region.'"
                    ))
             "\\)\\>")))
 
+
+(defconst maplev--protected-names-procs-re
+  (list "evalindets" "subsindets"))
 
 (defun maplev-font-lock-keywords-1 ()
   "Compute the minimum decoration `font-lock-keywords' for MapleV mode.
@@ -3646,8 +3660,7 @@ Reset the filter for PROCESS \(cmaple\) and unlock access."
 
 (defun maplev-cmaple--clear-buffer ()
   "Clear the contents of the cmaple buffer."
-  (save-excursion
-    (set-buffer (maplev--cmaple-buffer))
+  (with-current-buffer (maplev--cmaple-buffer)
     (delete-region (point-min) (point-max))))
                  
 
@@ -4460,7 +4473,6 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 This should probably be a list of directories."
   :type 'string
   :group 'maplev-mint)
-  
 
 ;;}}}
 ;;{{{   syntax table
@@ -4897,12 +4909,10 @@ Return exit code of mint."
             maplev-mint--code-end (make-marker)))
     (set-marker maplev-mint--code-beginning beg)
     (set-marker maplev-mint--code-end end)
-    (save-excursion
-      (set-buffer (get-buffer-create mint-buffer))
+    (with-current-buffer (get-buffer-create mint-buffer)
       (setq buffer-read-only nil))
     (copy-to-buffer mint-buffer beg end)
-    (save-excursion
-      (set-buffer mint-buffer)
+    (with-current-buffer mint-buffer
       (goto-char (point-max))
       ;; Add a blank line to the end of the buffer, unless there is
       ;; one already.  This is needed for mint to work properly.
