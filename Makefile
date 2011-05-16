@@ -10,7 +10,7 @@ include help-system.mak
 # {{{ Binaries
 
 EMACS = emacs
-MAPLE = smaple
+MAPLE = maple
 TEXI2HTML = makeinfo --html --number-sections
 TEXI2PDF = texi2pdf
 
@@ -136,23 +136,26 @@ clean-maple:
 # }}}
 # {{{ Installation
 
-install: $(call print-help,install,Install everything)
-install: install-lisp install-info install-maple
+MKDIR = if test ! -d $(1); then mkdir --parents $(1); fi
+
+install: $(call print-help,install,Install lisp and doc)
+install: install-lisp install-info
 
 install-lisp: $(call print-help,install-lisp,Install lisp in $(subst $(DESTDIR)$(prefix),$$DESTDIR/$$prefix,$(LISPDIR)))
 install-lisp: $(LISPFILES) $(ELCFILES)
-	if test ! -d $(LISPDIR); then mkdir $(LISPDIR); else true; fi ;
+	$(call MKDIR,$(LISPDIR))
 	cp $+ $(LISPDIR)
 
 install-info: $(call print-help,install-info,Install info files in $(subst $(DESTDIR)$(prefix),$$DESTDIR/$$prefix,$(INFODIR)) and update dir)
 install-info: $(INFOFILES)
 	$(POST_INSTALL)
-	if test ! -d $(INFODIR); then mkdir $(INFODIR); else true; fi ;
+	$(call MKDIR,$(INFODIR))
 	cp $(INFOFILES) $(INFODIR)
 	for file in $(INFOFILES); do install-info --info-dir=$(INFODIR) $${file}; done
 
 install-maple: $(call print-help,install-maple,Install mla in $$MAPLEDIR)
 install-maple: $(mla)
+	$(call MKDIR,$(MAPLEDIR))
 	cp --archive $+ $(MAPLEDIR)
 
 clean-install: $(call print-help,clean-install,Remove installed files)
@@ -181,10 +184,10 @@ dist: $(call print-help,dist,Create maplev-$$TAG.tar.gz file)
 dist: $(LISPFILES) $(TEXIFILES)
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
 	rm -rf maplev-$(TAG)
-	mkdir maplev-$(TAG)
-	mkdir maplev-$(TAG)/doc
-	mkdir maplev-$(TAG)/lisp
-	mkdir maplev-$(TAG)/maple
+	$(call MKDIR,maplev-$(TAG))
+	$(call MKDIR,maplev-$(TAG)/doc)
+	$(call MKDIR,maplev-$(TAG)/lisp)
+	$(call MKDIR,maplev-$(TAG)/maplev)
 	cp $(LISPFILES) maplev-$(TAG)/lisp
 	cp $(TEXIFILES) maplev-$(TAG)/doc
 	cp $(MAPLEFILES) maplev-$(TAG)/maple
