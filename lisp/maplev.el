@@ -2503,6 +2503,20 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
 
 ;;}}}
 
+;;{{{ Folding functions
+
+(defun maplev-fold-proc ()
+  "Add editor fold marks around the procedure at point.
+The name of the procedure is inserted into the title of the fold."
+  (interactive)
+  (let ((proc (maplev-what-proc 'nodisplay)))
+    (maplev-mark-defun)
+    (folding-fold-region (point) (mark))
+    (insert (concat " " proc))
+    (folding-shift-out)))
+
+;;}}}
+
 ;;{{{ Movement functions
 
 (defconst maplev--operator-re
