@@ -1,0 +1,96 @@
+#!/bin/bash
+# -*- mode:shell-script; mode:folding -*-
+
+# Assign a version number to the source files
+
+script="$0"
+
+# Regular expression that matches version number
+
+bash_regex="([0-9]+\.)+[0-9]+"
+sed_regex="\([0-9]\+\.\)\+[0-9]\+"
+
+#{{{ Functions
+
+#{{{ (*) usage
+
+# Print a brief help page and exit with exit value $1
+# usage 101
+
+function usage { echo "\
+Usage:  $script [-ch] version 
+
+Options:
+  -c       check the result (print the version number in the files)
+  -h       show this info
+
+Update the version number embedded in the source files of the mdcs project.
+The version must match the regular expression $regex.
+
+\$ $script 0.3
+
+"; exit $1 ; }
+
+#}}}
+
+#}}}
+#{{{ Process arguments
+
+check=
+
+while getopts ":ch" opt; do
+    case "$opt" in
+	c  ) check=1              ;;
+	h  ) usage 0              ;;
+	?  ) usage 101            ;;
+    esac
+done
+
+shift $(($OPTIND-1))
+
+if [ "$check" ]; then
+    sed_opt="--quiet"
+    sed_cmd="p"
+else
+    [ -z "$*" ] && echo "no version number specified" && exit 101
+    version="$1"
+    [[ ! "$version" =~ ^$bash_regex$ ]] && echo "Illegal version number: ${version}. See $script -h." &&  exit 1
+    sed_opt=-i
+    sed_cmd="s/$sed_regex/$version/"
+fi
+
+#echo $sed_cmd
+#exit 1
+
+#}}}
+#{{{ Update source files
+
+# Update lisp
+
+file="lisp/maplev.el"
+[ "$check" ] && echo -ne "$file:\t"
+sed $sed_opt "
+/;; Version:/{$sed_cmd}
+/defconst mds-version/{$sed_cmd}
+" "$file"
+
+# Update texinfo
+
+file="doc/maplev.texi"
+[ "$check" ] && echo -ne "$file:\t"
+sed $sed_opt "/^@set VERSION /$sed_cmd" "$file"
+
+# Update README
+file="README"
+[ "$check" ] && echo -ne "$file:\t"
+sed $sed_opt "/^VERSION /$sed_cmd" "$file"
+
+# Update Makefile
+file="Makefile"
+[ "$check" ] && echo -ne "$file:\t"
+sed $sed_opt "/^VERSION := /$sed_cmd" "$file"
+
+
+#}}}
+
+exit 0

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Simple installation script for maplev
+
+LISP_DIR=$HOME/.emacs.d/mds        # for lisp files
+INFO_DIR=$HOME/share/info          # for the info file
+INFO_FILE=doc/maplev               # info file
+
+INSTALL_INFO=install-info          # program to update dir file
+
+echo "Byte-compiling mds lisp files"
+# Byte-compile lisp/*.el
+emacs --no-site-file \
+      --no-init-file \
+      --eval "(add-to-list (quote load-path) (expand-file-name \"./lisp\"))" \
+      --batch \
+      --funcall=batch-byte-compile \
+      lisp/*.el
+
+CP="cp --preserve --verbose"
+RM="rm --force --verbose"
+
+echo -e "\nInstalling lisp files"
+$CP lisp/*.el lisp/*.elc $LISP_DIR
+
+echo -e "\nInstalling info files"
+$CP $INFO_FILE $INFO_DIR
+
+echo -e "\nUpdating the dir file"
+$INSTALL_INFO --dir-file=$INFO_DIR/dir $INFO_FILE
+
+echo -e "\nDone"
+echo
+echo "Update, if needed, your .emacs file.  See README for details."
+exit 0

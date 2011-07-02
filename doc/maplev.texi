@@ -4,7 +4,8 @@
 @setfilename maplev
 @settitle MapleV Emacs Mode @value{VERSION}
 
-@include version.texi
+@set VERSION 2.17
+@set DATE June 2011
 
 @dircategory Emacs
 @direntry
@@ -59,8 +60,8 @@ by the Free Software Foundation.
 @titlepage
 @title MapleV
 @subtitle A GNU Emacs Mode for Maple Developers
-@subtitle Edition @value{EDITION}, for MapleV Version @value{VERSION}
-@subtitle @value{UPDATED}
+@subtitle For MapleV Version @value{VERSION}
+@c @subtitle @value{UPDATED}
   
 @author Joseph S.@ Riel
 @page
