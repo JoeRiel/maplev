@@ -122,9 +122,9 @@
 (require 'font-lock)
 (require 'comint)
 (require 'info)
-(require 'cl)
 
 (eval-and-compile
+  (require 'cl)
   (condition-case nil (require 'imenu) (error nil))
   (condition-case nil (require 'align) (error nil)))
 
