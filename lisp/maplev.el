@@ -5,12 +5,9 @@
 
 ;; Authors:    Joseph S. Riel <joer@san.rr.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
-;; Time-stamp: "2003-10-09 22:49:16 joe"
 ;; Created:    June 1999
-;; Version:    2.155
+;; Version:    2.17
 ;; Keywords:   Maple, languages
-;; X-URL:      http://www.k-online.com/~joer/maplev/maplev.html
-;; X-RCS:      $Id: maplev.el,v 1.16 2008-02-20 22:02:33 joe Exp $
 
 ;;{{{ License
 
@@ -108,9 +105,7 @@
 
 ;;{{{ Information
 
-(defconst maplev-version 
-  "2.16"
-  "Version of MapleV mode.")
+(defconst maplev-version "2.17" "Version of MapleV mode.")
 
 (defconst maplev-developer 
   "Joseph S. Riel <joer@san.rr.com>"
@@ -4504,7 +4499,6 @@ This should probably be a list of directories."
     (define-key map [?s]                          'isearch-forward)
     (define-key map [?r]                          'isearch-backward)
     (define-key map (maplev--mouse-keymap '(2))   'maplev-mint-click)
-    
     (define-key map [(control c) (control c)]     'maplev-mint-handler)
     (setq maplev-mint-mode-map map)))
 
@@ -5140,3 +5134,4 @@ If optional arg HIDE is non-nil do not display buffer."
 (provide 'maplev-mode)
 
 ;;; maplev.el ends here
+

@@ -5,6 +5,8 @@
 
 SHELL = /bin/sh
 
+VERSION := 2.17
+
 include help-system.mak
 
 # {{{ Binaries
@@ -26,13 +28,13 @@ prefix = /usr/local
 exec_prefix = $(prefix)
 
 # where local lisp files go
-LISPDIR = $(DESTDIR)$(prefix)/share/emacs/site-lisp
+LISP-DIR = $(DEST-DIR)$(prefix)/share/emacs/site-lisp
 
 # where info files go
-INFODIR = $(DESTDIR)$(prefix)/share/info
+INFO-DIR = $(DEST-DIR)$(prefix)/share/info
 
 # where the maple archive goes
-MAPLEDIR = $(HOME)/maple/lib
+MAPLE-DIR = $(HOME)/maple/lib
 
 # }}}
 # {{{ Elisp
@@ -41,36 +43,36 @@ ELFLAGS	= --no-site-file \
 	  --no-init-file \
 	  --eval "(progn \
                     (add-to-list (quote load-path) (expand-file-name \"./lisp\")) \
-	            (add-to-list (quote load-path) \"$(LISPDIR)\"))"
+	            (add-to-list (quote load-path) \"$(LISP-DIR)\"))"
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
 
 ELS = maplev
 
-LISPFILES = $(ELS:%=lisp/%.el)
-ELCFILES = $(LISPFILES:.el=.elc)
+LISP-FILES = $(ELS:%=lisp/%.el)
+ELC-FILES = $(LISP-FILES:.el=.elc)
 
 %.elc : %.el
 	$(ELC) $<
 
 byte-compile: $(call print-help,byte-compile,Byte-compile the elisp)
-byte-compile: $(ELCFILES)
+byte-compile: $(ELC-FILES)
 
 clean-elisp: $(call print-help,clean-elisp,Remove byte-compiled files)
 clean-elisp:
-	rm -f $(ELCFILES)
+	rm -f $(ELC-FILES)
 
 .PHONY: byte-compile clean-elisp
 
 # }}}
 # {{{ Documentation
 
-INFOFILES = doc/maplev
-PDFFILES  = doc/maplev.pdf
-TEXIFILES = doc/maplev.texi doc/version.texi
-HTMLFILES = doc/maplev.html
+INFO-FILES = doc/maplev
+PDF-FILES  = doc/maplev.pdf
+TEXI-FILES = doc/maplev.texi doc/version.texi
+HTML-FILES = doc/maplev.html
 
-DOCFILES = $(TEXIFILES) $(INFOFILES) $(PDFFILES) $(HTMLFILES)
+DOC-FILES = $(TEXI-FILES) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 
 doc: $(call print-help,doc,Create the info and pdf documentation)
 doc:  info pdf
@@ -92,11 +94,11 @@ doc/maplev.html: doc/maplev.texi doc/version.texi
 
 clean-doc: $(call print-help,clean-doc,Remove the auxiliary files in doc)
 clean-doc:
-	rm -f $(filter-out $(TEXIFILES) $(DOCFILES) $(INFOFILES), $(wildcard doc/*))
+	rm -f $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILES), $(wildcard doc/*))
 
 clean-doc-all: $(call print-help,clean-doc-all,Remove all generated documentation)
 clean-doc-all: clean-doc
-	rm -f $(INFOFILES) $(PDFFILES) $(HTMLFILES)
+	rm -f $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 
 .PHONY: doc html info pdf clean-doc clean-doc-all p i h
 
@@ -117,9 +119,9 @@ h: doc/maplev.html
 # }}}
 # {{{ Maple
 
-MAPLEFILES = maple/maplev.mpl
+MAPLE-FILES = maple/maplev.mpl
 
-mla = $(MAPLEFILES:.mpl=.mla)
+mla = $(MAPLE-FILES:.mpl=.mla)
 
 maple: $(call print-help,maple,Create the Maple archive)
 maple: $(mla)
@@ -138,62 +140,61 @@ clean-maple:
 
 MKDIR = if test ! -d $(1); then mkdir --parents $(1); fi
 
-install: $(call print-help,install,Install lisp and doc)
-install: install-lisp install-info
+install-all: $(call print-help,install-all,Install lisp and doc)
+install-all: install-lisp install-info
 
-install-lisp: $(call print-help,install-lisp,Install lisp in $(subst $(DESTDIR)$(prefix),$$DESTDIR/$$prefix,$(LISPDIR)))
-install-lisp: $(LISPFILES) $(ELCFILES)
-	$(call MKDIR,$(LISPDIR))
-	cp $+ $(LISPDIR)
+install-lisp: $(call print-help,install-lisp,Install lisp in $(subst $(DEST-DIR)$(prefix),$$DEST-DIR/$$prefix,$(LISP-DIR)))
+install-lisp: $(LISP-FILES) $(ELC-FILES)
+	$(call MKDIR,$(LISP-DIR))
+	cp $+ $(LISP-DIR)
 
-install-info: $(call print-help,install-info,Install info files in $(subst $(DESTDIR)$(prefix),$$DESTDIR/$$prefix,$(INFODIR)) and update dir)
-install-info: $(INFOFILES)
+install-info: $(call print-help,install-info,Install info files in $(subst $(DEST-DIR)$(prefix),$$DEST-DIR/$$prefix,$(INFO-DIR)) and update dir)
+install-info: $(INFO-FILES)
 	$(POST_INSTALL)
-	$(call MKDIR,$(INFODIR))
-	cp $(INFOFILES) $(INFODIR)
-	for file in $(INFOFILES); do install-info --info-dir=$(INFODIR) $${file}; done
+	$(call MKDIR,$(INFO-DIR))
+	cp $(INFO-FILES) $(INFO-DIR)
+	for file in $(INFO-FILES); do install-info --info-dir=$(INFO-DIR) $${file}; done
 
-install-maple: $(call print-help,install-maple,Install mla in $$MAPLEDIR)
+install-maple: $(call print-help,install-maple,Install mla in $$MAPLE-DIR)
 install-maple: $(mla)
-	$(call MKDIR,$(MAPLEDIR))
-	cp --archive $+ $(MAPLEDIR)
+	$(call MKDIR,$(MAPLE-DIR))
+	cp --archive $+ $(MAPLE-DIR)
 
 clean-install: $(call print-help,clean-install,Remove installed files)
 clean-install:
-	rm -f $(addprefix $(LISPDIR),$(lispfiles) $(ELCFILES))
-	rm -f $(addprefix $(INFODIR),$(INFOFILES))
-	rm -f $(addprefix $(MAPLEDIR),$(mla))
+	rm -f $(addprefix $(LISP-DIR),$(lispfiles) $(ELC-FILES))
+	rm -f $(addprefix $(INFO-DIR),$(INFO-FILES))
+	rm -f $(addprefix $(MAPLE-DIR),$(mla))
 
 
-.PHONY: install install-lisp install-info install-maple clean-install
+.PHONY: install-all install-lisp install-info install-maple clean-install
 
 # }}}
 # {{{ Distribution
 
 
-DISTFILES_extra = ChangeLog Copyright Makefile help-system.mak README
+DIST-FILES_extra = ChangeLog Copyright Makefile help-system.mak README
 
 src = lisp/maplev.el doc/maplev.texi doc/version.texi maple/maplev.mpl
 
-zip: maplev.zip
-
-maplev.zip: $(elfile) doc/maplev.texi
-	zip $@ $?
-
 dist: $(call print-help,dist,Create maplev-$$TAG.tar.gz file)
-dist: $(LISPFILES) $(TEXIFILES)
-	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
-	rm -rf maplev-$(TAG)
-	$(call MKDIR,maplev-$(TAG))
-	$(call MKDIR,maplev-$(TAG)/doc)
-	$(call MKDIR,maplev-$(TAG)/lisp)
-	$(call MKDIR,maplev-$(TAG)/maplev)
-	cp $(LISPFILES) maplev-$(TAG)/lisp
-	cp $(TEXIFILES) maplev-$(TAG)/doc
-	cp $(MAPLEFILES) maplev-$(TAG)/maple
-	cp $(DISTFILES_extra) maplev-$(TAG)/
-	zip -r maplev-$(TAG).zip maplev-$(TAG)
-	tar zcvf maplev-$(TAG).tar.gz maplev-$(TAG)
+dist: $(LISP-FILES) $(TEXI-FILES)
+	rm -rf maplev-$(VERSION)
+	$(call MKDIR,maplev-$(VERSION))
+	$(call MKDIR,maplev-$(VERSION)/doc)
+	$(call MKDIR,maplev-$(VERSION)/lisp)
+	$(call MKDIR,maplev-$(VERSION)/maplev)
+	cp $(LISP-FILES) maplev-$(VERSION)/lisp
+	cp $(TEXI-FILES) maplev-$(VERSION)/doc
+	cp $(MAPLE-FILES) maplev-$(VERSION)/maple
+	cp $(DIST-FILES_extra) maplev-$(VERSION)/
+	zip -r maplev-$(VERSION).zip maplev-$(VERSION)
+	tar zcvf maplev-$(VERSION).tar.gz maplev-$(VERSION)
+
+dist := $(LISP-FILES) $(INFO-FILES) $(HTML-FILES) README install
+zip: $(dist)
+	rm -f maplev-$(VERSION).zip
+	zip maplev-$(VERSION).zip $+
 
 .PHONY:  dist zip
 

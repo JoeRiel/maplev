@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Script to unpack and install a zipped release
+# file.  It does so in a tmp directory which
+# it removes and creates.
+
+if [ ${#} = 0 ]; then
+    zipfile=(*.zip)
+    zipfile=${zipfile[0]}
+else
+    zipfile=$1
+fi
+
+if [ ! -f $zipfile ]; then
+    echo "$zipfile is not in sight"
+    exit 1
+fi
+
+#make clean-all
+rm --force --recursive tmp
+mkdir tmp
+cp $zipfile tmp
+cd tmp
+unzip $zipfile
+./install
+exit 0
