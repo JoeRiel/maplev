@@ -13,3 +13,4 @@
 /temp.mpl
 /tmp/
 /releases/
+*.elc
