@@ -1130,6 +1130,7 @@ These commands are available through the menubar, @kbd{MapleV -> Maple}.
 
 The command line version of Maple is run in a buffer with the mode
 @code{cmaple-process-mode} that is based on @code{comint-mode}.
+@inforef{Shell Mode,,emacs} for more information.
 In addition to the normal @code{comint} commands, the following commands
 are available:
 
