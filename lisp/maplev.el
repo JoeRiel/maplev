@@ -910,7 +910,7 @@ Set STATE and STACK in variable to nil."
   (unless (and 
            maplev-use-indent-info
            maplev--indent-info
-               (>= (point) (maplev--indent-info-point)))
+	   (>= (point) (maplev--indent-info-point)))
     ;; Set POINT to (point) if we're at the beginning of a top level
     ;; procedure assignment, otherwise search backwards for the
     ;; beginning or end of a top level procedure assignment and put
@@ -1221,7 +1221,7 @@ beyond \(point\)."
 (defun maplev--compute-indent (indent-info)
   "Return the indentation required for a Maple code line.
 INDENT-INFO is the indentation information applicable to this line;
-it it is a list of three items: \(KEYWORD INDENT-CLOSE INDENT-FOLLOW\).
+it is a list of three items: \(KEYWORD INDENT-CLOSE INDENT-FOLLOW\).
 See `maplev--indent-info' for details.  If INDENT-INFO is nil then 0
 is returned.  Point must be at current indentation."
   (if (not indent-info)
@@ -5136,13 +5136,6 @@ If optional arg HIDE is non-nil do not display buffer."
 
 ;;}}}
 
-;; The following was used during development.
-;; Delete before shipping
-
-;; Local variables:
-;; max-lisp-eval-depth: 1000
-;; indent-tabs-mode:nil
-;; end:
 
 (provide 'maplev)
 (provide 'maplev-mode)
