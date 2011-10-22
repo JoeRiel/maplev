@@ -2912,7 +2912,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
   "List of reserved words for Maple 6")
 
 (defconst maplev--reserved-words-7
-  (append '("assuming" "implies" "xor")
+  (append '("assuming" "implies" "subset" "xor")
           maplev--reserved-words-6)
   "List of reserved words for Maple 7")
 
