@@ -1,0 +1,6 @@
+-*- org -*-
+
+* release-2.18:
+** Added 'subset' to reserved words (Maple 7!)
+** Added 'upperbound' and 'lowerbound' to builtin functions
+

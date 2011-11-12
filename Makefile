@@ -173,7 +173,7 @@ clean-install:
 # {{{ Distribution
 
 
-DIST-FILES_extra = ChangeLog Copyright Makefile help-system.mak README
+DIST-FILES_extra = ChangeLog Copyright Makefile help-system.mak README RELEASE-NOTES
 
 src = lisp/maplev.el doc/maplev.texi doc/version.texi maple/maplev.mpl
 
