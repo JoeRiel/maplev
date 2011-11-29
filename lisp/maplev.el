@@ -123,8 +123,10 @@
 (require 'comint)
 (require 'info)
 
+(eval-when-compile
+  (require 'cl))
+
 (eval-and-compile
-  (require 'cl)
   (condition-case nil (require 'imenu) (error nil))
   (condition-case nil (require 'align) (error nil)))
 
@@ -2580,6 +2582,19 @@ it incorrectly matches, d.Ed, which is invalid.")
 
 ;;}}}
 
+;;{{{ Miscellaneous
+
+(defun maplev-remove-dupes (list)
+  "Remove duplicates from a sorted assoc LIST."
+  (let (tmp-list head)
+    (while list
+      (setq head (pop list))
+      (unless (equal (car head) (car (car list)))
+        (push head tmp-list)))
+    (reverse tmp-list)))
+
+;;}}}
+
 ;;{{{ Templates
 
 (defun maplev--template-proc-module (function name args description)
@@ -2718,13 +2733,10 @@ The real work is done by `maplev-complete-on-module-exports'."
                         completions)))
           ;; Replace the completion alist.
           (setcar (cdr (assoc maplev-release maplev-completion-alist)) 
-                  (remove-duplicates
-                   (sort completions (lambda (a b) (string< (car a) (car b))))
-                   :test (lambda (a b) (string= (car a) (car b)))))))
+                  (maplev-remove-dupes
+                   (sort completions (lambda (a b) (string< (car a) (car b))))))))
       ;; Delete the output from the cmaple buffer.
       (delete-region (point-min) (point-max)))))
-
-;; (setq maplev-completion-alist nil)
 
 (defun maplev--generate-initial-completion-alist ()
   "Generate `maplev-completion-alist' from the index/function and
@@ -3049,27 +3061,31 @@ This is the inverse of `maplev-comment-to-string-region.'"
    "table" "taylor" "tcoeff" "time" "traperror" "trunc" "type" 
    "unames" "`union`" "unprotect" "userinfo" "words" "writeto" ))
 
-(defconst maplev--builtin-functions-4
-  (append  '("`*`" "`+`" "ASSERT" "DEBUG" "MorrBrilCull" "add" "attributes" "denom" "getuserinterface" "inner" "iolib" "kernelopts" "`kernel/transpose`" "map2" "mul" "setattribute" "setuserinterface" "typematch")
-           (remove-if (lambda (elem) (member elem '("printf" "protect" "readline" "setattribute" "setuserinterface" "sscanf" "unprotect" "words")))
-                      maplev--builtin-functions-3)))
+(with-no-warnings
+  (defconst maplev--builtin-functions-4
+    (eval-when-compile
+      (append  '("`*`" "`+`" "ASSERT" "DEBUG" "MorrBrilCull" "add" "attributes" "denom" "getuserinterface" "inner" "iolib" "kernelopts" "`kernel/transpose`" "map2" "mul" "setattribute" "setuserinterface" "typematch")
+	       (remove-if (lambda (elem) (member elem '("printf" "protect" "readline" "setattribute" "setuserinterface" "sscanf" "unprotect" "words")))
+			  maplev--builtin-functions-3)))))
 
 (defconst maplev--builtin-functions-5
-  (append '("`**`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`^`" "call" "crinterp" "define" "`evalf/hypergeom/kernel`" "hfarrray" "timelimit")
-          (remove "`evalf/hypergeom`" maplev--builtin-functions-4)))
+  (eval-when-compile
+    (append '("`**`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`^`" "call" "crinterp" "define" "`evalf/hypergeom/kernel`" "hfarrray" "timelimit")
+	    (remove "`evalf/hypergeom`" maplev--builtin-functions-4))))
 
-(defconst maplev--builtin-functions-6
- (append '("||" "Array" "ArrayOptions" "CopySign" "Default0" "DefaultOverflow" "DefaultUnderflow" 
-           "EqualEntries" "EqualStructure" "FromInert" "MPFloat" 
-           "NextAfter" "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" "OrderedNE"
-           "SFloatExponent" "SFloatMantissa" "Scale10" "Scale2" "TRACE" "ToInert" "Unordered" 
-           "`and`" "bind" "call_external" "conjugate" "define_external" "`done`" "evalgf1" "exports" "frem" 
-           "ilog2" "lhs" "modp2" "mvMultiply" "negate" "`not`" "`or`" "remove" "rhs" 
-           "rtable" "rtableInfo" "rtable_indfns" "rtable_is_zero" "rtable_normalize_index" 
-           "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_scanblock" "rtable_sort_indices" 
-           "selectremove" "`stop`" "streamcall" "unbind")
-           (remove-if (lambda (elem) (member elem '("call" "define" "getuserinterface" "setuserinterface")))
-                      maplev--builtin-functions-5)))
+(with-no-warnings
+  (defconst maplev--builtin-functions-6
+    (append '("||" "Array" "ArrayOptions" "CopySign" "Default0" "DefaultOverflow" "DefaultUnderflow" 
+	      "EqualEntries" "EqualStructure" "FromInert" "MPFloat" 
+	      "NextAfter" "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" "OrderedNE"
+	      "SFloatExponent" "SFloatMantissa" "Scale10" "Scale2" "TRACE" "ToInert" "Unordered" 
+	      "`and`" "bind" "call_external" "conjugate" "define_external" "`done`" "evalgf1" "exports" "frem" 
+	      "ilog2" "lhs" "modp2" "mvMultiply" "negate" "`not`" "`or`" "remove" "rhs" 
+	      "rtable" "rtableInfo" "rtable_indfns" "rtable_is_zero" "rtable_normalize_index" 
+	      "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_scanblock" "rtable_sort_indices" 
+	      "selectremove" "`stop`" "streamcall" "unbind")
+	    (remove-if (lambda (elem) (member elem '("call" "define" "getuserinterface" "setuserinterface")))
+		       maplev--builtin-functions-5))))
 
 (defconst maplev--builtin-functions-7
  (append '("_treeMatch" "_unify" "_xml" "dlclose" "factorial" "`implies`" "`subset`" "`xor`")
@@ -3772,7 +3788,8 @@ cmaple.
         mode-name "Maple")
   (if (< emacs-major-version 22)
       ;; This generates a compiler warning.  Ignore.
-      (setq comint-use-prompt-regexp-instead-of-fields t)
+      (with-no-warnings
+	(setq comint-use-prompt-regexp-instead-of-fields t))
     (setq comint-use-prompt-regexp t))
 
   ;; Mint support
