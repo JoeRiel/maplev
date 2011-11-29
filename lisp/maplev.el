@@ -6,7 +6,7 @@
 ;; Authors:    Joseph S. Riel <joer@san.rr.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    2.18
+;; Version:    2.19
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -122,9 +122,6 @@
 (require 'font-lock)
 (require 'comint)
 (require 'info)
-
-(eval-when-compile
-  (require 'cl))
 
 (eval-and-compile
   (condition-case nil (require 'imenu) (error nil))
@@ -2502,16 +2499,17 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
 
 ;;{{{ Folding functions
 
-(defun maplev-fold-proc ()
-  "Add editor fold marks around the procedure at point.
+(with-no-warnings
+  (defun maplev-fold-proc ()
+    "Add editor fold marks around the procedure at point.
 The name of the procedure is inserted into the title of the fold."
-  (interactive)
-  (let ((proc (maplev-what-proc 'nodisplay)))
-    (maplev-mark-defun)
-    (folding-fold-region (point) (mark))
-    (insert (concat " " proc))
-    (folding-shift-out)))
-
+    (interactive)
+    (let ((proc (maplev-what-proc 'nodisplay)))
+      (maplev-mark-defun)
+      (folding-fold-region (point) (mark))
+      (insert (concat " " proc))
+      (folding-shift-out))))
+  
 ;;}}}
 
 ;;{{{ Movement functions
@@ -2592,6 +2590,15 @@ it incorrectly matches, d.Ed, which is invalid.")
       (unless (equal (car head) (car (car list)))
         (push head tmp-list)))
     (reverse tmp-list)))
+
+(defun maplev-minus (setA setB)
+  "Remove members of SETB from SETA."
+  (let (tmp head)
+    (while setA
+      (setq head (pop setA))
+      (unless (member head setB)
+	  (push head tmp)))
+    (reverse tmp)))
 
 ;;}}}
 
@@ -3061,31 +3068,29 @@ This is the inverse of `maplev-comment-to-string-region.'"
    "table" "taylor" "tcoeff" "time" "traperror" "trunc" "type" 
    "unames" "`union`" "unprotect" "userinfo" "words" "writeto" ))
 
-(with-no-warnings
-  (defconst maplev--builtin-functions-4
-    (eval-when-compile
-      (append  '("`*`" "`+`" "ASSERT" "DEBUG" "MorrBrilCull" "add" "attributes" "denom" "getuserinterface" "inner" "iolib" "kernelopts" "`kernel/transpose`" "map2" "mul" "setattribute" "setuserinterface" "typematch")
-	       (remove-if (lambda (elem) (member elem '("printf" "protect" "readline" "setattribute" "setuserinterface" "sscanf" "unprotect" "words")))
-			  maplev--builtin-functions-3)))))
+(defconst maplev--builtin-functions-4
+  (append  '("`*`" "`+`" "ASSERT" "DEBUG" "MorrBrilCull" "add" "attributes" "denom" "getuserinterface" "inner" "iolib" "kernelopts" "`kernel/transpose`" "map2" "mul" "setattribute" "setuserinterface" "typematch")
+	   (maplev-minus maplev--builtin-functions-3
+			 '("printf" "protect" "readline" "setattribute" "setuserinterface" "sscanf" "unprotect" "words"))))
+		      
 
 (defconst maplev--builtin-functions-5
-  (eval-when-compile
-    (append '("`**`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`^`" "call" "crinterp" "define" "`evalf/hypergeom/kernel`" "hfarrray" "timelimit")
-	    (remove "`evalf/hypergeom`" maplev--builtin-functions-4))))
+  (append '("`**`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`^`" "call" "crinterp" "define" "`evalf/hypergeom/kernel`" "hfarrray" "timelimit")
+	  (remove "`evalf/hypergeom`" maplev--builtin-functions-4)))
 
-(with-no-warnings
-  (defconst maplev--builtin-functions-6
-    (append '("||" "Array" "ArrayOptions" "CopySign" "Default0" "DefaultOverflow" "DefaultUnderflow" 
-	      "EqualEntries" "EqualStructure" "FromInert" "MPFloat" 
-	      "NextAfter" "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" "OrderedNE"
-	      "SFloatExponent" "SFloatMantissa" "Scale10" "Scale2" "TRACE" "ToInert" "Unordered" 
-	      "`and`" "bind" "call_external" "conjugate" "define_external" "`done`" "evalgf1" "exports" "frem" 
-	      "ilog2" "lhs" "modp2" "mvMultiply" "negate" "`not`" "`or`" "remove" "rhs" 
-	      "rtable" "rtableInfo" "rtable_indfns" "rtable_is_zero" "rtable_normalize_index" 
-	      "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_scanblock" "rtable_sort_indices" 
-	      "selectremove" "`stop`" "streamcall" "unbind")
-	    (remove-if (lambda (elem) (member elem '("call" "define" "getuserinterface" "setuserinterface")))
-		       maplev--builtin-functions-5))))
+(defconst maplev--builtin-functions-6
+  (append '("||" "Array" "ArrayOptions" "CopySign" "Default0" "DefaultOverflow" "DefaultUnderflow" 
+	    "EqualEntries" "EqualStructure" "FromInert" "MPFloat" 
+	    "NextAfter" "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" "OrderedNE"
+	    "SFloatExponent" "SFloatMantissa" "Scale10" "Scale2" "TRACE" "ToInert" "Unordered" 
+	    "`and`" "bind" "call_external" "conjugate" "define_external" "`done`" "evalgf1" "exports" "frem" 
+	    "ilog2" "lhs" "modp2" "mvMultiply" "negate" "`not`" "`or`" "remove" "rhs" 
+	    "rtable" "rtableInfo" "rtable_indfns" "rtable_is_zero" "rtable_normalize_index" 
+	    "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_scanblock" "rtable_sort_indices" 
+	    "selectremove" "`stop`" "streamcall" "unbind")
+	  (maplev-minus maplev--builtin-functions-5
+			   '("call" "define" "getuserinterface" "setuserinterface"))))
+		     
 
 (defconst maplev--builtin-functions-7
  (append '("_treeMatch" "_unify" "_xml" "dlclose" "factorial" "`implies`" "`subset`" "`xor`")
