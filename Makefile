@@ -25,7 +25,7 @@ INFO = info
 # {{{ Directories
 
 # where local lisp files go.  
-LISP-DIR  := $(HOME)/.emacs.d/$(PKG)
+LISP-DIR  := $(HOME)/.emacs.d/maple
 
 # where info files go
 INFO-DIR = $(HOME)/share/info
