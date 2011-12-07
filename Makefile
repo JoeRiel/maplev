@@ -88,7 +88,7 @@ doc/$(PKG).html: doc/$(PKG).texi doc/version.texi
 
 clean-doc: $(call print-help,clean-doc,Remove the auxiliary files in doc)
 clean-doc:
-	rm -f $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILES), $(wildcard doc/*))
+	rm -f $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILES) fdl.texi, $(wildcard doc/*))
 
 clean-doc-all: $(call print-help,clean-doc-all,Remove all generated documentation)
 clean-doc-all: clean-doc

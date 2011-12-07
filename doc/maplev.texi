@@ -19,38 +19,27 @@
 @tolerance 10000
 @end iftex
 
-@c $Id: maplev.texi,v 1.1 2005-06-19 00:38:35 joe Exp $
+@copying
+MapleV is a GNU Emacs major mode for developing source code for @w{Maple}, 
+a computer algebra system (CAS) marketed by @w{Waterloo Maple Inc}.
+In this manual @dfn{MapleV} refers to the Emacs major mode and
+@dfn{Maple} to the CAS.  MapleV is written entirely in Emacs-Lisp and is
+distributed under the GNU General Public License.
 
-@ifinfo
-This file documents MapleV, a GNU Emacs major mode for developing code for
-Maple, a computer algebra system (CAS) produced by Waterloo Maple Inc.
+This manual is for MapleV version @value{VERSION}.
 
-Copyright (C) 1999, 2010
-Joseph S. Riel
+Copyright @copyright{} 2011, Joseph S. Riel
 
-This edition is for MapleV version @value{VERSION}.
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled
+``GNU Free Documentation License.''
+@end quotation
+@end copying
 
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
-
-@ignore
-Permission is granted to process this file through TeX and print the
-results, provided the printed document carries copying permission
-notice identical to this one except for the removal of this paragraph
-(this paragraph not being relevant to the printed manual).
-
-@end ignore
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided that the entire
-resulting derived work is distributed under the terms of a permission
-notice identical to this one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that this permission notice may be stated in a translation approved
-by the Free Software Foundation.
-@end ifinfo
 
 @c {{{endfold}}}
 @c {{{ Titlepage and Copyright }}}
@@ -74,23 +63,6 @@ Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
 are preserved on all copies.
 
-@ignore
-Permission is granted to process this file through TeX and print the
-results, provided the printed document carries copying permission
-notice identical to this one except for the removal of this paragraph
-(this paragraph not being relevant to the printed manual).
-@end ignore
-
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-section entitled ``Copying'' is included exactly as in the original, and
-provided that the entire resulting derived work is distributed under the
-terms of a permission notice identical to this one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that this permission notice may be stated in a translation
-approved by the Free Software Foundation.
 @end titlepage
 @page
 
@@ -101,18 +73,12 @@ approved by the Free Software Foundation.
 @node top, Copying, (dir), (dir)
 @top MapleV
 
-MapleV is a GNU Emacs major mode for developing source code for @w{Maple}, 
-a computer algebra system (CAS) marketed by @w{Waterloo Maple Inc}.
-In this manual @dfn{MapleV} refers to the Emacs major mode and
-@dfn{Maple} to the CAS.  MapleV is written entirely in Emacs-Lisp and is
-distributed under the GNU General Public License.
-
-This is the documentation for MapleV version @value{VERSION}.
-
+@insertcopying
 @end ifnottex
 
 @menu
 * Copying::                     Conditions for copying and changing MapleV.
+* GNU Free Documentation License::  Copying this manual.
 * Introduction::                A brief tour of MapleV's features.
 * Basics::                      A few basics.
 
@@ -141,7 +107,6 @@ Indices
 * Key Index::                   
 * Function Index::              
 * Variable Index::              
-* Concept Index::               
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -211,7 +176,7 @@ Evolution
 @c {{{endfold}}}
 @c {{{ Copying }}}
 
-@node Copying, Introduction, top, top
+@node Copying, GNU Free Documentation License, top, top
 @unnumbered Copying
 @cindex Copying
 @cindex Copyright
@@ -260,8 +225,18 @@ Licenses that accompany them.
 
 
 @c {{{endfold}}}
+
+@c {{{ GNU Free Documentation License }}}
+
+@node GNU Free Documentation License, Introduction, Copying, top
+@unnumbered GNU Free Documentation License
+@include fdl.texi
+
+@c {{{endfold}}}
+
+
 @c {{{ Introduction }}}
-@node Introduction, Basics, Copying, top
+@node Introduction, Basics, GNU Free Documentation License, top
 @unnumbered Introduction
 @cindex Introduction
 
@@ -1570,15 +1545,11 @@ optional package.
 
 @printindex fn
 
-@node Variable Index, Concept Index, Function Index, top
+@node Variable Index,  , Function Index, top
 @comment    node-name,         next,       previous, up
 @unnumbered Variable Index
 
 @printindex vr
-
-@node Concept Index,  , Variable Index, top
-@comment      node-name, next,       previous, up
-@unnumbered Concept Index
 
 @printindex cp
 
