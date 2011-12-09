@@ -26,12 +26,12 @@ If that does not work, here are the manual steps.
 Copy the files to locations appropriate on your system.
 Here is where I put the various files:
 
-   $HOME/.emacs.d/maple :  lisp/maplev.el
-   $HOME/share/info     :  doc/maplev (do not include the doc/)
+   lisp/maplev.el --> $HOME/.emacs.d/maple
+   doc/maplev     --> $HOME/share/info
 
 Under the doc subdirectory is an html format of the maplev manual.  It
 may be useful if you do not have Emacs or info installed and so cannot
-read the info file (mds).
+read the info file (maplev).
 
 CONFIGURATION
 -------------
