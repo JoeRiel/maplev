@@ -13,25 +13,31 @@ The major modes are
 
 INSTALLATION
 ------------
+On a linux system you should be able to run
+
+$ ./install
+
+That byte-compiles and installs the lisp files,
+copies the info page, and updates the info dir node.
+You may need to modify the file for your system.
+
+If that does not work, here are the manual steps.
+
 Copy the files to locations appropriate on your system.
 Here is where I put the various files:
 
-   $HOME/.emacs.d/mds :  lisp/maplev.el
-   $HOME/share/info   :  doc/maplev (do not include the doc/)
+   $HOME/.emacs.d/maple :  lisp/maplev.el
+   $HOME/share/info     :  doc/maplev (do not include the doc/)
 
 Under the doc subdirectory is an html format of the maplev manual.  It
 may be useful if you do not have Emacs or info installed and so cannot
 read the info file (mds).
 
-The provided install file can be used to do the copying,
-just be sure to check that it does what you want.  Run
-
-./install
-
 CONFIGURATION
 -------------
 Modify your .emacs file.  I have the following in mine
 
+(setq load-path (cons (format "%s/.emacs.d/maple" (getenv "HOME")) load-path))
 (autoload 'maplev "maplev" "Maple editing mode" t)
 (setq 
  auto-mode-alist (cons (cons (concat "\\." (regexp-opt '("mpl" "tst") t)
@@ -42,9 +48,9 @@ Modify your .emacs file.  I have the following in mine
  maplev-default-release "15"
  maplev-executable-alist 
  '(
-   ("15" . ("smaple15" nil "smint15"))
-   ("14" . ("smaple14" nil "smint14"))
-   ("13" . ("smaple13" nil "smint13")))
+   ("15" . ("maple15" nil "mint15"))
+   ("14" . ("maple14" nil "mint14"))
+   ("13" . ("maple13" nil "mint13")))
  maplev-mint-query nil
  maplev-description-quote-char ?\"
  )
@@ -52,7 +58,7 @@ Modify your .emacs file.  I have the following in mine
 
 USAGE
 -----
-Fire up Emacs.  If you configuted auto-mode-alist, as above,
+Fire up Emacs.  If you configured auto-mode-alist, as above,
 opening a Maple source file with extension .mpl should case
 it to be opened in maplev-mode.
 
