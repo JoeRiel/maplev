@@ -4,6 +4,7 @@ export MemberToIndexed
     ,  PrintProc
     ;
 
+#{{{ MemberToIndexed
     MemberToIndexed := proc(s::string)
     description "Convert member operator (:-) to indices in a string";
     local words;
@@ -17,7 +18,8 @@ export MemberToIndexed
         end if;
     end proc:
 
-
+#}}}
+#{{{ PrintProc
     PrintProc := proc(P :: string
                       , lines::{posint,posint..posint} := NULL
                       , { doublespaces :: truefalse := true }
@@ -80,17 +82,18 @@ export MemberToIndexed
             # Print the string.
             printf("%s\n", str);
 
-        catch "procedure name expected":
-            error "%1 is not a procedure name",p;
         catch "cannot debug the debugger":
             dummy_name := eval(p);
             procname(dummy_name,args[2..-1])
+        catch:
+            error "'%1' is not a procedure name",P;
         finally
             interface('screenwidth' = width);
             kernelopts('opaquemodules' = opacity);
         end try;
         return NULL;
     end proc;
+#}}}
 
 end module:
 

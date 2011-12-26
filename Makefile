@@ -145,13 +145,13 @@ install: $(addprefix install-,info lisp mla)
 install-lisp: $(call print-help,install-lisp,Install lisp in $(LISP-DIR))
 install-lisp: $(LISP-FILES) $(ELC-FILES)
 	@$(call MKDIR,$(LISP-DIR))
-	@$(CP) $+ $(LISP-DIR)
+	$(CP) $+ $(LISP-DIR)
 
 install-info: $(call print-help,install-info,Install info files in $(INFO-DIR))
 install-info: $(INFO-FILES)
 	@$(call MKDIR,$(INFO-DIR))
 	$(CP) $(INFO-FILES) $(INFO-DIR)
-	@echo Update 'dir' node:
+	@echo Update 'dir' node
 	@for file in $(INFO-FILES); do ginstall-info --info-dir=$(INFO-DIR) $${file}; done
 
 install-mla: $(call print-help,install-mla,Install mla in $(MAPLE_LIB_DIR))

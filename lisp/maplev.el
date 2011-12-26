@@ -643,7 +643,7 @@ May interfere with some modes (e.g. noweb).")
   "\\<\\(?:local\\|options?\\|global\\|description\\|export\\|uses\\)\\>"
   "Regular expression for a Maple procedure declaration statement.")
 
-(defconst maplev--simple-name-re  "\\_<[a-zA-Z_][a-zA-Z0-9_]*\\_>"
+(defconst maplev--simple-name-re  "\\_<[a-zA-Z_~][a-zA-Z0-9_]*\\_>"
   "Regular expression for a simple name.")
 
 (defconst maplev--quoted-name-re  "`[^`\n\\\\]*\\(?:\\\\.[^`\n\\\\]*\\)*`"
@@ -774,6 +774,7 @@ including double-quotes.")
 (unless maplev-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?_  "_"  table) ; symbol constituent
+    (modify-syntax-entry ?~  "_"  table) ; symbol constituent
     (modify-syntax-entry ?&  "w"  table) ; word constituent
     (modify-syntax-entry ?\\ "\\" table) ; escape
     (modify-syntax-entry ?#  "<"  table) ; comment starter
