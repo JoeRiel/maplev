@@ -1,6 +1,11 @@
 -*- org -*-
 
-* release-2.18:
+* 2.20:
+** Handle leading tilde in symbols (new with Maple 16; used for coercion).
+** Improve README.
+* 2.19:
+** Eliminate compilation errors
+* 2.18:
 ** Added 'subset' to reserved words (Maple 7!)
 ** Added 'upperbound' and 'lowerbound' to builtin functions
 
