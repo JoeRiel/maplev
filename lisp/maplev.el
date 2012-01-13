@@ -105,7 +105,7 @@
 
 ;;{{{ Information
 
-(defconst maplev-version "2.17" "Version of MapleV mode.")
+(defconst maplev-version "2.20" "Version of MapleV mode.")
 
 (defconst maplev-developer 
   "Joseph S. Riel <joer@san.rr.com>"

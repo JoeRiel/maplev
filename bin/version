@@ -70,7 +70,7 @@ file="lisp/maplev.el"
 [ -z "$version" ] && echo -ne "$file:\t"
 sed $sed_opt "
 /;; Version:/{$sed_cmd}
-/defconst mds-version/{$sed_cmd}
+/defconst maplev-version/{$sed_cmd}
 " "$file"
 
 # Update texinfo
