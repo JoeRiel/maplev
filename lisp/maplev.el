@@ -1,4 +1,4 @@
-;;; maplev.el --- Maple mode for GNU Emacs
+ ;;; maplev.el --- Maple mode for GNU Emacs
 ;;
 ;;
 ;; Copyright (C) 2001,2003,2008,2009 Joseph S. Riel
@@ -246,7 +246,8 @@ is an integer correspond to the button number; preceding items are optional modi
 
 (defcustom maplev-executable-alist
   (if (string-match "windows-nt\\|ms-dos" (symbol-name system-type))
-      `(("15" . ,(maplev-windows-executables "15" t))
+      `(("16" . ,(maplev-windows-executables "16" t))
+	("15" . ,(maplev-windows-executables "15" t))
         ("14" . ,(maplev-windows-executables "14" t))
         ("13" . ,(maplev-windows-executables "13" t))
         ("12" . ,(maplev-windows-executables "12" t))
@@ -261,6 +262,7 @@ is an integer correspond to the button number; preceding items are optional modi
         ("3"  . ,(maplev-windows-executables "3"  t)))
 
     '(
+      ("16"  . ("maple" nil "mint"))
       ("15"  . ("maple" nil "mint"))
       ("14"  . ("maple" nil "mint"))
       ("13"  . ("maple" nil "mint"))
@@ -292,7 +294,7 @@ if nil the default initialization file is used."
 ;; this isn't quite right, it doesn't permit assigning
 ;; a new release.
 
-(defcustom maplev-default-release "13"
+(defcustom maplev-default-release "15"
   "*Release of Maple used as the default executable.
 It must be a key in `maplev-executable-alist'."
   :type `(choice ,@(mapcar (lambda (item)
@@ -2969,6 +2971,10 @@ This is the inverse of `maplev-comment-to-string-region.'"
   maplev--reserved-words-10
   "List of reserved words for Maple 15")
 
+(defconst maplev--reserved-words-16
+  maplev--reserved-words-10
+  "List of reserved words for Maple 16")
+
 (defconst maplev--reserved-words-alist
   `((3 .  ,maplev--reserved-words-3)
     (4 .  ,maplev--reserved-words-4)
@@ -2983,6 +2989,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
     (13 . ,maplev--reserved-words-13)
     (14 . ,maplev--reserved-words-14)
     (15 . ,maplev--reserved-words-15)
+    (16 . ,maplev--reserved-words-16)
    )
   "Alist of Maple reserved words.  The key is the major release.")
 
@@ -3124,6 +3131,9 @@ This is the inverse of `maplev-comment-to-string-region.'"
 (defconst maplev--builtin-functions-15
   (append '("numelems" "upperbound" "lowerbound") maplev--builtin-functions-14))
 
+(defconst maplev--builtin-functions-16
+  (append '("_hackwareToPointer") maplev--builtin-functions-15))
+
 (defconst maplev--builtin-functions-alist
   `((3  . ,maplev--builtin-functions-3)
     (4  . ,maplev--builtin-functions-4)
@@ -3138,6 +3148,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
     (13 . ,maplev--builtin-functions-13)
     (14 . ,maplev--builtin-functions-14)
     (15 . ,maplev--builtin-functions-15)
+    (16 . ,maplev--builtin-functions-16)
  "Alist of Maple builtin funtions. The key is the major release."))
 
 ;; (defconst maplev--builtin-functions-alist
