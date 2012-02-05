@@ -3129,7 +3129,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
  (append '("Object") maplev--builtin-functions-13))
 
 (defconst maplev--builtin-functions-15
-  (append '("numelems" "upperbound" "lowerbound") maplev--builtin-functions-14))
+  (append '("assign" "numelems" "upperbound" "lowerbound") maplev--builtin-functions-14))
 
 (defconst maplev--builtin-functions-16
   (append '("_hackwareToPointer") maplev--builtin-functions-15))
