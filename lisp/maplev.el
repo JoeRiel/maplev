@@ -3083,7 +3083,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
 		      
 
 (defconst maplev--builtin-functions-5
-  (append '("`**`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`^`" "call" "crinterp" "define" "`evalf/hypergeom/kernel`" "hfarrray" "timelimit")
+  (append '("`**`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`^`" "call" "crinterp" "define" "`evalf/hypergeom/kernel`" "hfarray" "timelimit")
 	  (remove "`evalf/hypergeom`" maplev--builtin-functions-4)))
 
 (defconst maplev--builtin-functions-6
@@ -3109,7 +3109,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
            maplev--builtin-functions-7))
 
 (defconst maplev--builtin-functions-9
- (append '("`..`" "Normalizer" "UpdateSource" "gmp_isprime" "isqrt" "`mod`" "piecewise" "reduce_opr" "rtable_eval" "rtable_zip")
+ (append '("`..`" "Normalizer" "UpdateSource" "gmp_isprime" "is_gmp" "isqrt" "`mod`" "piecewise" "reduce_opr" "rtable_eval" "rtable_zip")
            maplev--builtin-functions-8))
 
 (defconst maplev--builtin-functions-10
@@ -3120,7 +3120,7 @@ This is the inverse of `maplev-comment-to-string-region.'"
   maplev--builtin-functions-10)
 
 (defconst maplev--builtin-functions-12
- (append '("Record") maplev--builtin-functions-11))
+ (append '("Record" "rtable_size") maplev--builtin-functions-11))
 
 (defconst maplev--builtin-functions-13
  (append '("`::`" "`~`") maplev--builtin-functions-12))
