@@ -3001,24 +3001,32 @@ This is the inverse of `maplev-comment-to-string-region.'"
      (list "fi" "od" "traperror" "linalg" "solvefor" "ERROR")))
   "Regex of deprecated keywords and procedures.")
 
+(defconst maplev--special-words
+  (list "args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
+	"_options" "_noptions" "_rest" "_nrest"
+	"_params" "_nparams" "_passed" "_npassed"
+	"_nresults" )
+  "List of special words in Maple.")
+
 (defconst maplev--special-words-re
   (eval-when-compile
-    (maplev--list-to-word-re
-     (list "args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
-           "_options" "_noptions" "_rest" "_nrest"
-           "_params" "_nparams" "_passed" "_npassed"
-           "_nresults" )))
+    (maplev--list-to-word-re maplev--special-words))
   "Regex of special words in Maple.")
+
+(defconst maplev--initial-variables
+  (list "Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
+	"integrate" "libname" "NULL" "Order" "printlevel" "lasterror"
+	"`mod`" "Digits" "constants" "undefined" "I"
+	"UseHardwareFloats"
+	"Testzero" "Normalizer" "NumericEventHandlers"
+	"Rounding" "`index/newtable`")
+  "List of global, environmental variables, and constants.")
+	
+
 
 (defconst maplev--initial-variables-re
   (eval-when-compile
-    (maplev--list-to-word-re
-     (list "Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
-           "integrate" "libname" "NULL" "Order" "printlevel" "lasterror"
-           "`mod`" "Digits" "constants" "undefined" "I"
-           "UseHardwareFloats"
-           "Testzero" "Normalizer" "NumericEventHandlers"
-           "Rounding" "`index/newtable`")))
+    (maplev--list-to-word-re maplev--initial-variables))
   "Regexp of global, environmental variables and constants.")
 
 (defconst maplev--preprocessor-directives-re
