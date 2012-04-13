@@ -3354,6 +3354,40 @@ If nil then `font-lock-maximum-decoration' selects the level."
 
 ;;}}}
 
+;;{{{ Includes
+
+(defun maplev-find-include-file-at-point (button)
+  "Open the include file at point."
+  (beginning-of-line)
+  (unless (looking-at maplev--include-directive-re)
+    (error "Not at an include statement"))
+  (maplev-find-include-file (match-string 2)))
+
+
+(defun maplev-find-include-file (inc-file)
+  "Find and open the Maple include file INC-FILE.
+Because an include-path is not known, the path delimiters, angle
+brackets or double-quotes, do not matter.  If the file path is
+absolute, raise an error if it does not exist.  If the path is
+relative, append it to each directory in the current directory
+and search there.  Raise an error if the file is not found."
+  (if (file-exists-p inc-file)
+      (find-file inc-file)
+    (if (file-name-absolute-p inc-file)
+	(error "Include file %1 does not exist" inc-file))
+    (let ((dir default-directory)
+	  abs-file found)
+      (while (and (not found) (not (string= dir "")))
+	(setq abs-path (concat dir inc-file))
+	(if (file-exists-p abs-path)
+	    (setq found t)
+	  (setq dir (file-name-directory (directory-file-name dir)))))
+      (if found
+	  (find-file abs-path)
+	(error "Cannot find include file %1" inc-file)))))
+
+;;}}}
+
 ;;; Process Modes
 
 ;;{{{ Group definitions
@@ -3591,7 +3625,7 @@ non-nil do not generate an error if time-out occurs."
         (sleep-for 0.1))
       (and (not no-err)
            (maplev-cmaple--locked-p)
-           (error "Maple busy.")))))
+           (error "Maple busy")))))
 
 ;; Functions that send stuff to cmaple
 
