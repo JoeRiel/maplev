@@ -489,7 +489,8 @@ The button value can be passed to `button-lock-extend-binding'."
     (let ((map (make-sparse-keymap))
           (properties nil)
           (success nil)
-          (fl-keyword nil))
+          (fl-keyword nil)
+	  props)
 
       (define-key map `[,mouse-binding] action)
 
