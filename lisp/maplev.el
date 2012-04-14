@@ -1875,6 +1875,8 @@ Maple libraries.
   ;;(make-local-hook 'hack-local-variables-hook)
   (add-hook 'hack-local-variables-hook 'maplev-mode-name nil t)
 
+  (maplev-buttonize-includes)
+
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
       (add-hook 'local-write-file-hooks 'maplev-remove-trailing-spaces))
@@ -3371,7 +3373,7 @@ If nil then `font-lock-maximum-decoration' selects the level."
 (defun maplev-buttonize-includes ()
   "Buttonize the include statements."
   (interactive)
-  (global-button-lock-mode 1)
+  (button-lock-mode t)
   (button-lock-set-button maplev--include-directive-re
 			  'maplev-find-include-file-at-point
 			  :face 'link
