@@ -208,7 +208,8 @@
 (autoload 'font-lock-remove-keywords "font-lock" nil nil)
 
 ;;;###autoload
-(defgroup button-lock nil "Clickable text defined by regexp")
+(defgroup button-lock nil "Clickable text defined by regexp"
+  :group 'development)
 
 (defcustom button-lock-modestring " bl"
   "This string appears in the modeline when button-lock mode is active."
