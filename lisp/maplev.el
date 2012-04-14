@@ -1875,7 +1875,9 @@ Maple libraries.
   ;;(make-local-hook 'hack-local-variables-hook)
   (add-hook 'hack-local-variables-hook 'maplev-mode-name nil t)
 
+  (set (make-local-variable 'maplev-loaded-config-file-flag) nil)
   (maplev-buttonize-includes)
+  (maplev-load-config-file)
 
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
@@ -3454,6 +3456,25 @@ nil."
   'follow-link t
   'face 'maplev-include-file)
 
+
+;;}}}
+
+;;{{{ Config file (.maplev)
+
+(defun maplev-load-config-file (&optional force)
+  "Find and load the maplev configuration file.
+The file is named .maplev and is searched for in the current
+directory and its ancestors.  With FORCE non-nil, search and
+reload, otherwise do so only if the buffer-local flag
+`maplev-loaded-config-file-flag' is nil.  Set the flag whether
+the file regardless.  Return t if configuration file was loaded,
+nil otherwise."
+  (unless maplev-loaded-config-file-flag
+    (setq maplev-loaded-config-file-flag t)
+    (let ((config (maplev-include--find-file-up-path ".maplev")))
+      (when config
+	(load-file config)
+	t))))
 
 ;;}}}
 
