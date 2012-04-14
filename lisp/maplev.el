@@ -3391,14 +3391,13 @@ The path is a list of rooted strings."
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
     (let* ((inc-file (match-string-no-properties 2))
-	   (file (or (maplev-find-include-file inc-file)
-		     (string= "<" (match-string-no-properties 1))
-		     path maplev-include-path)))
+	   (file (maplev-find-include-file inc-file
+					   (string= "<" (match-string-no-properties 1))
+					   (or path maplev-include-path))))
       (unless file
 	(error "Cannot find include file %s" inc-file))
       (find-file-other-window file))))
 	  
-
 (defun maplev-find-include-file (inc-file &optional inc-first inc-path)
   "Find the Maple include file INC-FILE and return as an absolute path.
 INC-PATH is an optional list of rooted directories.  Use each
