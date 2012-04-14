@@ -3368,9 +3368,8 @@ If nil then `font-lock-maximum-decoration' selects the level."
   "Font lock face used for include filenames, indicates hyperlink."
   :group 'maplev-faces)
 
-(defun maplev--buttonize-lock-includes (&optional off)
-  "If OFF is nil enable buttonizing the include statements,
-otherwise turn it off (that part is not implemented)."
+(defun maplev-buttonize-includes ()
+  "Buttonize the include statements."
   (interactive)
   (global-button-lock-mode 1)
   (button-lock-set-button maplev--include-directive-re
@@ -3390,9 +3389,9 @@ The path is a list of rooted strings."
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
     (let* ((inc-file (match-string-no-properties 2))
-	   (file (maplev-find-include-file inc-file)
-		 (string= "<" (match-string-no-properties 1))
-		 (or path maplev-include-path)))
+	   (file (or (maplev-find-include-file inc-file)
+		     (string= "<" (match-string-no-properties 1))
+		     path maplev-include-path)))
       (unless file
 	(error "Cannot find include file %s" inc-file))
       (find-file-other-window file))))
@@ -3400,19 +3399,23 @@ The path is a list of rooted strings."
 
 (defun maplev-find-include-file (inc-file &optional inc-first inc-path)
   "Find the Maple include file INC-FILE and return as an absolute path.
-Return nil if the file is not found."
+INC-PATH is an optional list of rooted directories.  Use each
+directory, in order, as parent of INC-FILE.  If INC-FIRST is
+non-nil, search the INC-PATH directories before using the
+`default-directory'.  If those searches fail, search each parent
+of `default-directory'.  Return nil if the file is not found."
   (if (file-name-absolute-p inc-file)
-      (and (file-exists-p file) file)
+      (and (file-exists-p inc-file) inc-file)
     (if inc-first
 	(or
-	 (maplev-include--find-file-in-path file inc-path)
-	 (maplev-include--find-file-up-path))
-      (or (maplev-include--find-file-in-path file (list default-dir))
-	  (maplev-include--find-file-in-path file inc-path)
-	  (maplev-include--find-file-up-path)))))
+	 (maplev-include--find-file-in-path inc-file inc-path)
+	 (maplev-include--find-file-up-path inc-file))
+      (or (maplev-include--find-file-in-path inc-file (list default-directory))
+	  (maplev-include--find-file-in-path inc-file inc-path)
+	  (maplev-include--find-file-up-path inc-file)))))
 
 (defun maplev-include--find-file-in-path (file &optional paths)
-  "Search for FILE in list of rooted PATHS, which include trailing slash.
+  "Search for FILE in a list of rooted PATHS, which include trailing slash.
 If found, return the absolute path to FILE, otherwise return nil."
   (let (dir abs-file)
     (while (not (progn
