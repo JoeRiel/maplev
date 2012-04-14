@@ -1,5 +1,17 @@
 -*- org -*-
 
+* 2.21:
+** Added maple 16
+** Buttonize include statements; clicking them opens the file.
+   The functionality respects include file delimiters (angle brackets
+   or double quotes) and acts accordingly, using maplev-include-path
+   to provide the include path of searchable directories.  A heuristic
+   is used if the normal searches fail; that allows most includes to just
+   work.
+** Search and load a maplev configuration file, which can be project specific.
+   The configuration file is elisp.  A typical use is to set maplev-include-path
+   (which is now buffer-local) so that the buttonizing (above) works properly
+   with the project.  
 * 2.20:
 ** Handle leading tilde in symbols (new with Maple 16; used for coercion).
 ** Improve README.
