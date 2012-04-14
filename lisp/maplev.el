@@ -382,6 +382,8 @@ specified in Maple preprocessor $include directives."
   :group 'maplev-executables
   :group 'maplev-mint)
 
+(make-variable-buffer-local 'maplev-include-path)
+
 ;;}}}
 ;;{{{   comments
 
