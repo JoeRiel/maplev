@@ -3380,57 +3380,69 @@ otherwise turn it off (that part is not implemented)."
 			  :grouping 2
 			  :help-text "open file"))
 
-(defun maplev-find-include-file-at-point ()
-  "Open the include file at point."
+(defun maplev-find-include-file-at-point (&optional path)
+  "Open the include file at point.  If PATH is non-nil, use
+it for the include path, otherwise use `maplev-include-path'.
+The path is a list of rooted strings."
   (interactive)
   (save-excursion
     (beginning-of-line)
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
-    (maplev-find-include-file (match-string-no-properties 2))))
+    (let* ((inc-file (match-string-no-properties 2))
+	   (file (maplev-find-include-file inc-file)
+		 (string= "<" (match-string-no-properties 1))
+		 (or path maplev-include-path)))
+      (unless file
+	(error "Cannot find include file %s" inc-file))
+      (find-file-other-window file))))
+	  
 
-(defun maplev-find-include-file (inc-file)
-  "Find and open the Maple include file INC-FILE.
-Because an include-path is not known, the path delimiters, angle
-brackets or double-quotes, are ignored.  If the file path is
-absolute, raise an error if it does not exist.  If the path is
-relative, append it the current directory and check there.
-If that fails, remove the last directory of the current path
-and try again, etc. Raise an error if the file is not found."
-  (setq inc-file (maplev-include--find-file-in-path inc-file))
-  (unless inc-file
-    (error "Cannot find include file %s" inc-file))
-  (find-file-other-window inc-file))
+(defun maplev-find-include-file (inc-file &optional inc-first inc-path)
+  "Find the Maple include file INC-FILE and return as an absolute path.
+Return nil if the file is not found."
+  (if (file-name-absolute-p inc-file)
+      (and (file-exists-p file) file)
+    (if inc-first
+	(or
+	 (maplev-include--find-file-in-path file inc-path)
+	 (maplev-include--find-file-up-path))
+      (or (maplev-include--find-file-in-path file (list default-dir))
+	  (maplev-include--find-file-in-path file inc-path)
+	  (maplev-include--find-file-up-path)))))
 
-(defun maplev--get-include-path ()
-  (or maplev-include-path
-      (maplev-include--read-path-from-file)))
+(defun maplev-include--find-file-in-path (file &optional paths)
+  "Search for FILE in list of rooted PATHS, which include trailing slash.
+If found, return the absolute path to FILE, otherwise return nil."
+  (let (dir abs-file)
+    (while (not (progn
+		  (setq dir (car paths)
+			paths (cdr paths)
+			abs-file (concat dir file))
+		  (or (file-exists-p abs-file)
+		      (setq abs-file nil)
+		      (null paths)))))
+    (and abs-file
+	 (expand-file-name abs-file))))
 
-(defun maplev-include--read-file-in-path ()
-  (let ((file (maplev--find-file-in-path maplev-config-file)))
-    (when file
-      (load-file file
-      maplev-include-path))))
 
-(defun maplev-include--find-file-in-path (file)
-  "Find FILE by ascending working directory path.
+(defun maplev-include--find-file-up-path (file &optional dir)
+  "Find FILE, optionally searching in the rooted path DIR.
+Look in each ancestor in DIR.  If DIR is nil, use `default-directory'.
 Return the absolute path to the file, if found, otherwise return
-nil.  FILE may be an absolute or relative path."
-  (if (file-name-absolute-p file)
-      (and (file-exists-p file)
-	   file))
-    (let ((dir default-directory)
-	  parent abs-file)
-      (while
-	  (progn
-	    (setq abs-file (concat dir file))
-	    (if (file-exists-p abs-file)
-		nil ; success; exit loop
-	      (setq parent (file-name-directory (directory-file-name dir)))
-	      (if (string= dir parent)
-		  (setq abs-file nil) ; at root, exit loop with empty file
+nil."
+  (setq dir (or dir default-directory))
+  (let (parent abs-file)
+    (while
+	(progn
+	  (setq abs-file (concat dir file))
+	  (if (file-exists-p abs-file)
+	      nil ; success; exit loop
+	    (setq parent (file-name-directory (directory-file-name dir)))
+	    (if (string= dir parent)
+		(setq abs-file nil) ; at root, exit loop with empty file
 		(setq dir parent))))) ; check parent
-      abs-file)))
+    abs-file))
 		  
 (define-button-type 'maplev-find-include-file
   'help-echo "Find include file"
