@@ -3389,7 +3389,6 @@ If nil then `font-lock-maximum-decoration' selects the level."
 
 (defun maplev-buttonize-includes ()
   "Buttonize the include statements."
-  (interactive)
   (button-lock-mode t)
   (button-lock-set-button maplev--include-directive-re
 			  'maplev-find-include-file-at-point
