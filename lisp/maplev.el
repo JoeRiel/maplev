@@ -529,6 +529,21 @@ Nil means do not expand in either."
   :group 'maplev-misc
   :group 'maplev-comments)
 
+;; Configuration
+
+(defcustom maplev-buttonize-includes-flag t
+  "*Non-nil means use `button-lock-mode' to hyperlink include statements."
+  :type 'boolean
+  :group 'maplev-misc)
+
+(defcustom maplev-load-config-file-flag t
+  "*Non-nil means load a configuration file when starting maplev-mode.
+The configuration file is named .maplev and is searched for in the current directory
+and its ancestors.  The file is loaded as an elisp file.  No error occurs if
+the file does not exist."
+  :type 'boolean
+  :group 'maplev-misc)
+
 ;; Saving
 
 (defcustom maplev-clean-buffer-before-saving-flag t
@@ -638,6 +653,7 @@ May interfere with some modes (e.g. noweb).")
 
 (defvar maplev--declaration-history nil
   "History list used for type declarations.")
+
 
 ;;}}}
 ;;{{{ Regular expressions
@@ -1875,9 +1891,8 @@ Maple libraries.
   ;;(make-local-hook 'hack-local-variables-hook)
   (add-hook 'hack-local-variables-hook 'maplev-mode-name nil t)
 
-  (set (make-local-variable 'maplev-loaded-config-file-flag) nil)
-  (maplev-buttonize-includes)
-  (maplev-load-config-file)
+  (if maplev-buttonize-includes-flag (maplev-buttonize-includes))
+  (if maplev-load-config-file-flag (maplev-load-config-file))
 
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
@@ -3464,17 +3479,12 @@ nil."
 (defun maplev-load-config-file (&optional force)
   "Find and load the maplev configuration file.
 The file is named .maplev and is searched for in the current
-directory and its ancestors.  With FORCE non-nil, search and
-reload, otherwise do so only if the buffer-local flag
-`maplev-loaded-config-file-flag' is nil.  Set the flag whether
-the file regardless.  Return t if configuration file was loaded,
-nil otherwise."
-  (unless maplev-loaded-config-file-flag
-    (setq maplev-loaded-config-file-flag t)
-    (let ((config (maplev-include--find-file-up-path ".maplev")))
-      (when config
-	(load-file config)
-	t))))
+directory and its ancestors.  Return t if configuration file was
+loaded, nil otherwise."
+  (let ((config (maplev-include--find-file-up-path ".maplev")))
+    (when config
+      (load-file config)
+      t)))
 
 ;;}}}
 
