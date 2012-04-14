@@ -1,4 +1,4 @@
- ;;; maplev.el --- Maple mode for GNU Emacs
+;;; maplev.el --- Maple mode for GNU Emacs
 ;;
 ;;
 ;; Copyright (C) 2001,2003,2008,2009 Joseph S. Riel
@@ -122,6 +122,7 @@
 (require 'font-lock)
 (require 'comint)
 (require 'info)
+(require 'button-lock)
 
 (eval-and-compile
   (condition-case nil (require 'imenu) (error nil))
@@ -3033,8 +3034,10 @@ This is the inverse of `maplev-comment-to-string-region.'"
   "Regex of preprocessor directives, not including 'include'.")
 
 (defconst maplev--include-directive-re
-  "^\\$include\\s-+[<\"]\\(.*\\)[>\"]"
-  "Regex of an include directive.")
+  "^\\$include\\s-+\\([<\"]\\)\\(.*\\)[>\"]"
+  "Regex of an include directive.  The first group matches
+the character used to delimit the file (either < or \").
+The second group matches the filename.")
     
 
 ;;{{{  builtins
@@ -3253,7 +3256,7 @@ are font locked."
   (list
    (list maplev--top-defun-begin-re '(1 font-lock-function-name-face t))
    (list maplev--preprocessor-directives-re '(0 maplev-preprocessor-face))
-   (list maplev--include-directive-re '(1 font-lock-function-name-face))
+   ;;(list maplev--include-directive-re '(1 font-lock-function-name-face))
    (list (maplev--list-to-word-re
           (cdr (assoc (maplev--major-release)
                       maplev--reserved-words-alist)))
@@ -3356,35 +3359,85 @@ If nil then `font-lock-maximum-decoration' selects the level."
 
 ;;{{{ Includes
 
-(defun maplev-find-include-file-at-point (button)
-  "Open the include file at point."
-  (beginning-of-line)
-  (unless (looking-at maplev--include-directive-re)
-    (error "Not at an include statement"))
-  (maplev-find-include-file (match-string 2)))
+(defface maplev-find-include-file
+  '((((class grayscale) (background light)) (:foreground "LightGray" :underline t))
+    (((class grayscale) (background dark))  (:foreground "DarkGray" :underline t))
+    (((class color)     (background light)) (:foreground "DarkBlue" :underline t))
+    (((class color)     (background dark))  (:foreground "LightBlue" :underline t))
+    (t (:underline t)))
+  "Font lock face used for include filenames, indicates hyperlink."
+  :group 'maplev-faces)
 
+(defun maplev--buttonize-lock-includes (&optional off)
+  "If OFF is nil enable buttonizing the include statements,
+otherwise turn it off (that part is not implemented)."
+  (interactive)
+  (global-button-lock-mode 1)
+  (button-lock-set-button maplev--include-directive-re
+			  'maplev-find-include-file-at-point
+			  :face 'link
+			  :face-policy 'prepend
+			  :grouping 2
+			  :help-text "open file"))
+
+(defun maplev-find-include-file-at-point ()
+  "Open the include file at point."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (unless (looking-at maplev--include-directive-re)
+      (error "Not at an include statement"))
+    (maplev-find-include-file (match-string-no-properties 2))))
 
 (defun maplev-find-include-file (inc-file)
   "Find and open the Maple include file INC-FILE.
 Because an include-path is not known, the path delimiters, angle
-brackets or double-quotes, do not matter.  If the file path is
+brackets or double-quotes, are ignored.  If the file path is
 absolute, raise an error if it does not exist.  If the path is
-relative, append it to each directory in the current directory
-and search there.  Raise an error if the file is not found."
-  (if (file-exists-p inc-file)
-      (find-file inc-file)
-    (if (file-name-absolute-p inc-file)
-	(error "Include file %1 does not exist" inc-file))
+relative, append it the current directory and check there.
+If that fails, remove the last directory of the current path
+and try again, etc. Raise an error if the file is not found."
+  (setq inc-file (maplev-include--find-file-in-path inc-file))
+  (unless inc-file
+    (error "Cannot find include file %s" inc-file))
+  (find-file-other-window inc-file))
+
+(defun maplev--get-include-path ()
+  (or maplev-include-path
+      (maplev-include--read-path-from-file)))
+
+(defun maplev-include--read-file-in-path ()
+  (let ((file (maplev--find-file-in-path maplev-config-file)))
+    (when file
+      (load-file file
+      maplev-include-path))))
+
+(defun maplev-include--find-file-in-path (file)
+  "Find FILE by ascending working directory path.
+Return the absolute path to the file, if found, otherwise return
+nil.  FILE may be an absolute or relative path."
+  (if (file-name-absolute-p file)
+      (and (file-exists-p file)
+	   file))
     (let ((dir default-directory)
-	  abs-file found)
-      (while (and (not found) (not (string= dir "")))
-	(setq abs-path (concat dir inc-file))
-	(if (file-exists-p abs-path)
-	    (setq found t)
-	  (setq dir (file-name-directory (directory-file-name dir)))))
-      (if found
-	  (find-file abs-path)
-	(error "Cannot find include file %1" inc-file)))))
+	  parent abs-file)
+      (while
+	  (progn
+	    (setq abs-file (concat dir file))
+	    (if (file-exists-p abs-file)
+		nil ; success; exit loop
+	      (setq parent (file-name-directory (directory-file-name dir)))
+	      (if (string= dir parent)
+		  (setq abs-file nil) ; at root, exit loop with empty file
+		(setq dir parent))))) ; check parent
+      abs-file)))
+		  
+(define-button-type 'maplev-find-include-file
+  'help-echo "Find include file"
+  'action 'maplev-find-include-file-at-point
+  'follow-link t
+  'face 'maplev-include-file)
+
 
 ;;}}}
 
@@ -5224,4 +5277,3 @@ If optional arg HIDE is non-nil do not display buffer."
 (provide 'maplev-mode)
 
 ;;; maplev.el ends here
-
