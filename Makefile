@@ -50,7 +50,9 @@ LISP-FILES = $(ELS:%=lisp/%.el)
 ELC-FILES = $(LISP-FILES:.el=.elc)
 
 %.elc : %.el
-	$(ELC) $<
+	@$(RM) $@
+	@echo Byte-compiling $+
+	@$(call showerr,$(ELC) $< 2>&1 > /dev/null | sed '/^Wrote/d')
 
 byte-compile: $(call print-help,byte-compile,Byte-compile the elisp)
 byte-compile: $(ELC-FILES)
