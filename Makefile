@@ -9,6 +9,7 @@ VERSION := 2.22
 
 include help-system.mak
 
+
 # {{{ Executables
 
 EMACS := emacs
@@ -31,16 +32,28 @@ LISP-DIR  := $(HOME)/.emacs.d/maple
 INFO-DIR = $(HOME)/share/info
 
 # where the Maple archive goes
-MAPLE_LIB_DIR := $(HOME)/maple/toolbox/emacs/lib
+MAPLE-LIB-DIR := $(HOME)/maple/toolbox/emacs/lib
 
 # }}}
+# {{{ Auxiliary functions (warn, shellerr)
+
+txtbold   := $(shell tput bold)
+# 0=black 1=red 2=green 3=yellow 4=blue 5=magenta 6=cyan 7=white
+txthilite := $(shell tput setaf 3)
+txtnormal := $(shell tput sgr0)
+warn = "$(txthilite)$1$(txtnormal)"
+shellerr = $(call showerr,$1 2>&1 > /dev/null)
+showerr = err="$$($1)" ; if [ "$$err" ]; then echo $(call warn,$$err); fi
+
+# }}}
+
 # {{{ Elisp
 
 ELFLAGS	= --no-site-file \
 	  --no-init-file \
 	  --eval "(progn \
-                    (add-to-list (quote load-path) (expand-file-name \"./lisp\")) \
-	            (add-to-list (quote load-path) \"$(LISP-DIR)\"))"
+			(add-to-list (quote load-path) (expand-file-name \"./lisp\")) \
+			(add-to-list (quote load-path) \"$(LISP-DIR)\"))"
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
 
@@ -123,15 +136,10 @@ mla := maplev.mla
 mla: $(call print-help,mla,Create Maple archive: $(mla))
 mla: $(mla)
 
-txtbold   := $(shell tput bold)
-txtred    := $(shell tput setaf 1)
-txtnormal := $(shell tput sgr0)
-warn = "$(txtred)$(textbold)$1$(txtnormal)"
-
 %.mla: maple/%.mpl
 	@$(RM) $@
 	@echo "Building Maple archive $@"
-	@err=$$($(MAPLE) -q -I maple -D BUILD_MLA $< ) ; \
+	@err=$$($(MAPLE) -q -I maple -D BUILD-MLA $< ) ; \
 		if [ ! -z "$$err" ]; then \
 			echo $(call warn,$$err); \
 		fi
@@ -156,17 +164,17 @@ install-info: $(INFO-FILES)
 	@echo Update 'dir' node
 	@for file in $(INFO-FILES); do ginstall-info --info-dir=$(INFO-DIR) $${file}; done
 
-install-mla: $(call print-help,install-mla,Install mla in $(MAPLE_LIB_DIR))
+install-mla: $(call print-help,install-mla,Install mla in $(MAPLE-LIB-DIR))
 install-mla: $(mla)
-	@$(call MKDIR,$(MAPLE_LIB_DIR))
-	@echo "Installing Maple archive $(mla) into $(MAPLE_LIB_DIR)/"
-	@$(CP) $+ $(MAPLE_LIB_DIR)
+	@$(call MKDIR,$(MAPLE-LIB-DIR))
+	@echo "Installing Maple archive $(mla) into $(MAPLE-LIB-DIR)/"
+	@$(CP) $+ $(MAPLE-LIB-DIR)
 
 clean-install: $(call print-help,clean-install,Remove installed files)
 clean-install:
 	$(RM) $(addprefix $(LISP-DIR)/,$(PKG).*)
 	$(RM) $(addprefix $(INFO-DIR)/,$(PKG))
-	$(RM) -r $(MAPLE_LIB_DIR)/$(mla)
+	$(RM) -r $(MAPLE-LIB-DIR)/$(mla)
 
 
 .PHONY: install install-lisp install-mla install-info clean-install
