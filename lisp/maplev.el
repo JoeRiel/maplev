@@ -1848,6 +1848,7 @@ Maple libraries.
   (set (make-local-variable 'require-final-newline) t)
 
   (auto-fill-mode (if maplev-auto-fill-comment-flag 1 0))
+  (setq auto-fill-function 'maplev-auto-fill)
 
   ;; indentation
   (set (make-local-variable 'indent-line-function)   'maplev-indent-line)
@@ -2931,6 +2932,23 @@ This is the inverse of `maplev-comment-to-string-region.'"
       (replace-match "\\1\\2"))))
 
 ;;}}}
+
+;;{{{ Auto-fill
+
+(defun maplev-auto-fill ()
+  (let ((fc (current-fill-column)))
+    (if (and fc (<= (current-column) fc))
+	nil
+      (if (eq ?\" (parse-partial-sexp (line-beginning-position) (point)))
+	  (progn
+	    (insert "\"\n")
+	    (maplev-indent-line)
+	    (insert-char ?\" 1))
+	(do-auto-fill)))))
+  
+
+;;}}}
+
 
 ;;{{{ Font lock
 
