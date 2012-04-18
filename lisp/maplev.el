@@ -3455,14 +3455,12 @@ nil."
   (setq dir (file-name-as-directory (or dir default-directory)))
   (let (parent abs-file)
     (while
-	(progn
-	  (setq abs-file (concat dir file))
-	  (if (file-exists-p abs-file)
-	      nil ; success; exit loop
-	    (if (or (null (setq parent (file-name-directory (directory-file-name dir))))
-		    (string= dir parent))
-		(setq abs-file nil) ; at root, exit loop with empty file
-	      (setq dir parent))))) ; check parent
+	(if (file-exists-p (setq abs-file (concat dir file)))
+	    nil ; success; exit loop
+	  (if (or (null (setq parent (file-name-directory (directory-file-name dir))))
+		  (string= dir parent))
+	      (setq abs-file nil) ; at root, exit loop with empty file
+	    (setq dir parent)))) ; check parent
     abs-file))
 		  
 (define-button-type 'maplev-find-include-file
