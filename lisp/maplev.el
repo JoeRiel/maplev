@@ -3484,8 +3484,10 @@ directory and its ancestors.  Return t if configuration file was
 loaded, nil otherwise."
   (let ((config (maplev-include--find-file-up-path ".maplev")))
     (when config
-      (load-file config)
-      t)))
+      (condition-case err
+	  (load-file config)
+	(error
+	 (message "An error occurred loading config file %s" config))))))
 
 ;;}}}
 
