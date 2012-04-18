@@ -3447,23 +3447,22 @@ If found, return the absolute path to FILE, otherwise return nil."
     (and abs-file
 	 (expand-file-name abs-file))))
 
-
 (defun maplev-include--find-file-up-path (file &optional dir)
-  "Find FILE, optionally searching in the rooted path DIR.
+  "Find FILE, optionally searching in directory DIR.
 Look in each ancestor in DIR.  If DIR is nil, use `default-directory'.
 Return the absolute path to the file, if found, otherwise return
 nil."
-  (setq dir (or dir default-directory))
+  (setq dir (file-name-as-directory (or dir default-directory)))
   (let (parent abs-file)
     (while
 	(progn
 	  (setq abs-file (concat dir file))
 	  (if (file-exists-p abs-file)
 	      nil ; success; exit loop
-	    (setq parent (file-name-directory (directory-file-name dir)))
-	    (if (string= dir parent)
+	    (if (or (null (setq parent (file-name-directory (directory-file-name dir))))
+		    (string= dir parent))
 		(setq abs-file nil) ; at root, exit loop with empty file
-		(setq dir parent))))) ; check parent
+	      (setq dir parent))))) ; check parent
     abs-file))
 		  
 (define-button-type 'maplev-find-include-file
