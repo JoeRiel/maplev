@@ -1,5 +1,7 @@
 -*- org -*-
 
+* 2.22:
+** Modify so that an error loading a config file (.maplev) does not prevent maplev from loading
 * 2.21:
 ** Added maple 16
 ** Buttonize include statements; clicking them opens the file.
