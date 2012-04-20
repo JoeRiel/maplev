@@ -517,6 +517,15 @@ than the long delimiter is never used."
 ;;}}}
 ;;{{{   miscellaneous
 
+;; Leading commas
+
+(defcustom maplev-leading-comma-flag t
+  "*Non-nil means the user prefers leading commas when continuing lines.
+Currently this only determines whether advice for `fixup-whitespace'
+is activated when maplev-mode is executed."
+  :type 'boolean
+  :group 'maplev-misc)
+
 ;; Abbrev mode
 
 (defcustom maplev-initial-abbrev-mode-flag nil
@@ -1527,6 +1536,12 @@ regardless of where you click."
         ["List abbrevs" maplev-abbrev-help t])
        ["Enable auto fill" auto-fill-mode
         :style toggle :selected auto-fill-function]
+       ["Use leading commas" (setq maplev-leading-comma-flag
+				   (if maplev-leading-comma-flag
+				       nil
+				     (ad-activate 'fixup-whitespace)
+				     t))
+	:style toggle :selected maplev-leading-comma-flag]
        ("Decoration" ,@maplev--menu-decoration))
       "---"
       ["Add Index" maplev-add-imenu (not (and (boundp 'imenu--index-alist)
@@ -1839,6 +1854,9 @@ Maple libraries.
   (set (make-local-variable 'indent-region-function) 'maplev-indent-region)
   (set (make-local-variable 'tab-width)               maplev-indent-level)
   (set (make-local-variable 'indent-tabs-mode)        nil)
+
+  (if maplev-leading-comma-flag
+      (ad-activate 'fixup-whitespace))
 
   ;; abbrev expansion
   (abbrev-mode (if maplev-initial-abbrev-mode-flag 1 0))
@@ -3485,6 +3503,15 @@ loaded, nil otherwise."
 	  (load-file config)
 	(error
 	 (message "An error occurred loading config file %s" config))))))
+
+;;}}}
+
+;;{{{ leading-comma stuff
+(defadvice fixup-whitespace (after mpldoc-close-up-comma)
+  "If `maplev-leading-comma-flag' is non-nil, remove space before comma."
+  (and maplev-leading-comma-flag
+       (looking-at " ,")
+       (delete-char 1)))
 
 ;;}}}
 
