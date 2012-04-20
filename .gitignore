@@ -1,3 +1,4 @@
+*~
 /addon.el
 /builtins12
 /builtins13
@@ -13,6 +14,7 @@
 /patch-erik1
 /protected.mpl
 /temp.mpl
+/test/
 /tmp/
 /releases/
 *.elc
