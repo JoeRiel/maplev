@@ -2728,7 +2728,6 @@ first statement.  Prompt fo the EXPRSEQ."
   (maplev-indent-line)
   (forward-line -1)
   (maplev-indent-line))
-  
 
 ;;}}}
 ;;{{{ Completion
@@ -2950,18 +2949,24 @@ the current column is automatically broken at whitespace, terminated
 with a double-colon, and begun again on the next line, with an indent."
   (let ((fc (current-fill-column)))
     (and fc (<= fc (current-column))
-	 (if (not (and
-		   maplev-auto-break-strings-flag
-		   (eq ?\" (nth 3 (parse-partial-sexp (line-beginning-position) (point))))))
-	     (do-auto-fill)
-	   ;; auto-break a string
-	   (insert "\"")
-	   (maplev-indent-newline)
-	   (insert-char ?\" 1)
-	   ;; add terminating "; some may not like this.
-	   (unless (char-equal (char-after) ?\")
-	     (insert-char ?\" 1)
-	     (backward-char))))))
+	 (if (and
+	      maplev-auto-break-strings-flag
+	      (eq ?\" (nth 3 (parse-partial-sexp (line-beginning-position) (point)))))
+	     (maplev-auto-break-string)
+	   (do-auto-fill)))))
+
+(defun maplev-auto-break-string ()
+  "Auto-break a string.  Must be called where the string is to break.
+Inserts double-quote, then calls `mpldoc-indent-newline' to insert an
+indented newling.  A double-quote is inserted at the indentation point.
+If at the end of the line, a closing double-quote is also added and point
+moved to be before it."
+  (insert "\"")
+  (newline-and-indent)
+  (insert-char ?\" 1)
+  (when (eolp)
+    (insert-char ?\" 1)
+    (backward-char)))
 	   
 
 
