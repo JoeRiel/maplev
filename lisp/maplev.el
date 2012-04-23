@@ -2955,9 +2955,14 @@ with a double-colon, and begun again on the next line, with an indent."
 		   (eq ?\" (nth 3 (parse-partial-sexp (line-beginning-position) (point))))))
 	     (do-auto-fill)
 	   ;; auto-break a string
-	   (insert "\"\n")
-	   (maplev-indent-line)
-	   (insert-char ?\" 1)))))
+	   (insert "\"")
+	   (maplev-indent-newline)
+	   (insert-char ?\" 1)
+	   ;; add terminating "; some may not like this.
+	   (unless (char-equal (char-after) ?\")
+	     (insert-char ?\" 1)
+	     (backward-char))))))
+	   
 
 
 ;;}}}
