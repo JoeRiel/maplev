@@ -1,5 +1,10 @@
 -*- org -*-
 
+* 2.23:
+** fix bug finding include path.  If include file not found, but path exists, query to create.
+** refactor maplev-auto-fill.
+** Advise fixup-whitespace to catenate strings and remove space from leading comma,
+   these are used with delete-indentation.
 * 2.22:
 ** Modify so that an error loading a config file (.maplev) does not prevent maplev from loading
 * 2.21:
