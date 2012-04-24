@@ -3420,19 +3420,29 @@ If nil then `font-lock-maximum-decoration' selects the level."
 (defun maplev-find-include-file-at-point (&optional path)
   "Open the include file at point.  If PATH is non-nil, use
 it for the include path, otherwise use `maplev-include-path'.
-The path is a list of rooted strings."
+The path is a list of rooted strings.  If the file cannot be found,
+but the proper directory exists, query user to create the file."
   (interactive)
   (save-excursion
     (beginning-of-line)
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
     (let* ((inc-file (match-string-no-properties 2))
-	   (file (maplev-find-include-file inc-file
-					   (string= "<" (match-string-no-properties 1))
-					   (or path maplev-include-path))))
-      (unless file
-	(error "Cannot find include file %s" inc-file))
-      (find-file-other-window file))))
+	   (path (or path maplev-include-path))
+	   (inc-first (string= "<" (match-string-no-properties 1)))
+	   file)
+      (setq file (maplev-find-include-file inc-file inc-first path))
+      (if file
+	  (find-file-other-window file)
+	;; file does not exist.  Query for file if a reasonable location can be found.
+	(let ((inc-dir inc-file))
+	  (while (and (setq inc-dir (file-name-directory (directory-file-name inc-dir)))
+		      (not (setq file (maplev-find-include-file inc-dir inc-first path)))))
+	(if (not file)
+	    (error "Include file %s does not exist" inc-file)
+	  (if (setq file (read-file-name "Create include file: "
+				    file (file-name-nondirectory inc-file) nil))
+	      (find-file-other-window file))))))))
 	  
 (defun maplev-find-include-file (inc-file &optional inc-first inc-path)
   "Find the Maple include file INC-FILE and return as an absolute path.
