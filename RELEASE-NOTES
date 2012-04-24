@@ -1,5 +1,7 @@
 -*- org -*-
 
+* 2.24:
+** fix bug when creating include file.
 * 2.23:
 ** fix bug finding include path.  If include file not found, but path exists, query to create.
 ** refactor maplev-auto-fill.
