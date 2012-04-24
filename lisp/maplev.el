@@ -459,7 +459,6 @@ either `maplev-add-declaration-leading-comma' or
   :type 'boolean
   :group 'maplev-indentation)
 
-
 ;;}}}
 ;;{{{   templates
 
@@ -1544,11 +1543,7 @@ regardless of where you click."
 	:style toggle :selected maplev-auto-fill-comment-flag]
        ["Enable auto-string break" (setq maplev-auto-break-strings-flag (not maplev-auto-break-strings-flag))
 	:style toggle :selected maplev-auto-break-strings-flag]
-       ["Use leading commas" (setq maplev-leading-comma-flag
-				   (if maplev-leading-comma-flag
-				       nil
-				     (ad-activate 'fixup-whitespace)
-				     t))
+       ["Use leading commas" (setq maplev-leading-comma-flag (not maplev-leading-comma-flag))
 	:style toggle :selected maplev-leading-comma-flag]
        ("Decoration" ,@maplev--menu-decoration))
       "---"
@@ -1864,8 +1859,7 @@ Maple libraries.
   (set (make-local-variable 'tab-width)               maplev-indent-level)
   (set (make-local-variable 'indent-tabs-mode)        nil)
 
-  (if maplev-leading-comma-flag
-      (ad-activate 'fixup-whitespace))
+  (ad-activate 'fixup-whitespace)
 
   ;; abbrev expansion
   (abbrev-mode (if maplev-initial-abbrev-mode-flag 1 0))
@@ -3558,11 +3552,18 @@ loaded, nil otherwise."
 ;;}}}
 
 ;;{{{ leading-comma stuff
-(defadvice fixup-whitespace (after mpldoc-close-up-comma)
-  "If `maplev-leading-comma-flag' is non-nil, remove space before comma."
-  (and maplev-leading-comma-flag
-       (looking-at " ,")
-       (delete-char 1)))
+
+(defadvice fixup-whitespace (after maplev-fixup-whitespace)
+  "Catenate adjacent Maple strings (separated by one space) or,
+if `maplev-leading-comma-flag' is non-nil, remove space before a comma."
+  (if (and maplev-leading-comma-flag
+	   (looking-at " ,"))
+      (delete-char 1)
+    (when (and (looking-at " \"")
+	       (looking-back "\""))
+      (delete-char -1)
+      (delete-char 2))))
+	
 
 ;;}}}
 
