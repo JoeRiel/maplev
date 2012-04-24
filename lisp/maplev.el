@@ -454,6 +454,12 @@ either `maplev-add-declaration-leading-comma' or
   :type '(choice string (const :tag "default" nil))
   :group 'maplev-indentation)
 
+(defcustom maplev-auto-break-strings-flag t
+  "*Strings in code will be automatically broken when they pass the `current-fill-column'."
+  :type 'boolean
+  :group 'maplev-indentation)
+
+
 ;;}}}
 ;;{{{   templates
 
@@ -1505,10 +1511,10 @@ regardless of where you click."
        ["Rerun"     maplev-mint-rerun :active maplev-mint--code-beginning]
        "---"
        ("Mint level"
-        ["severe errors"  (setq maplev-mint-info-level   1) :style radio :selected (= maplev-mint-info-level 1)]
+        ["severe errors"    (setq maplev-mint-info-level 1) :style radio :selected (= maplev-mint-info-level 1)]
         ["+ serious errors" (setq maplev-mint-info-level 2) :style radio :selected (= maplev-mint-info-level 2)]
         ["+ warnings"       (setq maplev-mint-info-level 3) :style radio :selected (= maplev-mint-info-level 3)]
-        ["full report"    (setq maplev-mint-info-level   4) :style radio :selected (= maplev-mint-info-level 4)]))
+        ["full report"      (setq maplev-mint-info-level 4) :style radio :selected (= maplev-mint-info-level 4)]))
       ("Maple"
        ["Goto buffer"    maplev-cmaple-pop-to-buffer t]
        ["Send buffer"    maplev-cmaple-send-buffer t]
@@ -1534,8 +1540,10 @@ regardless of where you click."
         ["Enable abbrevs" abbrev-mode
          :style toggle :selected abbrev-mode]
         ["List abbrevs" maplev-abbrev-help t])
-       ["Enable auto fill" auto-fill-mode
-        :style toggle :selected auto-fill-function]
+       ["Enable auto-fill comments" (setq maplev-auto-fill-comment-flag (not maplev-auto-fill-comment-flag))
+	:style toggle :selected maplev-auto-fill-comment-flag]
+       ["Enable auto-string break" (setq maplev-auto-break-strings-flag (not maplev-auto-break-strings-flag))
+	:style toggle :selected maplev-auto-break-strings-flag]
        ["Use leading commas" (setq maplev-leading-comma-flag
 				   (if maplev-leading-comma-flag
 				       nil
@@ -2936,16 +2944,21 @@ This is the inverse of `maplev-comment-to-string-region.'"
 ;;{{{ Auto-fill
 
 (defun maplev-auto-fill ()
+  "Use this function when `auto-fill-mode' is active in Maple.
+If `maplev-auto-break-strings-flag' is non-nil, a string that exceeds
+the current column is automatically broken at whitespace, terminated
+with a double-colon, and begun again on the next line, with an indent."
   (let ((fc (current-fill-column)))
-    (if (and fc (<= (current-column) fc))
-	nil
-      (if (eq ?\" (parse-partial-sexp (line-beginning-position) (point)))
-	  (progn
-	    (insert "\"\n")
-	    (maplev-indent-line)
-	    (insert-char ?\" 1))
-	(do-auto-fill)))))
-  
+    (and fc (<= fc (current-column))
+	 (if (not (and
+		   maplev-auto-break-strings-flag
+		   (eq ?\" (nth 3 (parse-partial-sexp (line-beginning-position) (point))))))
+	     (do-auto-fill)
+	   ;; auto-break a string
+	   (insert "\"\n")
+	   (maplev-indent-line)
+	   (insert-char ?\" 1)))))
+
 
 ;;}}}
 
