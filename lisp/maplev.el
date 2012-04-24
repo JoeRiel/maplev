@@ -3471,13 +3471,15 @@ but the proper directory exists, query user to create the file."
 	  (find-file-other-window file)
 	;; file does not exist.  If suitable location can be found from include path,
 	;; query to create
-	(let ((inc-dir inc-file))
+	(let ((base (file-name-nondirectory inc-file))
+	      (inc-dir inc-file))
 	  (while (and (setq inc-dir (file-name-directory (directory-file-name inc-dir)))
 		      (not (setq file (maplev-find-include-file inc-dir inc-first path)))))
 	(if (not file)
 	    (error "Include file %s does not exist " inc-file)
-	  (if (yes-or-no-p (format "Create include file %s " inc-file))
-	      (find-file-other-window inc-file))))))))
+	  (if (yes-or-no-p (format "Create include file %s "
+				   (setq file (concat file base))))
+	      (find-file-other-window file))))))))
 	  
 (defun maplev-find-include-file (inc-file &optional inc-first inc-path)
   "Find the Maple include file INC-FILE and return as an absolute path.
