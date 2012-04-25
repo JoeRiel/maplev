@@ -1,5 +1,7 @@
 -*- org -*-
 
+* 2.25:
+** bind C-c C-o to button to open include files
 * 2.24:
 ** fix bug when creating include file.
 * 2.23:
