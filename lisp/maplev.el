@@ -3450,6 +3450,7 @@ If nil then `font-lock-maximum-decoration' selects the level."
 			  :face 'link
 			  :face-policy 'prepend
 			  :grouping 2
+			  :keyboard-binding "C-c C-o"
 			  :help-text "open file"))
 
 (defun maplev-find-include-file-at-point (&optional path)
