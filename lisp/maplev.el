@@ -3089,7 +3089,7 @@ moved to be before it."
 
 (defconst maplev--initial-variables
   (list "Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
-	"integrate" "libname" "NULL" "Order" "printlevel" "lasterror"
+	"integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
 	"`mod`" "Digits" "constants" "undefined" "I"
 	"UseHardwareFloats"
 	"Testzero" "Normalizer" "NumericEventHandlers"
