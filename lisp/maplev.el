@@ -3103,7 +3103,17 @@ moved to be before it."
 (defconst maplev--preprocessor-directives-re
   (eval-when-compile
     (concat "^\\$\\("
-            (regexp-opt (list "define" "include" "undef" "ifdef" "ifndef" "else" "endif" ))
+            (regexp-opt (list
+			 "define"
+			 "elif"
+			 "else"
+			 "endif"
+			 "file"
+			 "ifdef"
+			 "ifndef"
+			 "include"
+			 "undef"
+			 ))
             "\\)"))
   "Regex of preprocessor directives, not including 'include'.")
 
