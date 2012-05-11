@@ -5,7 +5,7 @@
 SHELL = /bin/sh
 
 PKG := maplev
-VERSION := 2.25
+VERSION := 2.26
 
 include help-system.mak
 

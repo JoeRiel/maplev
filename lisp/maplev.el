@@ -6,7 +6,7 @@
 ;; Authors:    Joseph S. Riel <joer@san.rr.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    2.25
+;; Version:    2.26
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -105,7 +105,7 @@
 
 ;;{{{ Information
 
-(defconst maplev-version "2.25" "Version of MapleV mode.")
+(defconst maplev-version "2.26" "Version of MapleV mode.")
 
 (defconst maplev-developer 
   "Joseph S. Riel <joer@san.rr.com>"

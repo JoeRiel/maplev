@@ -1,5 +1,9 @@
 -*- org -*-
 
+* 2.26:
+** Add customizable flag maplev-include-file-other-window-flag
+** Add $elif and $file as preprocessor directors
+** Font-lock lastexception
 * 2.25:
 ** bind C-c C-o to button to open include files
 * 2.24:
