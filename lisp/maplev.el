@@ -545,6 +545,12 @@ Nil means do not expand in either."
   :group 'maplev-misc
   :group 'maplev-comments)
 
+(defcustom maplev-include-file-other-window-flag t
+  "*Non-nil means the default action is to open an include file
+in the other window. See `maplev-find-include-file'."
+  :type 'boolean
+  :group 'maplev-misc)
+
 ;; Configuration
 
 (defcustom maplev-buttonize-includes-flag t
@@ -3462,18 +3468,20 @@ If nil then `font-lock-maximum-decoration' selects the level."
 			  :keyboard-binding "C-c C-o"
 			  :help-text "open file"))
 
-(defun maplev-find-include-file-at-point (&optional path)
-  "Open the include file at point.  If PATH is non-nil, use
-it for the include path, otherwise use `maplev-include-path'.
-The path is a list of rooted strings.  If the file cannot be found,
-but the proper directory exists, query user to create the file."
-  (interactive)
+(defun maplev-find-include-file-at-point (toggle)
+  "Open the include file at point.  If found, the file is opened
+either in this window or the other window, depending on the
+exclusive-or of TOGGLE with `maplev-include-file-other-window-flag'.  
+The variable `maplev-include-path' specifies the search paths; 
+it is a list of rooted strings.  If the file cannot be found, but 
+the proper directory exists, query user to create the file."
+  (interactive "P")
   (save-excursion
     (beginning-of-line)
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
     (let* ((inc-file (match-string-no-properties 2))
-	   (path (or path maplev-include-path))
+	   (path maplev-include-path)
 	   (inc-first (string= "<" (match-string-no-properties 1)))
 	   file)
       (setq file (maplev-find-include-file inc-file inc-first path))
@@ -3489,7 +3497,11 @@ but the proper directory exists, query user to create the file."
 	    (error "Include file %s does not exist " inc-file)
 	  (if (yes-or-no-p (format "Create include file %s "
 				   (setq file (concat file base))))
-	      (find-file-other-window file))))))))
+	      (if (if maplev-include-file-other-window-flag
+		      (not toggle)
+		    toggle)
+		  (find-file-other-window file)
+		(find-file file)))))))))
 	  
 (defun maplev-find-include-file (inc-file &optional inc-first inc-path)
   "Find the Maple include file INC-FILE and return as an absolute path.
