@@ -3115,10 +3115,10 @@ moved to be before it."
 			 "undef"
 			 ))
             "\\)"))
-  "Regex of preprocessor directives, not including 'include'.")
+  "Regex of preprocessor directives.")
 
 (defconst maplev--include-directive-re
-  "^\\$include\\s-+\\([<\"]\\)\\(.*\\)[>\"]"
+  "^\\(?:## \\)?\\$include\\s-+\\([<\"]\\)\\(.*\\)[>\"]"
   "Regex of an include directive.  The first group matches
 the character used to delimit the file (either < or \").
 The second group matches the filename.")
@@ -3340,7 +3340,6 @@ are font locked."
   (list
    (list maplev--top-defun-begin-re '(1 font-lock-function-name-face t))
    (list maplev--preprocessor-directives-re '(0 maplev-preprocessor-face))
-   ;;(list maplev--include-directive-re '(1 font-lock-function-name-face))
    (list (maplev--list-to-word-re
           (cdr (assoc (maplev--major-release)
                       maplev--reserved-words-alist)))
@@ -3544,7 +3543,6 @@ nil."
   'action 'maplev-find-include-file-at-point
   'follow-link t
   'face 'maplev-include-file)
-
 
 ;;}}}
 
@@ -4428,7 +4426,6 @@ The title is the phrase following the function name."
   "Font lock mode face used to highlight Maple input."
   :group 'maplev-faces
   :group 'maplev-help)
-
 
 ;;}}}
 ;;{{{     regular expressions
