@@ -1,5 +1,4 @@
 \input texinfo
-@c {{{ Header }}}
 
 @setfilename maplev
 @settitle MapleV Emacs Mode @value{VERSION}
@@ -41,8 +40,6 @@ Texts.  A copy of the license is included in the section entitled
 @end copying
 
 
-@c {{{endfold}}}
-@c {{{ Titlepage and Copyright }}}
 
 @setchapternewpage on
 
@@ -66,8 +63,6 @@ are preserved on all copies.
 @end titlepage
 @page
 
-@c {{{endfold}}}
-@c {{{ Top Node and Master Menu }}}
 
 @ifnottex
 @node top, Copying, (dir), (dir)
@@ -89,6 +84,7 @@ Editing
 * Comments::                    Command for adding and aligning comments.
 * Shortcuts::                   Abbreviations and templates.
 * Imenu support::               Creating a procedure index.
+* Miscellaneous features::      Useful editing features
 
 Processes
 
@@ -138,6 +134,10 @@ Abbreviations
 
 * Customizing Abbreviations::   
 
+Miscellaneous features
+
+* Include statements::          Active include statements
+
 Mint
 
 * Running mint::                Commands for sending code to Mint.
@@ -172,9 +172,6 @@ Evolution
 
 @end detailmenu
 @end menu
-
-@c {{{endfold}}}
-@c {{{ Copying }}}
 
 @node Copying, GNU Free Documentation License, top, top
 @unnumbered Copying
@@ -224,18 +221,14 @@ Licenses that accompany them.
 
 
 
-@c {{{endfold}}}
 
-@c {{{ GNU Free Documentation License }}}
 
 @node GNU Free Documentation License, Introduction, Copying, top
 @unnumbered GNU Free Documentation License
 @include fdl.texi
 
-@c {{{endfold}}}
 
 
-@c {{{ Introduction }}}
 @node Introduction, Basics, GNU Free Documentation License, top
 @unnumbered Introduction
 @cindex Introduction
@@ -316,10 +309,6 @@ the release.
 
 
 
-@c {{{endfold}}}
-
-@c {{{ Basics }}}
-
 @node Basics, Indentation, Introduction, top
 @chapter Basics
 @cindex Top-level procedures
@@ -340,9 +329,7 @@ Most of the higher-level MapleV functions, those that do more than edit
 text, are available on the menubar.
 
 
-@c {{{endfold}}}
 
-@c {{{ Indentation }}}
 
 @node Indentation, Font Lock, Basics, top
 @comment  node-name,  next,  previous,  up
@@ -362,7 +349,6 @@ error and moves the cursor to the place where the error was detected.
 * Indentation Details::         Overview of the indentation algorithm.
 @end menu
 
-@c {{{   commands }}}
 
 @node Indentation Commands, Customizing Indentation, Indentation, Indentation
 @comment  node-name,  next,  previous,  up
@@ -403,8 +389,6 @@ Indent the region (@code{maplev-indent-region}).
 
 @end table
 
-@c {{{endfold}}}
-@c {{{   customizing }}}
 
 @node Customizing Indentation, Indentation Tricks, Indentation Commands, Indentation
 @comment  node-name,  next,  previous,  up
@@ -430,8 +414,6 @@ from being indented.
 
 @end vtable
 
-@c {{{endfold}}}
-@c {{{   tricks }}}
 
 @node Indentation Tricks, Indentation Details, Customizing Indentation, Indentation
 @section Indentation Tricks
@@ -445,7 +427,6 @@ indented.  The following sections give examples and demonstrate workarounds.
 * Preventing indentation::      Using continued comments to prevent indentation.
 @end menu
 
-@c {{{   forcing indentation }}}
 
 @node Forcing indentation, Preventing indentation, Indentation Tricks, Indentation Tricks
 @subsection Forcing indentation
@@ -490,13 +471,10 @@ y := ( a + ( ... )
 ---------- Buffer: foo ----------
 @end example
 
-@c {{{endfold}}}
-@c {{{   preventing indentation }}}
 
 @node Preventing indentation,  , Forcing indentation, Indentation Tricks
 @subsection Preventing indentation
-@cindex Preventing indentation
-@cindex Indentation, preventing
+
 @subsubheading Problem
 
 Consider an installation script in which the procedures @samp{foo1} and
@@ -556,11 +534,8 @@ MapleV ignores the comment continuations and determines that each
 the comments and so matches the initial @code{if} to the final
 @code{fi}; it ignores the dummy statements.
 
-@c {{{endfold}}}
 
 
-@c {{{endfold}}}
-@c {{{   details }}}
 
 @node Indentation Details,  , Indentation Tricks, Indentation
 @section Indentation Details
@@ -584,10 +559,7 @@ the last indentation location then the indentation information is lost;
 consequently, you may occasionally notice small delays as the source is
 reparsed.
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
-@c {{{ Font Lock }}}
 
 @node Font Lock, Comments, Indentation, top
 @chapter Font Lock
@@ -600,7 +572,6 @@ reparsed.
 * Display faces::               Setting the display faces.
 @end menu
 
-@c {{{   decoration level }}}
 
 @node Decoration level, Adding keywords, Font Lock, Font Lock
 @section Decoration level
@@ -634,8 +605,6 @@ Execute @kbd{M-x maplev-reset-font-lock @key{RET} LEVEL @key{RET}} or
 use the menubar, @kbd{MapleV -> Setup -> Decoration}, to change the
 decoration in a MapleV buffer.  @code{LEVEL} is an integer from 1 to 3.
 
-@c {{{endfold}}}
-@c {{{   adding keywords }}}
 
 
 @node Adding keywords, Display faces, Decoration level, Font Lock
@@ -656,8 +625,6 @@ MapleV mode.
    ("printf"   . maplev-font-special-word-face)))
 @end example
 
-@c {{{endfold}}}
-@c {{{   faces }}}
 
 @node Display faces,  , Adding keywords, Font Lock
 @section Display faces
@@ -680,10 +647,7 @@ Display face used for Maple initial variables.  These are
 
 @end vtable
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
-@c {{{ Comments }}}
 
 @node Comments, Shortcuts, Font Lock, top
 @chapter Comments
@@ -752,8 +716,6 @@ and interprets the following line as code.  This can fool the MapleV
 indentation grammar; however, it can also be used to achieve certain
 effects.  @xref{Preventing indentation}, for an example.
 
-@c {{{endfold}}}
-@c {{{ Shortcuts }}}
 
 @node Shortcuts, Imenu support, Comments, top
 @chapter Shortcuts
@@ -764,7 +726,6 @@ effects.  @xref{Preventing indentation}, for an example.
 * Templates::                   Inserting procedures and assignments.
 @end menu
 
-@c {{{   abbreviations }}}
 
 @node Abbreviations, Templates, Shortcuts, Shortcuts
 @section Abbreviations
@@ -794,7 +755,6 @@ strings. The default is @samp{nil}.
 @end menu
 
 
-@c {{{   customizing }}}
 
 
 @node Customizing Abbreviations,  , Abbreviations, Abbreviations
@@ -822,10 +782,7 @@ following to @file{emacs}:
 @end example
 
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
-@c {{{   templates }}}
 
 @node Templates,  , Abbreviations, Shortcuts
 @section Templates
@@ -876,12 +833,9 @@ The default value is @samp{ := }.
 
 @end vtable
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
-@c {{{ Imenu support }}}
 
-@node Imenu support, Mint, Shortcuts, top
+@node Imenu support, Miscellaneous features, Shortcuts, top
 @chapter Imenu support
 @cindex Imenu
 @cindex Index, procedures
@@ -898,11 +852,39 @@ the menu moves point to the assignment of that item.
 The assignments must be flush left to be indexed.
 Only the first macro in a @code{macro} assignment is indexed.
 
-@c {{{endfold}}}
+@node Miscellaneous features, Mint, Imenu support, top
+@comment  node-name,  next,  previous,  up
+@chapter Miscellaneous features
+@cindex Miscellaneous
 
-@c {{{ Mint }}}
+@menu
+* Include statements::          Active include statements
+@end menu
 
-@node Mint, Maple, Imenu support, top
+@node Include statements,  , Miscellaneous features, Miscellaneous features
+@section Include statements
+@cindex Include
+
+@findex maplev-find-include-file-at-point
+Maple include statements, such as @code{$include <somefile>},
+are font-locked and active.  
+Clicking on them, or typing @kbd{C-c C-o},
+calls @kbd{maplev-find-include-file-at-point},
+which searches for the file and, if successful, opens it.
+If the path exists, but the file does not, the user is
+asked whether to create the file.  
+
+@vindex maplev-include-path
+The include path can be
+assigned, as a list of strings, to the variable @kbd{maplev-include-path}.
+The paths are searched in the order of occurrence in the list.
+
+@vindex maplev-include-file-other-window-flag
+The customizable variable @kbd{maplev-include-file-other-window-flag}
+determines whether the file is opened in the current window or 
+another window.
+
+@node Mint, Maple, Miscellaneous features, top
 @chapter Mint
 @cindex Mint
 @cindex Syntax checking
@@ -919,7 +901,6 @@ convenient means for locating and correcting syntax errors.
 * Mint mode::                   Mode for viewing the output of Mint.
 @end menu
 
-@c {{{   running mint }}}
 
 @node Running mint, Mint mode, Mint, Mint
 @section Running mint
@@ -974,8 +955,6 @@ is @code{undecided-dos}.
 
 @end vtable
 
-@c {{{endfold}}}
-@c {{{   Mint mode }}}
 
 @node Mint mode,  , Running mint, Mint
 @section Mint mode
@@ -1029,10 +1008,7 @@ Face for notes (usually @samp{on line}).
 
 @end vtable
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
-@c {{{ Cmaple }}}
 
 @node Maple, Help pages, Mint, top
 @chapter Maple
@@ -1048,7 +1024,6 @@ Maple process.  Maple commands can be directly executed in the buffer.
 * Cmaple mode::                 Mode for interacting with Maple.
 @end menu
 
-@c {{{   running maple }}}
 
 @node Running Maple, Cmaple mode, Maple, Maple
 @section Running Maple
@@ -1095,8 +1070,6 @@ Kill the Maple engine (@code{cmaplev-kill}).
 
 These commands are available through the menubar, @kbd{MapleV -> Maple}.
 
-@c {{{endfold}}}
-@c {{{   cmaple mode }}}
 
 @node Cmaple mode,  , Running Maple, Maple
 @section Cmaple mode
@@ -1119,10 +1092,7 @@ Display a Maple procedure (@pxref{Procedures}).
 
 @end table
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
-@c {{{ Help }}}
 
 @node Help pages, Procedures, Maple, top
 @chapter Help pages
@@ -1138,7 +1108,6 @@ highlighted and cross references are activated.
 * MapleV help mode::            Mode for viewing Maple help pages.
 @end menu
 
-@c {{{   displaying help pages }}}
 
 @node Displaying help pages, MapleV help mode, Help pages, Help pages
 @section Displaying help pages
@@ -1168,8 +1137,6 @@ Help pages are displayed in a buffer with major mode
 @xref{MapleV help mode}.
 @end ifinfo
 
-@c {{{endfold}}}
-@c {{{   help mode }}}
 
 @node MapleV help mode,  , Displaying help pages, Help pages
 @section MapleV help mode
@@ -1232,10 +1199,7 @@ The help page for a chosen topic is displayed by sending the string
 Maple engine is busy an error message, @samp{Maple busy}, is displayed in
 the message window.  
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
-@c {{{ Proc }}}
 
 @node Procedures, Installation, Help pages, top
 @chapter Procedures
@@ -1252,7 +1216,6 @@ locked the same as in MapleV mode.
 * MapleV proc mode::            Mode for viewing Maple procedures.
 @end menu
 
-@c {{{   displaying procedures }}}
 
 @node Displaying procedures, MapleV proc mode, Procedures, Procedures
 @section Displaying procedures
@@ -1282,8 +1245,6 @@ Procedures are displayed in a buffer with major mode
 @xref{MapleV proc mode}.
 @end ifinfo
 
-@c {{{endfold}}}
-@c {{{   proc mode }}}
 
 @node MapleV proc mode,  , Displaying procedures, Procedures
 @section MapleV proc mode
@@ -1338,13 +1299,10 @@ procedure @samp{maplev_print} that is assigned when the Maple engine is
 started.  If the Maple engine is busy an error message, @samp{Maple
 busy}, is displayed in the message window.
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
 
 @c Appendices
 
-@c {{{ Installation }}}
 
 @node Installation, Evolution, Procedures, top
 @appendix Installation
@@ -1363,7 +1321,6 @@ This section describes how to install MapleV into GNU Emacs.
 @end menu
 
 
-@c {{{   compiling }}}
 
 @node Compiling, Customizing, Installation, Installation
 @section Compiling
@@ -1390,8 +1347,6 @@ regex @file{.mpl} to an extension appropriate for your usage:
       (cons `("\\.mpl\\'" . maplev-mode) auto-mode-alist))
 @end example
 
-@c {{{endfold}}}
-@c {{{   customizing }}}
 
 @node Customizing, Info documentation, Compiling, Installation
 @section Customizing
@@ -1412,8 +1367,6 @@ The important options are in the subgroup @code{maplev-important}.
 After setting these options, save them to your @file{.emacs} file by
 clicking on the @samp{Save for Future Sessions} button.
 
-@c {{{endfold}}}
-@c {{{   installing info docs }}}
 
 @node Info documentation,  , Customizing, Installation
 @section Info documentation
@@ -1433,15 +1386,11 @@ the top level node of your Emacs Info structure, to point to
 @end example
 
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
-@c {{{ Evolution }}}
 
 @node Evolution, Key Index, Installation, top
 @appendix Evolution
 
-@c {{{ Bugs }}}
 
 @menu
 * Bugs::                        
@@ -1458,8 +1407,6 @@ developer.
 
    Joseph S. Riel (Joe Riel) @samp{joer@@k-online.com}
 
-@c {{{endfold}}}
-@c {{{ Acknowledgements }}}
 
 @node Acknowledgments, Enhancements, Bugs, Evolution
 @section Acknowledgements
@@ -1498,8 +1445,6 @@ improvements.
 
 @end table
 
-@c {{{endfold}}}
-@c {{{ Enhancements }}}
 
 @node Enhancements,  , Acknowledgments, Evolution
 @section Enhancements
@@ -1527,11 +1472,8 @@ optional package.
 
 @end itemize
 
-@c {{{endfold}}}
 
-@c {{{endfold}}}
 
-@c {{{ Indices and Endmatter }}}
 
 @node Key Index, Function Index, Evolution, top
 @comment    node-name,         next,       previous, up
@@ -1557,4 +1499,3 @@ optional package.
 @contents
 @bye
 
-@c {{{endfold}}}
