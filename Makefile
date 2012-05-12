@@ -86,8 +86,8 @@ HTML-FILES = doc/$(PKG).html
 
 DOC-FILES = $(TEXI-FILES) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 
-doc: $(call print-help,doc,Create the info and pdf documentation)
-doc:  info pdf
+doc: $(call print-help,doc,Create the info and html documentation)
+doc:  info html
 info: $(call print-help,info,Create info file)
 info: doc/$(PKG)
 pdf:  $(call print-help,pdf,Create pdf documentation)
