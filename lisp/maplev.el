@@ -277,7 +277,7 @@ is an integer correspond to the button number; preceding items are optional modi
       ("5.1" . ("maple" nil "mint"))
       ("5"   . ("maple" nil "mint"))
       ("4"   . ("maple" nil "mint"))))
-  "*Assoc list specifying the available executables.
+  "Assoc list specifying the available executables.
 Each item has the form \(RELEASE MAPLE MAPLE-INIFILE MINT\)
 where RELEASE is the Maple release corresponding to the
 executables MAPLE and MINT.  MAPLE must be the command line
@@ -296,7 +296,7 @@ if nil the default initialization file is used."
 ;; a new release.
 
 (defcustom maplev-default-release "15"
-  "*Release of Maple used as the default executable.
+  "Release of Maple used as the default executable.
 It must be a key in `maplev-executable-alist'."
   :type `(choice ,@(mapcar (lambda (item)
                              (list 'const (car item)))
@@ -329,7 +329,7 @@ for particular releases.")
           maplev-interface-kernelopts-settings)))
     `(("5.1" . ,init)
       ("5"   . ,init)))
-  "*Assoc list of Maple commands initializing a maple session.
+  "Assoc list of Maple commands initializing a maple session.
 Each item has the form \(RELEASE COMMANDS\) where RELEASE is the
 Maple release.  COMMANDS must be a string of Maple commands.
 Overrides `maplev-default-init-string'."
@@ -339,7 +339,7 @@ Overrides `maplev-default-init-string'."
   :group 'maplev-important)
 
 (defcustom maplev-mint-info-level 3
-  "*Integer controlling amount of information that Mint outputs."
+  "Integer controlling amount of information that Mint outputs."
   :type '(choice (const :tag "no info" 0)
                  (const :tag "severe errors" 1)
                  (const :tag "+ serious errors" 2)
@@ -348,7 +348,7 @@ Overrides `maplev-default-init-string'."
   :group 'maplev-mint)
 
 (defcustom maplev-mint-error-level 1
-  "*Integer controlling Mint error checking in Maple input."
+  "Integer controlling Mint error checking in Maple input."
   :type '(choice (const :tag "no info" 0)
                  (const :tag "severe errors" 1)
                  (const :tag "+ serious errors" 2)
@@ -357,7 +357,7 @@ Overrides `maplev-default-init-string'."
   :group 'maplev-mint)
 
 (defcustom maplev-mint-start-options (list "-q")
-  "*List of mint command line options.  
+  "List of mint command line options.  
 Do not include the info level or the include path,
 they are handled by `maplev-mint-info-level' and `maplev-include-path'."
   :type 'list
@@ -373,7 +373,7 @@ they are handled by `maplev-mint-info-level' and `maplev-include-path'."
   :group 'maplev-mint)
 
 (defcustom maplev-include-path nil
-  "*List of directories to search for files to include.
+  "List of directories to search for files to include.
 Each element is a string (directory name) or nil.
 The directories are passed to maple and to mint 
 via the \"-I\" option; they are searched for files
@@ -388,24 +388,24 @@ specified in Maple preprocessor $include directives."
 ;;{{{   comments
 
 (defcustom maplev-comment-column 40
-  "*Column for inline comments.
+  "Column for inline comments.
 Use \\[indent-for-comment] to insert or align an inline comment."
   :type 'integer
   :group 'maplev-comments)
 
 (defcustom maplev-comment-start "#"
-  "*String to insert to start a Maple inline comment."
+  "String to insert to start a Maple inline comment."
   :type 'string
   :group 'maplev-comments)
 
 ;; not used by GNU emacs 21
 (defcustom maplev-block-comment-start "# "
-  "*String to insert to start a Maple standalone comment."
+  "String to insert to start a Maple standalone comment."
   :type 'string
   :group 'maplev-comments)
 
 (defcustom maplev-auto-fill-comment-flag t
-  "*Non-nil means initially enable `auto-fill-mode' in a Maple buffer."
+  "Non-nil means initially enable `auto-fill-mode' in a Maple buffer."
   :type 'boolean
   :group 'maplev-comments)
 
@@ -413,12 +413,12 @@ Use \\[indent-for-comment] to insert or align an inline comment."
 ;;{{{   declarations
 
 (defcustom maplev-var-declaration-symbol " :: "
-  "*Separator inserted between declared variable and type."
+  "Separator inserted between declared variable and type."
   :type 'string
   :group 'maplev-declarations)
 
 (defcustom maplev-alphabetize-declarations-p nil
-  "*If non-nil, variable declarations are alphabetized.
+  "If non-nil, variable declarations are alphabetized.
 Only works if `maplev-add-declaration-function' is assigned
 either `maplev-add-declaration-leading-comma' or
 `maplev-add-declaration-trailing-comma'."
@@ -426,7 +426,7 @@ either `maplev-add-declaration-leading-comma' or
   :group 'maplev-declarations)
 
 (defcustom maplev-add-declaration-function 'maplev-add-declaration-trailing-comma
-  "*Selects the function that adds variables to a declaration."
+  "Selects the function that adds variables to a declaration."
   :type '(radio
           (function-item :doc "declarations on one line" maplev-add-declaration-one-line)
           (function-item :doc "declarations on separate lines, with leading comma" maplev-add-declaration-leading-comma)
@@ -440,22 +440,22 @@ either `maplev-add-declaration-leading-comma' or
 ;;{{{   indentation
 
 (defcustom maplev-indent-level 4
-  "*Indentation of Maple statements with respect to containing block."
+  "Indentation of Maple statements with respect to containing block."
   :type 'integer
   :group 'maplev-indentation)
 
 (defcustom maplev-indent-declaration 0
-  "*Indentation of Maple declarations \(local, global, option, description\)."
+  "Indentation of Maple declarations \(local, global, option, description\)."
   :type 'integer
   :group 'maplev-indentation)
 
 (defcustom maplev-dont-indent-re "[#$]"
-  "*Lines starting with this regular expression will not be auto-indented."
+  "Lines starting with this regular expression will not be auto-indented."
   :type '(choice string (const :tag "default" nil))
   :group 'maplev-indentation)
 
 (defcustom maplev-auto-break-strings-flag t
-  "*Strings in code will be automatically broken when they pass the `current-fill-column'."
+  "Strings in code will be automatically broken when they pass the `current-fill-column'."
   :type 'boolean
   :group 'maplev-indentation)
 
@@ -463,13 +463,13 @@ either `maplev-add-declaration-leading-comma' or
 ;;{{{   templates
 
 (defcustom maplev-copyright-owner "John Q. Public"
-  "*Copyright owner inserted in the copyright string by `maplev--template-proc-module'."
+  "Copyright owner inserted in the copyright string by `maplev--template-proc-module'."
   :type 'string
   :group 'maplev-templates
   :group 'maplev-important)
 
 (defcustom maplev-comment-end-flag t
-  "*Non-nil means add a template's name as a comment following the end.
+  "Non-nil means add a template's name as a comment following the end.
 See `maplev--template-proc-module'."
   :type 'boolean
   :group 'maplev-templates)
@@ -480,31 +480,31 @@ See `maplev--template-proc-module'."
 ;;; display it I might use " #\# ", which also prints the hash.
 
 (defcustom maplev-template-end-comment " # "
-  "*String prepended to the name of a template at the end,
+  "String prepended to the name of a template at the end,
 following the \"end\".  See `maplev-comment-end-flag'."
   :type 'string
   :group 'maplev-templates)
 
 (defcustom maplev-insert-copyright-flag t
-  "*Non-nil means insert `maplev-copyright-owner' in a template.
+  "Non-nil means insert `maplev-copyright-owner' in a template.
 See `maplev-template'."
   :type 'boolean
   :group 'maplev-templates)
 
 (defcustom maplev-description-quote-char ?\`
-  "*Quote character for the description statement.
+  "Quote character for the description statement.
 Maple uses a backquote; however, in R5 it makes more sense to use a
 double quote.  Procbody, alas, does not handle a double quote."
   :type 'character
   :group 'maplev-templates)
 
 (defcustom maplev-variable-spacing 0
-  "*Spaces to insert after a comma in declarations and argument lists."
+  "Spaces to insert after a comma in declarations and argument lists."
   :type 'integer
   :group 'maplev-templates)
 
 (defcustom maplev-assignment-operator " := "
-  "*Maple assignment operator.  Used by `maplev-insert-assignment-operator'."
+  "Maple assignment operator.  Used by `maplev-insert-assignment-operator'."
   :type 'string
   :group 'maplev-templates)
 
@@ -512,7 +512,7 @@ double quote.  Procbody, alas, does not handle a double quote."
 ;;{{{   completion
 
 (defcustom maplev-completion-longdelim-p nil
-  "*If non-nil use the long delimiter when completing a Maple control structure.
+  "If non-nil use the long delimiter when completing a Maple control structure.
 For example, if non-nil, a `do' loop is completed with `end do',
 otherwise it is completed with `od'.  If the maple release is less than 6
 than the long delimiter is never used."
@@ -525,7 +525,7 @@ than the long delimiter is never used."
 ;; Leading commas
 
 (defcustom maplev-leading-comma-flag t
-  "*Non-nil means the user prefers leading commas when continuing lines.
+  "Non-nil means the user prefers leading commas when continuing lines.
 Currently this only determines whether advice for `fixup-whitespace'
 is activated when maplev-mode is executed."
   :type 'boolean
@@ -534,19 +534,19 @@ is activated when maplev-mode is executed."
 ;; Abbrev mode
 
 (defcustom maplev-initial-abbrev-mode-flag nil
-  "*Non-nil means initially enable function `abbrev-mode' in a Maple buffer."
+  "Non-nil means initially enable function `abbrev-mode' in a Maple buffer."
   :type 'boolean
   :group 'maplev-misc)
 
 (defcustom maplev-expand-abbrevs-in-comments-and-strings-flag nil
-  "*Non-nil means expand Maple abbreviations in comments and strings.
+  "Non-nil means expand Maple abbreviations in comments and strings.
 Nil means do not expand in either."
   :type 'boolean
   :group 'maplev-misc
   :group 'maplev-comments)
 
 (defcustom maplev-include-file-other-window-flag t
-  "*Non-nil means the default action is to open an include file
+  "Non-nil means the default action is to open an include file
 in the other window. See `maplev-find-include-file'."
   :type 'boolean
   :group 'maplev-misc)
@@ -554,12 +554,12 @@ in the other window. See `maplev-find-include-file'."
 ;; Configuration
 
 (defcustom maplev-buttonize-includes-flag t
-  "*Non-nil means use `button-lock-mode' to hyperlink include statements."
+  "Non-nil means use `button-lock-mode' to hyperlink include statements."
   :type 'boolean
   :group 'maplev-misc)
 
 (defcustom maplev-load-config-file-flag t
-  "*Non-nil means load a configuration file when starting maplev-mode.
+  "Non-nil means load a configuration file when starting maplev-mode.
 The configuration file is named .maplev and is searched for in the current directory
 and its ancestors.  The file is loaded as an elisp file.  No error occurs if
 the file does not exist."
@@ -569,7 +569,7 @@ the file does not exist."
 ;; Saving
 
 (defcustom maplev-clean-buffer-before-saving-flag t
-  "*Non-nil means run `maplev-remove-trailing-spaces' before saving."
+  "Non-nil means run `maplev-remove-trailing-spaces' before saving."
   :type 'boolean
   :group 'maplev-misc)
 
@@ -613,7 +613,7 @@ the file does not exist."
         (maple-comment
          (regexp . "\\(\\s-+\\)\\s<")
          (column . comment-column)))
-      "*A list describing the maplev alignment rules.
+      "A list describing the maplev alignment rules.
 See the documentation for `align-rules-list' for more info on the format."
       :type align-rules-list-type
       :group 'maplev-align)
@@ -639,7 +639,7 @@ See the documentation for `align-rules-list' for more info on the format."
                                 (concat "[^ \t\n\\\\]"
                                         (regexp-quote comment-start)
                                         "\\(.+\\)$") end t))))))
-      "*A list describing text that should be excluded from alignment.
+      "A list describing text that should be excluded from alignment.
 See the documentation for `align-exclude-rules-list' for more info."
       :type align-rules-list-type
       :group 'maplev-align)))
@@ -3613,18 +3613,18 @@ if `maplev-leading-comma-flag' is non-nil, remove space before a comma."
 ;;{{{   buffers
 
 (defcustom maplev-pop-up-frames-flag nil
-  "*Non-nil means help pages and procedure listings start in a separate frame."
+  "Non-nil means help pages and procedure listings start in a separate frame."
   :type 'boolean
   :group 'maplev-misc)
 
 (defcustom maplev-cmaple-end-notice "END_OF_OUTPUT"
-  "*Message used to indicate the end of Maple output."
+  "Message used to indicate the end of Maple output."
   :type 'string
   :group 'maplev-misc)
 
 (defcustom maplev-cmaple-echoes-flag
   (not (string-match "windows-nt\\|ms-dos" (symbol-name system-type)))
-  "*Non-nil means the process echoes."
+  "Non-nil means the process echoes."
   :type 'boolean
   :group 'maplev-buffer
   :group 'maplev-important)
@@ -3632,7 +3632,7 @@ if `maplev-leading-comma-flag' is non-nil, remove space before a comma."
 ;;}}}
 ;;{{{   maple setup
 (defcustom maplev-start-options (list "-q")
-  "*List of Maple command line options.  Each item is a string."
+  "List of Maple command line options.  Each item is a string."
   :type 'list
   :group 'maplev-executables)
 
@@ -4747,22 +4747,22 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 ;;{{{   customizable variables
 
 (defcustom maplev-mint-coding-system 'undecided-dos
-  "*Coding system used by Mint.  See `coding-system-for-read' for details."
+  "Coding system used by Mint.  See `coding-system-for-read' for details."
   :type '(choice (const undecided-dos) (const raw-text-unix) (symbol :tag "other"))
   :group 'maplev-mint)
 
 (defcustom maplev-mint-query t
-  "*Non-nil means query before correcting."
+  "Non-nil means query before correcting."
   :type 'boolean
   :group 'maplev-mint)
 
 (defcustom maplev-mint-process-all-vars nil
-  "*Non-nil means process all variables in one step."
+  "Non-nil means process all variables in one step."
   :type 'boolean
   :group 'maplev-mint)
 
 (defcustom maplev-mint-include-dir nil
-  "*Directory of mint include files.
+  "Directory of mint include files.
 This should probably be a list of directories."
   :type 'string
   :group 'maplev-mint)
