@@ -3086,7 +3086,7 @@ moved to be before it."
   (list "args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
 	"_options" "_noptions" "_rest" "_nrest"
 	"_params" "_nparams" "_passed" "_npassed"
-	"_nresults" )
+	"_nresults" "static" )
   "List of special words in Maple.")
 
 (defconst maplev--special-words-re
