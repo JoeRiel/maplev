@@ -3735,6 +3735,7 @@ restart it."
          (inifile (nth 1 (cdr (assoc release maplev-executable-alist))))
          (buffer (get-buffer-create (maplev--cmaple-buffer)))
          (process (get-buffer-process buffer))
+	 (include-path maplev-include-path)
          ;; Just testing this.  Is there an advantage to a PTY process?
          (process-connection-type 'pty)) 
     (with-current-buffer buffer
@@ -3750,9 +3751,9 @@ restart it."
                             cmaple
                             (append (and inifile (list "-i" inifile))
                                     maplev-start-options ;; add include path to argument list
-                                    (and maplev-include-path
+                                    (and include-path
                                          (list (concat "-I " 
-                                                       (mapconcat 'identity maplev-include-path ",")))))))
+                                                       (mapconcat 'identity include-path ",")))))))
        'maplev--cmaple-filter)
       (maplev-cmaple-mode release)
       (maplev-cmaple--lock-access t)
@@ -5194,6 +5195,7 @@ Return exit code of mint."
         (coding-system-for-read maplev-mint-coding-system)
         (mint-buffer (concat "*Mint " maplev-release "*"))
         (mint (nth 2 (cdr (assoc maplev-release maplev-executable-alist))))
+	(include-path maplev-include-path)
         status eoi lines errpos)
     ;; Allocate markers, unless they exist
     (unless maplev-mint--code-beginning
@@ -5219,9 +5221,9 @@ Return exit code of mint."
                           (concat "-i" (number-to-string maplev-mint-info-level)
                                   ;; Add include path to argument list.
                                   ;; Use commas to separate directories (see ?mint)
-                                  (and maplev-include-path
-                                       (concat " -I " 
-                                               (mapconcat 'identity maplev-include-path ","))))
+                                  (and include-path
+                                       (concat " -s -I " 
+                                               (mapconcat 'identity include-path ","))))
                           maplev-mint-start-options))
       (delete-region (point-min) eoi)
       ;; Display Mint output
