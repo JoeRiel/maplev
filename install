@@ -8,7 +8,7 @@ INFO_FILE=doc/maplev               # info file
 
 INSTALL_INFO=ginstall-info         # program to update dir file
 
-echo "Byte-compiling mds lisp files"
+echo "Byte-compiling maplev lisp files"
 # Byte-compile lisp/*.el
 emacs --no-site-file \
       --no-init-file \
