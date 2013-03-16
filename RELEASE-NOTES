@@ -1,5 +1,9 @@
 -*- org -*-
 
+* 2.27:
+** Font-lock 'static' (as special word)
+** Improve regular expression match for simple-names
+** Fix issue with mint and include statements
 * 2.26:
 ** Add customizable flag maplev-include-file-other-window-flag
 ** Add $elif and $file as preprocessor directors
