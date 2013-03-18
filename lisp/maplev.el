@@ -109,9 +109,10 @@
 
 (defconst maplev-developer 
   "Joseph S. Riel <joer@san.rr.com>"
-  "Developers/maintainers of maplev-mode.")
+  "Developers/maintainers of `maplev-mode'.")
 
 (defun maplev-about ()
+  "Print information for `maplev-mode'."
   (interactive)
   (sit-for 0)
   (message "maplev-mode version %s, (C) %s" maplev-version maplev-developer))
@@ -261,7 +262,6 @@ is an integer correspond to the button number; preceding items are optional modi
         ("5"  . ,(maplev-windows-executables "5"  t))
         ("4"  . ,(maplev-windows-executables "4"  t))
         ("3"  . ,(maplev-windows-executables "3"  t)))
-
     '(
       ("16"  . ("maple" nil "mint"))
       ("15"  . ("maple" nil "mint"))
@@ -455,7 +455,7 @@ either `maplev-add-declaration-leading-comma' or
   :group 'maplev-indentation)
 
 (defcustom maplev-auto-break-strings-flag t
-  "Strings in code will be automatically broken when they pass the `current-fill-column'."
+  "Non-nil means strings in code will be automatically broken when they pass the `current-fill-column'."
   :type 'boolean
   :group 'maplev-indentation)
 
@@ -527,7 +527,7 @@ than the long delimiter is never used."
 (defcustom maplev-leading-comma-flag t
   "Non-nil means the user prefers leading commas when continuing lines.
 Currently this only determines whether advice for `fixup-whitespace'
-is activated when maplev-mode is executed."
+is activated when `maplev-mode' is executed."
   :type 'boolean
   :group 'maplev-misc)
 
@@ -559,10 +559,10 @@ in the other window. See `maplev-find-include-file'."
   :group 'maplev-misc)
 
 (defcustom maplev-load-config-file-flag t
-  "Non-nil means load a configuration file when starting maplev-mode.
-The configuration file is named .maplev and is searched for in the current directory
-and its ancestors.  The file is loaded as an elisp file.  No error occurs if
-the file does not exist."
+  "Non-nil means load a configuration file when starting `maplev-mode'.
+The configuration file is named .maplev and is searched for in
+the current directory and its ancestors.  The file is loaded as
+an elisp file.  No error occurs if the file does not exist."
   :type 'boolean
   :group 'maplev-misc)
 
@@ -689,8 +689,8 @@ May interfere with some modes (e.g. noweb).")
 
 (defconst maplev--quoted-name-re  "`[^`\n\\\\]*\\(?:\\\\.[^`\n\\\\]*\\)*`"
   "Regular expression for a Maple quoted name.
-It correctly handles escaped backquotes in a name, but not doubled
-backquotes.  It intentionally fails for the exceptional case where a
+It correctly handles escaped back-quotes in a name, but not doubled
+back-quotes.  It intentionally fails for the exceptional case where a
 name has a newline character.")
 
 (defconst maplev--symbol-re (concat "\\(?:" 
@@ -741,7 +741,7 @@ A backslash at the end of the line does not continue the comment.")
           "\\(?:[ \t\n]*::[ \t\n]*\\(" maplev--name-re "\\)\\)?"
           "[ \t\n]*:?=[ \t\n]*")
   "Regular expression that matches a Maple assignment that may
-include a type declaration.  The second group correponds to the
+include a type declaration.  The second group corresponds to the
 assignee, the second group to the type.  This only works with
 an assignment to a name, it does not match an assignment to
 a sequence.")
@@ -774,7 +774,7 @@ The first group corresponds to the name of the defun.")
           "\\(?:[ \t]+" maplev--defun-re "\\)?"
           "[ \t]*[:;]")
   "Regular expression for \"end\" statement in a Maple defun.
-It does not allow linebreaks as this messes up searching.  
+It does not allow line-breaks as this messes up searching.  
 It matches from the \"end\" to the terminating colon or semicolon.")
 
 (defconst maplev--top-defun-end-re
@@ -1785,8 +1785,8 @@ Prefix JUSTIFY means justify as well."
 (defun maplev-set-release (&optional release)
   "Assign the buffer local variable `maplev-release'.
 RELEASE is a key in `maplev-executable-alist', if not supplied then
-`maplev-default-release' is used. Set syntax table according to
-RELEASE. If in `maplev-mode' also refontify the buffer."
+`maplev-default-release' is used.  Set syntax table according to
+RELEASE.  If in `maplev-mode' also refontify the buffer."
   (interactive
    (list (completing-read "Use Maple release: "
                           (mapcar (lambda (item) (list (car item)))
@@ -1998,11 +1998,11 @@ Optionally move N lines forward before testing.  Point is not affected."
 ;;{{{ Interactive functions
 
 (defun maplev--beginning-of-defun-pos (&optional top n)
-  "Return character position of beginning of previous defun.  If
-optional argument TOP is non-nil, search for top level defun.  With
-optional argument N, do it that many times.  Negative argument -N
-means search forward to Nth preceding end of defun.  Return nil if
-search fails."
+  "Return character position of beginning of previous defun.  
+If optional argument TOP is non-nil, search for top level defun.
+With optional argument N, do it that many times.  Negative
+argument -N means search forward to Nth preceding end of defun.
+Return nil if search fails."
   (let ((regexp (if top maplev--top-defun-begin-re maplev--defun-begin-re))
         pos)
     (setq n (or n 1))
@@ -2035,10 +2035,11 @@ search fails."
             ((point))))))
 
 (defun maplev--end-of-defun-pos (&optional top n)
-  "Return character position of next end of defun.  If optional
-argument TOP is non-nil, search for top level defun.  With optional
-argument N, do it that many times.  Negative argument -N means search
-back to Nth preceding end of defun.  Return nil if search fails."
+  "Return character position of next end of defun.  
+If optional argument TOP is non-nil, search for top level defun.
+With optional argument N, do it that many times.  Negative
+argument -N means search back to Nth preceding end of defun.
+Return nil if search fails."
 
   ;; The search algorithm is asymmetric with respect to direction.
   ;; Searching backwards (-N) for an end of defun is easy, just search
@@ -2077,19 +2078,20 @@ back to Nth preceding end of defun.  Return nil if search fails."
             ((point))))))
 
 (defun maplev-beginning-of-defun (&optional n)
-  "Move point backward to the beginning of defun.  With optional
-argument N, move to the beginning of the Nth preceding defun.
-Negative argument -N means move forward to the end of the Nth
-following defun."
+  "Move point backward to the beginning of defun.  
+With optional argument N, move to the beginning of the Nth
+preceding defun.  Negative argument -N means move forward to the
+end of the Nth following defun."
   (interactive)
   (setq n (or n 1))
   (goto-char (or (maplev--beginning-of-defun-pos nil n)
                  (if (> n 0) (point-min) (point-max)))))
        
 (defun maplev-end-of-defun (&optional n)
-  "Move point forward to the end of defun.  With optional argument N,
-move to the end of the Nth following defun.  Negative argument -N
-means move backwards to the end of the Nth preceding defun."
+  "Move point forward to the end of defun.  
+With optional argument N, move to the end of the Nth following
+defun.  Negative argument -N means move backwards to the end of
+the Nth preceding defun."
   (interactive)
   (setq n (or n 1))
   (goto-char (or (maplev--end-of-defun-pos nil n)
@@ -2149,7 +2151,7 @@ If optional NODISPLAY is non-nil, just return the string."
 
 (defun maplev--re-search-forward (regexp &optional bound noerror count)
   "Search forward from point for regular expression REGEXP.
-This function is like re-search-forward, but comments are ignored.
+This function is like `re-search-forward', but comments are ignored.
 Optional arguments BOUND, NOERROR, and COUNT have the same meaning
 as in `re-search-forward'."
   ;; This approach gets confused by a comment inside the match
@@ -2169,7 +2171,7 @@ as in `re-search-forward'."
       
 (defun maplev--re-search-backward (regexp &optional bound noerror count)
   "Search backward from point for regular expression REGEXP.
-This function is like re-search-backward, but comments are ignored.
+This function is like `re-search-backward', but comments are ignored.
 Optional arguments BOUND, NOERROR, and COUNT have the same meaning
 as in `re-search-backward'."
   ;; See maplev--re-search-forward.
@@ -2186,7 +2188,7 @@ as in `re-search-backward'."
 
 (defun maplev-safe-position (&optional to)
   "Search for safe buffer position before point \(a position not in a comment\).
-Optional arg TO initializes the search. It defaults to point"
+Optional arg TO initializes the search.  It defaults to point"
   (unless to (setq to (point)))
   (save-excursion
     (save-match-data
@@ -2196,7 +2198,7 @@ Optional arg TO initializes the search. It defaults to point"
       (point))))
 
 (defun maplev--scan-lists (count &optional from)
-  "Scan COUNT lists. Optional arg FROM defaults to position of point.
+  "Scan COUNT lists.  Optional arg FROM defaults to position of point.
 Returns the character number of the position thus found."
   (if (not from) (setq from (point)))
   (let ((parse-sexp-ignore-comments t))
@@ -2458,7 +2460,7 @@ Interactively, VAR defaults to identifier point is on."
 
 (defun maplev-delete-declaration (keyword vars &optional leave-one)
   "From the KEYWORD declaration delete occurrences of VARS.
-VARS must be eiter a string or a list of strings. If optional
+VARS must be either a string or a list of strings.  If optional
 argument LEAVE-ONE is non-nil, then one occurrence of VARS is left.
 The entire statement is deleted if it is left with no variables."
   (save-excursion
@@ -2473,7 +2475,7 @@ The entire statement is deleted if it is left with no variables."
 
 (defun maplev-delete-vars-old (start end vars &optional leave-one)
   "In region between START and END delete occurrences of VARS.
-VARS must be either a string or a list of strings. If optional
+VARS must be either a string or a list of strings.  If optional
 argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
   (let (case-fold-search lo)
     (save-excursion
@@ -2503,7 +2505,7 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
 
 (defun maplev-delete-vars (start end vars &optional leave-one)
   "In region between START and END delete occurrences of VARS.
-VARS must be either a string or a list of strings. If optional
+VARS must be either a string or a list of strings.  If optional
 argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
   (let ((parse-sexp-ignore-comments)
         case-fold-search lo )
@@ -2599,8 +2601,8 @@ The name of the procedure is inserted into the title of the fold."
 
 (defconst maplev--number-re
   "\\=[+-]?\\(?:[0-9]+\\(\\.[0-9]*\\)?\\|\\.[0-9]+\\)\\(?:[Ee][+-]?[0-9]*\\)?"
-  "Regular expression matching a number.  This is slightly too aggressive,
-it incorrectly matches, d.Ed, which is invalid.")
+  "Regular expression matching a number.  
+This is slightly too aggressive, it incorrectly matches, d.Ed, which is invalid.")
 
 (defconst maplev--expr-re
   (concat "\\s-*"
@@ -2720,8 +2722,8 @@ Prompt for the NAME, ARGUMENTS, and DESCRIPTION.  See `maplev-template'."
   (maplev--template-proc-module "module" name args description))
 
 (defun maplev-template-use-statement (exprseq)
-  "Insert a template for a Maple use statement and move point to its 
-first statement.  Prompt fo the EXPRSEQ."
+  "Insert a template for a Maple use statement and move point to its first statement.  
+Prompt for the EXPRSEQ."
   (interactive "*sExpression Sequence: ")
   (insert "use " exprseq " in")
   (maplev-indent-newline)
@@ -2920,7 +2922,7 @@ Compare that symbol against `maplev-completion-alist'."
 ;;{{{ Comments to Strings
 
 (defun maplev-comment-to-string-region (beg end)
-  "Convert indented comments to strings.
+  "Convert indented comments to strings in region from BEG to END.
 The purpose of this is to embed comments as strings into the source
 so that, when using a debugger, the showstat output appears to
 be commented.  See `maplev-string-to-comment-region'."
@@ -2931,7 +2933,7 @@ be commented.  See `maplev-string-to-comment-region'."
       (replace-match "\\1\"\\2\";"))))
 
 (defun maplev-string-to-comment-region (beg end)
-  "Convert strings back to comments.
+  "Convert strings back to comments in region from BEG to END.
 This is the inverse of `maplev-comment-to-string-region.'"
   (interactive "r")
   (save-excursion
@@ -2959,7 +2961,7 @@ with a double-colon, and begun again on the next line, with an indent."
 (defun maplev-auto-break-string ()
   "Auto-break a string.  Must be called where the string is to break.
 Inserts double-quote, then calls `mpldoc-indent-newline' to insert an
-indented newling.  A double-quote is inserted at the indentation point.
+indented newline.  A double-quote is inserted at the indentation point.
 If at the end of the line, a closing double-quote is also added and point
 moved to be before it."
   (insert "\"")
@@ -2999,63 +3001,63 @@ moved to be before it."
     "or"   "proc" "quit"      "read"   "save"
     "stop" "then" "to"        "union"  "while"
     "description" "local" "global")
-  "List of reserved words for Maple V R3")
+  "List of reserved words for Maple V R3.")
 
 (defconst maplev--reserved-words-4
   maplev--reserved-words-3
-  "List of reserved words for Maple V4")
+  "List of reserved words for Maple V4.")
 
 (defconst maplev--reserved-words-5
   maplev--reserved-words-3
-  "List of reserved words for Maple V5")
+  "List of reserved words for Maple V5.")
 
 (defconst maplev--reserved-words-6
   (append '("break" "catch" "error" "export" "finally"
             "in" "module" "next" "return" "try" "use")
           maplev--reserved-words-5)
-  "List of reserved words for Maple 6")
+  "List of reserved words for Maple 6.")
 
 (defconst maplev--reserved-words-7
   (append '("assuming" "implies" "subset" "xor")
           maplev--reserved-words-6)
-  "List of reserved words for Maple 7")
+  "List of reserved words for Maple 7.")
 
 (defconst maplev--reserved-words-8
   maplev--reserved-words-7
-  "List of reserved words for Maple 8")
+  "List of reserved words for Maple 8.")
 
 (defconst maplev--reserved-words-9
   maplev--reserved-words-7
-  "List of reserved words for Maple 9")
+  "List of reserved words for Maple 9.")
 
 (defconst maplev--reserved-words-10
   (append '("uses")
           maplev--reserved-words-7)
-  "List of reserved words for Maple 10")
+  "List of reserved words for Maple 10.")
 
 (defconst maplev--reserved-words-11
   maplev--reserved-words-10
-  "List of reserved words for Maple 11")
+  "List of reserved words for Maple 11.")
 
 (defconst maplev--reserved-words-12
   maplev--reserved-words-10
-  "List of reserved words for Maple 12")
+  "List of reserved words for Maple 12.")
 
 (defconst maplev--reserved-words-13
   maplev--reserved-words-10
-  "List of reserved words for Maple 13")
+  "List of reserved words for Maple 13.")
 
 (defconst maplev--reserved-words-14
   maplev--reserved-words-10
-  "List of reserved words for Maple 14")
+  "List of reserved words for Maple 14.")
 
 (defconst maplev--reserved-words-15
   maplev--reserved-words-10
-  "List of reserved words for Maple 15")
+  "List of reserved words for Maple 15.")
 
 (defconst maplev--reserved-words-16
   maplev--reserved-words-10
-  "List of reserved words for Maple 16")
+  "List of reserved words for Maple 16.")
 
 (defconst maplev--reserved-words-alist
   `((3 .  ,maplev--reserved-words-3)
@@ -3126,9 +3128,9 @@ moved to be before it."
 
 (defconst maplev--include-directive-re
   "^\\(?:## \\)?\\$include\\s-+\\([<\"]\\)\\(.*\\)[>\"]"
-  "Regex of an include directive.  The first group matches
-the character used to delimit the file (either < or \").
-The second group matches the filename.")
+  "Regex of an include directive.  
+The first group matches the character used to delimit the
+file (either < or \").  The second group matches the filename.")
     
 
 ;;{{{  builtins
@@ -3470,12 +3472,13 @@ If nil then `font-lock-maximum-decoration' selects the level."
 			  :help-text "open file"))
 
 (defun maplev-find-include-file-at-point (toggle)
-  "Open the include file at point.  If found, the file is opened
-either in this window or the other window, depending on the
-exclusive-or of TOGGLE with `maplev-include-file-other-window-flag'.  
-The variable `maplev-include-path' specifies the search paths; 
-it is a list of rooted strings.  If the file cannot be found, but 
-the proper directory exists, query user to create the file."
+  "Open the include file at point.  
+If found, the file is opened either in this window or the other
+window, depending on the exclusive-or of TOGGLE with
+`maplev-include-file-other-window-flag'.  The variable
+`maplev-include-path' specifies the search paths; it is a list of
+rooted strings.  If the file cannot be found, but the proper
+directory exists, query user to create the file."
   (interactive "P")
   (save-excursion
     (beginning-of-line)
@@ -3561,7 +3564,7 @@ nil."
 
 ;;{{{ Config file (.maplev)
 
-(defun maplev-load-config-file (&optional force)
+(defun maplev-load-config-file ()
   "Find and load the maplev configuration file.
 The file is named .maplev and is searched for in the current
 directory and its ancestors.  Return t if configuration file was
@@ -3817,7 +3820,7 @@ Interactively use \\[maplev-cmaple-interrupt]."
 (defun maplev-cmaple--wait (&optional max-cnt no-err)
   "Wait for cmaple to become available.  
 If optional argument MAX-CNT is non-nil, wait at most that many
-seconds; otherwise wait indefinitly.  If optional argument NO-ERR is
+seconds; otherwise wait indefinitely.  If optional argument NO-ERR is
 non-nil do not generate an error if time-out occurs."
   (with-temp-message "Maple busy, waiting..."
     (let ((cnt (* 10 (or max-cnt 0))))
@@ -3875,7 +3878,7 @@ If called with a prefix the cmaple buffer is first cleared."
                                   (buffer-substring-no-properties beg end)))))
 
 (defun maplev-cmaple-send-line ()
-  "Send the current line to cmaple"
+  "Send the current line to cmaple."
   (interactive)
   (maplev-cmaple-send-region (line-beginning-position) (line-end-position)))
 
@@ -3995,7 +3998,7 @@ PROCESS is the Maple process, STRING its output."
       (goto-char pmark))))
 
 (defun maplev--cleanup-buffer ()
-  "Remove overstriking and underlining from the current buffer."
+  "Remove over-striking and underlining from the current buffer."
   (goto-char (point-min))
   (while (re-search-forward "\e\\[[0-9;]+m" nil t) (replace-match ""))
   (goto-char (point-min))
@@ -4222,7 +4225,7 @@ If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
 
 (defun maplev-ident-around-point-interactive (prompt &optional default complete)
   "Request Maple identifier in minibuffer, using PROMPT.
-Default is identifier around point. If it is empty use DEFAULT.
+Default is identifier around point.  If it is empty use DEFAULT.
 Minibuffer completion is used if COMPLETE is non-nil."
   ;; Suppress error message
   (if (not default) (setq default t))
@@ -4243,7 +4246,7 @@ Minibuffer completion is used if COMPLETE is non-nil."
     (maplev--string-to-name choice)))
 
 (defun maplev--string-to-name (name)
-  "Convert NAME to a valid Maple name. Add backquotes if needed."
+  "Convert NAME to a valid Maple name.  Add back-quotes if needed."
   ;; Do we need something more general to match a string that might
   ;; require backquotes?
   (when (string-match "/" name)
@@ -4467,13 +4470,13 @@ The title is the phrase following the function name."
 
 (defconst maplev--help-definition-re
   "([ \t\n]*\\(Definition/[^) \t\n]+\\)[ \t\n]*)"
-  "Regular expression for dictionary hyperlinks")
+  "Regular expression for dictionary hyperlinks.")
 
 ;;}}}
 ;;{{{     functions
 
 (defun maplev-help-fontify-node ()
-  "Fontify a Maple help page buffer. Does not use font-lock mode."
+  "Fontify a Maple help page buffer.  Does not use font-lock mode."
   (save-excursion
     (let (buffer-read-only
           (case-fold-search t))
@@ -5049,14 +5052,15 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ;; ("Global names used in this procedure:"
     ;;  1 maplev-mint-warning-face 'undecl-global t)
     )
-  "Alist for fontification in a Mint buffer. Each element is a list of
-the form \(REGEXP FACE PROP VAR\), where REGEXP is to be matched and
-FACE is a face.  Optional third element PROP is a symbol used for
-marking the category of SUBEXP.  Optional fourth element VAR is
-non-nil if REGEXP is concatenated with `maplev-mint-variables-re'.")
+  "Alist for fontification in a Mint buffer.
+Each element is a list of the form \(REGEXP FACE PROP VAR\),
+where REGEXP is to be matched and FACE is a face.  Optional third
+element PROP is a symbol used for marking the category of SUBEXP.
+Optional fourth element VAR is non-nil if REGEXP is concatenated
+with `maplev-mint-variables-re'.")
 
 (defun maplev-mint-fontify-buffer ()
-  "Fontify the mint buffer. Does not use font-lock mode."
+  "Fontify the mint buffer.  Does not use font-lock mode."
   (let ((mlist maplev-mint-fontify-alist)
         regexp mel buffer-read-only case-fold-search)
     (if font-lock-mode (font-lock-mode)) ; turn-off font-lock
@@ -5180,7 +5184,7 @@ When called interactively, POS is position where point is."
 
 (defun maplev-mint-query (form &rest vars)
   "Return t if correction suggested by mint should be made.
-FORM and VARS are used for y-or-n-p query."
+FORM and VARS are used for `y-or-n-p' query."
   (or (not maplev-mint-query)
       (y-or-n-p (apply 'format form vars))))
 
