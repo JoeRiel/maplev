@@ -67,7 +67,7 @@ ELC-FILES = $(LISP-FILES:.el=.elc)
 	@echo Byte-compiling $+
 	@$(call showerr,$(ELC) $< 2>&1 > /dev/null | sed '/^Wrote/d')
 
-byte-compile: $(call print-help,byte-compile,Byte-compile the elisp)
+byte-compile: $(call print-help,byte-compile,Byte-compile $(LISP-FILES))
 byte-compile: $(ELC-FILES)
 
 clean-elisp: $(call print-help,clean-elisp,Remove byte-compiled files)
@@ -79,6 +79,8 @@ clean-elisp:
 # }}}
 # {{{ Documentation
 
+help: $(call print-separator)
+
 INFO-FILES = doc/$(PKG)
 PDF-FILES  = doc/$(PKG).pdf
 TEXI-FILES = doc/$(PKG).texi doc/version.texi
@@ -86,13 +88,13 @@ HTML-FILES = doc/$(PKG).html
 
 DOC-FILES = $(TEXI-FILES) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 
-doc: $(call print-help,doc,Create the info and html documentation)
+doc: $(call print-help,doc,	Create the info and html documentation)
 doc:  info html
-info: $(call print-help,info,Create info file)
+info: $(call print-help,info,	Create info file)
 info: doc/$(PKG)
-pdf:  $(call print-help,pdf,Create pdf documentation)
+pdf:  $(call print-help,pdf,	Create pdf documentation)
 pdf:  doc/$(PKG).pdf
-html:  $(call print-help,html,Create html documentation)
+html:  $(call print-help,html,	Create html documentation)
 html: doc/$(PKG).html
 
 doc/$(PKG).pdf: doc/$(PKG).texi doc/version.texi
@@ -115,25 +117,27 @@ clean-doc-all: clean-doc
 .PHONY: doc html info pdf clean-doc clean-doc-all p i h
 
 # preview pdf
-p: $(call print-help,p,Preview the pdf)
+p: $(call print-help,p,	Preview the pdf)
 p: doc/$(PKG).pdf
 	$(PDFVIEWER) $<
 
 # preview info
-i: $(call print-help,i,Preview the info)
+i: $(call print-help,i,	Preview the info)
 i: doc/$(PKG)
 	$(INFOVIEWER) $<
 
-h: $(call print-help,h,Preview the html)
+h: $(call print-help,h,	Preview the html)
 h: doc/$(PKG).html
 	$(BROWSER) $<
 
 # }}}
 # {{{ Maple Archive (mla)
 
+help: $(call print-separator)
+
 .PHONY: mla 
 mla := maplev.mla
-mla: $(call print-help,mla,Create Maple archive: $(mla))
+mla: $(call print-help,mla,	Create Maple archive: $(mla))
 mla: $(mla)
 
 %.mla: maple/%.mpl
@@ -147,15 +151,23 @@ mla: $(mla)
 # }}}
 # {{{ Installation
 
+help: $(call print-separator)
+
 MKDIR = if test ! -d $(1); then mkdir --parents $(1); fi
 
-install: $(call print-help,install,Install everything)
+install: $(call print-help,install,	Install everything)
 install: $(addprefix install-,info lisp mla)
 
 install-lisp: $(call print-help,install-lisp,Install lisp in $(LISP-DIR))
 install-lisp: $(LISP-FILES) $(ELC-FILES)
 	@$(call MKDIR,$(LISP-DIR))
 	$(CP) $+ $(LISP-DIR)
+
+install-links: $(call print-help,install-links,Install links to the lisp files)
+install-links: $(LISP-FILES) $(ELC-FILES)
+	@$(call MKDIR,$(LISP-DIR))
+	@ln -nfst $(LISP-DIR) $(realpath $(LISP-FILES))
+	@ln -nfst $(LISP-DIR) $(realpath $(ELC-FILES))
 
 install-info: $(call print-help,install-info,Install info files in $(INFO-DIR))
 install-info: $(INFO-FILES)
@@ -182,13 +194,15 @@ clean-install:
 # }}}
 # {{{ Distribution
 
+help: $(call print-separator)
+
 DIST_extra = Copyright README RELEASE-NOTES install
 
 DIST-FILES_extra = ChangeLog Makefile help-system.mak
 
 src = lisp/$(PKG).el doc/$(PKG).texi doc/version.texi
 
-dist: $(call print-help,dist,Create $(PKG)-$$TAG.tar.gz file)
+dist: $(call print-help,dist,	Create $(PKG)-$$TAG.tar.gz file)
 dist: $(LISP-FILES) $(TEXI-FILES)
 	$(RM) -r $(PKG)-$(VERSION)
 	$(call MKDIR,$(PKG)-$(VERSION))
@@ -219,7 +233,9 @@ p4get:
 # }}}
 # {{{ Clean
 
-clean: $(call print-help,clean,Remove created and aux files)
+help: $(call print-separator)
+
+clean: $(call print-help,clean,	Remove created and aux files)
 clean: clean-elisp clean-doc
 
 .PHONY: clean
