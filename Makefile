@@ -53,11 +53,13 @@ ELFLAGS	= --no-site-file \
 	  --no-init-file \
 	  --eval "(progn \
 			(add-to-list (quote load-path) (expand-file-name \"./lisp\")) \
-			(add-to-list (quote load-path) \"$(LISP-DIR)\"))"
+			(add-to-list (quote load-path) \"$(LISP-DIR)\") \
+			(add-to-list (quote load-path) \"$(HOME)/.emacs.d/elisp\") \
+			(delete \"/usr/share/emacs/23.3/site-lisp/emacs-goodies-el\" load-path))"
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
 
-ELS = $(PKG) button-lock
+ELS = $(PKG) $(addprefix $(PKG),-cmaple -common -custom -help -history -indent -mint -proc -re -utils) button-lock
 
 LISP-FILES = $(ELS:%=lisp/%.el)
 ELC-FILES = $(LISP-FILES:.el=.elc)
@@ -67,7 +69,7 @@ ELC-FILES = $(LISP-FILES:.el=.elc)
 	@echo Byte-compiling $+
 	@$(call showerr,$(ELC) $< 2>&1 > /dev/null | sed '/^Wrote/d')
 
-byte-compile: $(call print-help,byte-compile,Byte-compile $(LISP-FILES))
+byte-compile: $(call print-help,byte-compile,Byte-compile $$(LISP-FILES))
 byte-compile: $(ELC-FILES)
 
 clean-elisp: $(call print-help,clean-elisp,Remove byte-compiled files)
@@ -200,9 +202,9 @@ clean-install:
 
 help: $(call print-separator)
 
-DIST_extra = Copyright README RELEASE-NOTES install
+DIST-extra = Copyright README RELEASE-NOTES install
 
-DIST-FILES_extra = ChangeLog Makefile help-system.mak
+DIST-FILES-extra = ChangeLog Makefile help-system.mak
 
 src = lisp/$(PKG).el doc/$(PKG).texi doc/version.texi
 
@@ -215,7 +217,7 @@ dist: $(LISP-FILES) $(TEXI-FILES)
 	$(call MKDIR,$(PKG)-$(VERSION)/$(PKG))
 	$(CP) $(LISP-FILES) $(PKG)-$(VERSION)/lisp
 	$(CP) $(TEXI-FILES) $(PKG)-$(VERSION)/doc
-	$(CP) $(DIST-FILES_extra) $(DIST_extra) $(PKG)-$(VERSION)/
+	$(CP) $(DIST-FILES-extra) $(DIST-extra) $(PKG)-$(VERSION)/
 	zip -r $(PKG)-$(VERSION).zip $(PKG)-$(VERSION)
 	tar zcvf $(PKG)-$(VERSION).tar.gz $(PKG)-$(VERSION)
 
