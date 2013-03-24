@@ -74,7 +74,22 @@ clean-elisp: $(call print-help,clean-elisp,Remove byte-compiled files)
 clean-elisp:
 	$(RM) $(ELC-FILES)
 
-.PHONY: byte-compile clean-elisp
+lisp-install: $(call print-help,lisp-install,Install lisp in $(LISP-DIR))
+lisp-install: $(LISP-FILES) $(ELC-FILES)
+	@$(call MKDIR,$(LISP-DIR))
+	$(CP) $+ $(LISP-DIR)
+
+links-install: $(call print-help,links-install,Install links to the lisp files)
+links-install: $(LISP-FILES) $(ELC-FILES)
+	@$(call MKDIR,$(LISP-DIR))
+	@ln -nfst $(LISP-DIR) $(realpath $(LISP-FILES))
+	@ln -nfst $(LISP-DIR) $(realpath $(ELC-FILES))
+
+links-uninstall: $(call print-help,links-uninstall,Remove links to the lisp files)
+links-uninstall:
+	$(RM) $(addprefix $(LISP-DIR)/,$(notdir $(LISP-FILES) $(ELC-FILES)))
+
+.PHONY: byte-compile clean-elisp links-install links-uninstall
 
 # }}}
 # {{{ Documentation
@@ -114,7 +129,14 @@ clean-doc-all: $(call print-help,clean-doc-all,Remove all generated documentatio
 clean-doc-all: clean-doc
 	$(RM) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 
-.PHONY: doc html info pdf clean-doc clean-doc-all p i h
+info-install: $(call print-help,info-install,Install info files in $(INFO-DIR))
+info-install: $(INFO-FILES)
+	@$(call MKDIR,$(INFO-DIR))
+	$(CP) $(INFO-FILES) $(INFO-DIR)
+	@echo Update 'dir' node
+	@for file in $(INFO-FILES); do ginstall-info --info-dir=$(INFO-DIR) $${file}; done
+
+.PHONY: doc html info pdf clean-doc clean-doc-all p i h info-install
 
 # preview pdf
 p: $(call print-help,p,	Preview the pdf)
@@ -135,7 +157,7 @@ h: doc/$(PKG).html
 
 help: $(call print-separator)
 
-.PHONY: mla 
+.PHONY: mla mla-install
 mla := maplev.mla
 mla: $(call print-help,mla,	Create Maple archive: $(mla))
 mla: $(mla)
@@ -148,6 +170,13 @@ mla: $(mla)
 			echo $(call warn,$$err); \
 		fi
 
+mla-install: $(call print-help,mla-install,Install mla in $(MAPLE-LIB-DIR))
+mla-install: $(mla)
+	@$(call MKDIR,$(MAPLE-LIB-DIR))
+	@echo "Installing Maple archive $(mla) into $(MAPLE-LIB-DIR)/"
+	@$(CP) $+ $(MAPLE-LIB-DIR)
+
+
 # }}}
 # {{{ Installation
 
@@ -158,38 +187,13 @@ MKDIR = if test ! -d $(1); then mkdir --parents $(1); fi
 install: $(call print-help,install,	Install everything)
 install: $(addprefix install-,info lisp mla)
 
-install-lisp: $(call print-help,install-lisp,Install lisp in $(LISP-DIR))
-install-lisp: $(LISP-FILES) $(ELC-FILES)
-	@$(call MKDIR,$(LISP-DIR))
-	$(CP) $+ $(LISP-DIR)
-
-install-links: $(call print-help,install-links,Install links to the lisp files)
-install-links: $(LISP-FILES) $(ELC-FILES)
-	@$(call MKDIR,$(LISP-DIR))
-	@ln -nfst $(LISP-DIR) $(realpath $(LISP-FILES))
-	@ln -nfst $(LISP-DIR) $(realpath $(ELC-FILES))
-
-install-info: $(call print-help,install-info,Install info files in $(INFO-DIR))
-install-info: $(INFO-FILES)
-	@$(call MKDIR,$(INFO-DIR))
-	$(CP) $(INFO-FILES) $(INFO-DIR)
-	@echo Update 'dir' node
-	@for file in $(INFO-FILES); do ginstall-info --info-dir=$(INFO-DIR) $${file}; done
-
-install-mla: $(call print-help,install-mla,Install mla in $(MAPLE-LIB-DIR))
-install-mla: $(mla)
-	@$(call MKDIR,$(MAPLE-LIB-DIR))
-	@echo "Installing Maple archive $(mla) into $(MAPLE-LIB-DIR)/"
-	@$(CP) $+ $(MAPLE-LIB-DIR)
-
 clean-install: $(call print-help,clean-install,Remove installed files)
 clean-install:
 	$(RM) $(addprefix $(LISP-DIR)/,$(PKG).*)
 	$(RM) $(addprefix $(INFO-DIR)/,$(PKG))
 	$(RM) -r $(MAPLE-LIB-DIR)/$(mla)
 
-
-.PHONY: install install-lisp install-mla install-info clean-install
+.PHONY: install clean-install
 
 # }}}
 # {{{ Distribution
@@ -240,4 +244,4 @@ clean: clean-elisp clean-doc
 
 .PHONY: clean
 
-# }}}o
+# }}}
