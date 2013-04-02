@@ -4,7 +4,7 @@
 @setfilename maplev
 @settitle MapleV Emacs Mode @value{VERSION}
 
-@set VERSION 2.27
+@set VERSION 2.28
 @set DATE June 2011
 
 @dircategory Emacs
