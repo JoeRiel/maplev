@@ -4,6 +4,7 @@
 ** Split maplev.el into multiple files
 ** Remove ~ as a component of a simple name, allowed as initial character.
 ** Update Makefile 
+** Fix version number of maplev info file
 * 2.27:
 ** Font-lock 'static' (as special word)
 ** Improve regular expression match for simple-names
