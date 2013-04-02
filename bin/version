@@ -79,6 +79,10 @@ file="doc/maplev.texi"
 [ -z "$version" ] && echo -ne "$file:\t"
 sed $sed_opt "/^@set VERSION /$sed_cmd" "$file"
 
+file="doc/version.texi"
+[ -z "$version" ] && echo -ne "$file:\t"
+sed $sed_opt "/^@set VERSION /$sed_cmd" "$file"
+
 # Update README
 file="README"
 [ -z "$version" ] && echo -ne "$file:\t"
