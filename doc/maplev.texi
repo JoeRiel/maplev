@@ -1,9 +1,10 @@
+
 \input texinfo
 
 @setfilename maplev
 @settitle MapleV Emacs Mode @value{VERSION}
 
-@set VERSION 2.27
+@set VERSION 2.28
 @set DATE June 2011
 
 @dircategory Emacs
@@ -20,7 +21,7 @@
 
 @copying
 MapleV is a GNU Emacs major mode for developing source code for @w{Maple}, 
-a computer algebra system (CAS) marketed by @w{Waterloo Maple Inc}.
+a computer algebra system (CAS) from @w{Waterloo Maple Inc}.
 In this manual @dfn{MapleV} refers to the Emacs major mode and
 @dfn{Maple} to the CAS.  MapleV is written entirely in Emacs-Lisp and is
 distributed under the GNU General Public License.
@@ -100,9 +101,10 @@ Appendices
 
 Indices
 
-* Key Index::                   
-* Function Index::              
-* Variable Index::              
+* Key Index::                   Key bindings and where they are described.
+* Function Index::              Functions mentioned in the manual.
+* Variable Index::              Variables mentioned in the manual.
+* Concept Index::               Concepts and features.
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -136,7 +138,7 @@ Abbreviations
 
 Miscellaneous features
 
-* Include statements::          Active include statements
+* Include statements::          Active include statements.
 
 Mint
 
@@ -858,7 +860,7 @@ Only the first macro in a @code{macro} assignment is indexed.
 @cindex Miscellaneous
 
 @menu
-* Include statements::          Active include statements
+* Include statements::          Active include statements.
 @end menu
 
 @node Include statements,  , Miscellaneous features, Miscellaneous features
@@ -1487,11 +1489,15 @@ optional package.
 
 @printindex fn
 
-@node Variable Index,  , Function Index, top
+@node Variable Index, Concept Index, Function Index, top
 @comment    node-name,         next,       previous, up
 @unnumbered Variable Index
 
 @printindex vr
+
+@node Concept Index,  , Variable Index, top
+@comment    node-name,         next,       previous, up
+@unnumbered Concept Index
 
 @printindex cp
 

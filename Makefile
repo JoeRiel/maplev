@@ -5,7 +5,7 @@
 SHELL = /bin/sh
 
 PKG := maplev
-VERSION := 2.27
+VERSION := 2.28
 
 include help-system.mak
 
@@ -53,11 +53,13 @@ ELFLAGS	= --no-site-file \
 	  --no-init-file \
 	  --eval "(progn \
 			(add-to-list (quote load-path) (expand-file-name \"./lisp\")) \
-			(add-to-list (quote load-path) \"$(LISP-DIR)\"))"
+			(add-to-list (quote load-path) \"$(LISP-DIR)\") \
+			(add-to-list (quote load-path) \"$(HOME)/.emacs.d/elisp\") \
+			(delete \"/usr/share/emacs/23.3/site-lisp/emacs-goodies-el\" load-path))"
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
 
-ELS = $(PKG) button-lock
+ELS = $(PKG) $(addprefix $(PKG),-cmaple -common -custom -help -history -indent -mint -proc -re -utils) button-lock
 
 LISP-FILES = $(ELS:%=lisp/%.el)
 ELC-FILES = $(LISP-FILES:.el=.elc)
@@ -67,17 +69,34 @@ ELC-FILES = $(LISP-FILES:.el=.elc)
 	@echo Byte-compiling $+
 	@$(call showerr,$(ELC) $< 2>&1 > /dev/null | sed '/^Wrote/d')
 
-byte-compile: $(call print-help,byte-compile,Byte-compile the elisp)
+byte-compile: $(call print-help,byte-compile,Byte-compile $$(LISP-FILES))
 byte-compile: $(ELC-FILES)
 
 clean-elisp: $(call print-help,clean-elisp,Remove byte-compiled files)
 clean-elisp:
 	$(RM) $(ELC-FILES)
 
-.PHONY: byte-compile clean-elisp
+lisp-install: $(call print-help,lisp-install,Install lisp in $(LISP-DIR))
+lisp-install: $(LISP-FILES) $(ELC-FILES)
+	@$(call MKDIR,$(LISP-DIR))
+	$(CP) $+ $(LISP-DIR)
+
+links-install: $(call print-help,links-install,Install links to the lisp files)
+links-install: $(LISP-FILES) $(ELC-FILES)
+	@$(call MKDIR,$(LISP-DIR))
+	@ln -nfst $(LISP-DIR) $(realpath $(LISP-FILES))
+	@ln -nfst $(LISP-DIR) $(realpath $(ELC-FILES))
+
+links-uninstall: $(call print-help,links-uninstall,Remove links to the lisp files)
+links-uninstall:
+	$(RM) $(addprefix $(LISP-DIR)/,$(notdir $(LISP-FILES) $(ELC-FILES)))
+
+.PHONY: byte-compile clean-elisp links-install links-uninstall
 
 # }}}
 # {{{ Documentation
+
+help: $(call print-separator)
 
 INFO-FILES = doc/$(PKG)
 PDF-FILES  = doc/$(PKG).pdf
@@ -86,13 +105,13 @@ HTML-FILES = doc/$(PKG).html
 
 DOC-FILES = $(TEXI-FILES) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 
-doc: $(call print-help,doc,Create the info and html documentation)
+doc: $(call print-help,doc,	Create the info and html documentation)
 doc:  info html
-info: $(call print-help,info,Create info file)
+info: $(call print-help,info,	Create info file)
 info: doc/$(PKG)
-pdf:  $(call print-help,pdf,Create pdf documentation)
+pdf:  $(call print-help,pdf,	Create pdf documentation)
 pdf:  doc/$(PKG).pdf
-html:  $(call print-help,html,Create html documentation)
+html:  $(call print-help,html,	Create html documentation)
 html: doc/$(PKG).html
 
 doc/$(PKG).pdf: doc/$(PKG).texi doc/version.texi
@@ -112,28 +131,37 @@ clean-doc-all: $(call print-help,clean-doc-all,Remove all generated documentatio
 clean-doc-all: clean-doc
 	$(RM) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 
-.PHONY: doc html info pdf clean-doc clean-doc-all p i h
+info-install: $(call print-help,info-install,Install info files in $(INFO-DIR))
+info-install: $(INFO-FILES)
+	@$(call MKDIR,$(INFO-DIR))
+	$(CP) $(INFO-FILES) $(INFO-DIR)
+	@echo Update 'dir' node
+	@for file in $(INFO-FILES); do ginstall-info --info-dir=$(INFO-DIR) $${file}; done
+
+.PHONY: doc html info pdf clean-doc clean-doc-all p i h info-install
 
 # preview pdf
-p: $(call print-help,p,Preview the pdf)
+p: $(call print-help,p,	Preview the pdf)
 p: doc/$(PKG).pdf
 	$(PDFVIEWER) $<
 
 # preview info
-i: $(call print-help,i,Preview the info)
+i: $(call print-help,i,	Preview the info)
 i: doc/$(PKG)
 	$(INFOVIEWER) $<
 
-h: $(call print-help,h,Preview the html)
+h: $(call print-help,h,	Preview the html)
 h: doc/$(PKG).html
 	$(BROWSER) $<
 
 # }}}
 # {{{ Maple Archive (mla)
 
-.PHONY: mla 
+help: $(call print-separator)
+
+.PHONY: mla mla-install
 mla := maplev.mla
-mla: $(call print-help,mla,Create Maple archive: $(mla))
+mla: $(call print-help,mla,	Create Maple archive: $(mla))
 mla: $(mla)
 
 %.mla: maple/%.mpl
@@ -144,31 +172,22 @@ mla: $(mla)
 			echo $(call warn,$$err); \
 		fi
 
-# }}}
-# {{{ Installation
-
-MKDIR = if test ! -d $(1); then mkdir --parents $(1); fi
-
-install: $(call print-help,install,Install everything)
-install: $(addprefix install-,info lisp mla)
-
-install-lisp: $(call print-help,install-lisp,Install lisp in $(LISP-DIR))
-install-lisp: $(LISP-FILES) $(ELC-FILES)
-	@$(call MKDIR,$(LISP-DIR))
-	$(CP) $+ $(LISP-DIR)
-
-install-info: $(call print-help,install-info,Install info files in $(INFO-DIR))
-install-info: $(INFO-FILES)
-	@$(call MKDIR,$(INFO-DIR))
-	$(CP) $(INFO-FILES) $(INFO-DIR)
-	@echo Update 'dir' node
-	@for file in $(INFO-FILES); do ginstall-info --info-dir=$(INFO-DIR) $${file}; done
-
-install-mla: $(call print-help,install-mla,Install mla in $(MAPLE-LIB-DIR))
-install-mla: $(mla)
+mla-install: $(call print-help,mla-install,Install mla in $(MAPLE-LIB-DIR))
+mla-install: $(mla)
 	@$(call MKDIR,$(MAPLE-LIB-DIR))
 	@echo "Installing Maple archive $(mla) into $(MAPLE-LIB-DIR)/"
 	@$(CP) $+ $(MAPLE-LIB-DIR)
+
+
+# }}}
+# {{{ Installation
+
+help: $(call print-separator)
+
+MKDIR = if test ! -d $(1); then mkdir --parents $(1); fi
+
+install: $(call print-help,install,	Install everything)
+install: $(addprefix install-,info lisp mla)
 
 clean-install: $(call print-help,clean-install,Remove installed files)
 clean-install:
@@ -176,19 +195,20 @@ clean-install:
 	$(RM) $(addprefix $(INFO-DIR)/,$(PKG))
 	$(RM) -r $(MAPLE-LIB-DIR)/$(mla)
 
-
-.PHONY: install install-lisp install-mla install-info clean-install
+.PHONY: install clean-install
 
 # }}}
 # {{{ Distribution
 
-DIST_extra = Copyright README RELEASE-NOTES install
+help: $(call print-separator)
 
-DIST-FILES_extra = ChangeLog Makefile help-system.mak
+DIST-extra = Copyright README RELEASE-NOTES install
+
+DIST-FILES-extra = ChangeLog Makefile help-system.mak
 
 src = lisp/$(PKG).el doc/$(PKG).texi doc/version.texi
 
-dist: $(call print-help,dist,Create $(PKG)-$$TAG.tar.gz file)
+dist: $(call print-help,dist,	Create $(PKG)-$$TAG.tar.gz file)
 dist: $(LISP-FILES) $(TEXI-FILES)
 	$(RM) -r $(PKG)-$(VERSION)
 	$(call MKDIR,$(PKG)-$(VERSION))
@@ -197,7 +217,7 @@ dist: $(LISP-FILES) $(TEXI-FILES)
 	$(call MKDIR,$(PKG)-$(VERSION)/$(PKG))
 	$(CP) $(LISP-FILES) $(PKG)-$(VERSION)/lisp
 	$(CP) $(TEXI-FILES) $(PKG)-$(VERSION)/doc
-	$(CP) $(DIST-FILES_extra) $(DIST_extra) $(PKG)-$(VERSION)/
+	$(CP) $(DIST-FILES-extra) $(DIST-extra) $(PKG)-$(VERSION)/
 	zip -r $(PKG)-$(VERSION).zip $(PKG)-$(VERSION)
 	tar zcvf $(PKG)-$(VERSION).tar.gz $(PKG)-$(VERSION)
 
@@ -219,9 +239,11 @@ p4get:
 # }}}
 # {{{ Clean
 
-clean: $(call print-help,clean,Remove created and aux files)
+help: $(call print-separator)
+
+clean: $(call print-help,clean,	Remove created and aux files)
 clean: clean-elisp clean-doc
 
 .PHONY: clean
 
-# }}}o
+# }}}
