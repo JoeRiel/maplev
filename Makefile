@@ -13,7 +13,7 @@ include help-system.mak
 # {{{ Executables
 
 EMACS := emacs
-MAPLE := maple
+MAPLE := cmaple
 TEXI2HTML := makeinfo --html --number-sections
 TEXI2PDF := texi2pdf
 
@@ -54,7 +54,6 @@ ELFLAGS	= --no-site-file \
 	  --eval "(progn \
 			(add-to-list (quote load-path) (expand-file-name \"./lisp\")) \
 			(add-to-list (quote load-path) \"$(LISP-DIR)\") \
-			(add-to-list (quote load-path) \"$(HOME)/.emacs.d/elisp\") \
 			(delete \"/usr/share/emacs/23.3/site-lisp/emacs-goodies-el\" load-path))"
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
@@ -84,8 +83,7 @@ lisp-install: $(LISP-FILES) $(ELC-FILES)
 links-install: $(call print-help,links-install,Install links to the lisp files)
 links-install: $(LISP-FILES) $(ELC-FILES)
 	@$(call MKDIR,$(LISP-DIR))
-	@ln -nfst $(LISP-DIR) $(realpath $(LISP-FILES))
-	@ln -nfst $(LISP-DIR) $(realpath $(ELC-FILES))
+	@ln -nfst $(LISP-DIR) $(realpath $^)
 
 links-uninstall: $(call print-help,links-uninstall,Remove links to the lisp files)
 links-uninstall:
@@ -159,7 +157,7 @@ h: doc/$(PKG).html
 
 help: $(call print-separator)
 
-.PHONY: mla mla-install
+.PHONY: mla mla-install mla-clean
 mla := maplev.mla
 mla: $(call print-help,mla,	Create Maple archive: $(mla))
 mla: $(mla)
@@ -178,6 +176,10 @@ mla-install: $(mla)
 	@echo "Installing Maple archive $(mla) into $(MAPLE-LIB-DIR)/"
 	@$(CP) $+ $(MAPLE-LIB-DIR)
 
+mla-clean: $(call print-help,mla-clean,Remove $(mla))
+mla-clean:
+	$(RM) $(mla)
+
 
 # }}}
 # {{{ Installation
@@ -187,7 +189,7 @@ help: $(call print-separator)
 MKDIR = if test ! -d $(1); then mkdir --parents $(1); fi
 
 install: $(call print-help,install,	Install everything)
-install: $(addprefix install-,info lisp mla)
+install: $(addsuffix -install,info lisp mla)
 
 clean-install: $(call print-help,clean-install,Remove installed files)
 clean-install:
@@ -204,7 +206,7 @@ help: $(call print-separator)
 
 DIST-extra = Copyright README RELEASE-NOTES install
 
-DIST-FILES-extra = ChangeLog Makefile help-system.mak
+DIST-FILES-extra = ChangeLog Makefile /usr/local/include/help-system.mak
 
 src = lisp/$(PKG).el doc/$(PKG).texi doc/version.texi
 
@@ -242,7 +244,7 @@ p4get:
 help: $(call print-separator)
 
 clean: $(call print-help,clean,	Remove created and aux files)
-clean: clean-elisp clean-doc
+clean: clean-elisp clean-doc mla-clean
 
 .PHONY: clean
 

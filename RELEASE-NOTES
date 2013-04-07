@@ -1,5 +1,8 @@
 -*- org -*-
 
+* 2.28.1
+** Remove folding requirement
+** Cleanup Makefile
 * 2.28
 ** Split maplev.el into multiple files
 ** Remove ~ as a component of a simple name, allowed as initial character.

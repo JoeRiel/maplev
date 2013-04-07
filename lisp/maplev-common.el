@@ -8,7 +8,6 @@
 
 ;;{{{ Suppress byte-compile warnings
 
-(require 'folding)
 (require 'maplev-custom)
 (require 'maplev-re)
 

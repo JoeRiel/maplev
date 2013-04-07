@@ -367,11 +367,12 @@ PROCESS is the Maple process, STRING its output."
     (define-key map [(meta tab)]              'maplev-complete-symbol)
     (define-key map [(control a)]             'comint-bol)
 
-    ;; These two bindings are needed only under linux / unix
-    (define-key map [(meta control y)]        'maplev-insert-cut-buffer)
-
-    ;; mouse button bindings
-    (define-key map [(control meta mouse-2)]  'maplev-mouse-yank-cut-buffer)
+    (when (fboundp 'x-get-cut-buffer)
+      ;; These two bindings are needed only under linux / unix
+      (define-key map [(meta control y)]        'maplev-insert-cut-buffer)
+      ;; mouse button bindings
+      (define-key map [(control meta mouse-2)]  'maplev-mouse-yank-cut-buffer))
+    
     (define-key map [(shift mouse-2)]         'maplev-help-follow-mouse)
     (define-key map [(control shift mouse-2)] 'maplev-help-follow-mouse)
     (define-key map [(meta shift mouse-2)]    'maplev-proc-follow-mouse)
@@ -407,7 +408,6 @@ cmaple.
         major-mode 'maplev-cmaple-mode
         mode-name "Maple")
   (if (< emacs-major-version 22)
-      ;; This generates a compiler warning.  Ignore.
       (with-no-warnings
 	(setq comint-use-prompt-regexp-instead-of-fields t))
     (setq comint-use-prompt-regexp t))
