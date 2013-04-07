@@ -109,7 +109,7 @@
 
 (require 'abbrevlist)
 (require 'comint)
-(require 'folding)
+;; (require 'folding)
 (require 'font-lock)
 (require 'imenu)
 (require 'info)
