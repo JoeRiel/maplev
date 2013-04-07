@@ -6,7 +6,7 @@
 ;; Authors:    Joseph S. Riel <joer@san.rr.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    2.28
+;; Version:    2.28.1
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -109,7 +109,7 @@
 
 (require 'abbrevlist)
 (require 'comint)
-(require 'folding)
+;; (require 'folding)
 (require 'font-lock)
 (require 'imenu)
 (require 'info)
@@ -128,7 +128,7 @@
 
 ;;{{{ Information
 
-(defconst maplev-version "2.28" "Version of MapleV mode.")
+(defconst maplev-version "2.28.1" "Version of MapleV mode.")
 
 (defconst maplev-developer
   "Joseph S. Riel <joer@san.rr.com>"
@@ -262,9 +262,10 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
     (define-key map [(control x) ?n ?d]          'maplev-narrow-to-defun)
 
 
-    ;; These two bindings are needed only under linux / unix
-    (define-key map [(meta control y)]          'maplev-insert-cut-buffer)
-    (define-key map [(control meta mouse-2)]    'maplev-mouse-yank-cut-buffer)
+    (when (fboundp 'x-get-cut-buffer)
+      ;; These two bindings are needed only under linux / unix
+      (define-key map [(meta control y)]          'maplev-insert-cut-buffer)
+      (define-key map [(control meta mouse-2)]    'maplev-mouse-yank-cut-buffer))
 
     (define-key map [(control c) (control l)] 'maplev-add-local-variable)
     (define-key map [(control c) (control g)] 'maplev-add-global-variable)
