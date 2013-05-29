@@ -500,6 +500,14 @@ Otherwise use the default directory of `maplev-cmaple-buffer'."
   :group 'maplev-executables)
 
 ;;}}}
+;;{{{   help
+
+(defcustom maplev-help-port 3141
+  "Port number used to communicate to a Maple help server."
+  :type 'integer
+  :group 'maplev-help)
+
+;;}}}
 ;;}}}
 
 (provide 'maplev-custom)

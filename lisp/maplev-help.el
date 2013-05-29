@@ -260,6 +260,15 @@ PROCESS calls this filter.  STRING is the output."
   (interactive)
   (maplev-cmaple-direct (maplev--cmaple-get-init-string maplev-release) 'delete))
 
+(defun maplev-help-standard-help (topic)
+  "Display help for TOPIC in the Standard help browser."
+  (let ((tcp-proc (open-network-stream "tcp-proc" nil "localhost" maplev-help-port)))
+    (process-send-string tcp-proc topic)
+    (stop-process tcp-proc)))
+
+;; (maplev-help-standard-help "diff")
+
+
 ;;}}}
 ;;{{{ history mechanism
 
