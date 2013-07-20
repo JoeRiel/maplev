@@ -1229,7 +1229,7 @@ moved to be before it."
     "mod"  "not"  "od"        "option" "options"
     "or"   "proc" "quit"      "read"   "save"
     "stop" "then" "to"        "union"  "while"
-    "description" "local" "global")
+    "description" "local"     "global")
   "List of reserved words for Maple V R3.")
 
 (defconst maplev--reserved-words-4
@@ -1288,6 +1288,10 @@ moved to be before it."
   maplev--reserved-words-10
   "List of reserved words for Maple 16.")
 
+(defconst maplev--reserved-words-17
+  maplev--reserved-words-10
+  "List of reserved words for Maple 16.")
+
 (defconst maplev--reserved-words-alist
   `((3 .  ,maplev--reserved-words-3)
     (4 .  ,maplev--reserved-words-4)
@@ -1303,6 +1307,7 @@ moved to be before it."
     (14 . ,maplev--reserved-words-14)
     (15 . ,maplev--reserved-words-15)
     (16 . ,maplev--reserved-words-16)
+    (17 . ,maplev--reserved-words-17)
    )
   "Alist of Maple reserved words.  The key is the major release.")
 
@@ -1461,7 +1466,10 @@ file (either < or \").  The second group matches the filename.")
   (append '("assign" "numelems" "upperbound" "lowerbound") maplev--builtin-functions-14))
 
 (defconst maplev--builtin-functions-16
-  (append '("_hackwareToPointer") maplev--builtin-functions-15))
+  (append '("_hackwareToPointer" "~Array" "~Matrix" "~Vector") maplev--builtin-functions-15))
+
+(defconst maplev--builtin-functions-17
+  (append (remove "alias" '("NameSpace" "_local" "print_preprocess")) maplev--builtin-functions-16))
 
 (defconst maplev--builtin-functions-alist
   `((3  . ,maplev--builtin-functions-3)
@@ -1478,6 +1486,7 @@ file (either < or \").  The second group matches the filename.")
     (14 . ,maplev--builtin-functions-14)
     (15 . ,maplev--builtin-functions-15)
     (16 . ,maplev--builtin-functions-16)
+    (17 . ,maplev--builtin-functions-17)
  "Alist of Maple builtin funtions. The key is the major release."))
 
 ;; (defconst maplev--builtin-functions-alist
