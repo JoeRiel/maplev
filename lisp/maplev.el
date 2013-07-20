@@ -1048,7 +1048,7 @@ index/package help pages.  If it already exists, do nothing."
             ;; Process help node "index/function".
             (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-help-show-topic "index/function" t)
+            (maplev-help-show-topic "index/function" 'hide)
             (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (save-restriction
@@ -1068,7 +1068,7 @@ index/package help pages.  If it already exists, do nothing."
             ;; Process help node "index/package".
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (maplev-cmaple--wait 3)
-            (maplev-help-show-topic "index/package" t)
+            (maplev-help-show-topic "index/package" 'hide)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (maplev-cmaple--wait 3)
             (save-restriction
