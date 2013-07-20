@@ -159,9 +159,9 @@ Interactively, default is word point is on."
 (defun maplev-help-show-topic (topic &optional hide)
   "Display Maple help for TOPIC \(a string\).
 Push TOPIC onto the local stack, unless it is already on the top.
-If optional arg HIDE is non-nil do not display buffer."
-  (save-current-buffer             ; maybe should be deeper (NEW!!!!!)
-    (let ((release maplev-release)) ;; we switch buffers!
+If optional arg HIDE is non-nil, do not display buffer."
+  (save-current-buffer              ; maybe should be deeper (NEW!!!!!)
+    (let ((release maplev-release)) ; we switch buffers!
       (set-buffer (get-buffer-create (maplev--help-buffer)))
       (unless (eq major-mode 'maplev-help-mode)
         (maplev-help-mode release))
@@ -265,9 +265,6 @@ PROCESS calls this filter.  STRING is the output."
   (let ((tcp-proc (open-network-stream "tcp-proc" nil "localhost" maplev-help-port)))
     (process-send-string tcp-proc topic)
     (stop-process tcp-proc)))
-
-;; (maplev-help-standard-help "diff")
-
 
 ;;}}}
 ;;{{{ history mechanism
