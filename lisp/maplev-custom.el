@@ -507,6 +507,13 @@ Otherwise use the default directory of `maplev-cmaple-buffer'."
   :type 'integer
   :group 'maplev-help)
 
+(defcustom maplev-help-use-standard-flag nil
+  "True means use standard help, if available.
+For this to work, Standard Maple must be running Help:-Server,
+which is an export of the Help package."
+  :type 'boolean
+  :group 'maplev-help)
+
 ;;}}}
 ;;}}}
 
