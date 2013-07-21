@@ -9,7 +9,6 @@ VERSION := 2.28.1
 
 include help-system.mak
 
-
 # {{{ Executables
 
 EMACS := emacs
@@ -17,9 +16,9 @@ MAPLE := cmaple
 TEXI2HTML := makeinfo --html --number-sections
 TEXI2PDF := texi2pdf
 
-BROWSER := firefox
+BROWSER := x-www-browser
 CP := cp --archive
-PDFVIEWER := evince
+PDFVIEWER := xpdf
 INFO := info
 
 # }}}
@@ -47,7 +46,17 @@ showerr = err="$$($1)" ; if [ "$$err" ]; then echo $(call warn,$$err); fi
 
 # }}}
 
+.PHONY: all 
+
+COMMA := ,
+
+all: $(call print-help,all,	Create mla$(COMMA) elcs$(COMMA) and info)
+all: byte-compile mla info
+
+
 # {{{ Elisp
+
+help: $(call print-separator)
 
 ELFLAGS	= --no-site-file \
 	  --no-init-file \
@@ -148,6 +157,7 @@ i: $(call print-help,i,	Preview the info)
 i: doc/$(PKG)
 	$(INFOVIEWER) $<
 
+# preview html
 h: $(call print-help,h,	Preview the html)
 h: doc/$(PKG).html
 	$(BROWSER) $<
@@ -192,7 +202,7 @@ install: $(call print-help,install,	Install everything)
 install: $(addsuffix -install,info lisp mla)
 
 clean-install: $(call print-help,clean-install,Remove installed files)
-clean-install:
+clean-install: links-uninstall
 	$(RM) $(addprefix $(LISP-DIR)/,$(PKG).*)
 	$(RM) $(addprefix $(INFO-DIR)/,$(PKG))
 	$(RM) -r $(MAPLE-LIB-DIR)/$(mla)
