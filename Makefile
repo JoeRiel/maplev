@@ -96,7 +96,7 @@ links-uninstall:
 
 help: $(call print-separator)
 
-INFO-FILES = doc/$(PKG)
+INFO-FILES = doc/$(PKG).info
 PDF-FILES  = doc/$(PKG).pdf
 TEXI-FILES = doc/$(PKG).texi doc/version.texi
 HTML-FILES = doc/$(PKG).html
@@ -106,7 +106,7 @@ DOC-FILES = $(TEXI-FILES) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 doc: $(call print-help,doc,	Create the info and html documentation)
 doc:  info html
 info: $(call print-help,info,	Create info file)
-info: doc/$(PKG)
+info: doc/$(PKG).info
 pdf:  $(call print-help,pdf,	Create pdf documentation)
 pdf:  doc/$(PKG).pdf
 html:  $(call print-help,html,	Create html documentation)
@@ -115,8 +115,8 @@ html: doc/$(PKG).html
 doc/$(PKG).pdf: doc/$(PKG).texi doc/version.texi
 	(cd doc; $(TEXI2PDF) $(PKG).texi)
 
-doc/$(PKG): doc/$(PKG).texi doc/version.texi
-	(cd doc; $(MAKEINFO) --no-split $(PKG).texi --output=$(PKG))
+doc/$(PKG).info: doc/$(PKG).texi doc/version.texi
+	(cd doc; $(MAKEINFO) --no-split $(PKG).texi --output=$(PKG).info)
 
 doc/$(PKG).html: doc/$(PKG).texi doc/version.texi
 	(cd doc; $(TEXI2HTML) --no-split -o $(PKG).html $(PKG).texi)
