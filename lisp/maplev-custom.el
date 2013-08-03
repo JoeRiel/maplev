@@ -265,7 +265,7 @@ either `maplev-add-declaration-leading-comma' or
   :type 'integer
   :group 'maplev-indentation)
 
-(defcustom maplev-indent-declaration 0
+(defcustom maplev-indent-declaration-level 0
   "Indentation of Maple declarations \(local, global, option, description\)."
   :type 'integer
   :group 'maplev-indentation)

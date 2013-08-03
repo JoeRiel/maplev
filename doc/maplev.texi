@@ -404,10 +404,13 @@ The following variables affect indentation:
 @item maplev-indent-level
 The amount a subblock is indented. The default is 4.
 
-@item maplev-indent-declaration
-The amount the Maple procedure declarations (@code{local},
-@code{global}, @code{option}, and @code{description}) are indented.  The
-default is 0.
+@vindex maplev-indent-declaration
+@vindex maplev-indent-declaration-level
+@item maplev-indent-declaration-level
+This value is used to initialize the buffer-local variable
+@code{maplev-indent-declaration}, which sets the amount Maple procedure
+declarations (@code{local}, @code{global}, @code{option}, and
+@code{description}) are indented.  The default is 0.
 
 @item maplev-dont-indent-re
 A regex or nil.  If non-nil then lines that begin with a match are not

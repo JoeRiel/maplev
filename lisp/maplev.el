@@ -597,9 +597,7 @@ Prefix JUSTIFY means justify as well."
 
 ;;}}}
 
-;;{{{ MapleV mode
-
-;;{{{   definition
+;;{{{ MapleV mode 
 
 (defun maplev-mode ()
   "Major mode for editing Maple code.
@@ -650,10 +648,11 @@ Maple libraries.
   (setq auto-fill-function 'maplev-auto-fill)
 
   ;; indentation
-  (set (make-local-variable 'indent-line-function)   'maplev-indent-line)
-  (set (make-local-variable 'indent-region-function) 'maplev-indent-region)
+  (set (make-local-variable 'indent-line-function)   #'maplev-indent-line)
+  (set (make-local-variable 'indent-region-function) #'maplev-indent-region)
   (set (make-local-variable 'tab-width)               maplev-indent-level)
   (set (make-local-variable 'indent-tabs-mode)        nil)
+  (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
 
   (ad-activate 'fixup-whitespace)
 
@@ -719,8 +718,6 @@ Maple libraries.
   ;;(make-local-hook 'before-change-functions)
   (add-hook 'before-change-functions 'maplev-indent-before-change-function nil t)
   (run-hooks 'maplev-mode-hook))
-
-;;}}}
 
 ;;}}}
 
