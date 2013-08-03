@@ -401,11 +401,11 @@ Indent the region (@code{maplev-indent-region}).
 The following variables affect indentation:
 
 @vtable @code
+
 @item maplev-indent-level
 The amount a subblock is indented. The default is 4.
 
 @vindex maplev-indent-declaration
-@vindex maplev-indent-declaration-level
 @item maplev-indent-declaration-level
 This value is used to initialize the buffer-local variable
 @code{maplev-indent-declaration}, which sets the amount Maple procedure
@@ -416,6 +416,16 @@ declarations (@code{local}, @code{global}, @code{option}, and
 A regex or nil.  If non-nil then lines that begin with a match are not
 indented.  The default, @samp{"#"}, prevents flush left comment lines
 from being indented.
+
+@item maplev-tab-width
+This integer value is used to initialize the value of @code{tab-width}.
+
+@findex maplev-get-tab-width-function
+@item maplev-get-tab-width-function
+If assigned, this function is called, with the filename of the current buffer,
+when @code{maplev-mode} is executed.  It should return the desired value
+of @code{tab-width}.  If not assigned, @code{maplev-tab-width} is used as
+the value.
 
 @end vtable
 

@@ -668,6 +668,8 @@ Maple libraries.
   (set (make-local-variable 'comment-column)           maplev-comment-column)
   (set (make-local-variable 'comment-indent-function) 'maplev-indent-comment-indentation)
 
+  (maplev-set-tab-width)
+
   ;; menubar (for Xemacs, GNU Emacs doesn't need this)
   ;; (and maplev-menu (easy-menu-add maplev-menu))
 
@@ -1201,10 +1203,20 @@ moved to be before it."
 
 ;;}}}
 
+(declare-function maplev-get-tab-width-function)
+
+(defun maplev-set-tab-width (&optional file)
+  "Return the value of tab-width required by optional FILE, or if nil,
+the file name given be `buffer-file-name'.  If the function
+`maplev-get-tab-width-function' is assigned, call it with FILE,
+otherwise use `maplev-tab-width'."
+  (setq tab-width (if (functionp 'maplev-get-tab-width-function)
+		      (maplev-get-tab-width-function (or file (buffer-file-name)))
+		    maplev-tab-width)))
 
 ;;{{{ Font lock
 
-(defvar maplev-preprocessor-face   'maplev-preprocessor-face
+(defvar maplev-preprocessor-face 'maplev-preprocessor-face
   "*Face name for Maple preprocessor directives.")
 
 (defface maplev-preprocessor-face

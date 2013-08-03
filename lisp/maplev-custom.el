@@ -280,6 +280,11 @@ either `maplev-add-declaration-leading-comma' or
   :type 'boolean
   :group 'maplev-indentation)
 
+(defcustom maplev-tab-width 4
+  "Tab width in maplev buffers."
+  :type 'integer
+  :group 'maplev-indentation)
+
 ;;}}}
 ;;{{{   templates
 
