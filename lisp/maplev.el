@@ -703,6 +703,8 @@ Maple libraries.
   ;; (set (make-local-variable 'add-log-current-defun-function)
   ;;      #'maplev-current-defun-name) ;; not yet available
 
+  (maplev-add-maple-to-compilation)
+
   ;; Release support
   (maplev-set-release)
   ;; the file's local variables specs might change maplev-release

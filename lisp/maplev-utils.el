@@ -7,9 +7,13 @@
 
 ;;; Code:
 
+(require 'maplev-re)
+
 (eval-when-compile
   (defvar mouse-selection-click-count)
+  (defvar compilation-error-regexp-alist)
   (autoload 'mouse-selection-click-count "mouse"))
+
   
 
 (defun maplev--string-to-name (name)
@@ -48,6 +52,16 @@ regardless of where you click."
     (setq this-command 'yank)
     (setq mouse-selection-click-count 0)
     (yank arg)))
+
+(defun maplev-add-maple-to-compilation ()
+  "Add the symbol \`maple to `compilation-error-regexp-alist'
+and the `maplev--compile-error-re' regexp to 'compilation-error-regexp-alist'.
+This font-locks the compilation buffer when using the `compile' command to 
+build Maple libraries.  Requires customizing `compile-command'."
+  (interactive)
+  (unless (member 'maple compilation-error-regexp-alist)
+    (add-to-list 'compilation-error-regexp-alist 'maple)
+    (add-to-list 'compilation-error-regexp-alist-alist `(maple ,maplev--compile-error-re 2 1 nil))))
 
 
 (provide 'maplev-utils)

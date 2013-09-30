@@ -134,6 +134,12 @@ including double-quotes.")
           maplev--string-re)
   "Regular expression that matches a backward-quoted name or double code string.")
 
+(defconst maplev--compile-error-re
+  "^on line \\([0-9]+\\) of[ \n]\"\\([^\"]*\\)"
+  "Regular expression that matches the output of a Maple load time error message.
+This is intended to be assigned to an element of `compilation-error-regexp-alist-alist'.
+The first group matches the line number, the second group the file name.")
+
 (provide 'maplev-re)
 
 ;;; maplev-re.el ends here
