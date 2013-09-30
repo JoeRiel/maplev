@@ -1821,7 +1821,7 @@ loaded, nil otherwise."
   (let ((config (maplev-include--find-file-up-path ".maplev")))
     (when config
       (condition-case err
-	  (load-file config)
+	  (load config)
 	(error
 	 (message "An error occurred loading config file %s" config))))))
 
