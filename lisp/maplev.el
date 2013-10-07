@@ -597,9 +597,7 @@ Prefix JUSTIFY means justify as well."
 
 ;;}}}
 
-;;{{{ MapleV mode
-
-;;{{{   definition
+;;{{{ MapleV mode 
 
 (defun maplev-mode ()
   "Major mode for editing Maple code.
@@ -650,10 +648,11 @@ Maple libraries.
   (setq auto-fill-function 'maplev-auto-fill)
 
   ;; indentation
-  (set (make-local-variable 'indent-line-function)   'maplev-indent-line)
-  (set (make-local-variable 'indent-region-function) 'maplev-indent-region)
+  (set (make-local-variable 'indent-line-function)   #'maplev-indent-line)
+  (set (make-local-variable 'indent-region-function) #'maplev-indent-region)
   (set (make-local-variable 'tab-width)               maplev-indent-level)
   (set (make-local-variable 'indent-tabs-mode)        nil)
+  (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
 
   (ad-activate 'fixup-whitespace)
 
@@ -668,6 +667,8 @@ Maple libraries.
   (set (make-local-variable 'comment-start-skip)       "#+[ \t]*")
   (set (make-local-variable 'comment-column)           maplev-comment-column)
   (set (make-local-variable 'comment-indent-function) 'maplev-indent-comment-indentation)
+
+  (maplev-set-tab-width)
 
   ;; menubar (for Xemacs, GNU Emacs doesn't need this)
   ;; (and maplev-menu (easy-menu-add maplev-menu))
@@ -702,6 +703,8 @@ Maple libraries.
   ;; (set (make-local-variable 'add-log-current-defun-function)
   ;;      #'maplev-current-defun-name) ;; not yet available
 
+  (maplev-add-maple-to-compilation)
+
   ;; Release support
   (maplev-set-release)
   ;; the file's local variables specs might change maplev-release
@@ -719,8 +722,6 @@ Maple libraries.
   ;;(make-local-hook 'before-change-functions)
   (add-hook 'before-change-functions 'maplev-indent-before-change-function nil t)
   (run-hooks 'maplev-mode-hook))
-
-;;}}}
 
 ;;}}}
 
@@ -1048,7 +1049,7 @@ index/package help pages.  If it already exists, do nothing."
             ;; Process help node "index/function".
             (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-help-show-topic "index/function" t)
+            (maplev-help-show-topic "index/function" 'hide)
             (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (save-restriction
@@ -1068,7 +1069,7 @@ index/package help pages.  If it already exists, do nothing."
             ;; Process help node "index/package".
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (maplev-cmaple--wait 3)
-            (maplev-help-show-topic "index/package" t)
+            (maplev-help-show-topic "index/package" 'hide)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (maplev-cmaple--wait 3)
             (save-restriction
@@ -1204,10 +1205,20 @@ moved to be before it."
 
 ;;}}}
 
+(declare-function maplev-get-tab-width-function)
+
+(defun maplev-set-tab-width (&optional file)
+  "Return the value of tab-width required by optional FILE, or if nil,
+the file name given be `buffer-file-name'.  If the function
+`maplev-get-tab-width-function' is assigned, call it with FILE,
+otherwise use `maplev-tab-width'."
+  (setq tab-width (if (functionp 'maplev-get-tab-width-function)
+		      (maplev-get-tab-width-function (or file (buffer-file-name)))
+		    maplev-tab-width)))
 
 ;;{{{ Font lock
 
-(defvar maplev-preprocessor-face   'maplev-preprocessor-face
+(defvar maplev-preprocessor-face 'maplev-preprocessor-face
   "*Face name for Maple preprocessor directives.")
 
 (defface maplev-preprocessor-face
@@ -1229,7 +1240,7 @@ moved to be before it."
     "mod"  "not"  "od"        "option" "options"
     "or"   "proc" "quit"      "read"   "save"
     "stop" "then" "to"        "union"  "while"
-    "description" "local" "global")
+    "description" "local"     "global")
   "List of reserved words for Maple V R3.")
 
 (defconst maplev--reserved-words-4
@@ -1288,6 +1299,10 @@ moved to be before it."
   maplev--reserved-words-10
   "List of reserved words for Maple 16.")
 
+(defconst maplev--reserved-words-17
+  maplev--reserved-words-10
+  "List of reserved words for Maple 16.")
+
 (defconst maplev--reserved-words-alist
   `((3 .  ,maplev--reserved-words-3)
     (4 .  ,maplev--reserved-words-4)
@@ -1303,6 +1318,7 @@ moved to be before it."
     (14 . ,maplev--reserved-words-14)
     (15 . ,maplev--reserved-words-15)
     (16 . ,maplev--reserved-words-16)
+    (17 . ,maplev--reserved-words-17)
    )
   "Alist of Maple reserved words.  The key is the major release.")
 
@@ -1461,7 +1477,10 @@ file (either < or \").  The second group matches the filename.")
   (append '("assign" "numelems" "upperbound" "lowerbound") maplev--builtin-functions-14))
 
 (defconst maplev--builtin-functions-16
-  (append '("_hackwareToPointer") maplev--builtin-functions-15))
+  (append '("_hackwareToPointer" "~Array" "~Matrix" "~Vector") maplev--builtin-functions-15))
+
+(defconst maplev--builtin-functions-17
+  (append (remove "alias" '("NameSpace" "_local" "print_preprocess")) maplev--builtin-functions-16))
 
 (defconst maplev--builtin-functions-alist
   `((3  . ,maplev--builtin-functions-3)
@@ -1478,6 +1497,7 @@ file (either < or \").  The second group matches the filename.")
     (14 . ,maplev--builtin-functions-14)
     (15 . ,maplev--builtin-functions-15)
     (16 . ,maplev--builtin-functions-16)
+    (17 . ,maplev--builtin-functions-17)
  "Alist of Maple builtin funtions. The key is the major release."))
 
 ;; (defconst maplev--builtin-functions-alist
@@ -1801,7 +1821,7 @@ loaded, nil otherwise."
   (let ((config (maplev-include--find-file-up-path ".maplev")))
     (when config
       (condition-case err
-	  (load-file config)
+	  (load config)
 	(error
 	 (message "An error occurred loading config file %s" config))))))
 

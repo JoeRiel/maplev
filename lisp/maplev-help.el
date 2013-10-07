@@ -158,17 +158,18 @@ Interactively, default is word point is on."
 
 (defun maplev-help-show-topic (topic &optional hide)
   "Display Maple help for TOPIC \(a string\).
-Push TOPIC onto the local stack, unless it is already on the top.
-If optional arg HIDE is non-nil do not display buffer."
-  (save-current-buffer             ; maybe should be deeper (NEW!!!!!)
-    (let ((release maplev-release)) ;; we switch buffers!
-      (set-buffer (get-buffer-create (maplev--help-buffer)))
-      (unless (eq major-mode 'maplev-help-mode)
-        (maplev-help-mode release))
-      ;; Push TOPIC onto history stack
-      (maplev-history--stack-process topic hide))))
+Push TOPIC onto the local stack, unless it is already on the top."
+  (unless
+      (and maplev-help-use-standard-flag
+	   (maplev-help-standard-help topic))
+    (save-current-buffer             ; maybe should be deeper (NEW!!!!!)
+      (let ((release maplev-release)) ;; we switch buffers!
+	(set-buffer (get-buffer-create (maplev--help-buffer)))
+	(unless (eq major-mode 'maplev-help-mode)
+	  (maplev-help-mode release))
+	;; Push TOPIC onto history stack
+	(maplev-history--stack-process topic hide)))))
 
-;;(setq maplev-cmaple-screenheight 24)
 
 (defun maplev--help-process (topic)
   "Display Maple help for TOPIC in `maplev--help-buffer'."
@@ -259,6 +260,34 @@ PROCESS calls this filter.  STRING is the output."
   "Reset the settings that affect the display of help pages."
   (interactive)
   (maplev-cmaple-direct (maplev--cmaple-get-init-string maplev-release) 'delete))
+
+(defun maplev-help-standard-help (topic)
+  "Display help for TOPIC in the Standard help browser.
+If successful, return t, otherwise return nil."
+  (condition-case nil
+      (let ((tcp-proc (open-network-stream "tcp-proc" nil "localhost" maplev-help-port)))
+	(process-send-string tcp-proc topic)
+	(delete-process tcp-proc)
+	t)
+    (error
+       (message "cannot connect to Maple help server")
+       (beep))))
+
+(defun maplev-help-toggle-standard-help (&optional arg)
+  "Toggle whether to use the standard Maple help browser.
+With prefix argument ARG, use it if ARG is positive, otherwise 
+use the tty help browser, in an Emacs buffer."
+  (interactive "P")
+  (setq maplev-help-use-standard-flag
+	(if (null arg)
+	    (not maplev-help-use-standard-flag)
+	  (> (prefix-numeric-value arg) 0)))
+  (message "Standard help %s"
+	   (if maplev-help-use-standard-flag
+	       "enabled" "disabled")))
+	
+				  
+
 
 ;;}}}
 ;;{{{ history mechanism

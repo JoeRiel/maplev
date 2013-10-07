@@ -36,6 +36,10 @@
 
 ;; Define variables and functions for handling indentation information.
 
+(defvar maplev-indent-declaration 0
+  "Buffer-local variable that sets the indentation of local, global, and export statements.
+The default value is taken from `maplev-indent-declaration-level'.")
+
 (defvar maplev-indent-use-info-flag t
   "Non-nil means use `maplev-indent-info' to speed-up indentation.
 May interfere with some modes (e.g. noweb).")
@@ -239,7 +243,7 @@ If procedure is anonymous, point is not moved and nil is returned.
 Otherwise point is moved to left of assignee and point is returned."
   ;; Regexp does not include possible comments.
   (and (re-search-backward (concat maplev--possibly-typed-assignment-re "\\=") nil t)
-       (goto-char (match-beginning 2))))
+       (goto-char (match-beginning 1))))
 
 (defun maplev-indent-line-with-info ()
   "Indent the current line as Maple code.  Point must be at the left margin."
