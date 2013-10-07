@@ -1,5 +1,10 @@
 -*- org -*-
 
+* 2.29
+** Add maplev-add-maple-to-compilation function
+** Change the way global/local/exports are indented (options available)
+** Provide method to display help pages in standard help browser (requires Help module)
+
 * 2.28.1
 ** Remove folding requirement
 ** Cleanup Makefile
