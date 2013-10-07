@@ -265,7 +265,7 @@ either `maplev-add-declaration-leading-comma' or
   :type 'integer
   :group 'maplev-indentation)
 
-(defcustom maplev-indent-declaration 0
+(defcustom maplev-indent-declaration-level 0
   "Indentation of Maple declarations \(local, global, option, description\)."
   :type 'integer
   :group 'maplev-indentation)
@@ -278,6 +278,11 @@ either `maplev-add-declaration-leading-comma' or
 (defcustom maplev-auto-break-strings-flag t
   "Non-nil means strings in code will be automatically broken when they pass the `current-fill-column'."
   :type 'boolean
+  :group 'maplev-indentation)
+
+(defcustom maplev-tab-width 4
+  "Tab width in maplev buffers."
+  :type 'integer
   :group 'maplev-indentation)
 
 ;;}}}
@@ -498,6 +503,21 @@ See the documentation for `align-exclude-rules-list' for more info."
 Otherwise use the default directory of `maplev-cmaple-buffer'."
   :type '(choice string (const :tag "default" nil))
   :group 'maplev-executables)
+
+;;}}}
+;;{{{   help
+
+(defcustom maplev-help-port 3141
+  "Port number used to communicate to a Maple help server."
+  :type 'integer
+  :group 'maplev-help)
+
+(defcustom maplev-help-use-standard-flag nil
+  "True means use standard help, if available.
+For this to work, Standard Maple must be running Help:-Server,
+which is an export of the Help package."
+  :type 'boolean
+  :group 'maplev-help)
 
 ;;}}}
 ;;}}}

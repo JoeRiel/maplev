@@ -280,10 +280,10 @@ declaration.  Return non-nil if this is a procedure, nil if an operator."
 
 (defun maplev-mint--goto-source-line (pos)
   "Goto the location in source specified by the line number in the Mint buffer.
-The line number beginss at character position POS."
+The line number begins at character position POS."
   (goto-char pos)
   (beginning-of-line)
-  (re-search-forward "line \\([0-9]+\\)" (line-end-position))
+  (re-search-forward "line +\\([0-9]+\\)" (line-end-position))
   (maplev-mint--goto-source-pos (1- (string-to-number (match-string 1))) 0))
 
 
@@ -343,7 +343,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
-    ("\\(on line [0-9]+\\)" maplev-mint-note-face 'goto-line)
+    ("\\(on line +[0-9]+\\)" maplev-mint-note-face 'goto-line)
     ;; Could we make the following optional?
     ;; ("Global names used in this procedure:"
     ;;  1 maplev-mint-warning-face 'undecl-global t)

@@ -5,10 +5,9 @@
 SHELL = /bin/sh
 
 PKG := maplev
-VERSION := 2.28.1
+VERSION := 2.29
 
 include help-system.mak
-
 
 # {{{ Executables
 
@@ -17,9 +16,9 @@ MAPLE := cmaple
 TEXI2HTML := makeinfo --html --number-sections
 TEXI2PDF := texi2pdf
 
-BROWSER := firefox
+BROWSER := x-www-browser
 CP := cp --archive
-PDFVIEWER := evince
+PDFVIEWER := xpdf
 INFO := info
 
 # }}}
@@ -47,7 +46,17 @@ showerr = err="$$($1)" ; if [ "$$err" ]; then echo $(call warn,$$err); fi
 
 # }}}
 
+.PHONY: all 
+
+COMMA := ,
+
+all: $(call print-help,all,	Create mla$(COMMA) elcs$(COMMA) and info)
+all: byte-compile mla info
+
+
 # {{{ Elisp
+
+help: $(call print-separator)
 
 ELFLAGS	= --no-site-file \
 	  --no-init-file \
@@ -96,7 +105,7 @@ links-uninstall:
 
 help: $(call print-separator)
 
-INFO-FILES = doc/$(PKG)
+INFO-FILES = doc/$(PKG).info
 PDF-FILES  = doc/$(PKG).pdf
 TEXI-FILES = doc/$(PKG).texi doc/version.texi
 HTML-FILES = doc/$(PKG).html
@@ -106,7 +115,7 @@ DOC-FILES = $(TEXI-FILES) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 doc: $(call print-help,doc,	Create the info and html documentation)
 doc:  info html
 info: $(call print-help,info,	Create info file)
-info: doc/$(PKG)
+info: doc/$(PKG).info
 pdf:  $(call print-help,pdf,	Create pdf documentation)
 pdf:  doc/$(PKG).pdf
 html:  $(call print-help,html,	Create html documentation)
@@ -115,8 +124,8 @@ html: doc/$(PKG).html
 doc/$(PKG).pdf: doc/$(PKG).texi doc/version.texi
 	(cd doc; $(TEXI2PDF) $(PKG).texi)
 
-doc/$(PKG): doc/$(PKG).texi doc/version.texi
-	(cd doc; $(MAKEINFO) --no-split $(PKG).texi --output=$(PKG))
+doc/$(PKG).info: doc/$(PKG).texi doc/version.texi
+	(cd doc; $(MAKEINFO) --no-split $(PKG).texi --output=$(PKG).info)
 
 doc/$(PKG).html: doc/$(PKG).texi doc/version.texi
 	(cd doc; $(TEXI2HTML) --no-split -o $(PKG).html $(PKG).texi)
@@ -148,6 +157,7 @@ i: $(call print-help,i,	Preview the info)
 i: doc/$(PKG)
 	$(INFOVIEWER) $<
 
+# preview html
 h: $(call print-help,h,	Preview the html)
 h: doc/$(PKG).html
 	$(BROWSER) $<
@@ -192,7 +202,7 @@ install: $(call print-help,install,	Install everything)
 install: $(addsuffix -install,info lisp mla)
 
 clean-install: $(call print-help,clean-install,Remove installed files)
-clean-install:
+clean-install: links-uninstall
 	$(RM) $(addprefix $(LISP-DIR)/,$(PKG).*)
 	$(RM) $(addprefix $(INFO-DIR)/,$(PKG))
 	$(RM) -r $(MAPLE-LIB-DIR)/$(mla)
