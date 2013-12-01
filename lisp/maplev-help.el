@@ -131,7 +131,7 @@ RELEASE is the Maple release, if nil, `maplev-default-release' is used.
   (interactive "e")
   (set-buffer (window-buffer (event-window click)))
   (goto-char (event-point click))
-  (let ((topic (maplev--ident-around-point))
+  (let ((topic (replace-regexp-in-string "\n" "" (maplev--ident-around-point) 'inplace))
         (pkg (maplev-help--get-package)))
     (if pkg
         ;; This frequently works when the help index does not have a
@@ -375,6 +375,7 @@ The title is the phrase following the function name."
           "\\|Description"
           "\\|Examples"
           "\\|See Also"
+	  "\\| ?Pages That Link to This Page"
           "\\|References"
           "\\|Returns"
           "\\|Notes"
@@ -466,13 +467,17 @@ The title is the phrase following the function name."
 	
 
 
-	;; Activate hyperlinks following "See Also".
-	;; Stop when encountering a blank line.
+	;; Activate hyperlinks following "See Also" and "Pages That Link to This Page".
 	(goto-char (point-max))
-	(and (re-search-backward "^See Also:?" nil 'move)
-	     (maplev--activate-hyperlinks
-	      (match-end 0)
-	      (point-max)))
+	(let ((end (point))
+	      tmp)
+	  (when (re-search-backward "^ ?Pages That Link to This Page" nil 'move)
+	    (setq tmp (point))
+	    (maplev--activate-hyperlinks (match-end 0) end)
+	    (setq end tmp)
+	    (goto-char end))
+	  (when (re-search-backward "^See Also:?" nil 'move)
+	     (maplev--activate-hyperlinks (match-end 0) end))) 
 
 
 	;; Highlight section titles
@@ -510,11 +515,10 @@ The title is the phrase following the function name."
   "Font lock and activate Maple keywords in the region from BEG to END."
   (goto-char beg)
   (while (re-search-forward
-          (concat  maplev--name-re
-                   "\\([,/]" maplev--name-re "\\)*")
+	  " *\\([^,/\n]+\\(/\n?[^,/\n]+\\)*\\)\\(,\\|$\\)"
           end 'move)
-    (let ((beg (match-beginning 0))
-          (end (match-end 0)))
+    (let ((beg (match-beginning 1))
+          (end (match-end 1)))
       ;; Treat everything between beg and end as word constituents.
       ;; In particular, ignore the syntactic meaning of, e.g., `[',
       ;; `]', and `,'. Thus we can use current-word to pick up
