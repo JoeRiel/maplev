@@ -408,99 +408,103 @@ The title is the phrase following the function name."
       ;; The tricky part is handling multiple titles.
 
       (goto-char (point-min))
-      ;; Move to the end of the title area.  Stop at first section or bullet.
-      (if (re-search-forward (concat maplev--help-section-re "\\|^- ")
-                             nil 'move)
-          ;; Move backward to top of buffer, checking each line.
-          (while (= 0 (forward-line -1))
-            (if (looking-at "\\(Function:\\)?\\([^-\n]*\\)[ \t]+-[ \t]+\\(.*\\)$") ; regexp for function name(sort of)
-                (progn (and (match-beginning 1)
-                            (put-text-property (match-beginning 1) (match-end 1)
-                                               'face 'maplev-help-section-face))
-                       (and (match-beginning 3)
-                            (put-text-property (match-beginning 3) (match-end 3)
-                                               'face 'maplev-help-title-face))
-                       (and (match-beginning 2)
-                            (maplev--activate-hyperlinks (match-beginning 2) (match-end 2))))
-              (put-text-property (point) (progn (end-of-line) (point))
-                                 'face 'maplev-help-title-face)))
-        (goto-char (point-min))
-        (end-of-line)
-        (put-text-property (point-min) (point)
-                           'face 'maplev-help-title-face))
+      (if (looking-at "No exact matches found, please try one of the following (\\?#number):")
+	  ;; create links for all the help pages
+	  (while (re-search-forward "^ *\\([0-9]+\\)\\. \\(.*\\)$" nil 'move)
+	    (maplev--activate-hyperlink (match-beginning 2) (match-end 2)))
+	;; Move to the end of the title area.  Stop at first section or bullet.
+	(if (re-search-forward (concat maplev--help-section-re "\\|^- ")
+			       nil 'move)
+	    ;; Move backward to top of buffer, checking each line.
+	    (while (= 0 (forward-line -1))
+	      (if (looking-at "\\(Function:\\)?\\([^-\n]*\\)[ \t]+-[ \t]+\\(.*\\)$") ; regexp for function name(sort of)
+		  (progn (and (match-beginning 1)
+			      (put-text-property (match-beginning 1) (match-end 1)
+						 'face 'maplev-help-section-face))
+			 (and (match-beginning 3)
+			      (put-text-property (match-beginning 3) (match-end 3)
+						 'face 'maplev-help-title-face))
+			 (and (match-beginning 2)
+			      (maplev--activate-hyperlinks (match-beginning 2) (match-end 2))))
+		(put-text-property (point) (progn (end-of-line) (point))
+				   'face 'maplev-help-title-face)))
+	  (goto-char (point-min))
+	  (end-of-line)
+	  (put-text-property (point-min) (point)
+			     'face 'maplev-help-title-face))
 
-      ;; Highlight subsection titles
-      (goto-char (point-min))
-      (while (re-search-forward maplev--help-subsection-re nil t)
-        (put-text-property (match-beginning 0) (match-end 0)
-                           'face 'maplev-help-subsection-face))
-
-
-      ;; Highlight functions in a package. This usually works.  It
-      ;; searches for `- The functions [arbitrary text] are:' and
-      ;; highlights everything from the colon to the next line that
-      ;; starts with a character that is not whitespace.
-      (goto-char (point-min))
-      (when (re-search-forward
-             "^- The\\( available\\)? \\(functions\\|routines\\)[^\n]* are\\( the following\\)?: *$"
-             nil 'move)
-        (maplev--activate-hyperlinks
-         (point) (progn (re-search-forward "^[^ \t\n]" nil 'move)
-                        (line-end-position -1))))
-
-      ;; Highlight Maple input
-      (goto-char (point-min))
-      (while (re-search-forward "^> .*$" nil t)
-        (put-text-property (match-beginning 0) (match-end 0)
-                           'face 'maplev-input-face))
-
-      ;; Highligt Maple comments
-      (goto-char (point-min))
-      (while (re-search-forward "^# .*$" nil t)
-        (put-text-property (match-beginning 0) (match-end 0)
-                           'face 'font-lock-comment-face))
-                 
+	;; Highlight subsection titles
+	(goto-char (point-min))
+	(while (re-search-forward maplev--help-subsection-re nil t)
+	  (put-text-property (match-beginning 0) (match-end 0)
+			     'face 'maplev-help-subsection-face))
 
 
-      ;; Activate hyperlinks following "See Also".
-      ;; Stop when encountering a blank line.
-      (goto-char (point-max))
-      (and (re-search-backward "^See Also:?" nil 'move)
-           (maplev--activate-hyperlinks
-            (match-end 0)
-            (point-max)))
+	;; Highlight functions in a package. This usually works.  It
+	;; searches for `- The functions [arbitrary text] are:' and
+	;; highlights everything from the colon to the next line that
+	;; starts with a character that is not whitespace.
+	(goto-char (point-min))
+	(when (re-search-forward
+	       "^- The\\( available\\)? \\(functions\\|routines\\)[^\n]* are\\( the following\\)?: *$"
+	       nil 'move)
+	  (maplev--activate-hyperlinks
+	   (point) (progn (re-search-forward "^[^ \t\n]" nil 'move)
+			  (line-end-position -1))))
+
+	;; Highlight Maple input
+	(goto-char (point-min))
+	(while (re-search-forward "^> .*$" nil t)
+	  (put-text-property (match-beginning 0) (match-end 0)
+			     'face 'maplev-input-face))
+
+	;; Highligt Maple comments
+	(goto-char (point-min))
+	(while (re-search-forward "^# .*$" nil t)
+	  (put-text-property (match-beginning 0) (match-end 0)
+			     'face 'font-lock-comment-face))
+	
 
 
-      ;; Highlight section titles
-      (goto-char (point-min))
-      (while (re-search-forward maplev--help-section-re nil t)
-        (put-text-property (match-beginning 0) (match-end 0)
-                           'face 'maplev-help-section-face))
+	;; Activate hyperlinks following "See Also".
+	;; Stop when encountering a blank line.
+	(goto-char (point-max))
+	(and (re-search-backward "^See Also:?" nil 'move)
+	     (maplev--activate-hyperlinks
+	      (match-end 0)
+	      (point-max)))
 
 
-      ;; Activate hyperlinks in text.  This is overly aggressive.
-      (goto-char (point-min))
-      (re-search-forward "^Description" nil t)
-      (while (re-search-forward "(\\([][a-zA-Z,]+\\))" nil 'move)
-        (save-excursion
-          (beginning-of-line)
-          (unless (looking-at "> ")
-            (maplev--activate-hyperlink (match-beginning 1) (match-end 1)))))
-                 
+	;; Highlight section titles
+	(goto-char (point-min))
+	(while (re-search-forward maplev--help-section-re nil t)
+	  (put-text-property (match-beginning 0) (match-end 0)
+			     'face 'maplev-help-section-face))
 
-      ;; Activate hyperlinks following "Multiple matches:".
-      (goto-char (point-min))
-      (and (re-search-forward "^Multiple matches found:" nil 'move)
-           (maplev--activate-hyperlinks (match-end 0) (point-max)))
 
-      ;; Active dictionary hyperlinks
-      (goto-char (point-min))
-      (while (re-search-forward maplev--help-definition-re nil 'move)
-        (let ((beg (match-beginning 1))
-              (end (match-end 1)))
-          ;;(put-text-property beg end 'mouse-face 'highlight)
-          ;;(put-text-property beg end 'face maplev-help-function-face))))))
-          (maplev--activate-hyperlink beg end))))))
+	;; Activate hyperlinks in text.  This is overly aggressive.
+	(goto-char (point-min))
+	(re-search-forward "^Description" nil t)
+	(while (re-search-forward "(\\([][a-zA-Z,]+\\))" nil 'move)
+	  (save-excursion
+	    (beginning-of-line)
+	    (unless (looking-at "> ")
+	      (maplev--activate-hyperlink (match-beginning 1) (match-end 1)))))
+	
+
+	;; Activate hyperlinks following "Multiple matches:".
+	(goto-char (point-min))
+	(and (re-search-forward "^Multiple matches found:" nil 'move)
+	     (maplev--activate-hyperlinks (match-end 0) (point-max)))
+
+	;; Active dictionary hyperlinks
+	(goto-char (point-min))
+	(while (re-search-forward maplev--help-definition-re nil 'move)
+	  (let ((beg (match-beginning 1))
+		(end (match-end 1)))
+	    ;;(put-text-property beg end 'mouse-face 'highlight)
+	    ;;(put-text-property beg end 'face maplev-help-function-face))))))
+	    (maplev--activate-hyperlink beg end)))))))
 
 (defun maplev--activate-hyperlinks (beg end)
   "Font lock and activate Maple keywords in the region from BEG to END."
@@ -522,6 +526,7 @@ The title is the phrase following the function name."
   (put-text-property beg end 'syntax-table '(2 . nil))
   (put-text-property beg end 'mouse-face 'highlight)
   (put-text-property beg end 'face maplev-help-function-face))
+
 
 ;;}}}
 
