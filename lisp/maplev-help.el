@@ -410,9 +410,12 @@ The title is the phrase following the function name."
 
       (goto-char (point-min))
       (if (looking-at "No exact matches found, please try one of the following (\\?#number):")
-	  ;; create links for all the help pages
-	  (while (re-search-forward "^ *\\([0-9]+\\)\\. \\(.*\\)$" nil 'move)
-	    (maplev--activate-hyperlink (match-beginning 2) (match-end 2)))
+	  ;; create links for all the numbered help pages
+	  (while (re-search-forward "^\\( *\\)\\([0-9]+\\.\\) \\(.*\\)$" nil 'move)
+	    (let ((b (match-beginning 2))
+		  (e (match-end 2)))
+	    (replace-match "\\1#\\2 \\3")
+	    (maplev--activate-hyperlink b e)))
 	;; Move to the end of the title area.  Stop at first section or bullet.
 	(if (re-search-forward (concat maplev--help-section-re "\\|^- ")
 			       nil 'move)
