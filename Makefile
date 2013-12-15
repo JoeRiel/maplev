@@ -20,6 +20,7 @@ BROWSER := x-www-browser
 CP := cp --archive
 PDFVIEWER := xpdf
 INFO := info
+INFOVIEWER := info
 
 # }}}
 # {{{ Directories
@@ -154,7 +155,7 @@ p: doc/$(PKG).pdf
 
 # preview info
 i: $(call print-help,i,	Preview the info)
-i: doc/$(PKG)
+i: doc/$(PKG).info
 	$(INFOVIEWER) $<
 
 # preview html
