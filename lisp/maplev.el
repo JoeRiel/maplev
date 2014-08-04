@@ -1816,12 +1816,15 @@ nil."
 (defun maplev-load-config-file ()
   "Find and load the maplev configuration file.
 The file is named .maplev and is searched for in the current
-directory and its ancestors.  Return t if configuration file was
-loaded, nil otherwise."
+directory and its ancestors.  Return the path to the configuration
+file if one was found, nil otherwise."
+  (interactive)
   (let ((config (maplev-include--find-file-up-path ".maplev")))
     (when config
       (condition-case err
-	  (load config)
+	  (progn 
+	    (load config)
+	    config)
 	(error
 	 (message "An error occurred loading config file %s" config))))))
 
