@@ -713,7 +713,10 @@ Maple libraries.
   ;;(make-local-hook 'hack-local-variables-hook)
   (add-hook 'hack-local-variables-hook 'maplev-mode-name nil t)
 
-  (if maplev-buttonize-includes-flag (maplev-buttonize-includes))
+  (when maplev-buttonize-includes-flag
+    (maplev-buttonize-includes)
+    (maplev-buttonize-links))
+
   (if maplev-load-config-file-flag (maplev-load-config-file))
 
   ;; Set hooks
@@ -1372,7 +1375,7 @@ otherwise use `maplev-tab-width'."
   "Regex of preprocessor directives.")
 
 (defconst maplev--include-directive-re
-  "^\\(?:## \\)?\\$include\\s-+\\([<\"]\\)\\(.*\\)[>\"]"
+  "^\\(?:## \\)?\\$include\\s-*\\([<\"]\\)\\(.*\\)[>\"]"
   "Regex of an include directive.
 The first group matches the character used to delimit the
 file (either < or \").  The second group matches the filename.")
@@ -1718,7 +1721,7 @@ If nil then `font-lock-maximum-decoration' selects the level."
 			  :face-policy 'prepend
 			  :grouping 2
 			  :keyboard-binding "C-c C-o"
-			  :help-text "open file"))
+			  :help-text "open file ([C-u] C-c C-o)"))
 
 (defun maplev-find-include-file-at-point (toggle)
   "Open the include file at point.
@@ -1736,10 +1739,15 @@ directory exists, query user to create the file."
     (let* ((inc-file (match-string-no-properties 2))
 	   (path maplev-include-path)
 	   (inc-first (string= "<" (match-string-no-properties 1)))
+	   (other-window-flag (if maplev-include-file-other-window-flag
+				  (not toggle)
+				toggle))
 	   file)
       (setq file (maplev-find-include-file inc-file inc-first path))
       (if file
-	  (find-file-other-window file)
+	  (if other-window-flag
+	      (find-file-other-window file )
+	    (find-file file))
 	;; file does not exist.  If suitable location can be found from include path,
 	;; query to create
 	(let ((base (file-name-nondirectory inc-file))
@@ -1750,9 +1758,7 @@ directory exists, query user to create the file."
 	    (error "Include file %s does not exist " inc-file)
 	  (if (yes-or-no-p (format "Create include file %s "
 				   (setq file (concat file base))))
-	      (if (if maplev-include-file-other-window-flag
-		      (not toggle)
-		    toggle)
+	      (if other-window-flag
 		  (find-file-other-window file)
 		(find-file file)))))))))
 	  
@@ -1808,6 +1814,42 @@ nil."
   'action 'maplev-find-include-file-at-point
   'follow-link t
   'face 'maplev-include-file)
+
+;;}}}
+;;{{{ Links
+
+(defun maplev-buttonize-links ()
+  "Buttonize the link statements."
+  (button-lock-mode t)
+  (button-lock-set-button maplev--link-re
+			  'maplev-find-link-file-at-point
+			  :face 'link
+			  :face-policy 'prepend
+			  :grouping 1
+			  :keyboard-binding "C-c C-o"
+			  :help-text "open file"))
+
+(defun maplev-find-link-file-at-point (toggle)
+  "Open the maplev link file at point.
+If found, the file is opened in the current window, or the other
+window, depending on the exclusive-or of
+`maplev-include-file-other-window-flag' and TOGGLE."
+  (interactive "P")
+  (unless (eolp)
+    (save-excursion
+      (beginning-of-line)
+      (unless (looking-at maplev--link-re)
+	(error "Not at a link statement"))
+      (let* ((link-file (match-string-no-properties 1))
+	     (file (and (file-exists-p link-file) (expand-file-name link-file))))
+	(unless file
+	  (error "Cannot find link file %s" link-file))
+	(if (if maplev-include-file-other-window-flag
+		(not toggle)
+	      toggle)
+	    (find-file-other-window file)
+	  (find-file file))))))
+
 
 ;;}}}
 
