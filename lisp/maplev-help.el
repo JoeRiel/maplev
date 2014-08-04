@@ -479,6 +479,7 @@ The title is the phrase following the function name."
 	    (maplev--activate-hyperlinks (match-end 0) end)
 	    (setq end tmp)
 	    (goto-char end))
+	  (goto-char end)
 	  (when (re-search-backward "^See Also:?" nil 'move)
 	     (maplev--activate-hyperlinks (match-end 0) end))) 
 
