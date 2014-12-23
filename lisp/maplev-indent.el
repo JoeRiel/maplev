@@ -133,8 +133,10 @@ character position of the beginning of the change.  UNUSED is not used."
 (defconst maplev-indent-grammar-alist
 
   ;; Removed "in" from grammar to allow its use as a binary operator in Maple R8.
-  ;; The change in the indentation is minor; rarely is there a line break between
-  ;; an "in" and the "do" in a loop.
+  ;; Alas, this prevents properly indenting
+  ;; in iter do
+  ;;    ...
+  ;; end do;
 
   (let ((indent maplev-indent-level))
     (list
