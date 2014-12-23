@@ -10,6 +10,7 @@
 
 (eval-when-compile
   (defvar ffip-project-root)
+  (defvar ffip-patterns)
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
   (defvar maplev-executable-alist)
@@ -292,8 +293,9 @@ The line number begins at character position POS."
     (maplev-mint--goto-source-pos
      line 0
      (when (looking-at "\\s-+to\\s-+[0-9]+\\s-+of\\s-+\\(.*\\)")
-       (let ((file (match-string-no-properties 1))
-	     (project-files (ffip-project-files)))
+       (let* ((file (match-string-no-properties 1))
+	      (ffip-patterns '("*.mm" "*.mpl" ".mi"))
+	      (project-files (ffip-project-files)))
 	 (setq file (cdr (assoc file project-files)))
 	 (unless file
 	   (error "Cannot find source file %s" file))
