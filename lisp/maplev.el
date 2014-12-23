@@ -109,6 +109,7 @@
 
 (require 'abbrevlist)
 (require 'comint)
+(require 'find-file-in-project)
 ;; (require 'folding)
 (require 'font-lock)
 (require 'imenu)
@@ -162,6 +163,10 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
 (defvar maplev-completion-release nil
   "Maple release for which completion has been requested.")
 
+(defvar maplev-project-root nil
+  "Buffer-local variable assigned the root of the project.
+Used by mint-mode with ffip-project-files to locate the project files.")
+  
 
 ;;}}}
 ;;{{{ Syntax table
@@ -653,6 +658,7 @@ Maple libraries.
   (set (make-local-variable 'tab-width)               maplev-indent-level)
   (set (make-local-variable 'indent-tabs-mode)        nil)
   (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
+  (make-local-variable 'maplev-project-root)
 
   (ad-activate 'fixup-whitespace)
 
@@ -1868,7 +1874,7 @@ file if one was found, nil otherwise."
 	    (load config)
 	    config)
 	(error
-	 (message "An error occurred loading config file %s" config))))))
+	 (error "Problem loading config file %s: %s" config err))))))
 
 ;;}}}
 

@@ -9,12 +9,14 @@
 (require 'maplev-re)
 
 (eval-when-compile
+  (defvar ffip-project-root)
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
   (defvar maplev-executable-alist)
   (defvar maplev-include-path)
   (defvar maplev-mint-info-level)
   (defvar maplev-mint-start-options)
+  (defvar maplev-project-root)
   (defvar maplev-release)
   (defvar maplev-var-declaration-symbol)
   (defvar maplev-variable-spacing))
@@ -28,6 +30,7 @@
 (declare-function maplev-indent-newline "maplev")
 (declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-beginning-of-defun "maplev-common")
+(declare-function ffip-project-files "find-file-in-project")
 
 
 ;;{{{ customizable variables
@@ -114,7 +117,7 @@ This should probably be a list of directories."
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-mint-mode (code-buffer)
+(defun maplev-mint-mode (code-buffer project-root)
   "Major mode for displaying Mint output.
 CODE-BUFFER is the buffer that contains the source code.
 \\{maplev-mint-mode-map}"
@@ -125,6 +128,7 @@ CODE-BUFFER is the buffer that contains the source code.
         mode-name "Mint")
   (set-syntax-table maplev-mint-mode-syntax-table)
   (set (make-local-variable 'maplev-mint--code-buffer) code-buffer)
+  (set (make-local-variable 'ffip-project-root) project-root)
   (maplev-mint-fontify-buffer)
   (setq buffer-read-only t)
   (run-hooks 'maplev-mint-mode-hook))
@@ -266,13 +270,13 @@ declaration.  Return non-nil if this is a procedure, nil if an operator."
    ;; mint includedir.  Search for that file, using first the current
    ;; directory, then maplev-mint-include-dir.
    (when (looking-at "\\s-+to\\s-+\\(?:[0-9]+\\)\\s-+of\\s-+\\(.*\\)$")
-     (let* ((base (match-string 1))
+     (let* ((base (match-string-no-properties 1))
             (file (if (file-exists-p base)
                       base
                     (concat (file-name-as-directory maplev-mint-include-dir) base))))
-       (if (not (file-readable-p file))
-           (error (concat "File " file " does not exist or is unreadable"))
-         file))))
+       (if (file-readable-p file)
+	   file
+	 (error "File %s does not exist or is unreadable" file)))))
   ;; move to the end of the defun opening statement
   (re-search-forward ":=")
   (goto-char (maplev--scan-lists 1))
@@ -283,9 +287,17 @@ declaration.  Return non-nil if this is a procedure, nil if an operator."
 The line number begins at character position POS."
   (goto-char pos)
   (beginning-of-line)
-  (re-search-forward "line +\\([0-9]+\\)" (line-end-position))
-  (maplev-mint--goto-source-pos (1- (string-to-number (match-string 1))) 0))
-
+  (re-search-forward "lines? +\\([0-9]+\\)" (line-end-position))
+  (let ((line (1- (string-to-number (match-string 1)))))
+    (maplev-mint--goto-source-pos
+     line 0
+     (when (looking-at "\\s-+to\\s-+[0-9]+\\s-+of\\s-+\\(.*\\)")
+       (let ((file (match-string-no-properties 1))
+	     (project-files (ffip-project-files)))
+	 (setq file (cdr (assoc file project-files)))
+	 (unless file
+	   (error "Cannot find source file %s" file))
+	 file)))))
 
 (defun maplev--replace-string (string replace)
   "In STRING replace as specified by REPLACE.
@@ -343,7 +355,8 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
-    ("\\(on line +[0-9]+\\)" maplev-mint-note-face 'goto-line)
+    ("\\(on line +[0-9]+ .*\\)" maplev-mint-note-face 'goto-line)
+    ("\\(on lines +[0-9]+\\s-+to\\s-++[0-9]+\\s-+of\\s-+.*\\)" maplev-mint-note-face 'goto-line)
     ;; Could we make the following optional?
     ;; ("Global names used in this procedure:"
     ;;  1 maplev-mint-warning-face 'undecl-global t)
@@ -497,6 +510,7 @@ Return exit code of mint."
         (mint-buffer (concat "*Mint " maplev-release "*"))
         (mint (nth 2 (cdr (assoc maplev-release maplev-executable-alist))))
 	(include-path maplev-include-path)
+	(project-root maplev-project-root)
         status eoi lines errpos)
     ;; Allocate markers, unless they exist
     (unless maplev-mint--code-beginning
@@ -528,7 +542,7 @@ Return exit code of mint."
                           maplev-mint-start-options))
       (delete-region (point-min) eoi)
       ;; Display Mint output
-      (maplev-mint-mode code-buffer)
+      (maplev-mint-mode code-buffer project-root)
       (setq lines (if (= (buffer-size) 0)
                       0
                     (count-lines (point-min) (point-max))))

@@ -64,6 +64,7 @@ ELFLAGS	= --no-site-file \
 	  --eval "(progn \
 			(add-to-list (quote load-path) (expand-file-name \"./lisp\")) \
 			(add-to-list (quote load-path) \"$(LISP-DIR)\") \
+			(add-to-list (quote load-path) (expand-file-name \".emacs.d/el-get/find-file-in-project\" \"$(HOME)\")) \
 			(delete \"/usr/share/emacs/23.3/site-lisp/emacs-goodies-el\" load-path))"
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
