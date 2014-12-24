@@ -294,7 +294,7 @@ The line number begins at character position POS."
      line 0
      (when (looking-at "\\s-+to\\s-+[0-9]+\\s-+of\\s-+\\(.*\\)")
        (let* ((file (match-string-no-properties 1))
-	      (ffip-patterns '("*.mm" "*.mpl" ".mi"))
+	      (ffip-patterns '("*.mm" "*.mpl" "*.mi"))
 	      (project-files (ffip-project-files)))
 	 (setq file (cdr (assoc file project-files)))
 	 (unless file
