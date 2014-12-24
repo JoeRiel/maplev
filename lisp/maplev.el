@@ -1310,7 +1310,11 @@ otherwise use `maplev-tab-width'."
 
 (defconst maplev--reserved-words-17
   maplev--reserved-words-10
-  "List of reserved words for Maple 16.")
+  "List of reserved words for Maple 17.")
+
+(defconst maplev--reserved-words-2015
+  maplev--reserved-words-10
+  "List of reserved words for Maple 2015.")
 
 (defconst maplev--reserved-words-alist
   `((3 .  ,maplev--reserved-words-3)
@@ -1328,6 +1332,7 @@ otherwise use `maplev-tab-width'."
     (15 . ,maplev--reserved-words-15)
     (16 . ,maplev--reserved-words-16)
     (17 . ,maplev--reserved-words-17)
+    (2015 . ,maplev--reserved-words-2015)
    )
   "Alist of Maple reserved words.  The key is the major release.")
 
@@ -1491,6 +1496,9 @@ file (either < or \").  The second group matches the filename.")
 (defconst maplev--builtin-functions-17
   (append (remove "alias" '("NameSpace" "_local" "print_preprocess")) maplev--builtin-functions-16))
 
+(defconst maplev--builtin-functions-2015
+  (append '("localGridInterfaceRun" "wbOpen" "wbOpenURI") maplev--builtin-functions-17))
+
 (defconst maplev--builtin-functions-alist
   `((3  . ,maplev--builtin-functions-3)
     (4  . ,maplev--builtin-functions-4)
@@ -1507,7 +1515,8 @@ file (either < or \").  The second group matches the filename.")
     (15 . ,maplev--builtin-functions-15)
     (16 . ,maplev--builtin-functions-16)
     (17 . ,maplev--builtin-functions-17)
- "Alist of Maple builtin funtions. The key is the major release."))
+    (2015 . ,maplev--builtin-functions-2015))
+  "Alist of Maple builtin funtions. The key is the major release.")
 
 ;; (defconst maplev--builtin-functions-alist
 ;;  '((3 .  ("`$`"                                                                                                                                                                                                                             "ERROR"                                             "Im"                                                                                                                                            "RETURN" "Re"                                                                            "SearchText"                                                                                            "abs"       "addressof" "alias" "anames"                  "appendto" "array" "assemble" "assigned"                                            "callback" "cat" "coeff" "coeffs"             "convert"            "debugopts"                   "degree"         "diff" "disassemble" "divide"                    "entries" "eval" "evalb" "evalf" "`evalf/hypergeom`"                  "evalhf" "evaln" "expand"                              "frontend" "gc" "genpoly"                    "goto" "has" "hastype"           "icontent" "`if`" "igcd" "ilog10"                     "indets" "indices"         "intersect" "`int/series`"         "iquo" "irem"          "isqrt"                                   "lcoeff" "ldegree" "length" "lexorder"       "lprint" "macro" "map"        "max" "maxnorm" "member" "min" "`minus`"         "modp" "modp1"         "mods"                             "nops" "normal"         "numboccur" "numer" "op"        "order"                    "parse"             "pointto" "print" "printf" "protect"          "readlib" "readline"                                                                                                                                                                                                                                                                                                                          "searchtext" "select"                "seq" "series"                                   "sign" "sort" "sscanf" "ssystem"                       "subs"            "subsop" "substring" "system" "table" "taylor" "tcoeff" "time"             "traperror" "trunc" "type"             "unames"          "`union`" "unprotect" "userinfo" "words" "writeto"         ))
