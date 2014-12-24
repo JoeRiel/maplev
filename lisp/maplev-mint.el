@@ -143,7 +143,7 @@ If FILE is nil, use buffer `maplev-mint--code-buffer'.
 Pop up the buffer, move to either `point-min', if FILE is non-nil,
 or `maplev-mint--code-beginning' otherwise,
 and move forward L lines and C columns."
-  (pop-to-buffer (if file (find-file-noselect file)
+  (switch-to-buffer-other-window (if file (find-file-noselect file)
                    maplev-mint--code-buffer))
   (goto-char (if file (point-min)  maplev-mint--code-beginning))
   (if (> line 0) (forward-line line))
@@ -413,7 +413,7 @@ with `maplev-mint-variables-re'.")
 (defun maplev-mint-click (click)
   "Move point to CLICK."
   (interactive "e")
-  (set-buffer (window-buffer (event-window click)))
+  (set-buffer (window-buffer (select-window (event-window click))))
   (maplev-mint-handler (event-point click)))
 
 (defun maplev-mint-handler (pos)
