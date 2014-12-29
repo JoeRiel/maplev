@@ -265,19 +265,7 @@ declaration.  Return non-nil if this is a procedure, nil if an operator."
   (maplev-mint--goto-source-pos
    (1- (string-to-number (match-string 1)))
    0
-   ;; Optional file name, if applicable.
-   ;; If looking at something like " to 123 in filename", then
-   ;; the source is in filename, which is relative to the
-   ;; mint includedir.  Search for that file, using first the current
-   ;; directory, then maplev-mint-include-dir.
-   (when (looking-at "\\s-+to\\s-+\\(?:[0-9]+\\)\\s-+of\\s-+\\(.*\\)$")
-     (let* ((base (match-string-no-properties 1))
-            (file (if (file-exists-p base)
-                      base
-                    (concat (file-name-as-directory maplev-mint-include-dir) base))))
-       (if (file-readable-p file)
-	   file
-	 (error "File %s does not exist or is unreadable" file)))))
+   (maplev-mint-get-source-file))
   ;; move to the end of the defun opening statement
   (re-search-forward ":=")
   (goto-char (maplev--scan-lists 1))
@@ -288,18 +276,27 @@ declaration.  Return non-nil if this is a procedure, nil if an operator."
 The line number begins at character position POS."
   (goto-char pos)
   (beginning-of-line)
-  (re-search-forward "lines? +\\([0-9]+\\)" (line-end-position))
-  (let ((line (1- (string-to-number (match-string 1)))))
+  (let ((is_nested (looking-at "  ")))
+    (re-search-forward "line +\\([0-9]+\\)" (line-end-position))
+    (let ((line (1- (string-to-number (match-string 1)))))
     (maplev-mint--goto-source-pos
      line 0
-     (when (looking-at "\\s-+to\\s-+[0-9]+\\s-+of\\s-+\\(.*\\)")
-       (let* ((file (match-string-no-properties 1))
-	      (ffip-patterns '("*.mm" "*.mpl" "*.mi"))
-	      (project-files (ffip-project-files)))
-	 (setq file (cdr (assoc file project-files)))
-	 (unless file
-	   (error "Cannot find source file %s" file))
-	 file)))))
+     (when is_nested
+       (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
+       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
+       (maplev-mint-get-source-file))))))
+
+(defun maplev-mint-get-source-file ()
+  "Return the absolute path to the source file."
+  (when (looking-at "\\s-+to\\s-+[0-9]+\\s-+of\\s-+\\(.*\\)")
+    (let* ((file (match-string-no-properties 1))
+	   (ffip-patterns '("*.mm" "*.mpl" "*.mi"))
+	   (project-files (ffip-project-files)))
+      (let ((file-abs (cdr (assoc file project-files))))
+	(unless file-abs
+	  (error "Cannot find source file %s" file))
+	file-abs))))
+
 
 (defun maplev--replace-string (string replace)
   "In STRING replace as specified by REPLACE.
@@ -358,7 +355,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
     ("\\(on line +[0-9]+ .*\\)" maplev-mint-note-face 'goto-line)
-    ("\\(on lines +[0-9]+\\s-+to\\s-++[0-9]+\\s-+of\\s-+.*\\)" maplev-mint-note-face 'goto-line)
+   ; ("\\(on lines +[0-9]+\\s-+to\\s-++[0-9]+\\s-+of\\s-+.*\\)" maplev-mint-note-face 'goto-line)
     ;; Could we make the following optional?
     ;; ("Global names used in this procedure:"
     ;;  1 maplev-mint-warning-face 'undecl-global t)
