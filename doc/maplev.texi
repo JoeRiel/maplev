@@ -951,7 +951,7 @@ is @code{undecided-dos}.
 
 Mint mode is applied to mint's output buffer.  Warnings and errors are
 font locked and activated.  Moving the mouse pointer over active text
-highlights it; clicking it (@kbd{mouse-2}) either moves the cursor to
+highlights it; clicking it (@kbd{mouse-1}) either moves the cursor to
 the appropriate point in the source code or queries to automatically
 correct an error.
 
@@ -973,7 +973,7 @@ Scroll down (@code{scroll-down}).
 @item @key{SPC}
 Scroll up (@code{scroll-up}).
 
-@item mouse-2
+@item mouse-1
 Goto location in source, or fix error, depending on the active text.
 
 @end table

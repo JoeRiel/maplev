@@ -101,7 +101,7 @@ This should probably be a list of directories."
     (define-key map [?q]                          'quit-window)
     (define-key map [?s]                          'isearch-forward)
     (define-key map [?r]                          'isearch-backward)
-    (define-key map [(mouse-2)]                   'maplev-mint-click)
+    (define-key map [(mouse-1)]                   'maplev-mint-click)
     (define-key map [(control c) (control c)]     'maplev-mint-handler)
     (setq maplev-mint-mode-map map)))
 
