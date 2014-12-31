@@ -313,7 +313,8 @@ REPLACE is an alist with elements \(OLD . NEW\)."
   string)
 
 ;;}}}
-;;{{{ fontify
+ ;;{{{ fontify
+
 
 (defcustom maplev-mint-proc-face 'font-lock-function-name-face
   "Face name for procedure names in a Mint buffer."
@@ -339,6 +340,12 @@ REPLACE is an alist with elements \(OLD . NEW\)."
   :group 'maplev-faces
   :group 'maplev-mint)
 
+(defcustom maplev-mint-link-face 'link
+  "Face name for links in a Mint buffer."
+  :type 'face
+  :group 'maplev-faces
+  :group 'maplev-mint)
+
 (defconst maplev-mint-variables-re
   "[ \t\n]*\\(\\(.*,[ \t]*\n\\)*.*\\)[ \t]*$"
   "Regexp used to match the argument list of procedures in Mint output.")
@@ -346,15 +353,15 @@ REPLACE is an alist with elements \(OLD . NEW\)."
 (defconst maplev-mint-fontify-alist
   '(("\\(^on line[ \t]*[0-9]+:\\)" maplev-mint-note-face)
     ("^[ \t]*\\(\\^.*$\\)" maplev-mint-error-face 'error)
-    ("^\\(?:Nested \\)?\\(?:Procedure\\|Operator\\|Module\\)[ ]*\\([^(]*\\)" maplev-mint-proc-face 'proc)
-    ("^\\(?:Nested \\)?Anonymous \\(?:Procedure\\|Operator\\)[ ]*\\(proc([^)]*)\\)" maplev-mint-proc-face 'proc)
+    ("^\\(?:Nested \\)?\\(?:Procedure\\|Operator\\|Module\\)[ ]*\\([^(]*\\)" maplev-mint-link-face 'proc)
+    ("^\\(?:Nested \\)?Anonymous \\(?:Procedure\\|Operator\\)[ ]*\\(proc([^)]*)\\)" maplev-mint-link-face 'proc)
     ("These parameters were never used\\(?: explicitly\\)?:" maplev-mint-warning-face 'unused-arg t)
     ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
     ("These local variables were not declared explicitly:" maplev-mint-warning-face 'undecl-local t)
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
-    ("\\(on line +[0-9]+ .*\\)" maplev-mint-note-face 'goto-line)
+    ("\\(on line +[0-9]+ .*\\)" maplev-mint-link-face 'goto-line)
    ; ("\\(on lines +[0-9]+\\s-+to\\s-++[0-9]+\\s-+of\\s-+.*\\)" maplev-mint-note-face 'goto-line)
     ;; Could we make the following optional?
     ;; ("Global names used in this procedure:"
