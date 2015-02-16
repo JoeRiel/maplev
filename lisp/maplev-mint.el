@@ -259,13 +259,14 @@ declaration.  Return non-nil if this is a procedure, nil if an operator."
 
   ;; find the line number of the source buffer at which the defun starts
   (goto-char pos)
-  (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
-  (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
-  ;; move point to the beginning of that line in the source
-  (maplev-mint--goto-source-pos
-   (1- (string-to-number (match-string 1)))
-   0
-   (maplev-mint-get-source-file))
+  (let (line file)
+    (save-excursion
+      (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
+      (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
+      (setq line (1- (string-to-number (match-string-no-properties 1)))
+	    file (maplev-mint-get-source-file)))
+    ;; move point to the beginning of that line in the source
+    (maplev-mint--goto-source-pos line 0 file))
   ;; move to the end of the defun opening statement
   (re-search-forward ":=")
   (goto-char (maplev--scan-lists 1))
@@ -281,15 +282,15 @@ The line number begins at character position POS."
     (let ((line (1- (string-to-number (match-string 1)))))
     (maplev-mint--goto-source-pos
      line 0
-     (when is_nested
-       (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
-       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
+     (and
+       (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)" nil t)
+       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)" nil t)
        (maplev-mint-get-source-file))))))
 
 (defun maplev-mint-get-source-file ()
   "Return the absolute path to the source file."
-  (when (looking-at "\\s-+to\\s-+[0-9]+\\s-+of\\s-+\\(.*\\)")
-    (let* ((file (match-string-no-properties 1))
+  (when (looking-at "\\s-+\\(to\\s-+[0-9]+\\s-+\\)?of\\s-+\\(.*\\)")
+    (let* ((file (match-string-no-properties 2))
 	   (ffip-patterns '("*.mm" "*.mpl" "*.mi"))
 	   (project-files (ffip-project-files)))
       (let ((file-abs (cdr (assoc file project-files))))
@@ -313,7 +314,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
   string)
 
 ;;}}}
- ;;{{{ fontify
+;;{{{ fontify
 
 
 (defcustom maplev-mint-proc-face 'font-lock-function-name-face
@@ -361,7 +362,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
-    ("\\(on line +[0-9]+ .*\\)" maplev-mint-link-face 'goto-line)
+    ("\\(on line +[0-9]+\\)" maplev-mint-link-face 'goto-line)
    ; ("\\(on lines +[0-9]+\\s-+to\\s-++[0-9]+\\s-+of\\s-+.*\\)" maplev-mint-note-face 'goto-line)
     ;; Could we make the following optional?
     ;; ("Global names used in this procedure:"
@@ -569,8 +570,9 @@ Return exit code of mint."
           (setq errpos (maplev-mint--goto-error (point)))))
     ;; If there is an error in the maple source and a window displays it,
     ;; move point in this window
-    (if (and code-window errpos)
-        (set-window-point code-window errpos))
+    (when (and code-window errpos)
+      (set-window-point code-window errpos)
+      (switch-to-buffer-other-window mint-buffer))
     status))
 
 (defun maplev-mint-buffer ()
