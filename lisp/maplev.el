@@ -109,7 +109,6 @@
 
 (require 'abbrevlist)
 (require 'comint)
-(require 'find-file-in-project)
 ;; (require 'folding)
 (require 'font-lock)
 (require 'imenu)
