@@ -415,6 +415,12 @@ with `maplev-mint-variables-re'.")
 ;;}}}
 ;;{{{ interactive functions
 
+(defun maplev-mint-query (form &rest vars)
+  "Return t if correction suggested by mint should be made.
+FORM and VARS are used for `y-or-n-p' query."
+  (or (not maplev-mint-query)
+      (y-or-n-p (apply 'format form vars))))
+
 (defun maplev-mint-click (click)
   "Move point to CLICK."
   (interactive "e")
@@ -497,12 +503,6 @@ When called interactively, POS is position where point is."
            ((equal prop 'goto-line)
             (maplev-mint--goto-source-line pos))
            )))))
-
-(defun maplev-mint-query (form &rest vars)
-  "Return t if correction suggested by mint should be made.
-FORM and VARS are used for `y-or-n-p' query."
-  (or (not maplev-mint-query)
-      (y-or-n-p (apply 'format form vars))))
 
 ;;}}}
 ;;{{{ regions
