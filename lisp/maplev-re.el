@@ -140,6 +140,11 @@ including double-quotes.")
 This is intended to be assigned to an element of `compilation-error-regexp-alist-alist'.
 The first group matches the line number, the second group the file name.")
 
+(defconst maplev--link-re
+  "^#LINK\\s-+\\([^ \t\n]+*\\)"
+  "Regular expression that matches a link statement.
+The first group is the linked file.")
+
 (provide 'maplev-re)
 
 ;;; maplev-re.el ends here

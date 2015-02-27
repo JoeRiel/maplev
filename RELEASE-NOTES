@@ -1,5 +1,12 @@
 -*- org -*-
 
+* 2.30
+** add parsing of #LINK prefix in maple source files
+** fix hyperlinking in "See Also" section
+** add Maple 2015 entry in tables
+** bind mouse-1 to mint-output buffer clicks (was mouse-2)
+** improve handling of mint-output buffer
+** make maplev-get-tab-width-function a nil variable that the user can assign a procedure
 * 2.29
 ** Add maplev-add-maple-to-compilation function
 ** Change the way global/local/exports are indented (options available)

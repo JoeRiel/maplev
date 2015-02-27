@@ -1,4 +1,4 @@
-VERSION 2.29
+VERSION 2.30
 
 This package provides Emacs modes for developing Maple code.
 Maple is computer algebra system sold by [Waterloo Maple Inc.](http://www.maplesoft.com).

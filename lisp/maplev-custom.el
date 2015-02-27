@@ -177,10 +177,12 @@ Overrides `maplev-default-init-string'."
                  (const :tag "full report" 4))
   :group 'maplev-mint)
 
-(defcustom maplev-mint-start-options (list "-q")
+(defcustom maplev-mint-start-options (list "-q" "-w 200")
   "List of mint command line options.
 Do not include the info level or the include path,
-they are handled by `maplev-mint-info-level' and `maplev-include-path'."
+they are handled by `maplev-mint-info-level' and `maplev-include-path'.
+The line-width option (-w) is used to ensure that a reference to 
+an included file appears on a single line."
   :type 'list
   ;;   :type '(repeat (choice (const :tag "no logo" " -q")
   ;;                       (const :tag "suppress startup" " -s")

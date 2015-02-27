@@ -9,12 +9,15 @@
 (require 'maplev-re)
 
 (eval-when-compile
+  (defvar ffip-project-root)
+  (defvar ffip-patterns)
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
   (defvar maplev-executable-alist)
   (defvar maplev-include-path)
   (defvar maplev-mint-info-level)
   (defvar maplev-mint-start-options)
+  (defvar maplev-project-root)
   (defvar maplev-release)
   (defvar maplev-var-declaration-symbol)
   (defvar maplev-variable-spacing))
@@ -28,6 +31,7 @@
 (declare-function maplev-indent-newline "maplev")
 (declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-beginning-of-defun "maplev-common")
+(declare-function ffip-project-files "find-file-in-project")
 
 
 ;;{{{ customizable variables
@@ -97,7 +101,7 @@ This should probably be a list of directories."
     (define-key map [?q]                          'quit-window)
     (define-key map [?s]                          'isearch-forward)
     (define-key map [?r]                          'isearch-backward)
-    (define-key map [(mouse-2)]                   'maplev-mint-click)
+    (define-key map [(mouse-1)]                   'maplev-mint-click)
     (define-key map [(control c) (control c)]     'maplev-mint-handler)
     (setq maplev-mint-mode-map map)))
 
@@ -114,7 +118,7 @@ This should probably be a list of directories."
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-mint-mode (code-buffer)
+(defun maplev-mint-mode (code-buffer project-root)
   "Major mode for displaying Mint output.
 CODE-BUFFER is the buffer that contains the source code.
 \\{maplev-mint-mode-map}"
@@ -125,6 +129,7 @@ CODE-BUFFER is the buffer that contains the source code.
         mode-name "Mint")
   (set-syntax-table maplev-mint-mode-syntax-table)
   (set (make-local-variable 'maplev-mint--code-buffer) code-buffer)
+  (set (make-local-variable 'ffip-project-root) project-root)
   (maplev-mint-fontify-buffer)
   (setq buffer-read-only t)
   (run-hooks 'maplev-mint-mode-hook))
@@ -138,7 +143,7 @@ If FILE is nil, use buffer `maplev-mint--code-buffer'.
 Pop up the buffer, move to either `point-min', if FILE is non-nil,
 or `maplev-mint--code-beginning' otherwise,
 and move forward L lines and C columns."
-  (pop-to-buffer (if file (find-file-noselect file)
+  (switch-to-buffer-other-window (if file (find-file-noselect file)
                    maplev-mint--code-buffer))
   (goto-char (if file (point-min)  maplev-mint--code-beginning))
   (if (> line 0) (forward-line line))
@@ -254,25 +259,14 @@ declaration.  Return non-nil if this is a procedure, nil if an operator."
 
   ;; find the line number of the source buffer at which the defun starts
   (goto-char pos)
-  (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
-  (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
-  ;; move point to the beginning of that line in the source
-  (maplev-mint--goto-source-pos
-   (1- (string-to-number (match-string 1)))
-   0
-   ;; Optional file name, if applicable.
-   ;; If looking at something like " to 123 in filename", then
-   ;; the source is in filename, which is relative to the
-   ;; mint includedir.  Search for that file, using first the current
-   ;; directory, then maplev-mint-include-dir.
-   (when (looking-at "\\s-+to\\s-+\\(?:[0-9]+\\)\\s-+of\\s-+\\(.*\\)$")
-     (let* ((base (match-string 1))
-            (file (if (file-exists-p base)
-                      base
-                    (concat (file-name-as-directory maplev-mint-include-dir) base))))
-       (if (not (file-readable-p file))
-           (error (concat "File " file " does not exist or is unreadable"))
-         file))))
+  (let (line file)
+    (save-excursion
+      (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
+      (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
+      (setq line (1- (string-to-number (match-string-no-properties 1)))
+	    file (maplev-mint-get-source-file)))
+    ;; move point to the beginning of that line in the source
+    (maplev-mint--goto-source-pos line 0 file))
   ;; move to the end of the defun opening statement
   (re-search-forward ":=")
   (goto-char (maplev--scan-lists 1))
@@ -283,8 +277,26 @@ declaration.  Return non-nil if this is a procedure, nil if an operator."
 The line number begins at character position POS."
   (goto-char pos)
   (beginning-of-line)
-  (re-search-forward "line +\\([0-9]+\\)" (line-end-position))
-  (maplev-mint--goto-source-pos (1- (string-to-number (match-string 1))) 0))
+  (let ((is_nested (looking-at "  ")))
+    (re-search-forward "line +\\([0-9]+\\)" (line-end-position))
+    (let ((line (1- (string-to-number (match-string 1)))))
+    (maplev-mint--goto-source-pos
+     line 0
+     (and
+       (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)" nil t)
+       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)" nil t)
+       (maplev-mint-get-source-file))))))
+
+(defun maplev-mint-get-source-file ()
+  "Return the absolute path to the source file."
+  (when (looking-at "\\s-+\\(to\\s-+[0-9]+\\s-+\\)?of\\s-+\\(.*\\)")
+    (let* ((file (match-string-no-properties 2))
+	   (ffip-patterns '("*.mm" "*.mpl" "*.mi"))
+	   (project-files (ffip-project-files)))
+      (let ((file-abs (cdr (assoc file project-files))))
+	(unless file-abs
+	  (error "Cannot find source file %s" file))
+	file-abs))))
 
 
 (defun maplev--replace-string (string replace)
@@ -303,6 +315,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
 
 ;;}}}
 ;;{{{ fontify
+
 
 (defcustom maplev-mint-proc-face 'font-lock-function-name-face
   "Face name for procedure names in a Mint buffer."
@@ -328,6 +341,12 @@ REPLACE is an alist with elements \(OLD . NEW\)."
   :group 'maplev-faces
   :group 'maplev-mint)
 
+(defcustom maplev-mint-link-face 'link
+  "Face name for links in a Mint buffer."
+  :type 'face
+  :group 'maplev-faces
+  :group 'maplev-mint)
+
 (defconst maplev-mint-variables-re
   "[ \t\n]*\\(\\(.*,[ \t]*\n\\)*.*\\)[ \t]*$"
   "Regexp used to match the argument list of procedures in Mint output.")
@@ -335,15 +354,16 @@ REPLACE is an alist with elements \(OLD . NEW\)."
 (defconst maplev-mint-fontify-alist
   '(("\\(^on line[ \t]*[0-9]+:\\)" maplev-mint-note-face)
     ("^[ \t]*\\(\\^.*$\\)" maplev-mint-error-face 'error)
-    ("^\\(?:Nested \\)?\\(?:Procedure\\|Operator\\|Module\\)[ ]*\\([^(]*\\)" maplev-mint-proc-face 'proc)
-    ("^\\(?:Nested \\)?Anonymous \\(?:Procedure\\|Operator\\)[ ]*\\(proc([^)]*)\\)" maplev-mint-proc-face 'proc)
+    ("^\\(?:Nested \\)?\\(?:Procedure\\|Operator\\|Module\\)[ ]*\\([^(]*\\)" maplev-mint-link-face 'proc)
+    ("^\\(?:Nested \\)?Anonymous \\(?:Procedure\\|Operator\\)[ ]*\\(proc([^)]*)\\)" maplev-mint-link-face 'proc)
     ("These parameters were never used\\(?: explicitly\\)?:" maplev-mint-warning-face 'unused-arg t)
     ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
     ("These local variables were not declared explicitly:" maplev-mint-warning-face 'undecl-local t)
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
-    ("\\(on line +[0-9]+\\)" maplev-mint-note-face 'goto-line)
+    ("\\(on line +[0-9]+\\)" maplev-mint-link-face 'goto-line)
+   ; ("\\(on lines +[0-9]+\\s-+to\\s-++[0-9]+\\s-+of\\s-+.*\\)" maplev-mint-note-face 'goto-line)
     ;; Could we make the following optional?
     ;; ("Global names used in this procedure:"
     ;;  1 maplev-mint-warning-face 'undecl-global t)
@@ -395,10 +415,16 @@ with `maplev-mint-variables-re'.")
 ;;}}}
 ;;{{{ interactive functions
 
+(defun maplev-mint-query (form &rest vars)
+  "Return t if correction suggested by mint should be made.
+FORM and VARS are used for `y-or-n-p' query."
+  (or (not maplev-mint-query)
+      (y-or-n-p (apply 'format form vars))))
+
 (defun maplev-mint-click (click)
   "Move point to CLICK."
   (interactive "e")
-  (set-buffer (window-buffer (event-window click)))
+  (set-buffer (window-buffer (select-window (event-window click))))
   (maplev-mint-handler (event-point click)))
 
 (defun maplev-mint-handler (pos)
@@ -478,12 +504,6 @@ When called interactively, POS is position where point is."
             (maplev-mint--goto-source-line pos))
            )))))
 
-(defun maplev-mint-query (form &rest vars)
-  "Return t if correction suggested by mint should be made.
-FORM and VARS are used for `y-or-n-p' query."
-  (or (not maplev-mint-query)
-      (y-or-n-p (apply 'format form vars))))
-
 ;;}}}
 ;;{{{ regions
 
@@ -497,6 +517,7 @@ Return exit code of mint."
         (mint-buffer (concat "*Mint " maplev-release "*"))
         (mint (nth 2 (cdr (assoc maplev-release maplev-executable-alist))))
 	(include-path maplev-include-path)
+	(project-root maplev-project-root)
         status eoi lines errpos)
     ;; Allocate markers, unless they exist
     (unless maplev-mint--code-beginning
@@ -528,7 +549,7 @@ Return exit code of mint."
                           maplev-mint-start-options))
       (delete-region (point-min) eoi)
       ;; Display Mint output
-      (maplev-mint-mode code-buffer)
+      (maplev-mint-mode code-buffer project-root)
       (setq lines (if (= (buffer-size) 0)
                       0
                     (count-lines (point-min) (point-max))))
@@ -549,8 +570,9 @@ Return exit code of mint."
           (setq errpos (maplev-mint--goto-error (point)))))
     ;; If there is an error in the maple source and a window displays it,
     ;; move point in this window
-    (if (and code-window errpos)
-        (set-window-point code-window errpos))
+    (when (and code-window errpos)
+      (set-window-point code-window errpos)
+      (switch-to-buffer-other-window mint-buffer))
     status))
 
 (defun maplev-mint-buffer ()

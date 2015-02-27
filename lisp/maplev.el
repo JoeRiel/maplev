@@ -6,7 +6,7 @@
 ;; Authors:    Joseph S. Riel <joer@san.rr.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    2.29
+;; Version:    2.30
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -128,7 +128,7 @@
 
 ;;{{{ Information
 
-(defconst maplev-version "2.29" "Version of MapleV mode.")
+(defconst maplev-version "2.30" "Version of MapleV mode.")
 
 (defconst maplev-developer
   "Joseph S. Riel <joer@san.rr.com>"
@@ -162,6 +162,10 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
 (defvar maplev-completion-release nil
   "Maple release for which completion has been requested.")
 
+(defvar maplev-project-root nil
+  "Buffer-local variable assigned the root of the project.
+Used by mint-mode with ffip-project-files to locate the project files.")
+  
 
 ;;}}}
 ;;{{{ Syntax table
@@ -653,6 +657,7 @@ Maple libraries.
   (set (make-local-variable 'tab-width)               maplev-indent-level)
   (set (make-local-variable 'indent-tabs-mode)        nil)
   (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
+  (make-local-variable 'maplev-project-root)
 
   (ad-activate 'fixup-whitespace)
 
@@ -713,7 +718,10 @@ Maple libraries.
   ;;(make-local-hook 'hack-local-variables-hook)
   (add-hook 'hack-local-variables-hook 'maplev-mode-name nil t)
 
-  (if maplev-buttonize-includes-flag (maplev-buttonize-includes))
+  (when maplev-buttonize-includes-flag
+    (maplev-buttonize-includes)
+    (maplev-buttonize-links))
+
   (if maplev-load-config-file-flag (maplev-load-config-file))
 
   ;; Set hooks
@@ -1205,7 +1213,10 @@ moved to be before it."
 
 ;;}}}
 
-(declare-function maplev-get-tab-width-function)
+(defvar maplev-get-tab-width-function nil
+  "Use this to modify the tab-width used by maplev on a file based.
+If assigned it is passed the name of the file and should return
+the desired tab-with.")
 
 (defun maplev-set-tab-width (&optional file)
   "Return the value of tab-width required by optional FILE, or if nil,
@@ -1213,7 +1224,7 @@ the file name given be `buffer-file-name'.  If the function
 `maplev-get-tab-width-function' is assigned, call it with FILE,
 otherwise use `maplev-tab-width'."
   (setq tab-width (if (functionp 'maplev-get-tab-width-function)
-		      (maplev-get-tab-width-function (or file (buffer-file-name)))
+		      (funcall maplev-get-tab-width-function (or file (buffer-file-name)))
 		    maplev-tab-width)))
 
 ;;{{{ Font lock
@@ -1301,7 +1312,11 @@ otherwise use `maplev-tab-width'."
 
 (defconst maplev--reserved-words-17
   maplev--reserved-words-10
-  "List of reserved words for Maple 16.")
+  "List of reserved words for Maple 17.")
+
+(defconst maplev--reserved-words-2015
+  maplev--reserved-words-10
+  "List of reserved words for Maple 2015.")
 
 (defconst maplev--reserved-words-alist
   `((3 .  ,maplev--reserved-words-3)
@@ -1319,6 +1334,7 @@ otherwise use `maplev-tab-width'."
     (15 . ,maplev--reserved-words-15)
     (16 . ,maplev--reserved-words-16)
     (17 . ,maplev--reserved-words-17)
+    (2015 . ,maplev--reserved-words-2015)
    )
   "Alist of Maple reserved words.  The key is the major release.")
 
@@ -1372,7 +1388,7 @@ otherwise use `maplev-tab-width'."
   "Regex of preprocessor directives.")
 
 (defconst maplev--include-directive-re
-  "^\\(?:## \\)?\\$include\\s-+\\([<\"]\\)\\(.*\\)[>\"]"
+  "^\\(?:## \\)?\\$include\\s-*\\([<\"]\\)\\(.*\\)[>\"]"
   "Regex of an include directive.
 The first group matches the character used to delimit the
 file (either < or \").  The second group matches the filename.")
@@ -1482,6 +1498,9 @@ file (either < or \").  The second group matches the filename.")
 (defconst maplev--builtin-functions-17
   (append (remove "alias" '("NameSpace" "_local" "print_preprocess")) maplev--builtin-functions-16))
 
+(defconst maplev--builtin-functions-2015
+  (append '("localGridInterfaceRun" "wbOpen" "wbOpenURI") maplev--builtin-functions-17))
+
 (defconst maplev--builtin-functions-alist
   `((3  . ,maplev--builtin-functions-3)
     (4  . ,maplev--builtin-functions-4)
@@ -1498,7 +1517,8 @@ file (either < or \").  The second group matches the filename.")
     (15 . ,maplev--builtin-functions-15)
     (16 . ,maplev--builtin-functions-16)
     (17 . ,maplev--builtin-functions-17)
- "Alist of Maple builtin funtions. The key is the major release."))
+    (2015 . ,maplev--builtin-functions-2015))
+  "Alist of Maple builtin funtions. The key is the major release.")
 
 ;; (defconst maplev--builtin-functions-alist
 ;;  '((3 .  ("`$`"                                                                                                                                                                                                                             "ERROR"                                             "Im"                                                                                                                                            "RETURN" "Re"                                                                            "SearchText"                                                                                            "abs"       "addressof" "alias" "anames"                  "appendto" "array" "assemble" "assigned"                                            "callback" "cat" "coeff" "coeffs"             "convert"            "debugopts"                   "degree"         "diff" "disassemble" "divide"                    "entries" "eval" "evalb" "evalf" "`evalf/hypergeom`"                  "evalhf" "evaln" "expand"                              "frontend" "gc" "genpoly"                    "goto" "has" "hastype"           "icontent" "`if`" "igcd" "ilog10"                     "indets" "indices"         "intersect" "`int/series`"         "iquo" "irem"          "isqrt"                                   "lcoeff" "ldegree" "length" "lexorder"       "lprint" "macro" "map"        "max" "maxnorm" "member" "min" "`minus`"         "modp" "modp1"         "mods"                             "nops" "normal"         "numboccur" "numer" "op"        "order"                    "parse"             "pointto" "print" "printf" "protect"          "readlib" "readline"                                                                                                                                                                                                                                                                                                                          "searchtext" "select"                "seq" "series"                                   "sign" "sort" "sscanf" "ssystem"                       "subs"            "subsop" "substring" "system" "table" "taylor" "tcoeff" "time"             "traperror" "trunc" "type"             "unames"          "`union`" "unprotect" "userinfo" "words" "writeto"         ))
@@ -1718,7 +1738,7 @@ If nil then `font-lock-maximum-decoration' selects the level."
 			  :face-policy 'prepend
 			  :grouping 2
 			  :keyboard-binding "C-c C-o"
-			  :help-text "open file"))
+			  :help-text "open file ([C-u] C-c C-o)"))
 
 (defun maplev-find-include-file-at-point (toggle)
   "Open the include file at point.
@@ -1736,10 +1756,15 @@ directory exists, query user to create the file."
     (let* ((inc-file (match-string-no-properties 2))
 	   (path maplev-include-path)
 	   (inc-first (string= "<" (match-string-no-properties 1)))
+	   (other-window-flag (if maplev-include-file-other-window-flag
+				  (not toggle)
+				toggle))
 	   file)
       (setq file (maplev-find-include-file inc-file inc-first path))
       (if file
-	  (find-file-other-window file)
+	  (if other-window-flag
+	      (find-file-other-window file )
+	    (find-file file))
 	;; file does not exist.  If suitable location can be found from include path,
 	;; query to create
 	(let ((base (file-name-nondirectory inc-file))
@@ -1750,9 +1775,7 @@ directory exists, query user to create the file."
 	    (error "Include file %s does not exist " inc-file)
 	  (if (yes-or-no-p (format "Create include file %s "
 				   (setq file (concat file base))))
-	      (if (if maplev-include-file-other-window-flag
-		      (not toggle)
-		    toggle)
+	      (if other-window-flag
 		  (find-file-other-window file)
 		(find-file file)))))))))
 	  
@@ -1810,20 +1833,59 @@ nil."
   'face 'maplev-include-file)
 
 ;;}}}
+;;{{{ Links
+
+(defun maplev-buttonize-links ()
+  "Buttonize the link statements."
+  (button-lock-mode t)
+  (button-lock-set-button maplev--link-re
+			  'maplev-find-link-file-at-point
+			  :face 'link
+			  :face-policy 'prepend
+			  :grouping 1
+			  :keyboard-binding "C-c C-o"
+			  :help-text "open file"))
+
+(defun maplev-find-link-file-at-point (toggle)
+  "Open the maplev link file at point.
+If found, the file is opened in the current window, or the other
+window, depending on the exclusive-or of
+`maplev-include-file-other-window-flag' and TOGGLE."
+  (interactive "P")
+  (unless (eolp)
+    (save-excursion
+      (beginning-of-line)
+      (unless (looking-at maplev--link-re)
+	(error "Not at a link statement"))
+      (let* ((link-file (match-string-no-properties 1))
+	     (file (and (file-exists-p link-file) (expand-file-name link-file))))
+	(unless file
+	  (error "Cannot find link file %s" link-file))
+	(if (if maplev-include-file-other-window-flag
+		(not toggle)
+	      toggle)
+	    (find-file-other-window file)
+	  (find-file file))))))
+
+
+;;}}}
 
 ;;{{{ Config file (.maplev)
 
 (defun maplev-load-config-file ()
   "Find and load the maplev configuration file.
 The file is named .maplev and is searched for in the current
-directory and its ancestors.  Return t if configuration file was
-loaded, nil otherwise."
+directory and its ancestors.  Return the path to the configuration
+file if one was found, nil otherwise."
+  (interactive)
   (let ((config (maplev-include--find-file-up-path ".maplev")))
     (when config
       (condition-case err
-	  (load config)
+	  (progn 
+	    (load config)
+	    config)
 	(error
-	 (message "An error occurred loading config file %s" config))))))
+	 (error "Problem loading config file %s: %s" config err))))))
 
 ;;}}}
 
