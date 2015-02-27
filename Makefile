@@ -17,7 +17,7 @@ TEXI2HTML := makeinfo --html --number-sections
 TEXI2PDF := texi2pdf
 
 BROWSER := x-www-browser
-CP := cp --archive
+CP := cp --archive --verbose
 PDFVIEWER := xpdf
 INFO := info
 INFOVIEWER := info
