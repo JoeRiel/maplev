@@ -1213,7 +1213,10 @@ moved to be before it."
 
 ;;}}}
 
-(declare-function maplev-get-tab-width-function)
+(defvar maplev-get-tab-width-function nil
+  "Use this to modify the tab-width used by maplev on a file based.
+If assigned it is passed the name of the file and should return
+the desired tab-with.")
 
 (defun maplev-set-tab-width (&optional file)
   "Return the value of tab-width required by optional FILE, or if nil,
@@ -1221,7 +1224,7 @@ the file name given be `buffer-file-name'.  If the function
 `maplev-get-tab-width-function' is assigned, call it with FILE,
 otherwise use `maplev-tab-width'."
   (setq tab-width (if (functionp 'maplev-get-tab-width-function)
-		      (maplev-get-tab-width-function (or file (buffer-file-name)))
+		      (funcall maplev-get-tab-width-function (or file (buffer-file-name)))
 		    maplev-tab-width)))
 
 ;;{{{ Font lock
