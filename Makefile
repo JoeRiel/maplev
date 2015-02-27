@@ -17,9 +17,10 @@ TEXI2HTML := makeinfo --html --number-sections
 TEXI2PDF := texi2pdf
 
 BROWSER := x-www-browser
-CP := cp --archive
+CP := cp --archive --verbose
 PDFVIEWER := xpdf
 INFO := info
+INFOVIEWER := info
 
 # }}}
 # {{{ Directories
@@ -63,6 +64,7 @@ ELFLAGS	= --no-site-file \
 	  --eval "(progn \
 			(add-to-list (quote load-path) (expand-file-name \"./lisp\")) \
 			(add-to-list (quote load-path) \"$(LISP-DIR)\") \
+			(add-to-list (quote load-path) (expand-file-name \".emacs.d/el-get/find-file-in-project\" \"$(HOME)\")) \
 			(delete \"/usr/share/emacs/23.3/site-lisp/emacs-goodies-el\" load-path))"
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
@@ -154,7 +156,7 @@ p: doc/$(PKG).pdf
 
 # preview info
 i: $(call print-help,i,	Preview the info)
-i: doc/$(PKG)
+i: doc/$(PKG).info
 	$(INFOVIEWER) $<
 
 # preview html
