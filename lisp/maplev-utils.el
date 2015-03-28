@@ -8,6 +8,7 @@
 ;;; Code:
 
 (require 'maplev-re)
+(require 'compile)
 
 (eval-when-compile
   (defvar mouse-selection-click-count)

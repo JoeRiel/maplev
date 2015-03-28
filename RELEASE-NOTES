@@ -1,5 +1,7 @@
 -*- org -*-
 
+* 2.31
+  * Fix compile issue with Emacs 24
 * 2.30
 ** add parsing of #LINK prefix in maple source files
 ** fix hyperlinking in "See Also" section

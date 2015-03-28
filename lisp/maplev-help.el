@@ -158,7 +158,8 @@ Interactively, default is word point is on."
 
 (defun maplev-help-show-topic (topic &optional hide)
   "Display Maple help for TOPIC \(a string\).
-Push TOPIC onto the local stack, unless it is already on the top."
+Push TOPIC onto the local stack, unless it is already on the top.
+If HIDE is non-nil, do not bring buffer to front."
   (unless
       (and maplev-help-use-standard-flag
 	   (maplev-help-standard-help topic))
