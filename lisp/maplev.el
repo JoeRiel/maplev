@@ -1,9 +1,8 @@
 ;;; maplev.el --- Maple mode for GNU Emacs
 ;;
-;;
-;; Copyright (C) 2001,2003,2008,2009 Joseph S. Riel
+;; Copyright (C) 2001,2003,2008,2009,2015 Joseph S. Riel
 
-;; Authors:    Joseph S. Riel <joer@san.rr.com>
+;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
 ;; Version:    2.31
@@ -131,14 +130,14 @@
 (defconst maplev-version "2.31" "Version of MapleV mode.")
 
 (defconst maplev-developer
-  "Joseph S. Riel <joer@san.rr.com>"
-  "Developers/maintainers of `maplev-mode'.")
+  "Joseph S. Riel <jriel@maplesoft.com>"
+  "Developer/maintainer of `maplev-mode'.")
 
 (defun maplev-about ()
   "Print information for `maplev-mode'."
   (interactive)
   (sit-for 0)
-  (message "maplev-mode version %s, (C) %s" maplev-version maplev-developer))
+  (message "maplev-mode version %s (C) %s" maplev-version maplev-developer))
 
 ;;}}}
 
@@ -1209,10 +1208,12 @@ moved to be before it."
 
 ;;}}}
 
+;;{{{ tab-width
+
 (defvar maplev-get-tab-width-function nil
-  "Use this to modify the tab-width used by maplev on a file based.
+  "Use this to modify the tab-width used by maplev on a per-file basis.
 If assigned it is passed the name of the file and should return
-the desired tab-with.")
+the desired tab-width.")
 
 (defun maplev-set-tab-width (&optional file)
   "Return the value of tab-width required by optional FILE, or if nil,
@@ -1222,6 +1223,8 @@ otherwise use `maplev-tab-width'."
   (setq tab-width (if (functionp 'maplev-get-tab-width-function)
 		      (funcall maplev-get-tab-width-function (or file (buffer-file-name)))
 		    maplev-tab-width)))
+
+;;}}}
 
 ;;{{{ Font lock
 
