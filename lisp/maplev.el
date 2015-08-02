@@ -1243,106 +1243,26 @@ otherwise use `maplev-tab-width'."
 
 ;;{{{   reserved words
 
-(defconst maplev--reserved-words-3
-  '("and"  "by"   "do"        "done"   "elif"
-    "else" "end"  "fi"        "for"    "from"
-    "if"   "in"   "intersect" "local"  "minus"
-    "mod"  "not"  "od"        "option" "options"
-    "or"   "proc" "quit"      "read"   "save"
-    "stop" "then" "to"        "union"  "while"
-    "description" "local"     "global")
-  "List of reserved words for Maple V R3.")
+(defconst maplev-reserved-words
+  '("and" "assuming" "break" "by" "catch" 
+    "description"  "do" "done" "elif" "else" 
+    "end" "error" "export" "fi" "finally" 
+    "for" "from" "global" "if" "implies" 
+    "in" "intersect" "local" "minus" "mod" 
+    "module" "next" "not" "od" "option" 
+    "options" "or" "proc" "quit" "read" 
+    "return" "save" "stop" "subset" "then" 
+    "to" "try" "union" "use" "uses" 
+    "while" "xor")
+  "List of reserved words for Maple.")
 
-(defconst maplev--reserved-words-4
-  maplev--reserved-words-3
-  "List of reserved words for Maple V4.")
-
-(defconst maplev--reserved-words-5
-  maplev--reserved-words-3
-  "List of reserved words for Maple V5.")
-
-(defconst maplev--reserved-words-6
-  (append '("break" "catch" "error" "export" "finally"
-            "in" "module" "next" "return" "try" "use")
-          maplev--reserved-words-5)
-  "List of reserved words for Maple 6.")
-
-(defconst maplev--reserved-words-7
-  (append '("assuming" "implies" "subset" "xor")
-          maplev--reserved-words-6)
-  "List of reserved words for Maple 7.")
-
-(defconst maplev--reserved-words-8
-  maplev--reserved-words-7
-  "List of reserved words for Maple 8.")
-
-(defconst maplev--reserved-words-9
-  maplev--reserved-words-7
-  "List of reserved words for Maple 9.")
-
-(defconst maplev--reserved-words-10
-  (append '("uses")
-          maplev--reserved-words-7)
-  "List of reserved words for Maple 10.")
-
-(defconst maplev--reserved-words-11
-  maplev--reserved-words-10
-  "List of reserved words for Maple 11.")
-
-(defconst maplev--reserved-words-12
-  maplev--reserved-words-10
-  "List of reserved words for Maple 12.")
-
-(defconst maplev--reserved-words-13
-  maplev--reserved-words-10
-  "List of reserved words for Maple 13.")
-
-(defconst maplev--reserved-words-14
-  maplev--reserved-words-10
-  "List of reserved words for Maple 14.")
-
-(defconst maplev--reserved-words-15
-  maplev--reserved-words-10
-  "List of reserved words for Maple 15.")
-
-(defconst maplev--reserved-words-16
-  maplev--reserved-words-10
-  "List of reserved words for Maple 16.")
-
-(defconst maplev--reserved-words-17
-  maplev--reserved-words-10
-  "List of reserved words for Maple 17.")
-
-(defconst maplev--reserved-words-2015
-  maplev--reserved-words-10
-  "List of reserved words for Maple 2015.")
-
-(defconst maplev--reserved-words-alist
-  `((3 .  ,maplev--reserved-words-3)
-    (4 .  ,maplev--reserved-words-4)
-    (5 .  ,maplev--reserved-words-5)
-    (6 .  ,maplev--reserved-words-6)
-    (7 .  ,maplev--reserved-words-7)
-    (8 .  ,maplev--reserved-words-8)
-    (9 .  ,maplev--reserved-words-9)
-    (10 . ,maplev--reserved-words-10)
-    (11 . ,maplev--reserved-words-11)
-    (12 . ,maplev--reserved-words-12)
-    (13 . ,maplev--reserved-words-13)
-    (14 . ,maplev--reserved-words-14)
-    (15 . ,maplev--reserved-words-15)
-    (16 . ,maplev--reserved-words-16)
-    (17 . ,maplev--reserved-words-17)
-    (2015 . ,maplev--reserved-words-2015)
-   )
-  "Alist of Maple reserved words.  The key is the major release.")
 
 ;;}}}
 
 (defconst maplev--deprecated-re
   (eval-when-compile
     (maplev--list-to-word-re
-     (list "fi" "od" "traperror" "linalg" "solvefor" "ERROR")))
+     (list "traperror" "linalg" "solvefor" "ERROR")))
   "Regex of deprecated keywords and procedures.")
 
 (defconst maplev--special-words
@@ -1617,9 +1537,7 @@ are font locked."
   (list
    (list maplev--top-defun-begin-re '(1 font-lock-function-name-face t))
    (list maplev--preprocessor-directives-re '(0 maplev-preprocessor-face))
-   (list (maplev--list-to-word-re
-          (cdr (assoc (maplev--major-release)
-                      maplev--reserved-words-alist)))
+   (list (maplev--list-to-word-re maplev-reserved-words)
          '(0 font-lock-keyword-face))))
 
 
