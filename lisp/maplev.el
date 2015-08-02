@@ -439,10 +439,10 @@ controls the expansion."
         ("wh"    "while"      maplev--abbrev-hook 0)))
     (setq abbrevs-changed ac)))
 
-(defun maplev-abbrev-help ()
-  "List the currently defined abbreviations."
-  (interactive)
-  (list-one-abbrev-table maplev-mode-abbrev-table "*Abbrevs*"))
+;; (defun maplev-abbrev-help ()
+;;   "List the currently defined abbreviations."
+;;   (interactive)
+;;   (list-one-abbrev-table maplev-mode-abbrev-table "*Abbrevs*"))
 
 ;;}}}
 ;;{{{ Imenu support
@@ -603,7 +603,7 @@ Prefix JUSTIFY means justify as well."
 
 ;;{{{ MapleV mode 
 
-(defun maplev-mode ()
+(define-derived-mode maplev-mode fundamental-mode "MapleV"
   "Major mode for editing Maple code.
 
 \\[maplev-electric-tab] indents the current line.
@@ -619,14 +619,10 @@ There are functions and keys for indenting code, syntax checking \(via mint\),
 displaying Maple help pages and printing the source code of procedures from the
 Maple libraries.
 
+Key bindings:
 \\{maplev-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-  (use-local-map maplev-mode-map)
-  (setq major-mode 'maplev-mode)
-
-  ;; abbreviation
-  (setq local-abbrev-table maplev-mode-abbrev-table)
+  :group 'maplev
+  :abbrev maplev-mode-abbrev-table
 
   ;; paragraph filling
   ;;
