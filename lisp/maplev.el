@@ -1341,103 +1341,46 @@ file (either < or \").  The second group matches the filename.")
          "tabular" "uneval" "zppoly")))
   "Alist of builtin Maple types.  Currently not used.")
 
-(defconst maplev--builtin-functions-3
- '("`$`" "ERROR" "Im" "RETURN" "Re" "SearchText"
-   "abs" "addressof" "alias" "anames" "appendto" "array" "assemble" "assigned"
-   "callback" "cat" "coeff" "coeffs" "convert" "debugopts"
-   "degree" "diff" "disassemble" "divide"
-   "entries" "eval" "evalb" "evalf" "`evalf/hypergeom`" "evalhf" "evaln" "expand"
-   "frontend" "gc" "genpoly" "goto" "has" "hastype"
-   "icontent" "`if`" "igcd" "ilog10" "indets" "indices" "intersect" "`int/series`" "iquo" "irem" "isqrt"
-   "lcoeff" "ldegree" "length" "lexorder" "lprint"
-   "macro" "map" "max" "maxnorm" "member" "min" "`minus`" "modp" "modp1" "mods"
-   "nops" "normal" "numboccur" "numer" "op" "order" "parse" "pointto" "print" "printf" "protect"
-   "readlib" "readline" "searchtext" "select" "seq" "series" "sign" "sort" "sscanf" "ssystem" "subs" "subsop" "substring" "system"
-   "table" "taylor" "tcoeff" "time" "traperror" "trunc" "type"
-   "unames" "`union`" "unprotect" "userinfo" "words" "writeto" ))
-
-(defconst maplev--builtin-functions-4
-  (append  '("`*`" "`+`" "ASSERT" "DEBUG" "MorrBrilCull" "add" "attributes" "denom" "getuserinterface" "inner" "iolib" "kernelopts" "`kernel/transpose`" "map2" "mul" "setattribute" "setuserinterface" "typematch")
-	   (maplev-minus maplev--builtin-functions-3
-			 '("printf" "protect" "readline" "setattribute" "setuserinterface" "sscanf" "unprotect" "words"))))
-		      
-
-(defconst maplev--builtin-functions-5
-  (append '("`**`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`^`" "call" "crinterp" "define" "`evalf/hypergeom/kernel`" "hfarray" "timelimit")
-	  (remove "`evalf/hypergeom`" maplev--builtin-functions-4)))
-
-(defconst maplev--builtin-functions-6
-  (append '("||" "Array" "ArrayOptions" "CopySign" "Default0" "DefaultOverflow" "DefaultUnderflow"
-	    "EqualEntries" "EqualStructure" "FromInert" "MPFloat"
-	    "NextAfter" "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" "OrderedNE"
-	    "SFloatExponent" "SFloatMantissa" "Scale10" "Scale2" "TRACE" "ToInert" "Unordered"
-	    "`and`" "bind" "call_external" "conjugate" "define_external" "`done`" "evalgf1" "exports" "frem"
-	    "ilog2" "lhs" "modp2" "mvMultiply" "negate" "`not`" "`or`" "remove" "rhs"
-	    "rtable" "rtableInfo" "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
-	    "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_scanblock" "rtable_sort_indices"
-	    "selectremove" "`stop`" "streamcall" "unbind")
-	  (maplev-minus maplev--builtin-functions-5
-			   '("call" "define" "getuserinterface" "setuserinterface"))))
-		     
-
-(defconst maplev--builtin-functions-7
- (append '("_treeMatch" "_unify" "_xml" "dlclose" "factorial" "`implies`" "`subset`" "`xor`")
-           maplev--builtin-functions-6))
-
-(defconst maplev--builtin-functions-8
- (append '("_jvm" "_maplet" "andmap" "ormap")
-           maplev--builtin-functions-7))
-
-(defconst maplev--builtin-functions-9
- (append '("`..`" "Normalizer" "UpdateSource" "gmp_isprime" "is_gmp" "isqrt" "`mod`" "piecewise" "reduce_opr" "rtable_eval" "rtable_zip")
-           maplev--builtin-functions-8))
-
-(defconst maplev--builtin-functions-10
- (append '("`?()`" "`?[]`" "`{}`" "`[]`" "SDMPolynom" "overload" "rtable_convolution" "rtable_redim" "rtable_scale" "savelib")
-           maplev--builtin-functions-9))
-
-(defconst maplev--builtin-functions-11
-  maplev--builtin-functions-10)
-
-(defconst maplev--builtin-functions-12
- (append '("Record" "rtable_size") maplev--builtin-functions-11))
-
-(defconst maplev--builtin-functions-13
- (append '("`::`" "`~`") maplev--builtin-functions-12))
-
-(defconst maplev--builtin-functions-14
- (append '("Object") maplev--builtin-functions-13))
-
-(defconst maplev--builtin-functions-15
-  (append '("assign" "numelems" "upperbound" "lowerbound") maplev--builtin-functions-14))
-
-(defconst maplev--builtin-functions-16
-  (append '("_hackwareToPointer" "~Array" "~Matrix" "~Vector") maplev--builtin-functions-15))
-
-(defconst maplev--builtin-functions-17
-  (append (remove "alias" '("NameSpace" "_local" "print_preprocess")) maplev--builtin-functions-16))
-
-(defconst maplev--builtin-functions-2015
-  (append '("localGridInterfaceRun" "wbOpen" "wbOpenURI") maplev--builtin-functions-17))
-
-(defconst maplev--builtin-functions-alist
-  `((3  . ,maplev--builtin-functions-3)
-    (4  . ,maplev--builtin-functions-4)
-    (5  . ,maplev--builtin-functions-5)
-    (6  . ,maplev--builtin-functions-6)
-    (7  . ,maplev--builtin-functions-7)
-    (8  . ,maplev--builtin-functions-8)
-    (9  . ,maplev--builtin-functions-9)
-    (10 . ,maplev--builtin-functions-10)
-    (11 . ,maplev--builtin-functions-11)
-    (12 . ,maplev--builtin-functions-12)
-    (13 . ,maplev--builtin-functions-13)
-    (14 . ,maplev--builtin-functions-14)
-    (15 . ,maplev--builtin-functions-15)
-    (16 . ,maplev--builtin-functions-16)
-    (17 . ,maplev--builtin-functions-17)
-    (2015 . ,maplev--builtin-functions-2015))
-  "Alist of Maple builtin funtions. The key is the major release.")
+(defconst maplev-builtin-functions
+  '("`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`"
+    "`>=`" "`?()`" "`?[]`" "ASSERT" "Array" "ArrayOptions" "CopySign"
+    "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" "ERROR"
+    "EqualEntries" "EqualStructure" "FromInert" "Im" "MPFloat" 
+    "MorrBrilCull" "NameSpace" "NextAfter" "Normalizer" "NumericClass" 
+    "NumericEvent" "NumericEventHandler" "NumericStatus" "Object"
+    "OrderedNE" "RETURN" "Re" "Record" "SDMPolynom" "SFloatExponent"
+    "SFloatMantissa" "Scale10" "Scale2" "SearchText" "TRACE" "ToInert"
+    "Unordered" "UpdateSource" "`[]`" "`^`" "_hackwareToPointer" "_jvm"
+    "_local" "_maplet" "_savelib" "_treeMatch" "_unify" "_xml" "abs"
+    "add" "addressof" "anames" "`and`" "andmap" "appendto" "array"
+    "assemble" "assign" "assigned" "attributes" "bind" "call_external"
+    "callback" "cat" "coeff" "coeffs" "conjugate" "convert" "crinterp"
+    "debugopts" "define_external" "degree" "denom" "diff" "disassemble"
+    "divide" "dlclose" "done" "entries" "eval" "evalb" "evalf"
+    "`evalf/hypergeom/kernel`" "evalgf1" "evalhf" "evalindets" "evaln"
+    "expand" "exports" "factorial" "frem" "frontend" "gc" "genpoly"
+    "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "`if`"
+    "igcd" "ilog10" "ilog2" "implies" "indets" "indices" "inner"
+    "`int/series`" "`intersect`" "iolib" "iquo" "irem" "is_gmp" "isqrt"
+    "`kernel/transpose`" "kernelopts" "lcoeff" "ldegree" "length"
+    "lexorder" "lhs" "localGridInterfaceRun" "lowerbound" "lprint"
+    "macro" "map" "map2" "max" "maxnorm" "member" "membertype" "min"
+    "minus" "mod" "modp" "modp1" "modp2" "mods" "mul" "mvMultiply"
+    "negate" "nops" "normal" "`not`" "numboccur" "numelems" "numer"
+    "op" "`or`" "order" "ormap" "overload" "parse" "piecewise" "pointto"
+    "print" "`quit`" "readlib" "reduce_opr" "remove" "rhs" "rtable"
+    "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
+    "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
+    "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_redim"
+    "rtable_scale" "rtable_scanblock" "rtable_size" "rtable_sort_indices"
+    "rtable_zip" "savelib" "searchtext" "select" "selectremove" "seq"
+    "series" "setattribute" "sign" "sort" "ssystem" "stop" "streamcall"
+    "subs" "subset" "subsindets" "subsop" "substring" "system" "table"
+    "taylor" "tcoeff" "time" "timelimit" "traperror" "trunc" "type"
+    "typematch" "unames" "unbind" "`union`" "upperbound" "userinfo"
+    "wbOpen" "wbOpenURI" "writeto" "`xor`" "`{}`" "`||`"
+    "`~`" "~Array" "~Matrix" "~Vector")
+  "List of builtin functions as of Maple 2016")
 
 ;; (defconst maplev--builtin-functions-alist
 ;;  '((3 .  ("`$`"                                                                                                                                                                                                                             "ERROR"                                             "Im"                                                                                                                                            "RETURN" "Re"                                                                            "SearchText"                                                                                            "abs"       "addressof" "alias" "anames"                  "appendto" "array" "assemble" "assigned"                                            "callback" "cat" "coeff" "coeffs"             "convert"            "debugopts"                   "degree"         "diff" "disassemble" "divide"                    "entries" "eval" "evalb" "evalf" "`evalf/hypergeom`"                  "evalhf" "evaln" "expand"                              "frontend" "gc" "genpoly"                    "goto" "has" "hastype"           "icontent" "`if`" "igcd" "ilog10"                     "indets" "indices"         "intersect" "`int/series`"         "iquo" "irem"          "isqrt"                                   "lcoeff" "ldegree" "length" "lexorder"       "lprint" "macro" "map"        "max" "maxnorm" "member" "min" "`minus`"         "modp" "modp1"         "mods"                             "nops" "normal"         "numboccur" "numer" "op"        "order"                    "parse"             "pointto" "print" "printf" "protect"          "readlib" "readline"                                                                                                                                                                                                                                                                                                                          "searchtext" "select"                "seq" "series"                                   "sign" "sort" "sscanf" "ssystem"                       "subs"            "subsop" "substring" "system" "table" "taylor" "tcoeff" "time"             "traperror" "trunc" "type"             "unames"          "`union`" "unprotect" "userinfo" "words" "writeto"         ))
@@ -1557,9 +1500,7 @@ minimum decoration keywords."
 Add builtin functions to the medium decoration keywords."
   (let ((max-specpdl-size 10000))       ; default 600 is too small
     (append (maplev-font-lock-keywords-2)
-            (list (list (maplev--list-to-word-re
-                         (cdr (assoc (maplev--major-release)
-                                     maplev--builtin-functions-alist)))
+            (list (list (maplev--list-to-word-re maplev-builtin-functions)
                         ;; Xemacs doesn't have font-lock-builtin-face
                         '(0 font-lock-builtin-face))
                   (list maplev--deprecated-re '(0 font-lock-warning-face))
