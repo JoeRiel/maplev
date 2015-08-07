@@ -136,28 +136,20 @@ If access is already locked, generate an error
 unless optional arg NO-ERROR is non-nil."
   (if (and (not no-error) (maplev-cmaple--locked-p))
       (error "Maple busy")
-;;hieida:
-;;    (put 'maplev-cmaple-state maplev-release 'locked)))
     (put 'maplev-cmaple-state 'maplev-release 'locked)))
 
 (defun maplev-cmaple--unlock-access ()
   "Unlock access to cmaple.
 Interactively use \\[maplev-cmaple-interrupt]."
-;;hieida:
-;;  (put 'maplev-cmaple-state maplev-release nil))
   (put 'maplev-cmaple-state 'maplev-release nil))
 
 (defun maplev-cmaple--locked-p ()
   "Return non-nil if the Maple process is locked."
-;;hieida:
-;;  (eq (get 'maplev-cmaple-state maplev-release) 'locked))
   (eq (get 'maplev-cmaple-state 'maplev-release) 'locked))
 
 (defun maplev-cmaple-status ()
   "Status of Maple process."
   (interactive)
-;;hieida:
-;;  (let ((status (get 'maplev-cmaple-state maplev-release)))
   (let ((status (get 'maplev-cmaple-state 'maplev-release)))
     (message "Maple %s %s" maplev-release
              (cond ((eq status 'locked) "locked")
