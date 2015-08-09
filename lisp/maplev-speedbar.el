@@ -1,25 +1,18 @@
-;;; maplev-utils.el --- Utility functions for maplev
+;;; maplev-speedbar.el --- Speedbar for maplev
 
-;;; Goal:
-
+;;; Purpose:
+;;
 ;; Provide a speedbar extension for Maple source code.  The speedbar
-;; should list the "significant" procedures and modules in the file.
-;; A significant procedure is one that is top-level, or assigned
-;; at the next-level inside a module.
+;; lists the procedures and modules in the file.  The display is
+;; hierarchical, that is, a module can contain modules and procedures.
 ;;
-;; To determine the level, a simple parser is needed.  Ignoring
-;; comments and lots of stuff, here is the outline of a minimal
-;; grammar.
+;; Usage:
 ;;
-;; statement ::= BEGIN END
-;; BEGIN     ::= module | proc | do | if | use | try
-;; END       ::= end | fi | od 
-
-
-
-;;; Commentary:
+;; Add the following to .emacs
 ;;
-
+;;  (add-hook 'maplev-mode-hook
+;;	  (lambda ()
+;;	    (require 'maplev-speedbar)))
 
 ;;; Code:
 
@@ -46,10 +39,9 @@
 
 (defvar maplev-sb-stack nil
   "Stack used by `maplev-sb-fetch-dynamic-tags' and `maplev-sb-get-hier'.
-Each element is a cons-cell, (id . tag), where id is the identifier
-of a class and tag is the point in the text where it begins.  A zero 
-tag indicates the cell corresponds to an end-statement.")
-
+Each element is either the symbol 'end, or a cons-cell, (id. tag), 
+where id is the identifier of a module or procedure and
+tag is the point in the text where it begins.")
 
 (defun maplev-sb-insert-tags-list (level lst)
   "At LEVEL level, insert LST, a generic multi-level alist.
@@ -162,3 +154,5 @@ See Info node `(speedbar)Creating a display'."
 (provide 'maplev-speedbar)
 
 ;;; maplev-speedbar.el ends here
+
+
