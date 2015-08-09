@@ -84,6 +84,7 @@ See Info node `(speedbar)Creating a display'."
 	  (let ((point (point))
 		(skip 0) 	; number of ends to skip over
 		inproc   	; boolean flag, true means in a proc body
+		marker          ; marker used to point to start of keyword
 		state    	; parse-state
 		id)      	; proc/module identifier
 	    ;; create stack of (id . point) or 'end
@@ -121,7 +122,8 @@ See Info node `(speedbar)Creating a display'."
 				   (match-string-no-properties 1)
 				 "Anonymous"))
 		      (goto-char end))
-		    (setq maplev-sb-stack (cons (cons id beg) maplev-sb-stack)))
+		    (setq marker (set-marker (make-marker) beg))
+		    (setq maplev-sb-stack (cons (cons id marker) maplev-sb-stack)))
 		   ((string= keyword "proc")
 		    ;; ID := proc()
 		    (setq inproc t
@@ -131,7 +133,8 @@ See Info node `(speedbar)Creating a display'."
 				 (match-string-no-properties 1)
 			       "Anonymous"))
 		    (goto-char end)
-		    (setq maplev-sb-stack (cons (cons id beg) maplev-sb-stack)))
+		    (setq marker (set-marker (make-marker) beg))
+		    (setq maplev-sb-stack (cons (cons id marker) maplev-sb-stack)))
 		   
 		   (t 
 		    (setq skip (1+ skip)))))))
@@ -154,5 +157,3 @@ See Info node `(speedbar)Creating a display'."
 (provide 'maplev-speedbar)
 
 ;;; maplev-speedbar.el ends here
-
-
