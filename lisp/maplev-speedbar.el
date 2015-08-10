@@ -85,14 +85,19 @@ list of the ..."
   ;; null existing markers
   (while maplev-markers
     (set-marker (pop maplev-markers) nil))
-  
+
   (save-excursion
+    ;; Set `speedbar-tag-hierarchy-method' to nil so that 
+    ;; `speedbar-create-tag-hierarchy' won't reorder the list.
+    ;; Make it buffer local so that the global value is not touched.
+    (set (make-local-variable 'speedbar-tag-hierarchy-method) nil)
+    (set (make-local-variable 'speedbar-generic-list-group-expand-button-type) 'expandtag)
+    (set (make-local-variable 'speedbar-generic-list-tag-button-type) 'statictag)
+    
     (setq case-fold-search nil) ; use case-sensitive searches/matching
     (goto-char (point-min))     ; start at top of buffer
-
     (let ((point (point))
 	  (skip 0) 	; number of ends to skip over
-	  inproc   	; boolean flag, true means in a proc body
 	  marker        ; marker used to point to start of keyword
 	  stack         ; stack
 	  state    	; parse-state
@@ -116,11 +121,9 @@ list of the ..."
 	      ;; handle end-statement
 	      (if (zerop skip)
 		  (setq stack (cons 'end stack))
-		(setq skip (1- skip))
-		(when (and inproc (zerop skip))
-		  (setq inproc nil)
-		  (setq stack (cons 'end stack)))))
+		(setq skip (1- skip))))
 	     ((not (zerop skip))
+	      ;; just increase skip
 	      (setq skip (1+ skip)))
 	     ((string= keyword "module")
 	      (if (looking-at (concat "\\s-*\\(" maplev--symbol-re "\\)"))
@@ -130,24 +133,21 @@ list of the ..."
 		(beginning-of-line)
 		(setq id (if (looking-at maplev-sb-assign-re)
 			     (match-string-no-properties 1)
-			   "Anonymous"))
+			   "Anonymous Module"))
 		(goto-char end))
 	      (setq marker (set-marker (make-marker) beg))
 	      (push marker maplev-markers)
 	      (setq stack (cons (cons id marker) stack)))
 	     ((string= keyword "proc")
 	      ;; ID := proc()
-	      (setq inproc t
-		    skip 1)
 	      (beginning-of-line)
 	      (setq id (if (looking-at maplev-sb-assign-re)
 			   (match-string-no-properties 1)
-			 "Anonymous"))
+			 "Anonymous Procedure"))
 	      (goto-char end)
 	      (setq marker (set-marker (make-marker) beg))
 	      (push marker maplev-markers)
 	      (setq stack (cons (cons id marker) stack)))
-	     
 	     (t 
 	      (setq skip (1+ skip)))))))
       stack)))
