@@ -1,10 +1,33 @@
 ;;; maplev-speedbar.el --- Speedbar for maplev
 
-;;; Purpose:
+;; Copyright (C) 2015 Joseph S. Riel
+
+;; Author: Joseph S. Riel <jriel@maplesoft.com>
+;; Maintainer: Joseph S. Riel <jriel@maplesoft.com>
+;; Created: August 2015
+;; Keywords: maple speedbar
 ;;
-;; Provide a speedbar extension for Maple source code.  The speedbar
-;; lists the procedures and modules in the file.  The display is
-;; hierarchical, that is, a module can contain modules and procedures.
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2, or (at
+;; your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+;;
+;; This speedbar extension indexes the modules and procedures in a
+;; Maple source file in their natural order.  It uses markers so that
+;; the speedbar links remain relevant as the file is edited.  The
+;; display is hierarchical, a module or procedure can contain modules
+;; and procedures.  Anonymous procedures and their content are
+;; ignored.
 ;;
 ;; Usage:
 ;;
@@ -38,10 +61,12 @@
   "Regular expression that matches Maple assignment. Name is in group 1.")
 
 (defvar maplev-sb-stack nil
-  "Stack used by `maplev-sb-fetch-dynamic-tags' and `maplev-sb-get-hier'.
-Each element is either the symbol 'end, or a cons-cell, (id . tag), 
-where id is the identifier of a module or procedure and
-tag is the point in the text where it begins.")
+  "Stack created by `maplev-sb-mark-defuns' and used by
+`maplev-sb-fetch-dynamic-tags' and `maplev-sb-get-hier'.  Each
+element is either the symbol 'end, or a cons-cell, (id . marker),
+where id is the identifier of a module or procedure and marker is
+the marker pointing to the beginning of the keyword (module or
+proc) in the buffer.")
 
 (defun maplev-sb-insert-tags-list (level lst)
   "At LEVEL level, insert LST, a generic multi-level alist.
