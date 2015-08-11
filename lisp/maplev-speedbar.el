@@ -123,7 +123,7 @@ list of the ..."
 		  (setq stack (cons 'end stack))
 		(setq skip (1- skip))))
 	     ((not (zerop skip))
-	      ;; just increase skip
+	      ;; already skipping; increment skip
 	      (setq skip (1+ skip)))
 	     ((string= keyword "module")
 	      (setq id (if (looking-at (concat "\\s-*\\(" maplev--symbol-re "\\)"))
@@ -137,7 +137,7 @@ list of the ..."
 			     "Anonymous Module"))))
 	      (setq marker (set-marker (make-marker) beg))
 	      (push marker maplev-markers)
-	      (setq stack (cons (cons id marker) stack)))
+	      (push (cons id marker) stack))
 	     ((string= keyword "proc")
 	      ;; ID := proc()
 	      (save-excursion
@@ -148,7 +148,7 @@ list of the ..."
 		  (setq id (match-string-no-properties 1))
 		  (setq marker (set-marker (make-marker) beg))
 		  (push marker maplev-markers)
-		  (setq stack (cons (cons id marker) stack)))))
+		  (push (cons id marker) stack))))
 	     (t 
 	      (setq skip (1+ skip)))))))
       stack)))
