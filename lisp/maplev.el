@@ -186,15 +186,16 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (modify-syntax-entry ?\t " "  table) ; tab = whitespace
 
     (modify-syntax-entry ?*  ". 23b"  table) ; punctuation and used in multiline comments (* ... *)
+
     (modify-syntax-entry ?/  "."  table)
     (modify-syntax-entry ?+  "."  table)
     (modify-syntax-entry ?-  "."  table)
     (modify-syntax-entry ?=  "."  table)
-    ;; this is for noweb-mode
-;;    (modify-syntax-entry ?<  ". 12"  table)
-;;    (modify-syntax-entry ?>  ". 34"  table)
-
+    (modify-syntax-entry ?>  "."  table)
+    (modify-syntax-entry ?<  "."  table)
     (modify-syntax-entry ?.  "."  table)
+    (modify-syntax-entry ?|  "."  table)
+    
     (modify-syntax-entry ?\' "\"" table) ; string quotes
     (modify-syntax-entry ?\` "\"" table) ; string quotes
     (modify-syntax-entry ?\{ "(}" table) ; balanced brackets
