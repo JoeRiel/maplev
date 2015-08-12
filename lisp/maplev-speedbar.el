@@ -36,6 +36,14 @@
 ;;  (add-hook 'maplev-mode-hook
 ;;	  (lambda ()
 ;;	    (require 'maplev-speedbar)))
+;;
+;; The customizable variable `maplev-sb-sort-content-flag', if
+;; non-nil, causes the displayed links to be sorted alphabetically
+;; within the hierarchy.  
+;;
+;; The variable `maplev-sb-defined-macros' may be assigned a list
+;; of strings that will, by default, be assumed defined if they
+;; appear as the condition in a preprocessor macro.
 
 ;;; Code:
 
@@ -47,6 +55,18 @@
 	     '(maplev-sb-fetch-dynamic-tags . maplev-sb-insert-tags-list))
 
 (speedbar-add-supported-extension '(".mpl" ".mm"))
+
+;;; Customizations
+
+(defgroup maplev-speedbar nil
+  "Customizations for Maple speedbar"
+  :group 'maplev)
+
+(defcustom maplev-sb-sort-content-flag t
+  "Non-nil means alphabetically sort the displayed content of a
+Maple speedbar listing.  The hierarchy is preserved."
+  :type 'boolean
+  :group 'maplev-speedbar)
 
 ;;; Constants
 
@@ -79,8 +99,8 @@ proc) in the buffer.")
   "Multilevel alist returned by `maplev-sb-fetch-dynamic-tags'.
 Mainly saved for debugging.")
 
-(defvar maplev-sb-assigned-macros nil
-  "List of macro names that are assigned.")
+(defvar maplev-sb-defined-macros nil
+  "List of macro names that are defined.")
 
 (defvar maplev-sb-markers nil
   "Buffer-local list of markers used to mark modules and procedures.
@@ -103,6 +123,12 @@ See `speedbar-insert-generic-list'."
 				'speedbar-tag-expand
 				'speedbar-tag-find))
 
+(defun maplev-sb-sort (alist)
+  "Sort ALIST alphabetically if `maplev-sb-sort-content-flag' is non-nil."
+  (if maplev-sb-sort-content-flag
+      (sort alist (lambda (a b) (string< (car a) (car b))))
+    alist))
+
 (defun maplev-sb-fetch-dynamic-tags (filename)
   "Return a multi-level alist for the Maple source file FILENAME.
 The created alist is passed to `speedbar-insert-generic-list' via
@@ -122,7 +148,7 @@ See Info node `(speedbar)Creating a display'."
 	       (eq major-mode 'mpldoc-mode)))
       t
     (setq maplev-sb-stack (maplev-sb-mark-defuns))
-    (setq maplev-sb-alist (maplev-sb-make-alist))))
+    (setq maplev-sb-alist (maplev-sb-sort (maplev-sb-make-alist)))))
 
 (defun maplev-sb-mark-defuns ()
   "Add markers to modules and procedures in the current buffer,
@@ -145,11 +171,11 @@ or the symbol 'end."
     (setq case-fold-search nil) ; use case-sensitive searches/matching
     (goto-char (point-min))     ; start at top of buffer
     (let ((point (point))
+	  (macros maplev-sb-defined-macros) ; list of defined macros
 	  (depth 0)
 	  (ends 0) 	; number of ends to skip over
 	  cond          ; flag true if preprocessor conditional
 	  ifdef-stack   ; stack to handle preprocessor conditions
-	  (macros maplev-sb-assigned-macros) ; list of assigned macros
 	  marker        ; marker used to point to start of keyword
 	  skip          ; flag set according to preprocessor conditional
 	  stack         ; stack
@@ -254,7 +280,7 @@ or the symbol 'end."
 			(cons (maplev-sb-make-alist) lst)
 		      (cons (pop maplev-sb-stack) lst))
 		  (setq cont nil)
-		  (cons (car elem) (cons (cdr elem) lst)))))
+		  (cons (car elem) (cons (cdr elem) (maplev-sb-sort lst))))))
     lst))
 
 (provide 'maplev-speedbar)
