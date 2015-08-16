@@ -1261,40 +1261,39 @@ otherwise use `maplev-tab-width'."
 
 ;;}}}
 
-(defconst maplev--deprecated-re
-  (eval-when-compile
+(eval-when-compile
+  (defconst maplev--deprecated-re
     (maplev--list-to-word-re
-     (list "traperror" "linalg" "solvefor" "ERROR")))
-  "Regex of deprecated keywords and procedures.")
+     (list "traperror" "linalg" "solvefor" "ERROR"))
+    "Regex of deprecated keywords and procedures.")
 
-(defconst maplev--special-words
-  (list "args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
-	"_options" "_noptions" "_rest" "_nrest"
-	"_params" "_nparams" "_passed" "_npassed"
-	"_nresults" "static" )
-  "List of special words in Maple.")
+  (defconst maplev--special-words
+    (list "args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
+	  "_options" "_noptions" "_rest" "_nrest"
+	  "_params" "_nparams" "_passed" "_npassed"
+	  "_nresults" "static" )
+    "List of special words in Maple.")
 
-(defconst maplev--special-words-re
+  (defconst maplev--special-words-re
     (maplev--list-to-word-re maplev--special-words)
-  "Regex of special words in Maple.")
+    "Regex of special words in Maple.")
 
-(defconst maplev--initial-variables
-  (list "Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
-	"integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
-	"`mod`" "Digits" "constants" "undefined" "I"
-	"UseHardwareFloats"
-	"Testzero" "Normalizer" "NumericEventHandlers"
-	"Rounding" "`index/newtable`")
-  "List of global, environmental variables, and constants.")
+  (defconst maplev--initial-variables
+    (list "Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
+	  "integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
+	  "`mod`" "Digits" "constants" "undefined" "I"
+	  "UseHardwareFloats"
+	  "Testzero" "Normalizer" "NumericEventHandlers"
+	  "Rounding" "`index/newtable`")
+    "List of global, environmental variables, and constants.")
 
-(defconst maplev--initial-variables-re
+  (defconst maplev--initial-variables-re
     (maplev--list-to-word-re maplev--initial-variables)
-  "Regexp of global, environmental variables and constants.")
-
-(defconst maplev--preprocessor-directives-re
-  (eval-when-compile
+    "Regexp of global, environmental variables and constants.")
+  
+  (defconst maplev--preprocessor-directives-re
     (concat "^\\$\\("
-            (regexp-opt (list
+	    (regexp-opt (list
 			 "define"
 			 "elif"
 			 "else"
@@ -1414,7 +1413,7 @@ file (either < or \").  The second group matches the filename."))
 (defface maplev-protected-face
   '((((class grayscale) (background light)) (:foreground "LightGray" :bold t))
     (((class grayscale) (background dark))  (:foreground "DimGray"   :bold t))
-    (((class color)     (background light)) (:foreground "LImeGreen"))
+    (((class color)     (background light)) (:foreground "LimeGreen"))
     (((class color)     (background dark))  (:foreground "LimeGreen"))
     (t (:bold t)))
   "Font lock mode face used for Maple protected names."
