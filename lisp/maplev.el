@@ -106,7 +106,7 @@
 
 (require 'button-lock)
 
-(require 'abbrevlist)
+;; (require 'abbrevlist)
 (require 'comint)
 ;; (require 'folding)
 (require 'font-lock)
