@@ -165,7 +165,7 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
 (defvar maplev-project-root nil
   "Buffer-local variable assigned the root of the project.
 Used by mint-mode with ffip-project-files to locate the project files.")
-  
+
 
 ;;}}}
 ;;{{{ Syntax table
@@ -303,7 +303,7 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (define-key map [(control c) return return] 'maplev-mint-rerun)
 
     ;; Help and proc comma
-      
+    
     (define-key map [(control ?\?)] 'maplev-help-at-point)
     (define-key map [(meta ?\?)]    'maplev-proc-at-point)
     (define-key map [(control h) (meta d)] 'maplev-what-proc)
@@ -455,8 +455,8 @@ controls the expansion."
 (defvar maplev-imenu-generic-expression
   `(("Procedures" ,maplev--defun-begin-re 2)
     ("Modules" ,(concat "^\\(" maplev--name-re "\\)"
-                          "[ \t\n]*:=[ \t\n]*"
-                          "module") 1)
+			"[ \t\n]*:=[ \t\n]*"
+			"module") 1)
     ("Macros" ,(concat "^macro([ \t]*\\([^ \t=]*\\)") 1))
   "Imenu expression for MapleV mode.  See `imenu-generic-expression'.")
 
@@ -663,8 +663,8 @@ Key bindings:
 
   ;; comments
   (set (make-local-variable 'comment-start)            maplev-comment-start)
-;;  (if (< emacs-major-version 22)
-;;      (set (make-local-variable 'block-comment-start)      maplev-block-comment-start))
+  ;;  (if (< emacs-major-version 22)
+  ;;      (set (make-local-variable 'block-comment-start)      maplev-block-comment-start))
   (set (make-local-variable 'comment-end)              "")
   (set (make-local-variable 'comment-start-skip)       "#+[ \t]*")
   (set (make-local-variable 'comment-column)           maplev-comment-column)
@@ -799,7 +799,7 @@ The name of the procedure is inserted into the title of the fold."
       (folding-fold-region (point) (mark))
       (insert (concat " " proc))
       (folding-shift-out))))
-  
+
 ;;}}}
 
 ;;{{{ Movement functions
@@ -887,7 +887,7 @@ This is slightly too aggressive, it incorrectly matches, d.Ed, which is invalid.
     (while setA
       (setq head (pop setA))
       (unless (member head setB)
-	  (push head tmp)))
+	(push head tmp)))
     (reverse tmp)))
 
 ;;}}}
@@ -1043,7 +1043,7 @@ index/package help pages.  If it already exists, do nothing."
     ;; index/package help page, set the interface variable
     ;; `screenwidth' to infinity and save the original value in the
     ;; elisp variable screenwidth.
-        
+    
     (let ((screenwidth (maplev-cmaple-direct
                         "lprint(interface('screenwidth'=infinity));" t))
           completions)
@@ -1205,7 +1205,7 @@ moved to be before it."
   (when (eolp)
     (insert-char ?\" 1)
     (backward-char)))
-	   
+
 
 
 ;;}}}
@@ -1305,15 +1305,15 @@ otherwise use `maplev-tab-width'."
 			 "include"
 			 "undef"
 			 ))
-            "\\)"))
-  "Regex of preprocessor directives.")
-
-(defconst maplev--include-directive-re
-  "^\\(?:## \\)?\\$include\\s-*\\([<\"]\\)\\(.*\\)[>\"]"
-  "Regex of an include directive.
+	    "\\)")
+    "Regex of preprocessor directives.")
+  
+  (defconst maplev--include-directive-re
+    "^\\(?:## \\)?\\$include\\s-*\\([<\"]\\)\\(.*\\)[>\"]"
+    "Regex of an include directive.
 The first group matches the character used to delimit the
-file (either < or \").  The second group matches the filename.")
-    
+file (either < or \").  The second group matches the filename."))
+
 
 ;;{{{  builtins
 
@@ -1699,14 +1699,14 @@ directory exists, query user to create the file."
 	      (inc-dir inc-file))
 	  (while (and (setq inc-dir (file-name-directory (directory-file-name inc-dir)))
 		      (not (setq file (maplev-find-include-file inc-dir inc-first path)))))
-	(if (not file)
-	    (error "Include file %s does not exist " inc-file)
-	  (if (yes-or-no-p (format "Create include file %s "
-				   (setq file (concat file base))))
-	      (if other-window-flag
-		  (find-file-other-window file)
-		(find-file file)))))))))
-	  
+	  (if (not file)
+	      (error "Include file %s does not exist " inc-file)
+	    (if (yes-or-no-p (format "Create include file %s "
+				     (setq file (concat file base))))
+		(if other-window-flag
+		    (find-file-other-window file)
+		  (find-file file)))))))))
+
 (defun maplev-find-include-file (inc-file &optional inc-first inc-path)
   "Find the Maple include file INC-FILE and return as an absolute path.
 INC-PATH is an optional list of rooted directories.  Use each
@@ -1753,7 +1753,7 @@ nil."
 	      (setq abs-file nil) ; at root, exit loop with empty file
 	    (setq dir parent)))) ; check parent
     abs-file))
-		  
+
 (define-button-type 'maplev-find-include-file
   'help-echo "Find include file"
   'action 'maplev-find-include-file-at-point
