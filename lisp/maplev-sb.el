@@ -1,4 +1,4 @@
-;;; maplev-speedbar.el --- Speedbar for maplev
+;;; maplev-sb.el --- Speedbar for maplev
 
 ;; Copyright (C) 2015 Joseph S. Riel
 
@@ -54,6 +54,14 @@
   "Customizations for Maple speedbar"
   :group 'maplev)
 
+(defcustom maplev-sb-defined-macros nil
+  "List of Maple preprocessor macro names that are defined.
+These are used to evaluate preprocessor conditionals when parsing
+the source.  Embedded $define and $undef macros are also used,
+but do not affect this variable."
+  :group 'maplev-speedbar
+  :type '(repeat string))
+
 (defcustom maplev-sb-sort-content-flag t
   "Non-nil means alphabetically sort the displayed content of a
 Maple speedbar listing.  The hierarchy is preserved."
@@ -93,8 +101,6 @@ where id is the identifier of a module or procedure and tag is
 either a marker or point at the beginning of the keyword (module
 or proc) in the buffer.")
 
-(defvar maplev-sb-defined-macros nil
-  "List of macro names that are defined.")
 
 (defvar maplev-sb-markers nil
   "Buffer-local list of markers used to mark modules and procedures.
@@ -141,8 +147,14 @@ See Info node `(speedbar)Creating a display'."
   (if (not (or (eq major-mode 'maplev-mode)
 	       (eq major-mode 'mpldoc-mode)))
       t
-    (setq maplev-sb-stack (maplev-sb-mark-defuns))
-    (maplev-sb-sort (maplev-sb-make-alist))))
+    (condition-case err
+	(progn
+	  (setq maplev-sb-stack (maplev-sb-mark-defuns))
+	  (maplev-sb-sort (maplev-sb-make-alist)))
+      (error 
+       (message (cadr err))
+       t))))
+		
 
 (defun maplev-sb-mark-defuns ()
   "Add markers to modules and procedures in the current buffer,
@@ -268,8 +280,11 @@ or the symbol 'end."
 		    (push (cons id marker) stack))
 		   (t 
 		    (setq ends (1+ ends))))))))))
-      (when ifdef-stack
-	  (error "preprocessor conditionals are not balanced"))
+      (cond 
+       ((not (zerop depth))
+	(error "statements not balanced"))
+       (ifdef-stack
+	(error "preprocessor conditional not terminated")))
       stack)))
 
 (defun maplev-sb-make-alist ()
@@ -287,4 +302,4 @@ or the symbol 'end."
 
 (provide 'maplev-speedbar)
 
-;;; maplev-speedbar.el ends here
+;;; maplev-sb.el ends here

@@ -69,7 +69,7 @@ ELFLAGS	= --no-site-file \
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
 
-ELS = $(PKG) $(addprefix $(PKG),-cmaple -common -custom -help -history -indent -mint -proc -re -speedbar -utils) button-lock
+ELS = $(PKG) $(addprefix $(PKG),-cmaple -common -custom -help -history -indent -mint -proc -re -sb -utils) button-lock
 
 LISP-FILES = $(ELS:%=lisp/%.el)
 ELC-FILES = $(LISP-FILES:.el=.elc)

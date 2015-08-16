@@ -122,6 +122,7 @@
 (require 'maplev-proc)			; maplev-proc-mode (view procedures)
 (require 'maplev-re)			; regular expressions
 (require 'maplev-utils)			; not much here just yet
+(require 'maplev-speedbar "maplev-sb")
 
 ;;}}}
 
