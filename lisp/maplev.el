@@ -1420,8 +1420,8 @@ file (either < or \").  The second group matches the filename."))
   "Font lock mode face used for Maple protected names."
   :group 'maplev-faces)
 
-(defconst maplev--protected-names-re
-  (eval-when-compile
+(eval-when-compile
+  (defconst maplev--protected-names-re
     (concat "\\<\\(?:"
             (regexp-opt
              (list
@@ -1514,10 +1514,22 @@ file (either < or \").  The second group matches the filename."))
 	      "tan" "tanh" "testeq" "thaw" "unapply" "unassign" "undefine" 
 	      "unprotect" "unwindK" "unwith" "usage" "value" "verify" "version" 
 	      "whattype" "with" "ztrans"
-	      ))
-            "\\)\\>"))
-  "List of some of the protected names in Maple.
-This is supposed to exclude the builtins and reserved words.")
+	      )
+	     "\\)\\>"))
+    "List of some of the protected names in Maple.
+This is supposed to exclude the builtins and reserved words."))
+
+(defvar maplev-undocumented-face   'maplev-undocumented-face
+  "*Face name for Maple undocumented names.")
+
+(defface maplev-undocumented-face
+  '((((class grayscale) (background light)) (:foreground "LightGray" :bold t))
+    (((class grayscale) (background dark))  (:foreground "DimGray"   :bold t))
+    (((class color)     (background light)) (:foreground "VioletRed1"))
+    (((class color)     (background dark))  (:foreground "VioletRed1"))
+    (t (:bold t)))
+  "Font lock mode face used for Maple undocumented names."
+  :group 'maplev-faces)
 
 (defconst maplev--undocumented-names-re
   (eval-when-compile
@@ -1536,8 +1548,8 @@ This is supposed to exclude the builtins and reserved words.")
 	      "rtable_normalize_index" "rtable_scale" "rtable_sort_indices" "rtable_zip"
 	      "unbind"
 	      ))
-	    "\\)\\>")
-    "List of undocumented names reserved for internal use."))
+	    "\\)\\>"))
+  "List of undocumented names reserved for internal use.")
 
 
 (defconst maplev--protected-names-procs-re
@@ -1574,7 +1586,8 @@ Add builtin functions to the medium decoration keywords."
                         ;; Xemacs doesn't have font-lock-builtin-face
                         '(0 font-lock-builtin-face))
                   (list maplev--deprecated-re '(0 font-lock-warning-face))
-                  (list maplev--protected-names-re '(0 maplev-protected-face))))))
+                  (list maplev--protected-names-re '(0 maplev-protected-face))
+                  (list maplev--undocumented-names-re '(0 maplev-undocumented-face))))))
 
 (defun maplev--font-lock-keywords ()
   "Return a list of symbols for font locking MapleV mode buffers."
