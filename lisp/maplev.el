@@ -1261,57 +1261,47 @@ otherwise use `maplev-tab-width'."
 
 ;;}}}
 
-(eval-when-compile
-  (defconst maplev--deprecated-re
+(defconst maplev--deprecated-re
+  (eval-when-compile
     (maplev--list-to-word-re
-     (list "traperror" "linalg" "solvefor" "ERROR"))
-    "Regex of deprecated keywords and procedures.")
+     (list "traperror" "linalg" "solvefor" "ERROR")))
+  "Regex of deprecated keywords and procedures.")
 
-  (defconst maplev--special-words
-    (list "args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
-	  "_options" "_noptions" "_rest" "_nrest"
-	  "_params" "_nparams" "_passed" "_npassed"
-	  "_nresults" "static" )
-    "List of special words in Maple.")
+(defconst maplev--special-words-re
+  (eval-when-compile
+    (maplev--list-to-word-re
+     '("args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
+       "_options" "_noptions" "_rest" "_nrest"
+       "_params" "_nparams" "_passed" "_npassed"
+       "_nresults" "static")))
+  "Regex of special words in Maple.")
 
-  (defconst maplev--special-words-re
-    (maplev--list-to-word-re maplev--special-words)
-    "Regex of special words in Maple.")
+(defconst maplev--initial-variables-re
+  (eval-when-compile
+    (maplev--list-to-word-re
+     '("Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
+       "integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
+       "`mod`" "Digits" "constants" "undefined" "I"
+       "UseHardwareFloats"
+       "Testzero" "Normalizer" "NumericEventHandlers"
+       "Rounding" "`index/newtable`")))
+  "Regexp of global, environmental variables and constants.")
 
-  (defconst maplev--initial-variables
-    (list "Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
-	  "integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
-	  "`mod`" "Digits" "constants" "undefined" "I"
-	  "UseHardwareFloats"
-	  "Testzero" "Normalizer" "NumericEventHandlers"
-	  "Rounding" "`index/newtable`")
-    "List of global, environmental variables, and constants.")
-
-  (defconst maplev--initial-variables-re
-    (maplev--list-to-word-re maplev--initial-variables)
-    "Regexp of global, environmental variables and constants.")
-  
-  (defconst maplev--preprocessor-directives-re
+(defconst maplev--preprocessor-directives-re
+  (eval-when-compile
     (concat "^\\$\\("
 	    (regexp-opt (list
-			 "define"
-			 "elif"
-			 "else"
-			 "endif"
-			 "file"
-			 "ifdef"
-			 "ifndef"
-			 "include"
-			 "undef"
+			 "define" "elif" "else" "endif" "file"
+			 "ifdef" "ifndef" "include" "undef"
 			 ))
-	    "\\)")
-    "Regex of preprocessor directives.")
-  
-  (defconst maplev--include-directive-re
-    "^\\(?:## \\)?\\$include\\s-*\\([<\"]\\)\\(.*\\)[>\"]"
-    "Regex of an include directive.
+	    "\\)"))
+  "Regex of preprocessor directives.")
+
+(defconst maplev--include-directive-re
+  "^\\(?:## \\)?\\$include\\s-*\\([<\"]\\)\\(.*\\)[>\"]"
+  "Regex of an include directive.
 The first group matches the character used to delimit the
-file (either < or \").  The second group matches the filename."))
+file (either < or \").  The second group matches the filename.")
 
 
 ;;{{{  builtins
@@ -1419,8 +1409,8 @@ file (either < or \").  The second group matches the filename."))
   "Font lock mode face used for Maple protected names."
   :group 'maplev-faces)
 
-(eval-when-compile
-  (defconst maplev--protected-names-re
+(defconst maplev--protected-names-re
+  (eval-when-compile
     (concat "\\<\\(?:"
             (regexp-opt
              (list
@@ -1514,9 +1504,9 @@ file (either < or \").  The second group matches the filename."))
 	      "unprotect" "unwindK" "unwith" "usage" "value" "verify" "version" 
 	      "whattype" "with" "ztrans"
 	      )
-	     "\\)\\>"))
-    "List of some of the protected names in Maple.
-This is supposed to exclude the builtins and reserved words."))
+	     "\\)\\>")))
+  "List of some of the protected names in Maple.
+This is supposed to exclude the builtins and reserved words.")
 
 (defvar maplev-undocumented-face   'maplev-undocumented-face
   "*Face name for Maple undocumented names.")
