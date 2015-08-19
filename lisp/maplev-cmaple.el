@@ -91,6 +91,7 @@ restart it."
                             buffer
                             cmaple
                             (append (and inifile (list "-i" inifile))
+				   '("-c maplev:-Setup()")
                                     maplev-start-options ;; add include path to argument list
                                     (and include-path
                                          (list (concat "-I " 

@@ -1,10 +1,8 @@
 maplev := module()
 
-export MemberToIndexed
-    ,  PrintProc
-    ;
+##PROCEDURE maplev[MemberToIndexed]
 
-#{{{ MemberToIndexed
+export
     MemberToIndexed := proc(s::string)
     description "Convert member operator (:-) to indices in a string";
     local words;
@@ -18,11 +16,28 @@ export MemberToIndexed
         end if;
     end proc:
 
-#}}}
-#{{{ PrintProc
+##PROCEDURE maplev[PrintProc]
+##HALFLINE print a procedure
+##INDEXPAGE maplev[Exports],PrintProc,
+##CALLINGSEQUENCE
+##- PrintProc('P', 'lines', 'doublespaces')
+##PARAMETERS
+##- 'P'            : ::string::; identifies procedure to print
+##- 'lines'        : (optional) ::{posint, posint..posint}::; lines to print
+##- 'doubleindent' : (optional keyword) ::truefalse::; true means double the spaces used to indent
+##RETURNS
+##- NULL
+##
+##DESCRIPTION
+##- The `PrintProc` command
+##  prints a procedure, like "showstat", but without the line numbers.
+##
+##- The 'P' parameter is a string identifying the procedure to print
+
+export
     PrintProc := proc(P :: string
                       , lines::{posint,posint..posint} := NULL
-                      , { doublespaces :: truefalse := true }
+                      , { doubleindent :: truefalse := true }
                       , $
                      )
     local p,width,opacity,dummy_name,str,pos,opts,desc,extra;
@@ -51,7 +66,7 @@ export MemberToIndexed
                                                                , p
                                                                , [p, lines]
                                                               ))
-                                   , `if`(doublespaces
+                                   , `if`(doubleindent
                                           , "\n( +)" = "\n\\1\\1"  # double spaces used for indenting
                                           , NULL
                                          )
@@ -88,13 +103,31 @@ export MemberToIndexed
         catch:
             error "'%1' is not a procedure name",P;
         finally
-            interface('screenwidth' = width);
+            interface(screenwidth = width);
             kernelopts('opaquemodules' = opacity);
+            return NULL;
         end try;
-        return NULL;
     end proc;
-#}}}
 
+##PROCEDURE maplev[Setup]
+##DESCRIPTION
+##- The `Setup` command calls "kernelopts" and "interface"
+##  to assign the appropriate settings for interfacing with
+##  the Emacs **maplev-mode**.
+
+export
+    Setup := proc()
+        kernelopts(printbytes = false);
+        interface(prettyprint    = 1
+                  , verboseproc  = 2
+                  , errorbreak   = 0
+                  , warnlevel    = 2
+                  , errorcursor  = false
+                  , screenheight = infinity
+                 );
+        NULL;
+    end proc;
+##
 end module:
 
 LibraryTools:-Save('maplev', "maplev.mla");
