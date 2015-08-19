@@ -1,20 +1,7 @@
+##MODULE maplev
+##HALFLINE module used with Emacs maplev mode
+
 maplev := module()
-
-##PROCEDURE maplev[MemberToIndexed]
-
-export
-    MemberToIndexed := proc(s::string)
-    description "Convert member operator (:-) to indices in a string";
-    local words;
-    uses ST = StringTools;
-        words := ST:-Split(s, ":-");
-        words := remove(`=`, words, "");
-        if nops(words) > 1 then
-            sprintf("%s[':-%s']", words[1], ST:-Join(words[2..], "'][':-"));
-        else
-            words[1];
-        end if;
-    end proc:
 
 ##PROCEDURE maplev[PrintProc]
 ##HALFLINE print a procedure
@@ -26,13 +13,19 @@ export
 ##- 'lines'        : (optional) ::{posint, posint..posint}::; lines to print
 ##- 'doubleindent' : (optional keyword) ::truefalse::; true means double the spaces used to indent
 ##RETURNS
-##- NULL
+##- `NULL`
 ##
 ##DESCRIPTION
 ##- The `PrintProc` command
-##  prints a procedure, like "showstat", but without the line numbers.
+##  prints a procedure, like "showstat", but without the line numbers
+##  and with the options and description fields (they are elided by showstat).
 ##
-##- The 'P' parameter is a string identifying the procedure to print
+##- The 'P' parameter is a string identifying the procedure to print.
+##  Module local procedures can be passed.
+##OPTIONS
+##- 'doubleindent' :: truefalse
+##-(noindent) True means double the two-space indent used by showstat.
+##  The default is true.
 
 export
     PrintProc := proc(P :: string
