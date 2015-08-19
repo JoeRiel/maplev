@@ -38,10 +38,8 @@
 (eval-when-compile
   (defvar maplev-cmaple-echoes-flag)
   (defvar maplev-cmaple-end-notice)
-  (defvar maplev-default-init-string)
   (defvar maplev-executable-alist)
   (defvar maplev-include-path)
-  (defvar maplev-init-string-alist)
   (defvar maplev-mint-error-level)
   (defvar maplev-release)
   (defvar maplev-start-options)
@@ -68,22 +66,14 @@ Start one, if necessary."
         process
       (maplev-cmaple--start-process))))
 
-(defun maplev--cmaple-get-init-string (release)
-  "Return the initialization string passed to the Maple process.
-If RELEASE is an index in `maplev-init-string-alist' then use the entry,
-otherwise use `maplev-default-init-string'."
-  (let ((init (assoc release maplev-init-string-alist)))
-    (if init
-        (cdr init)
-      maplev-default-init-string)))
-
 (defun maplev-cmaple--start-process ()
   "Start a cmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it."
   (let* ((release maplev-release)
-         (cmaple (nth 0 (cdr (assoc release maplev-executable-alist))))
-         (inifile (nth 1 (cdr (assoc release maplev-executable-alist))))
+	 (executable (cdr (assoc release maplev-executable-alist)))
+         (cmaple (nth 0 executable))
+         (inifile (nth 1 executable))
          (buffer (get-buffer-create (maplev--cmaple-buffer)))
          (process (get-buffer-process buffer))
 	 (include-path maplev-include-path)
@@ -108,7 +98,7 @@ restart it."
        'maplev--cmaple-filter)
       (maplev-cmaple-mode release)
       (maplev-cmaple--lock-access t)
-      (comint-simple-send process (maplev--cmaple-get-init-string release))
+      ;; (comint-simple-send process init-code
       (maplev-cmaple--send-end-notice process)
       ;; Wait until cmaple is unlocked, that is, it has responded.
       ;; The time step, 100 milliseconds, should be customizable, some OSs
@@ -191,15 +181,6 @@ non-nil do not generate an error if time-out occurs."
 
 (defun maplev-cmaple--send-string (process string)
   "Send STRING to the cmaple process PROCESS."
-  ;; handle Maple `restart' by adding the initialization.
-  (let ((str "") case-fold-search)
-    (while (string-match "\\<restart[ \t\n]*[:;]" string)
-      (setq str (concat str (substring string 0 (match-end 0))
-                        (maplev--cmaple-get-init-string maplev-release))
-            string (if (> (length string) (match-end 0))
-                       (substring string (match-end 0))
-                     "")))
-    (setq string (concat str string)))
   (maplev-cmaple--lock-access)
   (set-process-filter process 'maplev--cmaple-filter)
   (comint-simple-send process string)

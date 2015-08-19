@@ -130,35 +130,6 @@ It must be a key in `maplev-executable-alist'."
   :group 'maplev-executables
   :group 'maplev-important)
 
-(defconst maplev-interface-kernelopts-settings
-  (concat "interface('prettyprint=1,verboseproc=2,errorbreak=0,warnlevel=2,errorcursor=false,screenheight=infinity'):\n"
-          "kernelopts('printbytes=false'):\n" )
-  "Maple commands that assign the default interface and kernelopts settings." )
-
-(defcustom maplev-default-init-string
-  (concat
-   "maplev_print := `if`(assigned(maplev['PrintProc']),maplev:-PrintProc,print):\n"
-   maplev-interface-kernelopts-settings)
-  "Default Maple commands used to initialize a Maple process.
-Use `maplev-init-string-alist' to customize initialization commands
-for particular releases.")
-
-(defcustom maplev-init-string-alist
-  (let ((init
-         (concat
-          "if not assigned(maplev_print) then maplev_print := proc(n)print(`if`(type(evaln(n),'procedure'),eval,readlib)(n))end:fi:\n"
-          maplev-interface-kernelopts-settings)))
-    `(("5.1" . ,init)
-      ("5"   . ,init)))
-  "Assoc list of Maple commands initializing a maple session.
-Each item has the form \(RELEASE COMMANDS\) where RELEASE is the
-Maple release.  COMMANDS must be a string of Maple commands.
-Overrides `maplev-default-init-string'."
-  :type '(repeat (cons (string :tag "Maple Release")
-                       (string :tag "Maple Commands")))
-  :group 'maplev-executables
-  :group 'maplev-important)
-
 (defcustom maplev-mint-info-level 3
   "Integer controlling amount of information that Mint outputs."
   :type '(choice (const :tag "no info" 0)
