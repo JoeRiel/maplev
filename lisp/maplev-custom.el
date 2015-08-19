@@ -61,56 +61,36 @@
 
 ;;{{{   executables
 
-(defun maplev-windows-executables (major-release &optional num-exe-flag ini-file)
-  "Return a list of the Maple executables for Windows.
-MAJOR-RELEASE is the Maple major release number; if NUM-EXE-FLAG
-is non-nil, MAJOR-RELEASE is appended to the cmaple
-name.  Optional INI-FILE specifies an initialization file.  A list
-of three elements is returned \[cmaple, ini-file, mint\]."
-  (let ((num (if num-exe-flag major-release "")))
-  (list (format "c:/Program Files/Maple Release %s/bin.wnt/cmaple%s.exe" major-release num)
-        ini-file
-        (format "c:/Program Files/Maple Release %s/bin.wnt/mint%s.exe" major-release num))))
-
 (defcustom maplev-executable-alist
-  (if (string-match "windows-nt\\|ms-dos" (symbol-name system-type))
-      `(("16" . ,(maplev-windows-executables "16" t))
-	("15" . ,(maplev-windows-executables "15" t))
-        ("14" . ,(maplev-windows-executables "14" t))
-        ("13" . ,(maplev-windows-executables "13" t))
-        ("12" . ,(maplev-windows-executables "12" t))
-        ("11" . ,(maplev-windows-executables "11" t))
-        ("10" . ,(maplev-windows-executables "10" t))
-        ("9"  . ,(maplev-windows-executables "9"  t))
-        ("8"  . ,(maplev-windows-executables "8"  t))
-        ("7"  . ,(maplev-windows-executables "7"  t))
-        ("6"  . ,(maplev-windows-executables "6"  t))
-        ("5"  . ,(maplev-windows-executables "5"  t))
-        ("4"  . ,(maplev-windows-executables "4"  t))
-        ("3"  . ,(maplev-windows-executables "3"  t)))
-    '(
-      ("16"  . ("maple" nil "mint"))
-      ("15"  . ("maple" nil "mint"))
-      ("14"  . ("maple" nil "mint"))
-      ("13"  . ("maple" nil "mint"))
-      ("12"  . ("maple" nil "mint"))
-      ("11"  . ("maple" nil "mint"))
-      ("10"  . ("maple" nil "mint"))
-      ("9"   . ("maple" nil "mint"))
-      ("8"   . ("maple" nil "mint"))
-      ("7"   . ("maple" nil "mint"))
-      ("6"   . ("maple" nil "mint"))
-      ("5.1" . ("maple" nil "mint"))
-      ("5"   . ("maple" nil "mint"))
-      ("4"   . ("maple" nil "mint"))))
+  '(("default" "maple" nil "mint"))
+  
   "Assoc list specifying the available executables.
-Each item has the form \(RELEASE MAPLE MAPLE-INIFILE MINT\)
-where RELEASE is the Maple release corresponding to the
-executables MAPLE and MINT.  MAPLE must be the command line
-\(non-GUI\) version of Maple.  MAPLE-INIFILE is the maple
-initialization file for running Maple under Emacs;
-if nil the default initialization file is used."
-  :type '(repeat (list (string :tag "Maple Release")
+Each sublist has the form \(ID MAPLE MAPLE-INIFILE MINT\).
+
+ID is a string used to select and identify the list; the name is arbitrary
+but will be displayed in the mode-line.
+
+MAPLE is the command that launches the tty version of Maple.  
+
+MAPLE-INIFILE is the maple initialization file for running Maple under Emacs;
+if nil the default initialization file is used.
+
+MINT is the command to launch Mint, the Maple syntax checker.
+
+To determine the name and path to the Maple and Mint executables,
+launch Maple and execute kernelopts\(mapledir\).  That returns the
+directory in which Maple is installed.  
+
+On Linux or Mac, the shell commands are locate in the \"bin\"
+subdirectory of the installed directory  and are named maple and mint.  
+
+On Windows the shell commands are usually in the \"bin.wnt\"
+subdirectory of the installed directory and are named
+cmapleXXX.exe and mintXXX.exe, where XXX is the Maple release.
+When entering the path to the binaries, use forward slashes (/)
+not backslashes as the directory separators."
+
+  :type '(repeat (list (string :tag "Identifier")
                        (file   :tag "Maple Executable")
                        (choice :tag "Maple Initialization File"
                                file (const :tag "none" nil))
@@ -118,12 +98,9 @@ if nil the default initialization file is used."
   :group 'maplev-executables
   :group 'maplev-important)
 
-;; this isn't quite right, it doesn't permit assigning
-;; a new release.
-
-(defcustom maplev-default-release "15"
+(defcustom maplev-default-release "default"
   "Release of Maple used as the default executable.
-It must be a key in `maplev-executable-alist'."
+It must be an id in `maplev-executable-alist'."
   :type `(choice ,@(mapcar (lambda (item)
                              (list 'const (car item)))
                            maplev-executable-alist))
