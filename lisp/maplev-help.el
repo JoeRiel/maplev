@@ -5,6 +5,7 @@
 
 ;;; Code:
 
+
 (require 'comint)
 (require 'maplev-re)
 (require 'maplev-custom)
@@ -21,7 +22,6 @@
 (declare-function maplev-cmaple--ready "maplev-cmaple")
 (declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
 (declare-function maplev-cmaple-direct "maplev-cmaple")
-
 
 ;;{{{ mode map
 
@@ -97,7 +97,8 @@
 
 (defun maplev-help-mode (&optional release)
   "Major mode for displaying Maple help pages.
-RELEASE is the Maple release, if nil, `maplev-default-release' is used.
+RELEASE is an id in `maplev-executable-alist'; if nil, the
+first id is used.
 
 \\{maplev-help-mode-map}"
   (interactive)

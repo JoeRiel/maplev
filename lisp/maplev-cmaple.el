@@ -368,8 +368,8 @@ PROCESS is the Maple process, STRING its output."
 
 (defun maplev-cmaple-mode (&optional release)
   "Major mode for interacting with cmaple.
-RELEASE is the release of Maple that should be started, if nil the
-`maplev-default-release' is used.  It has the same commands as
+RELEASE is an id in `maplev-executable-alist'; if omitted the
+first id is used.  This mode has the same commands as
 `comint-mode' plus some additional commands for interacting with
 cmaple.
 

@@ -64,11 +64,14 @@
 (defcustom maplev-executable-alist
   '(("default" "maple" nil "mint"))
   
-  "Assoc list specifying the available executables.
-Each sublist has the form \(ID MAPLE MAPLE-INIFILE MINT\).
+  "Association list specifying the available executables.
+Each sublist has the form \(ID MAPLE MAPLE-INIFILE MINT\).  
+The purpose of this list is to permit selecting different
+versions of Maple.
 
-ID is a string used to select and identify the list; the name is arbitrary
-but will be displayed in the mode-line.
+ID is a string used to select and identify the sublist; its value
+is arbitrary but will be displayed in the mode-line of the maple
+buffer.  The id of the first entry is used as the default.
 
 MAPLE is the command that launches the tty version of Maple.  
 
@@ -78,32 +81,24 @@ if nil the default initialization file is used.
 MINT is the command to launch Mint, the Maple syntax checker.
 
 To determine the name and path to the Maple and Mint executables,
-launch Maple and execute kernelopts\(mapledir\).  That returns the
-directory in which Maple is installed.  
+launch Maple and execute \'kernelopts\(mapledir\)\'.  That
+returns the directory in which Maple is installed.
 
-On Linux or Mac, the shell commands are locate in the \"bin\"
-subdirectory of the installed directory  and are named maple and mint.  
+On Linux or Mac, the shell commands are locate in the \`bin\'
+subdirectory of the installed directory and are named \`maple\'
+and \`mint\'.
 
-On Windows the shell commands are usually in the \"bin.wnt\"
+On Windows the shell commands are usually in the \`bin.wnt\'
 subdirectory of the installed directory and are named
-cmapleXXX.exe and mintXXX.exe, where XXX is the Maple release.
-When entering the path to the binaries, use forward slashes (/)
-not backslashes as the directory separators."
+\`cmapleXXXX.exe\' and \`mintXXXX.exe\', where XXXX is the Maple
+release.  When entering the path to the binaries, use forward
+slashes (/) as the directory separators."
 
   :type '(repeat (list (string :tag "Identifier")
                        (file   :tag "Maple Executable")
                        (choice :tag "Maple Initialization File"
                                file (const :tag "none" nil))
                        (file   :tag "Mint Executable ")))
-  :group 'maplev-executables
-  :group 'maplev-important)
-
-(defcustom maplev-default-release "default"
-  "Release of Maple used as the default executable.
-It must be an id in `maplev-executable-alist'."
-  :type `(choice ,@(mapcar (lambda (item)
-                             (list 'const (car item)))
-                           maplev-executable-alist))
   :group 'maplev-executables
   :group 'maplev-important)
 
@@ -132,15 +127,6 @@ they are handled by `maplev-mint-info-level' and `maplev-include-path'.
 The line-width option (-w) is used to ensure that a reference to 
 an included file appears on a single line."
   :type 'list
-  ;;   :type '(repeat (choice (const :tag "no logo" " -q")
-  ;;                       (const :tag "suppress startup" " -s")
-  ;;                       (const :tag "syntax only" " -S")
-  ;;                       (const :tag "cross reference" " -x")
-  ;;                       (list :tag "library" (const " -b") directory)
-  ;;                       (list :tag "append database" (const " -a ") file)
-  ;;                       (list :tag "use database" (const " -d ") file)
-  ;;                       (list :tag "toggle error" (const " -t ") (string :tag "error number"))))
-
   :group 'maplev-mint)
 
 (defcustom maplev-include-path nil

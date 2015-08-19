@@ -1113,8 +1113,6 @@ index/package help pages.  If it already exists, do nothing."
 (defun maplev--completion (word predicate mode)
   "Generate minibuffer completion using maple function names.
 For the meaning of args see Info node `(elisp)Programmed Completion'."
-  ;; Make sure we are using the correct value of maplev-release.
-  ;; (Inside the minibuffer maplev-release equals maplev-default-release.)
   (let ((maplev-release maplev-completion-release))
     (maplev--generate-initial-completion-alist)
     (let ((possibilities (cadr (assoc maplev-release maplev-completion-alist))))

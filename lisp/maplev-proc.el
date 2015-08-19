@@ -12,7 +12,6 @@
   (defvar maplev--builtin-functions-alist)
   (defvar maplev--process-item)
   (defvar maplev-cmaple-echoes-flag)
-  (defvar maplev-default-release)
   (defvar maplev-help-mode-map)
   (defvar maplev-release))
 
@@ -20,12 +19,12 @@
 (declare-function event-window "maplev-common")
 (declare-function maplev--cleanup-buffer "maplev-cmaple")
 (declare-function maplev--cmaple-process "maplev-cmaple")
-(declare-function maplev-history--stack-process "maplev-history")
 (declare-function maplev--ident-around-point "maplev-common")
 (declare-function maplev--major-release "maplev-common")
 (declare-function maplev-cmaple--lock-access "maplev-cmaple")
 (declare-function maplev-cmaple--ready "maplev-cmaple")
 (declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
+(declare-function maplev-history--stack-process "maplev-history")
 (declare-function maplev-history-clear "maplev-history")
 (declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-indent-buffer "maplev-indent")
@@ -54,7 +53,8 @@
 
 (defun maplev-proc-mode (&optional release)
   "Major mode for displaying the source code of Maple procedures.
-RELEASE is the Maple release, if nil, `maplev-default-release' is used.
+RELEASE is an id in `maplev-executable-alist'; if nil, the
+first id is used.
 
 \\{maplev-proc-mode-map}"
   (interactive)
