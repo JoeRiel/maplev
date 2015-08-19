@@ -1,4 +1,4 @@
-;;; maplev.el --- Maple mode for GNU Emacs
+;; maplev.el --- Maple mode for GNU Emacs
 ;;
 ;; Copyright (C) 2001,2003,2008,2009,2015 Joseph S. Riel
 
@@ -1411,7 +1411,7 @@ file (either < or \").  The second group matches the filename.")
 
 (defconst maplev--protected-names-re
   (eval-when-compile
-    (concat "\\<\\(?:"
+    (concat "\\<"
             (regexp-opt
              (list
 	      ;; constants
@@ -1449,7 +1449,7 @@ file (either < or \").  The second group matches the filename.")
 	      "stack" "string" "symbol" "symmfunc" "tabular" "trig" "truefalse" "truefalseFAIL"
 	      "undefined" "uneval" "zppoly"
 	      
-	      ;; procedures
+	      ;; math procedures
 	      "AiryAi" "AiryAiZeros" "AiryBi" "AiryBiZeros" "AngerJ" "ArrayDims" 
 	      "ArrayElems" "ArrayIndFns" "ArrayNumDims" "BesselI" "BesselJ" 
 	      "BesselJZeros" "BesselK" "BesselY" "BesselYZeros" "Beta" "ChebyshevT" 
@@ -1503,8 +1503,11 @@ file (either < or \").  The second group matches the filename.")
 	      "tan" "tanh" "testeq" "thaw" "unapply" "unassign" "undefine" 
 	      "unprotect" "unwindK" "unwith" "usage" "value" "verify" "version" 
 	      "whattype" "with" "ztrans"
-	      )
-	     "\\)\\>")))
+
+	      ;; miscellaneous procedures
+	      "interface" 
+	      ))
+	    "\\>"))
   "List of some of the protected names in Maple.
 This is supposed to exclude the builtins and reserved words.")
 
