@@ -171,7 +171,7 @@ Used by mint-mode with ffip-project-files to locate the project files.")
 ;;{{{ Syntax table
 
 (defvar maplev-mode-syntax-table nil
-  "Syntax table used in MapleV mode buffers \(except R4\).")
+  "Syntax table used in MapleV mode buffers.")
 
 (unless maplev-mode-syntax-table
   (let ((table (make-syntax-table)))
@@ -179,6 +179,8 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (modify-syntax-entry ?~  "_"  table) ; symbol constituent
     (modify-syntax-entry ??  "_"  table) ; symbol constituent
     (modify-syntax-entry ?&  "w"  table) ; word constituent
+    (modify-syntax-entry ?%  "w"  table) ; word constituent
+
     (modify-syntax-entry ?\\ "\\" table) ; escape
     (modify-syntax-entry ?#  "<"  table) ; comment starter
     (modify-syntax-entry ?\n ">"  table) ; newline = comment ender
@@ -197,8 +199,9 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (modify-syntax-entry ?.  "."  table)
     (modify-syntax-entry ?|  "."  table)
     
-    (modify-syntax-entry ?\' "\"" table) ; string quotes
-    (modify-syntax-entry ?\` "\"" table) ; string quotes
+    (modify-syntax-entry ?\" "\"" table) ; string quote
+    (modify-syntax-entry ?\' "\"" table) ; string quote
+    (modify-syntax-entry ?\` "\"" table) ; string quote
     (modify-syntax-entry ?\{ "(}" table) ; balanced brackets
     (modify-syntax-entry ?\[ "(]" table)
     (modify-syntax-entry ?\( "()1n" table)
@@ -1256,7 +1259,6 @@ otherwise use `maplev-tab-width'."
     "while" "xor")
   "List of reserved words for Maple.")
 
-
 ;;}}}
 
 (defconst maplev--deprecated-re
@@ -1330,7 +1332,7 @@ file (either < or \").  The second group matches the filename.")
          "tabular" "uneval" "zppoly")))
   "Alist of builtin Maple types.  Currently not used.")
 
-(defconst maplev-builtin-functions
+(defconst maplev--builtin-functions
   '("`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`"
     "`>=`" "`?()`" "`?[]`" "ASSERT" "Array" "ArrayOptions" "CopySign"
     "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" "ERROR"
@@ -1388,12 +1390,9 @@ file (either < or \").  The second group matches the filename.")
 
 ;;}}}
 
-(defun maplev--ditto-operators-re ()
-  "Return a regexp that matches the ditto operators."
-  (regexp-opt
-   (if (< (maplev--major-release) 5)
-       '("\"" "\"\"" "\"\"\"")
-     '("%" "%%" "%%%"))))
+(defconst maplev--ditto-operators-re
+  (eval-when-compile (regexp-opt '("%" "%%" "%%%")))
+  "Return a regexp that matches the ditto operators.")
 
 (defvar maplev-protected-face   'maplev-protected-face
   "*Face name for Maple protected names.")
@@ -1565,14 +1564,14 @@ minimum decoration keywords."
    (list
     (list maplev--special-words-re     '(0 font-lock-variable-name-face))
     (list maplev--initial-variables-re '(0 font-lock-reference-face))
-    (list (maplev--ditto-operators-re) '(0 font-lock-variable-name-face)))))
+    (list maplev--ditto-operators-re   '(0 font-lock-variable-name-face)))))
 
 (defun maplev-font-lock-keywords-3 ()
   "Compute the maximum decoration `font-lock-keywords' for MapleV mode.
 Add builtin functions to the medium decoration keywords."
   (let ((max-specpdl-size 10000))       ; default 600 is too small
     (append (maplev-font-lock-keywords-2)
-            (list (list (maplev--list-to-word-re maplev-builtin-functions)
+            (list (list (maplev--list-to-word-re maplev--builtin-functions)
                         ;; Xemacs doesn't have font-lock-builtin-face
                         '(0 font-lock-builtin-face))
                   (list maplev--deprecated-re '(0 font-lock-warning-face))
@@ -1585,14 +1584,6 @@ Add builtin functions to the medium decoration keywords."
     maplev-font-lock-keywords-1
     maplev-font-lock-keywords-2
     maplev-font-lock-keywords-3))
-
-(defun maplev--font-lock-syntax-alist ()
-  "Return the syntax alist appropriate for font lock.
-It depends on `maplev--major-release'."
-  `((?_ . "w")                          ; make `_' a word character
-    ,(if (< (maplev--major-release) 5)
-         '(?\" . "w")     ; make `"' a word character for R4 and down.
-       '(?% . "w"))))       ; make `%' a word character for R5 and up.
 
 (defun maplev--syntax-begin ()
   "Move backwards to start of a Maple procedure.
@@ -1610,7 +1601,7 @@ If nil then `font-lock-maximum-decoration' selects the level."
       (setq font-lock-maximum-decoration decoration))
   (setq font-lock-defaults `(,(maplev--font-lock-keywords)
                              nil nil
-                             ,(maplev--font-lock-syntax-alist)
+                             ((?_ . "w")) ; make underscore a word constituent
                              maplev--syntax-begin))
   (font-lock-set-defaults)
   (font-lock-fontify-buffer))

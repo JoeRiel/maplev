@@ -54,11 +54,6 @@
 Used to index `maplev-executable-alist'.")
 (make-variable-buffer-local 'maplev-release)
 
-(defsubst maplev--major-release ()
-  "Integer variable assigned the selected release of Maple."
-  (truncate (string-to-number maplev-release)))
-
-
 (defun maplev-set-release (&optional release)
   "Assign the buffer local variable `maplev-release'.
 RELEASE is a key in `maplev-executable-alist'; if not supplied
@@ -75,9 +70,7 @@ the buffer."
     (error "Invalid Maple release: %S" release))
   (setq maplev-release release)
   (cond ((memq major-mode '(maplev-mode maplev-cmaple-mode maplev-proc-mode))
-         (if (< (maplev--major-release) 5)
-             (set-syntax-table maplev-mode-4-syntax-table)
-           (set-syntax-table maplev-mode-syntax-table)))
+	 (set-syntax-table maplev-mode-syntax-table))
         ;; for consistency also maplev-help-mode
         ((eq major-mode 'maplev-help-mode)
          (set-syntax-table maplev-help-mode-syntax-table)))

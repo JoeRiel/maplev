@@ -64,10 +64,9 @@
 (defcustom maplev-executable-alist
   '(("default" "maple" nil "mint"))
   
-  "Association list specifying the available executables.
-Each sublist has the form \(ID MAPLE MAPLE-INIFILE MINT\).  
-The purpose of this list is to permit selecting different
-versions of Maple.
+  "Association list specifying the available executables to
+permit selecting different installations of Maple.  Each sublist
+has the form \(ID MAPLE MAPLE-INIFILE MINT\).
 
 ID is a string used to select and identify the sublist; its value
 is arbitrary but will be displayed in the mode-line of the maple

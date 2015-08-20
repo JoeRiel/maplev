@@ -9,7 +9,7 @@
 (require 'comint)
 
 (eval-when-compile
-  (defvar maplev--builtin-functions-alist)
+  (defvar maplev--builtin-functions)
   (defvar maplev--process-item)
   (defvar maplev-cmaple-echoes-flag)
   (defvar maplev-help-mode-map)
@@ -20,7 +20,6 @@
 (declare-function maplev--cleanup-buffer "maplev-cmaple")
 (declare-function maplev--cmaple-process "maplev-cmaple")
 (declare-function maplev--ident-around-point "maplev-common")
-(declare-function maplev--major-release "maplev-common")
 (declare-function maplev-cmaple--lock-access "maplev-cmaple")
 (declare-function maplev-cmaple--ready "maplev-cmaple")
 (declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
@@ -114,9 +113,7 @@ Request procedure name in minibuffer, using identifier at point as default."
 Push PROC onto the local stack, unless it is already on the top.
 If optional arg HIDE is non-nil do not display buffer."
   ;; Do not try to display builtin procedures.
-  (if (assoc proc (mapcar 'list
-                          (cdr (assoc (maplev--major-release)
-                                      maplev--builtin-functions-alist))))
+  (if (assoc proc (mapcar 'list maplev--builtin-functions))
       (message "Procedure \`%s\' builtin." proc)
     (save-current-buffer
       (let ((release maplev-release)) ;; we switch buffers!
@@ -137,7 +134,7 @@ If optional arg HIDE is non-nil do not display buffer."
       (goto-char (point-min))
       ;;(insert proc " := ")
       )
-    (comint-simple-send process (concat "maplev_print(\"" proc "\");"))
+    (comint-simple-send process (format "maplev:-PrintProc(\"%s\"):" proc))
     (maplev-cmaple--send-end-notice process)))
 
 (defun maplev-proc-filter (process string)
@@ -160,7 +157,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
   (save-excursion
     (when maplev-cmaple-echoes-flag
       (goto-char (point-min))
-      (if (re-search-forward "maplev_print(.+);\n" nil t)
+      (if (re-search-forward "maplev:-PrintProc(.+):\n" nil t)
           (delete-region (match-beginning 0) (match-end 0))))
     ;; Delete multiple spaces.
     (goto-char (point-min))
