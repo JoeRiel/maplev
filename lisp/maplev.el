@@ -1310,27 +1310,27 @@ file (either < or \").  The second group matches the filename.")
 ;; quoted names rather than as builtin functions.  Fixing this
 ;; requires pulling them out.
 
-(defconst maplev--builtin-types-alist
-  '((8. ("`::`" "`..`" "`!`"
-         "algebraic" "anyfunc" "anything" "atomic"
-         "boolean"
-         "complex" "constant" "cx_infinity" "cx_zero"
-         "embedded_axis" "embedded_imaginary" "embedded_real"
-         "equation" "even" "extended_numeric" "extended_rational"
-         "finite" "float" "fraction" "function"
-         "identical" "imaginary" "indexable" "indexed" "integer"
-         "list" "literal"
-         "module" "moduledefinition"
-         "name" "neg_infinity" "negative" "negint" "negzero"
-         "nonnegative" "nonnegint" "nonposint" "nonpositive"
-         "nonreal" "numeric" "odd"
-         "polynom" "pos_infinity" "posint" "positive" "poszero"
-         "procedure" "protected"
-         "radical" "range" "rational" "ratpoly" "real_infinity"
-         "realcons" "relation"
-         "sequential" "set" "sfloat" "specfunc" "string" "symbol"
-         "tabular" "uneval" "zppoly")))
-  "Alist of builtin Maple types.  Currently not used.")
+(defconst maplev--builtin-types
+  '("`::`" "`..`" "`!`"
+    "algebraic" "anyfunc" "anything" "atomic"
+    "boolean"
+    "complex" "constant" "cx_infinity" "cx_zero"
+    "embedded_axis" "embedded_imaginary" "embedded_real"
+    "equation" "even" "extended_numeric" "extended_rational"
+    "finite" "float" "fraction" "function"
+    "identical" "imaginary" "indexable" "indexed" "integer"
+    "list" "literal"
+    "module" "moduledefinition"
+    "name" "neg_infinity" "negative" "negint" "negzero"
+    "nonnegative" "nonnegint" "nonposint" "nonpositive"
+    "nonreal" "numeric" "odd"
+    "polynom" "pos_infinity" "posint" "positive" "poszero"
+    "procedure" "protected"
+    "radical" "range" "rational" "ratpoly" "real_infinity"
+    "realcons" "relation"
+    "sequential" "set" "sfloat" "specfunc" "string" "symbol"
+    "tabular" "uneval" "zppoly")
+  "List of builtin Maple types.")
 
 (defconst maplev--builtin-functions
   '("`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`"
@@ -1571,7 +1571,8 @@ minimum decoration keywords."
 Add builtin functions to the medium decoration keywords."
   (let ((max-specpdl-size 10000))       ; default 600 is too small
     (append (maplev-font-lock-keywords-2)
-            (list (list (maplev--list-to-word-re maplev--builtin-functions)
+            (list (list (maplev--list-to-word-re (append maplev--builtin-functions
+							 maplev--builtin-types))
                         ;; Xemacs doesn't have font-lock-builtin-face
                         '(0 font-lock-builtin-face))
                   (list maplev--deprecated-re '(0 font-lock-warning-face))
