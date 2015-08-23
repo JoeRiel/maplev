@@ -44,7 +44,7 @@ local Dispatch, PrintModule, PrintProc;
                      , { is_static :: truefalse := false }
                     )
     local indent;
-        if   expr :: procedure then
+        if expr :: procedure then
             PrintProc(expr, indent_level, nomen, _options['is_static']);
         elif expr :: '`module`' and not expr :: 'record' then
             PrintModule(expr, indent_level, nomen);
@@ -56,6 +56,11 @@ local Dispatch, PrintModule, PrintProc;
 
 
 ##PROCEDURE maplev[Print][PrintModule]
+##DESCRIPTION
+##- The `PrintModule` commands prints module 'm',
+##  which can be either a regular module, or an object.
+##  A record is not handled.
+
 
     PrintModule := proc(m
                         , indent_level :: nonnegint
@@ -138,13 +143,13 @@ local Dispatch, PrintModule, PrintProc;
 
         str := substring(debugopts('procdump' = p), 1..-2);
 
-        # Create name replacement
+        # Create name replacement; add static
         rep := `if`(is_static
                     , sprintf("%a :: static :=\\1", nomen)
                     , sprintf("%a :=\\1", nomen)
                    );
 
-        # escape ampersand (maybe other stuff)
+        # Escape special characters (skip \1, etc.; a backslash in a name is a bad idea)
         rep := StringTools:-RegSubs("&" = "\\\\&", rep);
 
         # Create string of procedure listing, with statement
