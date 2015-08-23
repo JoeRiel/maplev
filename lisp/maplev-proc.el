@@ -134,7 +134,7 @@ If optional arg HIDE is non-nil do not display buffer."
       (goto-char (point-min))
       ;;(insert proc " := ")
       )
-    (comint-simple-send process (format "maplev:-PrintProc(\"%s\"):" proc))
+    (comint-simple-send process (format "maplev:-Print(\"%s\"):" proc))
     (maplev-cmaple--send-end-notice process)))
 
 (defun maplev-proc-filter (process string)
@@ -157,7 +157,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
   (save-excursion
     (when maplev-cmaple-echoes-flag
       (goto-char (point-min))
-      (if (re-search-forward "maplev:-PrintProc(.+):\n" nil t)
+      (if (re-search-forward "maplev:-Print(.+):\n" nil t)
           (delete-region (match-beginning 0) (match-end 0))))
     ;; Delete multiple spaces.
     (goto-char (point-min))
