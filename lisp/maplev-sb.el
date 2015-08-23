@@ -79,8 +79,8 @@ Markers allow the links to work as the file is edited."
 (defconst maplev-sb-keyword-re
   (concat "\\_<\\("
 	  "module\\|proc\\|do\\|end\\|fi\\|if\\|od\\|try\\|use"
-	  "\\|^\$\\([a-z]+\\)"
-	  "\\)\\_>")
+	  "\\|^\$\\([a-z]+\\)"  ; preprocessor macro
+	  "\\)\\_>")            
   "Regular expression that matches Maple keywords. Keyword is in group 1.")
 
 (defconst maplev-sb-assign-re
@@ -175,20 +175,21 @@ or the symbol 'end."
     (set (make-local-variable 'speedbar-generic-list-group-expand-button-type) 'expandtag)
     (set (make-local-variable 'speedbar-generic-list-tag-button-type) 'statictag)
     
-    (setq case-fold-search nil) ; use case-sensitive searches/matching
     (goto-char (point-min))     ; start at top of buffer
+    
     (let ((point (point))
 	  (macros maplev-sb-defined-macros) ; list of defined macros
 	  (depth 0)
-	  (ends 0) 	; number of ends to skip over
-	  cond          ; flag true if preprocessor conditional
-	  ifdef-stack   ; stack to handle preprocessor conditions
-	  marker        ; marker used to point to start of keyword
-	  skip          ; flag set according to preprocessor conditional
-	  stack         ; stack
-	  state    	; parse-state
-	  tag           ; assigned marker or point
-	  id)      	; proc/module identifier
+	  (ends 0) 	   ; number of ends to skip over
+	  case-fold-search ; use case-sensitive searches/matching
+	  cond             ; flag true if preprocessor conditional
+	  ifdef-stack      ; stack to handle preprocessor conditions
+	  marker           ; marker used to point to start of keyword
+	  skip             ; flag set according to preprocessor conditional
+	  stack            ; stack
+	  state    	   ; parse-state
+	  tag              ; assigned marker or point
+	  id)      	   ; proc/module identifier
       ;; create stack of (id . marker) or 'end
       (while (re-search-forward maplev-sb-keyword-re nil 'noerror)
 	(setq state (parse-partial-sexp point (point) nil nil state)
