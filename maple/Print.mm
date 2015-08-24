@@ -3,7 +3,13 @@
 Print := module()
 
 export ModuleApply;
-local Dispatch, PrintModule, PrintProc, PrintRecord;
+local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
+    , buf # StringBuffer
+    ;
+
+    ModuleLoad := proc()
+        buf := StringTools:-StringBuffer();
+    end proc;
 
 ##PROCEDURE maplev[Print][ModuleApply]
 
@@ -11,7 +17,7 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
                         , { return_string :: truefalse := false }
                        )
 
-    local expr, opacity, width, str;
+    local expr, opacity, width;
 
         try
             # Save and reset configuration.
@@ -20,7 +26,9 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
 
             expr := parse(s);
 
-            str := Dispatch(expr, 0);
+            buf:-clear();
+
+            Dispatch(expr, 0);
 
         finally
             # restore configuration
@@ -29,9 +37,9 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
         end try;
 
         if return_string then
-            str;
+            buf:-value('clear');
         else
-            printf("%s\n", str);
+            printf("%s\n", buf:-value('clear'));
         end if;
 
     end proc;
@@ -51,7 +59,7 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
             PrintModule(expr, indent_level, nomen);
         else
             indent := 4 * indent_level;
-            sprintf("%*s%a = %a", indent, "", nomen, eval(expr));
+            buf:-appendf("%*s%a = %a", indent, "", nomen, eval(expr));
         end if;
     end proc;
 
@@ -67,13 +75,12 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
                         , indent_level :: nonnegint
                         , nomen := m
                        )
-    local buf, em, ex, indent, moddef,nm, obj;
+    local em, ex, indent, moddef,nm, obj;
     uses %ST = StringTools;
 
         em := eval(m);
         moddef := op(2,em);
 
-        buf := %ST:-StringBuffer();
         indent := indent_level * 4;
         buf:-appendf("%*s%a := module ()\n", indent, "", nomen);
         if op(2,moddef) <> NULL then
@@ -96,30 +103,32 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
             obj := eval(m);
             # print exports
             for ex in exports(obj,'static','instance') do
-                buf:-appendf("\n%s\n", Dispatch(ex, indent_level+1
-                                                , convert(convert(ex,string),name)
-                                                , 'is_static'
-                                               ));
+                buf:-newline();
+                Dispatch(ex, indent_level+1
+                         , convert(convert(ex,string),name)
+                         , 'is_static'
+                        );
+                buf:-newline();
             end do;
         else
-            local str;
             # print exports
             for ex in exports(m) do
-                str := Dispatch(m[ex], indent_level+1, ex);
-                buf:-appendf("\n%s\n", str);
+                buf:-newline();
+                Dispatch(m[ex], indent_level+1, ex);
+                buf:-newline();
             end do;
             # print locals;
             for ex in op(3,em) do
                 if ex :: '{procedure,`module`}' then
                     nm := convert(StringTools:-StringSplit(ex,":-")[-1],name);
-                    str := Dispatch(ex, indent_level+1, nm);
-                    buf:-appendf("\n%s\n", str);
+                    buf:-newline();
+                    Dispatch(ex, indent_level+1, nm);
+                    buf:-newline();
                 end if;
             end do;
         end if;
         buf:-appendf("%*send module;", indent, "");
 
-        buf:-value();
     end proc;
 
 ##PROCEDURE maplev[Print][PrintProc]
@@ -139,7 +148,7 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
         indent := indent_level * 4;
 
         if p :: 'builtin' then
-            return sprintf("%*s%a\n", indent, "", eval(p));
+            buf:-appendf("%*s%a\n", indent, "", eval(p));
         end if;
 
         str := substring(debugopts('procdump' = p), 1..-2);
@@ -187,76 +196,7 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
             str := %ST:-Insert(str, pos, extra);
         end if;
 
-        str;
-
-    end proc;
-
-##PROCEDURE maplev[Print][PrintProc]
-##HALFLINE print a procedure
-
-
-    PrintProc := proc(p
-                      , indent_level :: nonnegint
-                      , nomen := p
-                      , { is_static :: truefalse := false }
-                     )
-    description "Print like showstat, but without line numbers";
-    uses %ST = StringTools;
-
-    local desc, extra, indent, opts, pos, str, rep;
-
-        indent := indent_level * 4;
-
-        if p :: 'builtin' then
-            return sprintf("%*s%a\n", indent, "", eval(p));
-        end if;
-
-        str := substring(debugopts('procdump' = p), 1..-2);
-
-        # Create name replacement; add static
-        rep := `if`(is_static
-                    , sprintf("%a :: static :=\\1", nomen)
-                    , sprintf("%a :=\\1", nomen)
-                   );
-
-        # Escape special characters (skip \1, etc.; a backslash in a name is a bad idea)
-        rep := StringTools:-RegSubs("&" = "\\\\&", rep);
-
-        # Create string of procedure listing, with statement
-        # numbers removed and indenting doubled.
-        str := sprintf("%*s%s;"
-                       , indent, ""
-                       , foldr(StringTools:-RegSubs
-                               , str
-                               , "^[^ ]* :=" = rep
-                               , "\n"      = sprintf("\n%*s", indent, "") # indent
-                               , "\n( +)"  = "\n\\1\\1" # double spaces used for indenting
-                               , "\n ...." = "\n"       # remove statement numbers
-                              )
-                      );
-
-        # Insert option and description statements, if assigned.
-        opts := op(3, eval(p));
-        desc := op(5, eval(p));
-
-        extra := "";
-        if opts <> NULL then
-            extra := sprintf("%*soption %q;\n", indent, "", opts);
-        end if;
-        if desc <> NULL then
-            extra := sprintf("%s%*sdescription %q;\n", extra, indent, "", desc);
-        end if;
-
-        if extra <> "" then
-            # Insert options/description after the first line (the procedure
-            # header).  The Maple print procedure inserts them after the
-            # local/global statements, however, that takes slightly more
-            # work.
-            pos := %ST:-Search("\n", str);
-            str := %ST:-Insert(str, pos, extra);
-        end if;
-
-        str;
+        buf:-append(str);
 
     end proc;
 
@@ -269,10 +209,7 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
                         , indent_level :: nonnegint
                         , nomen := rec
                        )
-    local buf, ex, indent;
-    uses %ST = StringTools;
-
-        buf := %ST:-StringBuffer();
+    local ex, indent;
 
         indent := 4*indent_level;
 
@@ -289,7 +226,6 @@ local Dispatch, PrintModule, PrintProc, PrintRecord;
         end do;
 
         buf:-appendf("%*s);", indent, "");
-        buf:-value();
     end proc;
 
 ##
