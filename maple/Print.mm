@@ -3,7 +3,7 @@
 Print := module()
 
 export ModuleApply;
-local Dispatch, PrintModule, PrintProc;
+local Dispatch, PrintModule, PrintProc, PrintRecord;
 
 ##PROCEDURE maplev[Print][ModuleApply]
 
@@ -41,16 +41,17 @@ local Dispatch, PrintModule, PrintProc;
     Dispatch := proc(expr
                      , indent_level :: nonnegint
                      , nomen := NULL
-                     , { is_static :: truefalse := false }
                     )
     local indent;
         if expr :: procedure then
-            PrintProc(expr, indent_level, nomen, _options['is_static']);
-        elif expr :: '`module`' and not expr :: 'record' then
+            PrintProc(args);
+        elif expr :: 'record' then
+            PrintRecord(args);
+        elif expr :: '`module`' then
             PrintModule(expr, indent_level, nomen);
         else
             indent := 4 * indent_level;
-            sprintf("%*s%a", indent, "", eval(expr));
+            sprintf("%*s%a = %a", indent, "", nomen, eval(expr));
         end if;
     end proc;
 
@@ -188,6 +189,107 @@ local Dispatch, PrintModule, PrintProc;
 
         str;
 
+    end proc;
+
+##PROCEDURE maplev[Print][PrintProc]
+##HALFLINE print a procedure
+
+
+    PrintProc := proc(p
+                      , indent_level :: nonnegint
+                      , nomen := p
+                      , { is_static :: truefalse := false }
+                     )
+    description "Print like showstat, but without line numbers";
+    uses %ST = StringTools;
+
+    local desc, extra, indent, opts, pos, str, rep;
+
+        indent := indent_level * 4;
+
+        if p :: 'builtin' then
+            return sprintf("%*s%a\n", indent, "", eval(p));
+        end if;
+
+        str := substring(debugopts('procdump' = p), 1..-2);
+
+        # Create name replacement; add static
+        rep := `if`(is_static
+                    , sprintf("%a :: static :=\\1", nomen)
+                    , sprintf("%a :=\\1", nomen)
+                   );
+
+        # Escape special characters (skip \1, etc.; a backslash in a name is a bad idea)
+        rep := StringTools:-RegSubs("&" = "\\\\&", rep);
+
+        # Create string of procedure listing, with statement
+        # numbers removed and indenting doubled.
+        str := sprintf("%*s%s;"
+                       , indent, ""
+                       , foldr(StringTools:-RegSubs
+                               , str
+                               , "^[^ ]* :=" = rep
+                               , "\n"      = sprintf("\n%*s", indent, "") # indent
+                               , "\n( +)"  = "\n\\1\\1" # double spaces used for indenting
+                               , "\n ...." = "\n"       # remove statement numbers
+                              )
+                      );
+
+        # Insert option and description statements, if assigned.
+        opts := op(3, eval(p));
+        desc := op(5, eval(p));
+
+        extra := "";
+        if opts <> NULL then
+            extra := sprintf("%*soption %q;\n", indent, "", opts);
+        end if;
+        if desc <> NULL then
+            extra := sprintf("%s%*sdescription %q;\n", extra, indent, "", desc);
+        end if;
+
+        if extra <> "" then
+            # Insert options/description after the first line (the procedure
+            # header).  The Maple print procedure inserts them after the
+            # local/global statements, however, that takes slightly more
+            # work.
+            pos := %ST:-Search("\n", str);
+            str := %ST:-Insert(str, pos, extra);
+        end if;
+
+        str;
+
+    end proc;
+
+
+##PROCEDURE maplev[Print][PrintRecord]
+##DESCRIPTION
+##- The `PrintRecord` commands prints record 'm'.
+
+    PrintRecord := proc(rec
+                        , indent_level :: nonnegint
+                        , nomen := rec
+                       )
+    local buf, ex, indent;
+    uses %ST = StringTools;
+
+        buf := %ST:-StringBuffer();
+
+        indent := 4*indent_level;
+
+        buf:-appendf("%*s%a := record(\n", indent, "", nomen);
+        # print exports
+        for ex in exports(rec) do
+            buf:-appendf("%s\n", Dispatch(`if`(rec[ex] = NULL
+                                               , ''NULL''
+                                               , rec[ex]
+                                              )
+                                          , indent_level+1
+                                          , ex
+                                         ));
+        end do;
+
+        buf:-appendf("%*s);", indent, "");
+        buf:-value();
     end proc;
 
 ##
