@@ -5,6 +5,7 @@ Print := module()
 export ModuleApply;
 local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
     , buf # StringBuffer
+    , indent_amount := 4
     ;
 
     ModuleLoad := proc()
@@ -24,11 +25,9 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
             opacity := kernelopts('opaquemodules'=false);
             width := interface('screenwidth'=9999);
 
-            expr := parse(s);
-
             buf:-clear();
-
-            Dispatch(expr, 0);
+            expr := parse(s);
+            Dispatch(0, expr, ":=", expr);
 
         finally
             # restore configuration
@@ -46,20 +45,20 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
 ##PROCEDURE maplev[Print][Dispatch]
 
-    Dispatch := proc(expr
-                     , indent_level :: nonnegint
-                     , nomen := NULL
+    Dispatch := proc(indent :: nonnegint
+                     , nomen
+                     , rel :: string
                     )
-    local indent;
+    local expr;
+        expr := _rest;
         if expr :: procedure then
             PrintProc(args);
         elif expr :: 'record' then
             PrintRecord(args);
         elif expr :: '`module`' then
-            PrintModule(expr, indent_level, nomen);
+            PrintModule(args);
         else
-            indent := 4 * indent_level;
-            buf:-appendf("%*s%a = %a", indent, "", nomen, eval(expr));
+            buf:-appendf("%*s%a %s %q", indent, "", nomen, rel, eval(expr));
         end if;
     end proc;
 
@@ -71,18 +70,18 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 ##  A record is not handled.
 
 
-    PrintModule := proc(m
-                        , indent_level :: nonnegint
-                        , nomen := m
+    PrintModule := proc(indent :: nonnegint
+                        , nomen
+                        , rel :: string
+                        , m
                        )
-    local em, ex, indent, moddef,nm, obj;
+    local em, ex, moddef, nm, obj;
     uses %ST = StringTools;
 
         em := eval(m);
         moddef := op(2,em);
 
-        indent := indent_level * 4;
-        buf:-appendf("%*s%a := module ()\n", indent, "", nomen);
+        buf:-appendf("%*s%a %s module ()\n", indent, "", nomen, rel);
         if op(2,moddef) <> NULL then
             buf:-appendf("%*slocal %q;\n", indent, "", op(2,moddef));
         end if;
@@ -93,7 +92,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
             buf:-appendf("%*sdescription %q;\n", indent, "", op(5,moddef));
         end if;
         if op(6,moddef) <> NULL then
-            buf:-appendf("%*sglobals %q;\n", indent, "", op(6,moddef));
+            buf:-appendf("%*sglobal %q;\n", indent, "", op(6,moddef));
         end if;
         if op(3,moddef) <> NULL then
             buf:-appendf("%*soptions %q;\n", indent, "", op(3,moddef));
@@ -104,9 +103,10 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
             # print exports
             for ex in exports(obj,'static','instance') do
                 buf:-newline();
-                Dispatch(ex, indent_level+1
+                Dispatch(indent + indent_amount
                          , convert(convert(ex,string),name)
-                         , 'is_static'
+                         , ":: static :="
+                         , ex
                         );
                 buf:-newline();
             end do;
@@ -114,7 +114,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
             # print exports
             for ex in exports(m) do
                 buf:-newline();
-                Dispatch(m[ex], indent_level+1, ex);
+                Dispatch(indent + indent_amount, ex, ":=", m[ex]);
                 buf:-newline();
             end do;
             # print locals;
@@ -122,7 +122,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
                 if ex :: '{procedure,`module`}' then
                     nm := convert(StringTools:-StringSplit(ex,":-")[-1],name);
                     buf:-newline();
-                    Dispatch(ex, indent_level+1, nm);
+                    Dispatch(indent + indent_amount, nm, ":=", ex);
                     buf:-newline();
                 end if;
             end do;
@@ -135,29 +135,25 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 ##HALFLINE print a procedure
 
 
-    PrintProc := proc(p
-                      , indent_level :: nonnegint
-                      , nomen := p
-                      , { is_static :: truefalse := false }
+    PrintProc := proc(indent :: nonnegint
+                      , nomen
+                      , rel :: string
+                      , p
                      )
     description "Print like showstat, but without line numbers";
     uses %ST = StringTools;
 
-    local desc, extra, indent, opts, pos, str, rep;
-
-        indent := indent_level * 4;
+    local desc, extra, opts, pos, str, rep;
 
         if p :: 'builtin' then
             buf:-appendf("%*s%a\n", indent, "", eval(p));
+            return;
         end if;
 
         str := substring(debugopts('procdump' = p), 1..-2);
 
-        # Create name replacement; add static
-        rep := `if`(is_static
-                    , sprintf("%a :: static :=\\1", nomen)
-                    , sprintf("%a :=\\1", nomen)
-                   );
+        # Create name replacement
+        rep := sprintf("%a %s\\1", nomen, rel);
 
         # Escape special characters (skip \1, etc.; a backslash in a name is a bad idea)
         rep := StringTools:-RegSubs("&" = "\\\\&", rep);
@@ -203,26 +199,29 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
 ##PROCEDURE maplev[Print][PrintRecord]
 ##DESCRIPTION
-##- The `PrintRecord` commands prints record 'm'.
 
-    PrintRecord := proc(rec
-                        , indent_level :: nonnegint
-                        , nomen := rec
+    PrintRecord := proc(indent :: nonnegint
+                        , nomen
+                        , rel :: string
+                        , rec
                        )
-    local ex, indent;
-
-        indent := 4*indent_level;
-
-        buf:-appendf("%*s%a := record(\n", indent, "", nomen);
+    local ex;
+        buf:-appendf("%*s%a %s record(\n", indent, "", nomen, rel);
         # print exports
         for ex in exports(rec) do
-            buf:-appendf("%s\n", Dispatch(`if`(rec[ex] = NULL
-                                               , ''NULL''
-                                               , rec[ex]
-                                              )
-                                          , indent_level+1
-                                          , ex
-                                         ));
+            if rec[ex] = NULL then
+                Dispatch(indent + indent_amount
+                         , ex
+                         , ""
+                        );
+            else
+                Dispatch(indent + indent_amount
+                         , ex
+                         , "="
+                         , rec[ex]
+                        );
+            end if;
+            buf:-newline();
         end do;
 
         buf:-appendf("%*s);", indent, "");
