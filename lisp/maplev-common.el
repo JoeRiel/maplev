@@ -15,7 +15,6 @@
   (defvar maplev-help-mode-syntax-table)
   (defvar maplev-mode-syntax-table)
   (defvar maplev-mode-4-syntax-table)
-  (defvar maplev-default-release)
   (defvar maplev-executable-alist)
   (defvar maplev-help-mode-syntax-table)
   (defvar maplev-history-list)
@@ -46,35 +45,32 @@
 ;;}}}
 ;;{{{ Release
 
-(defvar maplev-release maplev-default-release
+(defun maplev--default-release ()
+  "Return the car of the first item in `maplev-executable-alist'"
+  (caar maplev-executable-alist))
+
+(defvar maplev-release (maplev--default-release)
   "Buffer local string variable assigned the selected release of Maple.
 Used to index `maplev-executable-alist'.")
 (make-variable-buffer-local 'maplev-release)
 
-(defsubst maplev--major-release ()
-  "Integer variable assigned the selected release of Maple."
-  (truncate (string-to-number maplev-release)))
-
 (defun maplev-set-release (&optional release)
   "Assign the buffer local variable `maplev-release'.
-RELEASE is a key in `maplev-executable-alist', if not supplied then
-`maplev-default-release' is used.  Set syntax table according to
-RELEASE.  If in `maplev-mode' also refontify the buffer."
+RELEASE is a key in `maplev-executable-alist'; if not supplied
+use value returned by `maplev--default-release'.  Set syntax
+table according to RELEASE.  If in `maplev-mode' also refontify
+the buffer."
   (interactive
    (list (completing-read "Use Maple release: "
                           (mapcar #'(lambda (item) (list (car item)))
                                   maplev-executable-alist)
                           nil t)))
-  (setq release (or release maplev-default-release))
-  ;; Invalid values of release are possible only due to an invalid value
-  ;; of maplev-default-release.
+  (setq release (or release (maplev--default-release)))
   (unless (assoc release maplev-executable-alist)
     (error "Invalid Maple release: %S" release))
   (setq maplev-release release)
-  (cond ((memq major-mode '(maplev-mode maplev-cmaple-mode maplev-proc-mode))
-         (if (< (maplev--major-release) 5)
-             (set-syntax-table maplev-mode-4-syntax-table)
-           (set-syntax-table maplev-mode-syntax-table)))
+  (cond ((memq major-mode '(maplev-mode maplev-cmaple-mode maplev-view-mode))
+	 (set-syntax-table maplev-mode-syntax-table))
         ;; for consistency also maplev-help-mode
         ((eq major-mode 'maplev-help-mode)
          (set-syntax-table maplev-help-mode-syntax-table)))

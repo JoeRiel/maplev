@@ -1,9 +1,8 @@
-;;; maplev.el --- Maple mode for GNU Emacs
+;; maplev.el --- Maple mode for GNU Emacs
 ;;
-;;
-;; Copyright (C) 2001,2003,2008,2009 Joseph S. Riel
+;; Copyright (C) 2001,2003,2008,2009,2015 Joseph S. Riel
 
-;; Authors:    Joseph S. Riel <joer@san.rr.com>
+;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
 ;; Version:    2.31
@@ -34,7 +33,7 @@
 ;;   maplev-cmaple-mode: for running Maple
 ;;   maplev-mint-mode:   for displaying the output of mint
 ;;   maplev-help-mode:   for displaying Maple help pages
-;;   maplev-proc-mode:   for displaying Maple procedures
+;;   maplev-view-mode:   for displaying Maple procedures
 
 ;;; Features:
 
@@ -107,7 +106,7 @@
 
 (require 'button-lock)
 
-(require 'abbrevlist)
+;; (require 'abbrevlist)
 (require 'comint)
 ;; (require 'folding)
 (require 'font-lock)
@@ -120,9 +119,10 @@
 (require 'maplev-help)			; maplev-help-mode (view help pages)
 (require 'maplev-indent)		; indentation engine
 (require 'maplev-mint)			; maplev-mint-mode (view mint output)
-(require 'maplev-proc)			; maplev-proc-mode (view procedures)
+(require 'maplev-view)			; maplev-view-mode (view procedures)
 (require 'maplev-re)			; regular expressions
 (require 'maplev-utils)			; not much here just yet
+(require 'maplev-speedbar "maplev-sb")
 
 ;;}}}
 
@@ -131,14 +131,14 @@
 (defconst maplev-version "2.31" "Version of MapleV mode.")
 
 (defconst maplev-developer
-  "Joseph S. Riel <joer@san.rr.com>"
-  "Developers/maintainers of `maplev-mode'.")
+  "Joseph S. Riel <jriel@maplesoft.com>"
+  "Developer/maintainer of `maplev-mode'.")
 
 (defun maplev-about ()
   "Print information for `maplev-mode'."
   (interactive)
   (sit-for 0)
-  (message "maplev-mode version %s, (C) %s" maplev-version maplev-developer))
+  (message "maplev-mode version %s (C) %s" maplev-version maplev-developer))
 
 ;;}}}
 
@@ -165,13 +165,13 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
 (defvar maplev-project-root nil
   "Buffer-local variable assigned the root of the project.
 Used by mint-mode with ffip-project-files to locate the project files.")
-  
+
 
 ;;}}}
 ;;{{{ Syntax table
 
 (defvar maplev-mode-syntax-table nil
-  "Syntax table used in MapleV mode buffers \(except R4\).")
+  "Syntax table used in MapleV mode buffers.")
 
 (unless maplev-mode-syntax-table
   (let ((table (make-syntax-table)))
@@ -179,6 +179,8 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (modify-syntax-entry ?~  "_"  table) ; symbol constituent
     (modify-syntax-entry ??  "_"  table) ; symbol constituent
     (modify-syntax-entry ?&  "w"  table) ; word constituent
+    (modify-syntax-entry ?%  "w"  table) ; word constituent
+
     (modify-syntax-entry ?\\ "\\" table) ; escape
     (modify-syntax-entry ?#  "<"  table) ; comment starter
     (modify-syntax-entry ?\n ">"  table) ; newline = comment ender
@@ -187,17 +189,19 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (modify-syntax-entry ?\t " "  table) ; tab = whitespace
 
     (modify-syntax-entry ?*  ". 23b"  table) ; punctuation and used in multiline comments (* ... *)
+
     (modify-syntax-entry ?/  "."  table)
     (modify-syntax-entry ?+  "."  table)
     (modify-syntax-entry ?-  "."  table)
     (modify-syntax-entry ?=  "."  table)
-    ;; this is for noweb-mode
-;;    (modify-syntax-entry ?<  ". 12"  table)
-;;    (modify-syntax-entry ?>  ". 34"  table)
-
+    (modify-syntax-entry ?>  "."  table)
+    (modify-syntax-entry ?<  "."  table)
     (modify-syntax-entry ?.  "."  table)
-    (modify-syntax-entry ?\' "\"" table) ; string quotes
-    (modify-syntax-entry ?\` "\"" table) ; string quotes
+    (modify-syntax-entry ?|  "."  table)
+    
+    (modify-syntax-entry ?\" "\"" table) ; string quote
+    (modify-syntax-entry ?\' "\"" table) ; string quote
+    (modify-syntax-entry ?\` "\"" table) ; string quote
     (modify-syntax-entry ?\{ "(}" table) ; balanced brackets
     (modify-syntax-entry ?\[ "(]" table)
     (modify-syntax-entry ?\( "()1n" table)
@@ -302,13 +306,13 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (define-key map [(control c) return return] 'maplev-mint-rerun)
 
     ;; Help and proc comma
-      
+    
     (define-key map [(control ?\?)] 'maplev-help-at-point)
-    (define-key map [(meta ?\?)]    'maplev-proc-at-point)
+    (define-key map [(meta ?\?)]    'maplev-view-at-point)
     (define-key map [(control h) (meta d)] 'maplev-what-proc)
 
     (define-key map [(control shift mouse-2)] 'maplev-help-follow-mouse)
-    (define-key map [(meta shift mouse-2)]    'maplev-proc-follow-mouse)
+    (define-key map [(meta shift mouse-2)]    'maplev-view-follow-mouse)
 
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
@@ -439,10 +443,10 @@ controls the expansion."
         ("wh"    "while"      maplev--abbrev-hook 0)))
     (setq abbrevs-changed ac)))
 
-(defun maplev-abbrev-help ()
-  "List the currently defined abbreviations."
-  (interactive)
-  (list-one-abbrev-table maplev-mode-abbrev-table "*Abbrevs*"))
+;; (defun maplev-abbrev-help ()
+;;   "List the currently defined abbreviations."
+;;   (interactive)
+;;   (list-one-abbrev-table maplev-mode-abbrev-table "*Abbrevs*"))
 
 ;;}}}
 ;;{{{ Imenu support
@@ -454,8 +458,8 @@ controls the expansion."
 (defvar maplev-imenu-generic-expression
   `(("Procedures" ,maplev--defun-begin-re 2)
     ("Modules" ,(concat "^\\(" maplev--name-re "\\)"
-                          "[ \t\n]*:=[ \t\n]*"
-                          "module") 1)
+			"[ \t\n]*:=[ \t\n]*"
+			"module") 1)
     ("Macros" ,(concat "^macro([ \t]*\\([^ \t=]*\\)") 1))
   "Imenu expression for MapleV mode.  See `imenu-generic-expression'.")
 
@@ -603,7 +607,7 @@ Prefix JUSTIFY means justify as well."
 
 ;;{{{ MapleV mode 
 
-(defun maplev-mode ()
+(define-derived-mode maplev-mode fundamental-mode "MapleV"
   "Major mode for editing Maple code.
 
 \\[maplev-electric-tab] indents the current line.
@@ -619,14 +623,10 @@ There are functions and keys for indenting code, syntax checking \(via mint\),
 displaying Maple help pages and printing the source code of procedures from the
 Maple libraries.
 
+Key bindings:
 \\{maplev-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-  (use-local-map maplev-mode-map)
-  (setq major-mode 'maplev-mode)
-
-  ;; abbreviation
-  (setq local-abbrev-table maplev-mode-abbrev-table)
+  :group 'maplev
+  :abbrev maplev-mode-abbrev-table
 
   ;; paragraph filling
   ;;
@@ -666,8 +666,8 @@ Maple libraries.
 
   ;; comments
   (set (make-local-variable 'comment-start)            maplev-comment-start)
-;;  (if (< emacs-major-version 22)
-;;      (set (make-local-variable 'block-comment-start)      maplev-block-comment-start))
+  ;;  (if (< emacs-major-version 22)
+  ;;      (set (make-local-variable 'block-comment-start)      maplev-block-comment-start))
   (set (make-local-variable 'comment-end)              "")
   (set (make-local-variable 'comment-start-skip)       "#+[ \t]*")
   (set (make-local-variable 'comment-column)           maplev-comment-column)
@@ -703,8 +703,8 @@ Maple libraries.
   (make-local-variable 'maplev-mint--code-end)
 
   ;; Is this what one wants??
-  ;; (set (make-local-variable 'beginning-of-defun-function) #'(lambda () (maplev-proc-beginning 1 t)))
-  ;; (set (make-local-variable 'end-of-defun-function)       #'(lambda () (maplev-proc-end 1 t)))
+  ;; (set (make-local-variable 'beginning-of-defun-function) #'(lambda () (maplev-view-beginning 1 t)))
+  ;; (set (make-local-variable 'end-of-defun-function)       #'(lambda () (maplev-view-end 1 t)))
   ;; (set (make-local-variable 'add-log-current-defun-function)
   ;;      #'maplev-current-defun-name) ;; not yet available
 
@@ -802,7 +802,7 @@ The name of the procedure is inserted into the title of the fold."
       (folding-fold-region (point) (mark))
       (insert (concat " " proc))
       (folding-shift-out))))
-  
+
 ;;}}}
 
 ;;{{{ Movement functions
@@ -890,7 +890,7 @@ This is slightly too aggressive, it incorrectly matches, d.Ed, which is invalid.
     (while setA
       (setq head (pop setA))
       (unless (member head setB)
-	  (push head tmp)))
+	(push head tmp)))
     (reverse tmp)))
 
 ;;}}}
@@ -937,7 +937,7 @@ end statement.  Point is moved to the start of the function body."
       (insert "\ndescription " maplev-description-quote-char
               description maplev-description-quote-char ";"))
 
-    (insert "\n\nend")
+    (insert "\n\nend " function)
     (when fname
       (insert ":")
       (if maplev-comment-end-flag
@@ -1046,7 +1046,7 @@ index/package help pages.  If it already exists, do nothing."
     ;; index/package help page, set the interface variable
     ;; `screenwidth' to infinity and save the original value in the
     ;; elisp variable screenwidth.
-        
+    
     (let ((screenwidth (maplev-cmaple-direct
                         "lprint(interface('screenwidth'=infinity));" t))
           completions)
@@ -1116,8 +1116,6 @@ index/package help pages.  If it already exists, do nothing."
 (defun maplev--completion (word predicate mode)
   "Generate minibuffer completion using maple function names.
 For the meaning of args see Info node `(elisp)Programmed Completion'."
-  ;; Make sure we are using the correct value of maplev-release.
-  ;; (Inside the minibuffer maplev-release equals maplev-default-release.)
   (let ((maplev-release maplev-completion-release))
     (maplev--generate-initial-completion-alist)
     (let ((possibilities (cadr (assoc maplev-release maplev-completion-alist))))
@@ -1208,15 +1206,17 @@ moved to be before it."
   (when (eolp)
     (insert-char ?\" 1)
     (backward-char)))
-	   
+
 
 
 ;;}}}
 
+;;{{{ tab-width
+
 (defvar maplev-get-tab-width-function nil
-  "Use this to modify the tab-width used by maplev on a file based.
+  "Use this to modify the tab-width used by maplev on a per-file basis.
 If assigned it is passed the name of the file and should return
-the desired tab-with.")
+the desired tab-width.")
 
 (defun maplev-set-tab-width (&optional file)
   "Return the value of tab-width required by optional FILE, or if nil,
@@ -1226,6 +1226,8 @@ otherwise use `maplev-tab-width'."
   (setq tab-width (if (functionp 'maplev-get-tab-width-function)
 		      (funcall maplev-get-tab-width-function (or file (buffer-file-name)))
 		    maplev-tab-width)))
+
+;;}}}
 
 ;;{{{ Font lock
 
@@ -1244,147 +1246,55 @@ otherwise use `maplev-tab-width'."
 
 ;;{{{   reserved words
 
-(defconst maplev--reserved-words-3
-  '("and"  "by"   "do"        "done"   "elif"
-    "else" "end"  "fi"        "for"    "from"
-    "if"   "in"   "intersect" "local"  "minus"
-    "mod"  "not"  "od"        "option" "options"
-    "or"   "proc" "quit"      "read"   "save"
-    "stop" "then" "to"        "union"  "while"
-    "description" "local"     "global")
-  "List of reserved words for Maple V R3.")
-
-(defconst maplev--reserved-words-4
-  maplev--reserved-words-3
-  "List of reserved words for Maple V4.")
-
-(defconst maplev--reserved-words-5
-  maplev--reserved-words-3
-  "List of reserved words for Maple V5.")
-
-(defconst maplev--reserved-words-6
-  (append '("break" "catch" "error" "export" "finally"
-            "in" "module" "next" "return" "try" "use")
-          maplev--reserved-words-5)
-  "List of reserved words for Maple 6.")
-
-(defconst maplev--reserved-words-7
-  (append '("assuming" "implies" "subset" "xor")
-          maplev--reserved-words-6)
-  "List of reserved words for Maple 7.")
-
-(defconst maplev--reserved-words-8
-  maplev--reserved-words-7
-  "List of reserved words for Maple 8.")
-
-(defconst maplev--reserved-words-9
-  maplev--reserved-words-7
-  "List of reserved words for Maple 9.")
-
-(defconst maplev--reserved-words-10
-  (append '("uses")
-          maplev--reserved-words-7)
-  "List of reserved words for Maple 10.")
-
-(defconst maplev--reserved-words-11
-  maplev--reserved-words-10
-  "List of reserved words for Maple 11.")
-
-(defconst maplev--reserved-words-12
-  maplev--reserved-words-10
-  "List of reserved words for Maple 12.")
-
-(defconst maplev--reserved-words-13
-  maplev--reserved-words-10
-  "List of reserved words for Maple 13.")
-
-(defconst maplev--reserved-words-14
-  maplev--reserved-words-10
-  "List of reserved words for Maple 14.")
-
-(defconst maplev--reserved-words-15
-  maplev--reserved-words-10
-  "List of reserved words for Maple 15.")
-
-(defconst maplev--reserved-words-16
-  maplev--reserved-words-10
-  "List of reserved words for Maple 16.")
-
-(defconst maplev--reserved-words-17
-  maplev--reserved-words-10
-  "List of reserved words for Maple 17.")
-
-(defconst maplev--reserved-words-2015
-  maplev--reserved-words-10
-  "List of reserved words for Maple 2015.")
-
-(defconst maplev--reserved-words-alist
-  `((3 .  ,maplev--reserved-words-3)
-    (4 .  ,maplev--reserved-words-4)
-    (5 .  ,maplev--reserved-words-5)
-    (6 .  ,maplev--reserved-words-6)
-    (7 .  ,maplev--reserved-words-7)
-    (8 .  ,maplev--reserved-words-8)
-    (9 .  ,maplev--reserved-words-9)
-    (10 . ,maplev--reserved-words-10)
-    (11 . ,maplev--reserved-words-11)
-    (12 . ,maplev--reserved-words-12)
-    (13 . ,maplev--reserved-words-13)
-    (14 . ,maplev--reserved-words-14)
-    (15 . ,maplev--reserved-words-15)
-    (16 . ,maplev--reserved-words-16)
-    (17 . ,maplev--reserved-words-17)
-    (2015 . ,maplev--reserved-words-2015)
-   )
-  "Alist of Maple reserved words.  The key is the major release.")
+(defconst maplev-reserved-words
+  '("and" "assuming" "break" "by" "catch" 
+    "description"  "do" "done" "elif" "else" 
+    "end" "error" "export" "fi" "finally" 
+    "for" "from" "global" "if" "implies" 
+    "in" "intersect" "local" "minus" "mod" 
+    "module" "next" "not" "od" "option" 
+    "options" "or" "proc" "quit" "read" 
+    "return" "save" "stop" "subset" "then" 
+    "to" "try" "union" "use" "uses" 
+    "while" "xor")
+  "List of reserved words for Maple.")
 
 ;;}}}
 
 (defconst maplev--deprecated-re
   (eval-when-compile
     (maplev--list-to-word-re
-     (list "fi" "od" "traperror" "linalg" "solvefor" "ERROR")))
+     (list "traperror" "linalg" "solvefor" "ERROR")))
   "Regex of deprecated keywords and procedures.")
 
-(defconst maplev--special-words
-  (list "args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
-	"_options" "_noptions" "_rest" "_nrest"
-	"_params" "_nparams" "_passed" "_npassed"
-	"_nresults" "static" )
-  "List of special words in Maple.")
-
 (defconst maplev--special-words-re
-    (maplev--list-to-word-re maplev--special-words)
+  (eval-when-compile
+    (maplev--list-to-word-re
+     '("args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
+       "_options" "_noptions" "_rest" "_nrest"
+       "_params" "_nparams" "_passed" "_npassed"
+       "_nresults" "static")))
   "Regex of special words in Maple.")
 
-(defconst maplev--initial-variables
-  (list "Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
-	"integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
-	"`mod`" "Digits" "constants" "undefined" "I"
-	"UseHardwareFloats"
-	"Testzero" "Normalizer" "NumericEventHandlers"
-	"Rounding" "`index/newtable`")
-  "List of global, environmental variables, and constants.")
-
 (defconst maplev--initial-variables-re
-    (maplev--list-to-word-re maplev--initial-variables)
+  (eval-when-compile
+    (maplev--list-to-word-re
+     '("Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
+       "integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
+       "`mod`" "Digits" "constants" "undefined" "I"
+       "UseHardwareFloats"
+       "Testzero" "Normalizer" "NumericEventHandlers"
+       "Rounding" "`index/newtable`")))
   "Regexp of global, environmental variables and constants.")
 
 (defconst maplev--preprocessor-directives-re
   (eval-when-compile
     (concat "^\\$\\("
-            (regexp-opt (list
-			 "define"
-			 "elif"
-			 "else"
-			 "endif"
-			 "file"
-			 "ifdef"
-			 "ifndef"
-			 "include"
-			 "undef"
+	    (regexp-opt (list
+			 "define" "elif" "else" "endif" "file"
+			 "ifdef" "ifndef" "include" "undef"
 			 ))
-            "\\)"))
+	    "\\)"))
   "Regex of preprocessor directives.")
 
 (defconst maplev--include-directive-re
@@ -1392,7 +1302,7 @@ otherwise use `maplev-tab-width'."
   "Regex of an include directive.
 The first group matches the character used to delimit the
 file (either < or \").  The second group matches the filename.")
-    
+
 
 ;;{{{  builtins
 
@@ -1400,125 +1310,68 @@ file (either < or \").  The second group matches the filename.")
 ;; quoted names rather than as builtin functions.  Fixing this
 ;; requires pulling them out.
 
-(defconst maplev--builtin-types-alist
-  '((8. ("`::`" "`..`" "`!`"
-         "algebraic" "anyfunc" "anything" "atomic"
-         "boolean"
-         "complex" "constant" "cx_infinity" "cx_zero"
-         "embedded_axis" "embedded_imaginary" "embedded_real"
-         "equation" "even" "extended_numeric" "extended_rational"
-         "finite" "float" "fraction" "function"
-         "identical" "imaginary" "indexable" "indexed" "integer"
-         "list" "literal"
-         "module" "moduledefinition"
-         "name" "neg_infinity" "negative" "negint" "negzero"
-         "nonnegative" "nonnegint" "nonposint" "nonpositive"
-         "nonreal" "numeric" "odd"
-         "polynom" "pos_infinity" "posint" "positive" "poszero"
-         "procedure" "protected"
-         "radical" "range" "rational" "ratpoly" "real_infinity"
-         "realcons" "relation"
-         "sequential" "set" "sfloat" "specfunc" "string" "symbol"
-         "tabular" "uneval" "zppoly")))
-  "Alist of builtin Maple types.  Currently not used.")
+(defconst maplev--builtin-types
+  '("`::`" "`..`" "`!`"
+    "algebraic" "anyfunc" "anything" "atomic"
+    "boolean"
+    "complex" "constant" "cx_infinity" "cx_zero"
+    "embedded_axis" "embedded_imaginary" "embedded_real"
+    "equation" "even" "extended_numeric" "extended_rational"
+    "finite" "float" "fraction" "function"
+    "identical" "imaginary" "indexable" "indexed" "integer"
+    "list" "literal"
+    "module" "moduledefinition"
+    "name" "neg_infinity" "negative" "negint" "negzero"
+    "nonnegative" "nonnegint" "nonposint" "nonpositive"
+    "nonreal" "numeric" "odd"
+    "polynom" "pos_infinity" "posint" "positive" "poszero"
+    "procedure" "protected"
+    "radical" "range" "rational" "ratpoly" "real_infinity"
+    "realcons" "relation"
+    "sequential" "set" "sfloat" "specfunc" "string" "symbol"
+    "tabular" "uneval" "zppoly")
+  "List of builtin Maple types.")
 
-(defconst maplev--builtin-functions-3
- '("`$`" "ERROR" "Im" "RETURN" "Re" "SearchText"
-   "abs" "addressof" "alias" "anames" "appendto" "array" "assemble" "assigned"
-   "callback" "cat" "coeff" "coeffs" "convert" "debugopts"
-   "degree" "diff" "disassemble" "divide"
-   "entries" "eval" "evalb" "evalf" "`evalf/hypergeom`" "evalhf" "evaln" "expand"
-   "frontend" "gc" "genpoly" "goto" "has" "hastype"
-   "icontent" "`if`" "igcd" "ilog10" "indets" "indices" "intersect" "`int/series`" "iquo" "irem" "isqrt"
-   "lcoeff" "ldegree" "length" "lexorder" "lprint"
-   "macro" "map" "max" "maxnorm" "member" "min" "`minus`" "modp" "modp1" "mods"
-   "nops" "normal" "numboccur" "numer" "op" "order" "parse" "pointto" "print" "printf" "protect"
-   "readlib" "readline" "searchtext" "select" "seq" "series" "sign" "sort" "sscanf" "ssystem" "subs" "subsop" "substring" "system"
-   "table" "taylor" "tcoeff" "time" "traperror" "trunc" "type"
-   "unames" "`union`" "unprotect" "userinfo" "words" "writeto" ))
-
-(defconst maplev--builtin-functions-4
-  (append  '("`*`" "`+`" "ASSERT" "DEBUG" "MorrBrilCull" "add" "attributes" "denom" "getuserinterface" "inner" "iolib" "kernelopts" "`kernel/transpose`" "map2" "mul" "setattribute" "setuserinterface" "typematch")
-	   (maplev-minus maplev--builtin-functions-3
-			 '("printf" "protect" "readline" "setattribute" "setuserinterface" "sscanf" "unprotect" "words"))))
-		      
-
-(defconst maplev--builtin-functions-5
-  (append '("`**`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`^`" "call" "crinterp" "define" "`evalf/hypergeom/kernel`" "hfarray" "timelimit")
-	  (remove "`evalf/hypergeom`" maplev--builtin-functions-4)))
-
-(defconst maplev--builtin-functions-6
-  (append '("||" "Array" "ArrayOptions" "CopySign" "Default0" "DefaultOverflow" "DefaultUnderflow"
-	    "EqualEntries" "EqualStructure" "FromInert" "MPFloat"
-	    "NextAfter" "NumericClass" "NumericEvent" "NumericEventHandler" "NumericStatus" "OrderedNE"
-	    "SFloatExponent" "SFloatMantissa" "Scale10" "Scale2" "TRACE" "ToInert" "Unordered"
-	    "`and`" "bind" "call_external" "conjugate" "define_external" "`done`" "evalgf1" "exports" "frem"
-	    "ilog2" "lhs" "modp2" "mvMultiply" "negate" "`not`" "`or`" "remove" "rhs"
-	    "rtable" "rtableInfo" "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
-	    "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_scanblock" "rtable_sort_indices"
-	    "selectremove" "`stop`" "streamcall" "unbind")
-	  (maplev-minus maplev--builtin-functions-5
-			   '("call" "define" "getuserinterface" "setuserinterface"))))
-		     
-
-(defconst maplev--builtin-functions-7
- (append '("_treeMatch" "_unify" "_xml" "dlclose" "factorial" "`implies`" "`subset`" "`xor`")
-           maplev--builtin-functions-6))
-
-(defconst maplev--builtin-functions-8
- (append '("_jvm" "_maplet" "andmap" "ormap")
-           maplev--builtin-functions-7))
-
-(defconst maplev--builtin-functions-9
- (append '("`..`" "Normalizer" "UpdateSource" "gmp_isprime" "is_gmp" "isqrt" "`mod`" "piecewise" "reduce_opr" "rtable_eval" "rtable_zip")
-           maplev--builtin-functions-8))
-
-(defconst maplev--builtin-functions-10
- (append '("`?()`" "`?[]`" "`{}`" "`[]`" "SDMPolynom" "overload" "rtable_convolution" "rtable_redim" "rtable_scale" "savelib")
-           maplev--builtin-functions-9))
-
-(defconst maplev--builtin-functions-11
-  maplev--builtin-functions-10)
-
-(defconst maplev--builtin-functions-12
- (append '("Record" "rtable_size") maplev--builtin-functions-11))
-
-(defconst maplev--builtin-functions-13
- (append '("`::`" "`~`") maplev--builtin-functions-12))
-
-(defconst maplev--builtin-functions-14
- (append '("Object") maplev--builtin-functions-13))
-
-(defconst maplev--builtin-functions-15
-  (append '("assign" "numelems" "upperbound" "lowerbound") maplev--builtin-functions-14))
-
-(defconst maplev--builtin-functions-16
-  (append '("_hackwareToPointer" "~Array" "~Matrix" "~Vector") maplev--builtin-functions-15))
-
-(defconst maplev--builtin-functions-17
-  (append (remove "alias" '("NameSpace" "_local" "print_preprocess")) maplev--builtin-functions-16))
-
-(defconst maplev--builtin-functions-2015
-  (append '("localGridInterfaceRun" "wbOpen" "wbOpenURI") maplev--builtin-functions-17))
-
-(defconst maplev--builtin-functions-alist
-  `((3  . ,maplev--builtin-functions-3)
-    (4  . ,maplev--builtin-functions-4)
-    (5  . ,maplev--builtin-functions-5)
-    (6  . ,maplev--builtin-functions-6)
-    (7  . ,maplev--builtin-functions-7)
-    (8  . ,maplev--builtin-functions-8)
-    (9  . ,maplev--builtin-functions-9)
-    (10 . ,maplev--builtin-functions-10)
-    (11 . ,maplev--builtin-functions-11)
-    (12 . ,maplev--builtin-functions-12)
-    (13 . ,maplev--builtin-functions-13)
-    (14 . ,maplev--builtin-functions-14)
-    (15 . ,maplev--builtin-functions-15)
-    (16 . ,maplev--builtin-functions-16)
-    (17 . ,maplev--builtin-functions-17)
-    (2015 . ,maplev--builtin-functions-2015))
-  "Alist of Maple builtin funtions. The key is the major release.")
+(defconst maplev--builtin-functions
+  '("`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`"
+    "`>=`" "`?()`" "`?[]`" "ASSERT" "Array" "ArrayOptions" "CopySign"
+    "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" "ERROR"
+    "EqualEntries" "EqualStructure" "FromInert" "Im" "MPFloat" 
+    "MorrBrilCull" "NameSpace" "NextAfter" "Normalizer" "NumericClass" 
+    "NumericEvent" "NumericEventHandler" "NumericStatus" "Object"
+    "OrderedNE" "RETURN" "Re" "Record" "SDMPolynom" "SFloatExponent"
+    "SFloatMantissa" "Scale10" "Scale2" "SearchText" "TRACE" "ToInert"
+    "Unordered" "UpdateSource" "`[]`" "`^`" "_hackwareToPointer" "_jvm"
+    "_local" "_maplet" "_savelib" "_treeMatch" "_unify" "_xml" "abs"
+    "add" "addressof" "anames" "`and`" "andmap" "appendto" "array"
+    "assemble" "assign" "assigned" "attributes" "bind" "call_external"
+    "callback" "cat" "coeff" "coeffs" "conjugate" "convert" "crinterp"
+    "debugopts" "define_external" "degree" "denom" "diff" "disassemble"
+    "divide" "dlclose" "done" "entries" "eval" "evalb" "evalf"
+    "`evalf/hypergeom/kernel`" "evalgf1" "evalhf" "evalindets" "evaln"
+    "expand" "exports" "factorial" "frem" "frontend" "gc" "genpoly"
+    "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "`if`"
+    "igcd" "ilog10" "ilog2" "implies" "indets" "indices" "inner"
+    "`int/series`" "`intersect`" "iolib" "iquo" "irem" "is_gmp" "isqrt"
+    "`kernel/transpose`" "kernelopts" "lcoeff" "ldegree" "length"
+    "lexorder" "lhs" "localGridInterfaceRun" "lowerbound" "lprint"
+    "macro" "map" "map2" "max" "maxnorm" "member" "membertype" "min"
+    "minus" "mod" "modp" "modp1" "modp2" "mods" "mul" "mvMultiply"
+    "negate" "nops" "normal" "`not`" "numboccur" "numelems" "numer"
+    "op" "`or`" "order" "ormap" "overload" "parse" "piecewise" "pointto"
+    "print" "`quit`" "readlib" "reduce_opr" "remove" "rhs" "rtable"
+    "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
+    "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
+    "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_redim"
+    "rtable_scale" "rtable_scanblock" "rtable_size" "rtable_sort_indices"
+    "rtable_zip" "savelib" "searchtext" "select" "selectremove" "seq"
+    "series" "setattribute" "sign" "sort" "ssystem" "stop" "streamcall"
+    "subs" "subset" "subsindets" "subsop" "substring" "system" "table"
+    "taylor" "tcoeff" "time" "timelimit" "traperror" "trunc" "type"
+    "typematch" "unames" "unbind" "`union`" "upperbound" "userinfo"
+    "wbOpen" "wbOpenURI" "writeto" "`xor`" "`{}`" "`||`"
+    "`~`" "~Array" "~Matrix" "~Vector")
+  "List of builtin functions as of Maple 2016")
 
 ;; (defconst maplev--builtin-functions-alist
 ;;  '((3 .  ("`$`"                                                                                                                                                                                                                             "ERROR"                                             "Im"                                                                                                                                            "RETURN" "Re"                                                                            "SearchText"                                                                                            "abs"       "addressof" "alias" "anames"                  "appendto" "array" "assemble" "assigned"                                            "callback" "cat" "coeff" "coeffs"             "convert"            "debugopts"                   "degree"         "diff" "disassemble" "divide"                    "entries" "eval" "evalb" "evalf" "`evalf/hypergeom`"                  "evalhf" "evaln" "expand"                              "frontend" "gc" "genpoly"                    "goto" "has" "hastype"           "icontent" "`if`" "igcd" "ilog10"                     "indets" "indices"         "intersect" "`int/series`"         "iquo" "irem"          "isqrt"                                   "lcoeff" "ldegree" "length" "lexorder"       "lprint" "macro" "map"        "max" "maxnorm" "member" "min" "`minus`"         "modp" "modp1"         "mods"                             "nops" "normal"         "numboccur" "numer" "op"        "order"                    "parse"             "pointto" "print" "printf" "protect"          "readlib" "readline"                                                                                                                                                                                                                                                                                                                          "searchtext" "select"                "seq" "series"                                   "sign" "sort" "sscanf" "ssystem"                       "subs"            "subsop" "substring" "system" "table" "taylor" "tcoeff" "time"             "traperror" "trunc" "type"             "unames"          "`union`" "unprotect" "userinfo" "words" "writeto"         ))
@@ -1537,12 +1390,9 @@ file (either < or \").  The second group matches the filename.")
 
 ;;}}}
 
-(defun maplev--ditto-operators-re ()
-  "Return a regexp that matches the ditto operators."
-  (regexp-opt
-   (if (< (maplev--major-release) 5)
-       '("\"" "\"\"" "\"\"\"")
-     '("%" "%%" "%%%"))))
+(defconst maplev--ditto-operators-re
+  (eval-when-compile (regexp-opt '("%" "%%" "%%%")))
+  "Return a regexp that matches the ditto operators.")
 
 (defvar maplev-protected-face   'maplev-protected-face
   "*Face name for Maple protected names.")
@@ -1550,7 +1400,7 @@ file (either < or \").  The second group matches the filename.")
 (defface maplev-protected-face
   '((((class grayscale) (background light)) (:foreground "LightGray" :bold t))
     (((class grayscale) (background dark))  (:foreground "DimGray"   :bold t))
-    (((class color)     (background light)) (:foreground "LImeGreen"))
+    (((class color)     (background light)) (:foreground "LimeGreen"))
     (((class color)     (background dark))  (:foreground "LimeGreen"))
     (t (:bold t)))
   "Font lock mode face used for Maple protected names."
@@ -1558,54 +1408,137 @@ file (either < or \").  The second group matches the filename.")
 
 (defconst maplev--protected-names-re
   (eval-when-compile
-    (concat "\\<\\(?:"
+    (concat "\\<"
             (regexp-opt
-             (list "ARRAY" "Add" "And" "Cache" "Catalan" "Complex" "D" "DESol" "Ei" "Eval" "Expand"
-                   "FAIL" "Float" "Fraction" "HFloat" "Implies" "ImportData" "Int" "Integer"
-                   "JacobiAM" "JacobiCN" "JacobiCS" "JacobiNC" "JacobiNS" "JacobiSC" "JacobiSN"
-                   "LinearAlgebra" "ListTools" "Matlab" "Matrix"  "Multiply"
-                   "Non" "Normal" "Not" "NumericTools" "O" "Or" "Pi" "Plot" "Power" "Product" "RealRange"
-                   "SFloat" "Shift" "Sum" "SymbolicInfinity" "TABLE" "TEXT"
-                   "Vector" "VectorOptions" "WARNING" "Xor"
-                   "algebraic" "algext" "algfun" "algnum" "algnumext"
-                   "ansi" "anyfunc" "anything" "apply" "atomic"
-                   "boolean" "bytesused"
-                   "charfcn" "collect" "combine" "complex" "complexcons" "constant" "copy" "cubic" "curry" "cx_infinity" "cx_zero"
-                   "dagtag" "deduced" "division_by_zero"
-                   "echo" "embedded_axis" "embedded_imaginary" "embedded_real" "equation" "errorbreak" "errorcursor"
-                   "evala" "evalr" "even" "evenfunc" "expanded" "extended_numeric" "extended_rational"
-                   "facint" "false" "fflush" "finite" "float" "fprintf" "frac" "fraction" "freeze" "function"
-                   "gamma" "gcfreq" "hasassumptions" "hasfun" "hfloat"
-                   "identical" "imaginary" "`in`" "indentamount" "interface" "index" "indexable" "indexed" "inexact"
-                   "infinity" "integer" "invalid_operation" "invfunc" "iperfpow" "iroot" "is"
-                   "labelling" "laurent" "leadterm" "linear" "list" "listlist" "literal"
-                   "mathfunc" "matrix" "`module`" "moduledefinition" "monomial"
-                   "name" "negative" "neg_infinity" "negint" "negzero" "nonnegative"
-                   "nonnegint" "nonposint" "nonpositive" "nonreal" "norm" "nothing" "numeric"
-                   "odd" "oddfunc" "overflow"
-                   "package" "plotdevice" "plotoptions" "plotoutput" "point" "polynom" "pos_infinity" "posint" "positive"
-                   "postplot" "poszero" "preplot" "prettyprint" "prime" "primpart" "printbytes" "procedure" "prompt" "proot" "protected" "psqrt"
-                   "quadratic" "quartic" "quiet"
-                   "radext" "radfun" "radfunext" "radical" "radnormal" "radnum" "radnumext" "range" "rational"
-                   "ratpoly" "rcurry" "real" "realcons" "real_infinity" "real_to_complex" "relation" "restart" "resultant" "round"
-                   "scalar" "screenheight" "screenwidth" "sequential" "set" "sfloat" "shake"
-                   "showassumed" "simplify" "specfunc" "sqrt" "stack" "string" "subtype" "symbol" "symmfunc"
-                   "tabular" "testeq" "thaw" "tracelast" "trig" "true" "truefalse"
-                   "unapply" "undefined" "underflow" "uneval" "usage"
-                   "vector" "verboseproc" "verify" "warnlevel" "with" "wordsize" "zppoly"
-		   
-		   "exp" "ln" "log" "log10"
-		   "sin" "cos" "tan"
-		   "sec" "csc" "cot"
-		   "sinh" "cosh" "tanh"
-		   "sech" "csch" "coth"
+             (list
+	      ;; constants
+	      "Catalan" "FAIL" "Pi" "false" "gamma" "infinity" "true"
 
-		   "arcsin" "arccos" "arctan"
-		   "arcsec" "arccsc" "arccot"
-		   "arcsinh" "arccosh" "arctanh"
-		   "arcsech" "arccsch" "arccoth"
-                   ))
-            "\\)\\>")))
+	      ;; interface options
+	      "ansi" "echo" "errorbreak" "errorcursor" "indentamount" "labeling"
+	      "labelwidth" "patchlevel" "plotdevice" "plotoptions" "plotoutput"
+	      "postplot" "preplot" "prettyprint" "printbytes" "prompt" "quiet"
+	      "screenheight" "screenwidth" "showassumed" "verboseproc" "version"
+	      "warnlevel"
+	      
+	      ;; kernelopts options
+	      "ASSERT" "bytesalloc" "bytesused" "cputime" "dagtag" "gcbytesavail"
+	      "gcbytesreturned" "gctimes" "maxdigits" "maximmediate" "memusage"
+	      "printbytes" "profile" "system" "version" "wordsize"
+	      
+	      ;; types
+	      "And" "Non" "Not" "Or" "SymbolicInfinity" "TEXT"
+	      "algebraic" "algext" "algfun" "algnum" "algnumext" 
+	      "anyfunc" "anything" "arctrig" "atomic"
+	      "boolean" "complex" "complexcons" "constant" "cubic"
+	      "cx_infinity" "cx_zero" "embedded_axis" "embedded_imaginary" "embedded_real"
+	      "equation" "even" "evenfunc" "expanded" "extended_numeric" "extended_rational"
+	      "facint" "finite" "float" "fraction" "function" "hfloat"
+	      "identical" "imaginary" "indexable" "indexed" "infinity" "integer"
+	      "laurent" "linear" "list" "listlist" "literal" "mathfunc"
+	      "moduledefinition" "monomial" "name" "neg_infinity"
+	      "negative" "negint" "negzero" "nonnegative" "nonnegint" "nonposint"
+	      "nonpositive" "nonreal" "nothing" "numeric" "odd" "oddfunc" "package"
+	      "point" "polynom" "pos_infinity" "posint" "positive" "poszero" "prime"
+	      "protected" "quadratic" "quartic" "radext" "radfun" "radfunext"
+	      "radical" "radnum" "radnumext" "range" "rational" "ratpoly" "real_infinity"
+	      "realcons" "relation" "scalar" "sequential" "set" "sfloat" "specfunc" "sqrt"
+	      "stack" "string" "symbol" "symmfunc" "tabular" "trig" "truefalse" "truefalseFAIL"
+	      "undefined" "uneval" "zppoly"
+	      
+	      ;; math procedures
+	      "AiryAi" "AiryAiZeros" "AiryBi" "AiryBiZeros" "AngerJ" "ArrayDims" 
+	      "ArrayElems" "ArrayIndFns" "ArrayNumDims" "BesselI" "BesselJ" 
+	      "BesselJZeros" "BesselK" "BesselY" "BesselYZeros" "Beta" "ChebyshevT" 
+	      "ChebyshevU" "CheckArgs" "Chi" "Ci" "CoulombF" "CylinderD" "CylinderU"
+	      "CylinderV" "D" "DESol" "Dirac" "Ei" "EllipticCE" "EllipticCK" 
+	      "EllipticF" "EllipticK" "ExportVector" "FresnelC" "FresnelS" "Fresnelf"
+	      "Fresnelg" "GAMMA" "GF" "GegenbauerC" "HankelH1" "HankelH2" "Heaviside"
+	      "HermiteH" "ImportVector" "InverseJacobiAM" "InverseJacobiCD" 
+	      "InverseJacobiCN" "InverseJacobiCS" "InverseJacobiDC" "InverseJacobiDN" 
+	      "InverseJacobiDS" "InverseJacobiNC" "InverseJacobiND" "InverseJacobiNS" 
+	      "InverseJacobiSC" "InverseJacobiSD" "InverseJacobiSN" "IsMatrixShape" 
+	      "IsVectorShape" "IsWorksheetInterface" "JacobiAM" "JacobiCD" "JacobiCN" 
+	      "JacobiCS" "JacobiDC" "JacobiDN" "JacobiDS" "JacobiNC" "JacobiND" 
+	      "JacobiNS" "JacobiP" "JacobiSC" "JacobiSD" "JacobiSN" "JacobiTheta1" 
+	      "JacobiTheta2" "JacobiTheta3" "JacobiTheta4" "KelvinBei" "KelvinBer" 
+	      "KelvinHei" "KelvinHer" "KelvinKei" "KelvinKer" "KummerM" "KummerU" 
+	      "LaguerreL" "LegendreP" "LegendreQ" "LommelS1" "LommelS2" "MOLS" 
+	      "MathieuA" "MathieuB" "MathieuC" "MathieuCE" "MathieuCEPrime" 
+	      "MathieuCPrime" "MathieuExponent" "MathieuFloquet" "MathieuS" "MathieuSE"
+	      "MathieuSEPrime" "MathieuSPrime" "Matrix" "MatrixOptions" "MeijerG" "Psi"
+	      "RESol" "RealRange" "Shi" "Si" "Ssi" "Stirling1" "Stirling2" 
+	      "StruveH" "StruveL" "TopologicalSort" "Vector" "WARNING" "WeberE" 
+	      "WeierstrassP" "WeierstrassPPrime" "WeierstrassSigma" "WeierstrassZeta" 
+	      "WhittakerM" "WhittakerW" "Wrightomega" "about" "addcoords" 
+	      "additionally" "addproperty" "algsubs" "apply" "applyop" "applyrule" 
+	      "arccos" "arccosh" "arccot" "arccoth" "arccsc" "arccsch" "arcsec" 
+	      "arcsech" "arcsin" "arcsinh" "arctan" "arctanh" "assume" "bernstein" 
+	      "binomial" "ceil" "charfcn" "chrem" "coeftayl" "collect" "combine" 
+	      "comparray" "compiletable" "compoly" "content" "convergs" "copy" "cos"
+	      "cosh" "cot" "coth" "coulditbe" "csc" "csch" "define" "definemore" 
+	      "dilog" "dinterp" "discont" "discrim" "dismantle" "dsolve" "eliminate"
+	      "ellipsoid" "erf" "erfc" "erfi" "euler" "eulermac" "evala" "evalapply"
+	      "evalc" "evalr" "evalrC" "example" "exists" "exp" "extrema" "factor" 
+	      "factors" "fdiscont" "fixdiv" "floor" "forall" "frac" "freeze" "galois"
+	      "gcd" "gcdex" "getassumptions" "hasassumptions" "hasfun" "hasoption" 
+	      "help" "history" "ifactor" "ifactors" "igcdex" "ilcm" "ilog" 
+	      "implicitdiff" "info" "initialcondition" "insertpattern" "intat" "interp"
+	      "invztrans" "iperfpow" "iratrecon" "iroot" "irreduc" "is" "iscont" 
+	      "isolate" "isolve" "ispoly" "isqrfree" "issqr" "ithprime" "latex" "lcm"
+	      "limit" "ln" "lnGAMMA" "log" "log10" "maptype" "match" "maximize" 
+	      "minimize" "modpol" "msolve" "mtaylor" "nextprime" "nprintf" "odetest"
+	      "packages" "patmatch" "plot" "plot3d" "plotsetup" "poisson" "polylog" 
+	      "powmod" "prem" "prevprime" "primpart" "printf" "product" "proot" 
+	      "protect" "psqrt" "quo" "radfield" "radnormal" "rand" "randomize" 
+	      "randpoly" "rationalize" "ratrecon" "readdata" "readstat" "redefine" 
+	      "related" "rem" "residue" "resultant" "root" "rootbound" "roots" 
+	      "round" "rsolve" "rtable_dims" "rtable_elems" "scanf" "sec" "sech" 
+	      "selectfun" "shake" "showtime" "signum" "simplify" "sin" "singular" 
+	      "sinh" "sinterp" "smartplot" "smartplot3d" "sprem" "sprintf" "sqrfree"
+	      "sscanf" "sturm" "sturmseq" "subtype" "sum" "symmdiff" "tablelook" 
+	      "tan" "tanh" "testeq" "thaw" "unapply" "unassign" "undefine" 
+	      "unprotect" "unwindK" "unwith" "usage" "value" "verify" "version" 
+	      "whattype" "with" "ztrans"
+
+	      ;; miscellaneous procedures
+	      "interface" 
+	      ))
+	    "\\>"))
+  "List of some of the protected names in Maple.
+This is supposed to exclude the builtins and reserved words.")
+
+(defvar maplev-undocumented-face   'maplev-undocumented-face
+  "*Face name for Maple undocumented names.")
+
+(defface maplev-undocumented-face
+  '((((class grayscale) (background light)) (:foreground "LightGray" :bold t))
+    (((class grayscale) (background dark))  (:foreground "DimGray"   :bold t))
+    (((class color)     (background light)) (:foreground "VioletRed1"))
+    (((class color)     (background dark))  (:foreground "VioletRed1"))
+    (t (:bold t)))
+  "Font lock mode face used for Maple undocumented names."
+  :group 'maplev-faces)
+
+(defconst maplev--undocumented-names-re
+  (eval-when-compile
+    (concat "\\<\\(?:"
+	    (regexp-opt
+	     (list
+	      "ARRAY" "DAESimplify" "Discrim" "EqualStructure" "FRAMESCALING"
+	      "GetAlgExt" "InertNames" "MPFloat" "MorrBrilCull" "NONUNIFORM"
+	      "NumericTools" "PIECEWISE" "PackageManagement" "PatternMatching"
+	      "PiecewiseTools" "PseudoStack" "PuiseuxSeries" "RestoreSession"
+	      "SaveSession" "Subres" "TABLE" "TRACE" "TestTools" "UNIFORM"
+	      "UpdateSource" "VerifyTools" "_X" "_Z" "_a" "_b" "_c" "_x" "_y" "_z"
+	      "assignfcn" "bind" "cmagdiff" "crinterp" "dlclose" "evalgf1"
+	      "gmp_isprime" "inner" "is_gmp" "mvMultiply" "negate" "reduce_opr"
+	      "rtableInfo" "rtable_convolution" "rtable_histogram" "rtable_is_zero"
+	      "rtable_normalize_index" "rtable_scale" "rtable_sort_indices" "rtable_zip"
+	      "unbind"
+	      ))
+	    "\\)\\>"))
+  "List of undocumented names reserved for internal use.")
 
 
 (defconst maplev--protected-names-procs-re
@@ -1618,9 +1551,7 @@ are font locked."
   (list
    (list maplev--top-defun-begin-re '(1 font-lock-function-name-face t))
    (list maplev--preprocessor-directives-re '(0 maplev-preprocessor-face))
-   (list (maplev--list-to-word-re
-          (cdr (assoc (maplev--major-release)
-                      maplev--reserved-words-alist)))
+   (list (maplev--list-to-word-re maplev-reserved-words)
          '(0 font-lock-keyword-face))))
 
 
@@ -1633,20 +1564,20 @@ minimum decoration keywords."
    (list
     (list maplev--special-words-re     '(0 font-lock-variable-name-face))
     (list maplev--initial-variables-re '(0 font-lock-reference-face))
-    (list (maplev--ditto-operators-re) '(0 font-lock-variable-name-face)))))
+    (list maplev--ditto-operators-re   '(0 font-lock-variable-name-face)))))
 
 (defun maplev-font-lock-keywords-3 ()
   "Compute the maximum decoration `font-lock-keywords' for MapleV mode.
 Add builtin functions to the medium decoration keywords."
   (let ((max-specpdl-size 10000))       ; default 600 is too small
     (append (maplev-font-lock-keywords-2)
-            (list (list (maplev--list-to-word-re
-                         (cdr (assoc (maplev--major-release)
-                                     maplev--builtin-functions-alist)))
+            (list (list (maplev--list-to-word-re (append maplev--builtin-functions
+							 maplev--builtin-types))
                         ;; Xemacs doesn't have font-lock-builtin-face
                         '(0 font-lock-builtin-face))
                   (list maplev--deprecated-re '(0 font-lock-warning-face))
-                  (list maplev--protected-names-re '(0 maplev-protected-face))))))
+                  (list maplev--protected-names-re '(0 maplev-protected-face))
+                  (list maplev--undocumented-names-re '(0 maplev-undocumented-face))))))
 
 (defun maplev--font-lock-keywords ()
   "Return a list of symbols for font locking MapleV mode buffers."
@@ -1654,14 +1585,6 @@ Add builtin functions to the medium decoration keywords."
     maplev-font-lock-keywords-1
     maplev-font-lock-keywords-2
     maplev-font-lock-keywords-3))
-
-(defun maplev--font-lock-syntax-alist ()
-  "Return the syntax alist appropriate for font lock.
-It depends on `maplev--major-release'."
-  `((?_ . "w")                          ; make `_' a word character
-    ,(if (< (maplev--major-release) 5)
-         '(?\" . "w")     ; make `"' a word character for R4 and down.
-       '(?% . "w"))))       ; make `%' a word character for R5 and up.
 
 (defun maplev--syntax-begin ()
   "Move backwards to start of a Maple procedure.
@@ -1679,7 +1602,7 @@ If nil then `font-lock-maximum-decoration' selects the level."
       (setq font-lock-maximum-decoration decoration))
   (setq font-lock-defaults `(,(maplev--font-lock-keywords)
                              nil nil
-                             ,(maplev--font-lock-syntax-alist)
+                             ((?_ . "w")) ; make underscore a word constituent
                              maplev--syntax-begin))
   (font-lock-set-defaults)
   (font-lock-fontify-buffer))
@@ -1771,14 +1694,14 @@ directory exists, query user to create the file."
 	      (inc-dir inc-file))
 	  (while (and (setq inc-dir (file-name-directory (directory-file-name inc-dir)))
 		      (not (setq file (maplev-find-include-file inc-dir inc-first path)))))
-	(if (not file)
-	    (error "Include file %s does not exist " inc-file)
-	  (if (yes-or-no-p (format "Create include file %s "
-				   (setq file (concat file base))))
-	      (if other-window-flag
-		  (find-file-other-window file)
-		(find-file file)))))))))
-	  
+	  (if (not file)
+	      (error "Include file %s does not exist " inc-file)
+	    (if (yes-or-no-p (format "Create include file %s "
+				     (setq file (concat file base))))
+		(if other-window-flag
+		    (find-file-other-window file)
+		  (find-file file)))))))))
+
 (defun maplev-find-include-file (inc-file &optional inc-first inc-path)
   "Find the Maple include file INC-FILE and return as an absolute path.
 INC-PATH is an optional list of rooted directories.  Use each
@@ -1825,7 +1748,7 @@ nil."
 	      (setq abs-file nil) ; at root, exit loop with empty file
 	    (setq dir parent)))) ; check parent
     abs-file))
-		  
+
 (define-button-type 'maplev-find-include-file
   'help-echo "Find include file"
   'action 'maplev-find-include-file-at-point

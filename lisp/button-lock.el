@@ -202,9 +202,9 @@
 ;;
 
 (eval-when-compile
-  (require 'font-lock))
+  (require 'font-lock)
+  (require 'cl))
 
-(require 'cl)
 (autoload 'font-lock-remove-keywords "font-lock" nil nil)
 
 ;;;###autoload
