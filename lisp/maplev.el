@@ -937,7 +937,7 @@ end statement.  Point is moved to the start of the function body."
       (insert "\ndescription " maplev-description-quote-char
               description maplev-description-quote-char ";"))
 
-    (insert "\n\nend")
+    (insert "\n\nend " function)
     (when fname
       (insert ":")
       (if maplev-comment-end-flag
