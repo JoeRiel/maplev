@@ -70,7 +70,7 @@ ELFLAGS	= --no-site-file \
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
 
-ELS = $(PKG) $(addprefix $(PKG),-cmaple -common -custom -help -history -indent -mint -re -sb -utils -view) button-lock
+ELS = $(PKG) $(addprefix $(PKG),-cmaple -common -custom -help -history -indent -mint -re -sb -trace -utils -view) button-lock
 
 LISP-FILES = $(ELS:%=lisp/%.el)
 ELC-FILES = $(LISP-FILES:.el=.elc)
@@ -175,6 +175,8 @@ mla := maplev.mla
 mla: $(call print-help,mla,	Create Maple archive: $(mla))
 mla: $(mla)
 
+MAPLE-FILES = $(addprefix maple/,maplev.mpl Print.mm)
+
 %.mla: maple/%.mpl
 	@$(RM) $@
 	@echo "Building Maple archive $@"
@@ -217,23 +219,23 @@ clean-install: links-uninstall
 
 help: $(call print-separator)
 
-DIST-extra = Copyright README RELEASE-NOTES install
-
+DIST-extra = Copyright README RELEASE-NOTES install maplev.mla doc/maplev.info
 DIST-FILES-extra = ChangeLog Makefile /usr/local/include/help-system.mak
 
-src = lisp/$(PKG).el doc/$(PKG).texi doc/version.texi
+$(info $(LISP-FILES))
 
 dist: $(call print-help,dist,	Create $(PKG)-$$TAG.tar.gz file)
-dist: $(LISP-FILES) $(TEXI-FILES)
+dist: $(LISP-FILES) $(MAPLE-FILES) $(TEXI-FILES)
 	$(RM) -r $(PKG)-$(VERSION)
 	$(call MKDIR,$(PKG)-$(VERSION))
 	$(call MKDIR,$(PKG)-$(VERSION)/doc)
 	$(call MKDIR,$(PKG)-$(VERSION)/lisp)
-	$(call MKDIR,$(PKG)-$(VERSION)/$(PKG))
+	$(call MKDIR,$(PKG)-$(VERSION)/maple)
 	$(CP) $(LISP-FILES) $(PKG)-$(VERSION)/lisp
+	$(CP) $(MAPLE-FILES) $(PKG)-$(VERSION)/maple
 	$(CP) $(TEXI-FILES) $(PKG)-$(VERSION)/doc
 	$(CP) $(DIST-FILES-extra) $(DIST-extra) $(PKG)-$(VERSION)/
-	zip -r $(PKG)-$(VERSION).zip $(PKG)-$(VERSION)
+	echo zip -r $(PKG)-$(VERSION).zip $(PKG)-$(VERSION)
 	tar zcvf $(PKG)-$(VERSION).tar.gz $(PKG)-$(VERSION)
 
 .PHONY:  dist
