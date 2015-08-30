@@ -1,7 +1,14 @@
 -*- org -*-
 
+* 2.32
+** eliminate customizing font-lock per release
+** eliminate maplev-default-release and related variables
+** add speedbar support for Maple source files
+** change maplev-proc to maple-view and extend to print modules
+** update info pages
+** button-lock: eliminate warning about use of cl
 * 2.31
-  * Fix compile issue with Emacs 24
+** Fix compile issue with Emacs 24
 * 2.30
 ** add parsing of #LINK prefix in maple source files
 ** fix hyperlinking in "See Also" section

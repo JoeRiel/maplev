@@ -4,7 +4,7 @@
 @setfilename maplev
 @settitle MapleV Emacs Mode @value{VERSION}
 
-@set VERSION 2.31
+@set VERSION 2.32
 @set DATE June 2011
 
 @dircategory Emacs
@@ -90,10 +90,7 @@ Processes
 * Mint::                        Syntax checking.
 * Maple::                       Running Maple as a standalone process.
 * Help pages::                  Displaying Maple help pages.
-* Procedures::                  Displaying procedures from the Maple libraries.
-
-Appendices
-
+* Viewing::                     Viewing Maple library code.
 * Installation::                Installing MapleV.
 * Evolution::                   Credits, Bugs, Enhancements.
 
@@ -111,10 +108,8 @@ Indices
 
 Introduction
 
-* Summary::                     
-* Requirements::                
-* Configuration::               
-* Customization::               
+* Summary::
+* Requirements::
 
 Indentation
 
@@ -141,7 +136,7 @@ Shortcuts
 
 Abbreviations
 
-* Customizing Abbreviations::   
+* Customizing Abbreviations::
 
 Miscellaneous features
 
@@ -162,22 +157,22 @@ Help pages
 * Displaying help pages::       Commands for displaying Maple help pages.
 * MapleV help mode::            Mode for viewing Maple help pages.
 
-Procedures
+Viewing
 
-* Displaying procedures::       Commands to display Maple procedures.
-* MapleV proc mode::            Mode for viewing Maple procedures.
+* Displaying::                  Commands to display Maple expressions.
+* MapleV view mode::            Mode for viewing Maple library code.
 
 Installation
 
-* Compiling::                   Byte compiling MapleV.
+* Emacs Files::                 Installing and byte-compiling the lisp files
+* Maple Files::                 Installing the Maple archive
 * Customizing::                 Customizing the installation.
 * Info documentation::          Installing the Info documentation.
 
 Evolution
 
-* Bugs::                        
-* Acknowledgments::             
-* Enhancements::                
+* Bugs::
+* Acknowledgments::
 
 @end detailmenu
 @end menu
@@ -195,10 +190,8 @@ under the GNU General Public License.
 @end iftex
 
 @menu
-* Summary::                     
-* Requirements::                
-* Configuration::               
-* Customization::               
+* Summary::
+* Requirements::
 @end menu
 
 @node Summary, Requirements, Introduction, Introduction
@@ -216,7 +209,7 @@ close to the pretty printed output of Maple.
 
 @subsection Font Lock
 
-Maple reserved words, special words, initial variables, builtin
+Maple reserved words, special words, initial variables, built-in
 functions, and top-level procedure assignments are font locked.
 Comments and quotes are syntactically highlighted.  The amount of
 ``decoration'' can be customized.
@@ -254,13 +247,11 @@ buffer.  The buffer has a mode that font locks section headings and
 provides commands for viewing other help pages and recalling previously
 visited pages.
 
-@subsection Library procedures
+@subsection Viewing library code
 
-Procedures from Maple libraries can be displayed in a buffer.  They are
-font locked the same as in a MapleV buffer.  Commands are
-available for displaying other procedures and a history mechanism
-provides a convenient means to return to previously displayed
-procedures.
+Modules and procedures from Maple libraries can be displayed in a
+buffer.  They are font-locked the same as in a MapleV buffer.  A history
+provides a convenient means to return to previously displayed code.
 
 @subsection Multiple Maple releases
 
@@ -271,18 +262,12 @@ default; it will access the versions of Maple and Mint appropriate for
 the release.
 
 
-@node Requirements, Configuration, Summary, Introduction
+@node Requirements,  , Summary, Introduction
 @section Requirements
 @cindex requirements
 
-@node Configuration, Customization, Requirements, Introduction
-@section Configuration
-@cindex configuration
-
-@node Customization,  , Configuration, Introduction
-@section Customization
-@cindex customization
-
+MapleV has been used with Maple version from 4 to 2015,
+with GNU Emacs 22 to 24, and on Linux, Mac, and Windows machines.
 
 @node Basics, Indentation, Introduction, top
 @chapter Basics
@@ -301,7 +286,7 @@ indentation}, for an illustration and a method to automatically indent
 these procedures to the left column.
 
 Most of the higher-level MapleV functions, those that do more than edit
-text, are available on the menubar.
+text, are available on the menu-bar.
 
 
 
@@ -585,7 +570,7 @@ Everything in level 1 plus Maple special words, initial variables, and
 the ditto operators are highlighted.
 
 @item
-Everything in level 2 plus Maple builtin functions are highlighted.
+Everything in level 2 plus Maple built-in functions are highlighted.
 
 @end enumerate
 
@@ -739,7 +724,7 @@ strings. The default is @samp{nil}.
 @end table
 
 @menu
-* Customizing Abbreviations::   
+* Customizing Abbreviations::
 @end menu
 
 
@@ -782,13 +767,13 @@ following to @file{emacs}:
 @kindex C-c C-p
 @kindex C-;
 
-@findex maplev-proc-template
+@findex maplev-template-proc
 @findex maplev-insert-assignment-operator
 
 @table @kbd
 @item C-c C-p
-Insert a procedure template (@code{maplev-proc-template}).  The user is
-queried for the name, arguments, and a description of the procedure.
+Insert a procedure template (@code{maplev-template-proc}).  
+The user is queried for the name, arguments, and a description of the procedure.
 Any of the entries can be left blank.  If the name is blank then an
 anonymous procedure is inserted, otherwise an assignment is inserted
 with the procedure assigned to the given name.  Backquotes are added
@@ -1076,13 +1061,13 @@ are available:
 Display a Maple help topic (@pxref{Help pages}).
 
 @item M-?
-Display a Maple procedure (@pxref{Procedures}).
+Display a Maple expression (@pxref{Viewing}).
 
 @end table
 
 
 
-@node Help pages, Procedures, Maple, top
+@node Help pages, Viewing, Maple, top
 @chapter Help pages
 @cindex Help pages, Maple
 @cindex Maple help pages
@@ -1189,29 +1174,28 @@ the message window.
 
 
 
-@node Procedures, Installation, Help pages, top
-@chapter Procedures
-@cindex Procedures, Maple
-@cindex Maple, procedures
-@cindex Displaying Maple procedures
+@node Viewing, Installation, Help pages, top
+@chapter Viewing
+@cindex Viewing, Maple
 
-Procedures can be read from the active Maple libraries and displayed in
-a buffer with major mode @code{maplev-proc-mode}. The code is font
-locked the same as in MapleV mode.
+Maple code for modules and procedures stored in Maple libraries, or
+otherwise known to Maple, can be displayed in a buffer with major mode
+@code{maplev-view-mode}.  The code is font-locked the same as in MapleV
+mode.
 
 @menu
-* Displaying procedures::       Commands to display Maple procedures.
-* MapleV proc mode::            Mode for viewing Maple procedures.
+* Displaying::                  Commands to display Maple expressions.
+* MapleV view mode::            Mode for viewing Maple library code.
 @end menu
 
 
-@node Displaying procedures, MapleV proc mode, Procedures, Procedures
+@node Displaying, MapleV view mode, Viewing, Viewing
 @section Displaying procedures
 @kindex M-?
 @kindex M-S-mouse-2
 
-@findex maplev-proc-at-point
-@findex maplev-proc-follow-point
+@findex maplev-view-at-point
+@findex maplev-view-follow-point
 
 The following commands display Maple procedures:
 
@@ -1219,34 +1203,34 @@ The following commands display Maple procedures:
 @item M-?
 Query for a procedure name, using the word at point as the default.
 Read the procedure from the Maple library and display it in a buffer
-(@code{maplev-proc-at-point}).
+(@code{maplev-view-at-point}).
 
 @item M-S-mouse-2
 Read the procedure at the click from the library and display it in a
-buffer (@code{maplev-proc-follow-point}).
+buffer (@code{maplev-view-follow-point}).
 
 @end table
 
 Procedures are displayed in a buffer with major mode
-@code{maplev-proc-mode}.
+@code{maplev-view-mode}.
 @ifinfo
-@xref{MapleV proc mode}.
+@xref{MapleV view mode}.
 @end ifinfo
 
 
-@node MapleV proc mode,  , Displaying procedures, Procedures
-@section MapleV proc mode
-@cindex MapleV proc mode
-@cindex Mode, proc, MapleV
-@cindex History, proc mode
+@node MapleV view mode,  , Displaying, Viewing
+@section MapleV view mode
+@cindex MapleV view mode
+@cindex Mode, view, MapleV
+@cindex History, view mode
 
-@findex maplev-proc-mode
-The major mode @code{maplev-proc-mode} is active in the buffer that
-displays Maple procedures read from a Maple library.  It font locks the
-procedure, highlighting keywords the same as MapleV mode does.  Clicking
-on procedure names in the buffer displays their source code or opens a
-help page for them.  A history mechanism stores the previously displayed
-procedure.
+@findex maplev-view-mode
+The major mode @code{maplev-view-mode} is active in the buffer that
+displays Maple modules and procedures read from a Maple library.  It
+font-locks the code, highlighting keywords the same as MapleV mode
+does.  Clicking on a name in the buffer displays its source
+code or opens a help page for them.  A history mechanism stores the
+previously displayed procedure.
 
 The following commands are available:
 
@@ -1269,7 +1253,7 @@ Redraw procedure (@code{maple-redo-item}).
 Query for a help topic (@code{maplev-help-at-point}).
 
 @item M-?
-Query for a procedure (@code{maplev-proc-at-point}).
+Query for a procedure (@code{maplev-view-at-point}).
 
 @item @key{SPC}
 Scroll down.
@@ -1292,7 +1276,7 @@ busy}, is displayed in the message window.
 @c Appendices
 
 
-@node Installation, Evolution, Procedures, top
+@node Installation, Evolution, Viewing, top
 @appendix Installation
 
 @cindex Installation
@@ -1303,24 +1287,26 @@ busy}, is displayed in the message window.
 This section describes how to install MapleV into GNU Emacs.
 
 @menu
-* Compiling::                   Byte compiling MapleV.
+* Emacs Files::                 Installing and byte-compiling the lisp files
+* Maple Files::                 Installing the Maple archive
 * Customizing::                 Customizing the installation.
 * Info documentation::          Installing the Info documentation.
 @end menu
 
+@node Emacs Files, Maple Files, Installation, Installation
+@section Emacs Files
 
+Install the Emacs lisp files, those with extension @file{.el},
+into the directory @file{~/.emacs.d/maple}.
+The tilde, @file{~}, corresponds to your home directory.
 
-@node Compiling, Customizing, Installation, Installation
-@section Compiling
-
-Move the file @file{maplev.el} into your Emacs load path and byte
-compile it as shown below:
+Byte-compile them from Emacs with the command
 
 @example
-@kbd{M-x byte-compile-file} @key{RET} maplev.el @key{RET}
+@kbd{C-u 0 M-x byte-recompile-directory @key{RET} ~/emacs.d/maple @key{RET}}
 @end example
 
-Add the following line to your @file{.emacs} file:
+Add the following line to your @file{.emacs} file
 
 @example
 (autoload 'maplev-mode "maplev" "Maple editing mode" t)
@@ -1335,39 +1321,57 @@ regex @file{.mpl} to an extension appropriate for your usage:
       (cons `("\\.mpl\\'" . maplev-mode) auto-mode-alist))
 @end example
 
+@node Maple Files, Customizing, Emacs Files, Installation
+@section Maple Files
 
-@node Customizing, Info documentation, Compiling, Installation
+Install the Maple archive file @file{maplev.mla} into @file{~/maple/toolbox/emacs/lib}.
+
+
+@node Customizing, Info documentation, Maple Files, Installation
 @section Customizing
 
-You must customize some of MapleV's default settings to be appropriate
-for your installation.  Most significantly, you must specify the
-locations of the executable files for mint and the command line version
-of Maple.  You can specify multiple versions of mint and Maple.  The
-easiest method is to invoke @code{customize} using the following
-commands:
+Some of MapleV's default settings must be customized for your
+installation.  Most significantly, you must specify the locations of the
+executable files for mint and the command line version of Maple.  You
+can specify multiple versions of mint and Maple.  The easiest method is
+to invoke @code{customize} using the following commands:
 
 @example
 M-x load-library @key{RET} maplev @key{RET}
 M-x customize-group @key{RET} maplev @key{RET}
 @end example
 
-The important options are in the subgroup @code{maplev-important}.
-After setting these options, save them to your @file{.emacs} file by
-clicking on the @samp{Save for Future Sessions} button.
+Select the @strong{MapleV Executables} subgroup and customize
+@code{maplev-executable-alist}.  It is a list of sublists.
+Each sublist contains four items:
+  an identifier,
+  the path to the Maple tty executable,
+  the path to the a Maple initialization file, and
+  the path to the Mint executable.
 
+The identifier is arbitrary.
+To determine the name and path to the Maple and Mint executables,
+launch Maple and execute @code{kernelopts(mapledir)}, that
+returns the directory in which Maple is installed.
+   
+On Linux or Mac, the shell commands are locate in the @file{bin}
+subdirectory of the installed directory and are named @file{maple}
+and @file{mint}.
+   
+On Windows the shell commands are usually in the @file{bin.wnt}
+subdirectory of the installed directory and are named
+@file{cmapleXXXX.exe} and @file{mintXXXX.exe}, where @file{XXXX} is the
+Maple release.  When entering the path to the binaries, use forward
+slashes (@file{/}) as the directory separators.
+
+After setting the values, click the @samp{Apply and Save} button.
 
 @node Info documentation,  , Customizing, Installation
 @section Info documentation
 
-To create the Info documentation for MapleV, convert the TeXinfo
-file @file{maplev.texi} to an Info file.  You may use either the
-stand-alone utility @code{makeinfo} or, from inside Emacs, the command
-@code{makeinfo-buffer}.
-
-Move the output file @file{maplev} to a directory in the Info
-load path and then edit the @file{dir} file, that is,
-the top level node of your Emacs Info structure, to point to 
-@file{maplev}.  I added the following menu item to my @file{dir} file:
+Install the included @file{maplev.info} file to a directory
+in the Info load path and then edit the @file{dir} to point
+to it.  I add the following menu item to my @file{dir} file:
 
 @example
 * MapleV: (maplev).       MapleV reference manual.
@@ -1381,22 +1385,20 @@ the top level node of your Emacs Info structure, to point to
 
 
 @menu
-* Bugs::                        
-* Acknowledgments::             
-* Enhancements::                
+* Bugs::
+* Acknowledgments::
 @end menu
 
 @node Bugs, Acknowledgments, Evolution, Evolution
 @section Bugs
 
 If you encounter a bug in this package, wish to suggest an enhancement,
-or want to make a smart remark, then send an email to me, the humble
-developer.
+or want to make a smart remark, then send an email to me:
 
-   Joseph S. Riel (Joe Riel) @samp{joer@@k-online.com}
+   Joseph S. Riel (Joe Riel) @email{jriel@@maplesoft.com}
 
 
-@node Acknowledgments, Enhancements, Bugs, Evolution
+@node Acknowledgments,  , Bugs, Evolution
 @section Acknowledgements
 @cindex Acknowledgements
 @cindex Credits
@@ -1431,36 +1433,10 @@ For courageously agreeing to test a series of alpha
 versions of this package.  He found numerous errors and suggested many
 improvements.
 
+@item Erik Postma
+For providing useful feedback and suggested enhancements.
+
 @end table
-
-
-@node Enhancements,  , Acknowledgments, Evolution
-@section Enhancements
-@cindex Enhancements
-@cindex Debugger, source code
-@cindex Code debugger
-@cindex LaTeX 
-@cindex MapleDoc
-
-The following is a short list of features that I am tentatively planning
-to add to MapleV.
-
-@itemize @bullet
-@item
-Source code debugger.  The Maple debugger @code{DEBUG} provides a useful
-means to step through code; its interface, however, leaves much to be
-desired.  A more convenient interface would be similar to that of
-@code{Edebug}, the Emacs-Lisp source code debugger.
-
-@item
-La@TeX{} support.  I use MapleDoc, a La@TeX{} macro package that I wrote,
-for documenting Maple source code.  To facilitate its use MapleV should
-be able to font-lock La@TeX{} keywords in comments.  This will be an
-optional package.
-
-@end itemize
-
-
 
 
 @node Key Index, Function Index, Evolution, top

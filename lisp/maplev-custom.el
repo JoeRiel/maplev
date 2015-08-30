@@ -14,10 +14,6 @@
   "Major mode for editing Maple source in Emacs"
   :group 'languages)
 
-(defgroup maplev-important nil
-  "STUFF THAT MUST BE CONFIGURED."
-  :group 'maplev)
-
 (defgroup maplev-declarations nil
   "Customizations for declaring variables."
   :group 'maplev)
@@ -61,103 +57,45 @@
 
 ;;{{{   executables
 
-(defun maplev-windows-executables (major-release &optional num-exe-flag ini-file)
-  "Return a list of the Maple executables for Windows.
-MAJOR-RELEASE is the Maple major release number; if NUM-EXE-FLAG
-is non-nil, MAJOR-RELEASE is appended to the cmaple
-name.  Optional INI-FILE specifies an initialization file.  A list
-of three elements is returned \[cmaple, ini-file, mint\]."
-  (let ((num (if num-exe-flag major-release "")))
-  (list (format "c:/Program Files/Maple Release %s/bin.wnt/cmaple%s.exe" major-release num)
-        ini-file
-        (format "c:/Program Files/Maple Release %s/bin.wnt/mint%s.exe" major-release num))))
-
 (defcustom maplev-executable-alist
-  (if (string-match "windows-nt\\|ms-dos" (symbol-name system-type))
-      `(("16" . ,(maplev-windows-executables "16" t))
-	("15" . ,(maplev-windows-executables "15" t))
-        ("14" . ,(maplev-windows-executables "14" t))
-        ("13" . ,(maplev-windows-executables "13" t))
-        ("12" . ,(maplev-windows-executables "12" t))
-        ("11" . ,(maplev-windows-executables "11" t))
-        ("10" . ,(maplev-windows-executables "10" t))
-        ("9"  . ,(maplev-windows-executables "9"  t))
-        ("8"  . ,(maplev-windows-executables "8"  t))
-        ("7"  . ,(maplev-windows-executables "7"  t))
-        ("6"  . ,(maplev-windows-executables "6"  t))
-        ("5"  . ,(maplev-windows-executables "5"  t))
-        ("4"  . ,(maplev-windows-executables "4"  t))
-        ("3"  . ,(maplev-windows-executables "3"  t)))
-    '(
-      ("16"  . ("maple" nil "mint"))
-      ("15"  . ("maple" nil "mint"))
-      ("14"  . ("maple" nil "mint"))
-      ("13"  . ("maple" nil "mint"))
-      ("12"  . ("maple" nil "mint"))
-      ("11"  . ("maple" nil "mint"))
-      ("10"  . ("maple" nil "mint"))
-      ("9"   . ("maple" nil "mint"))
-      ("8"   . ("maple" nil "mint"))
-      ("7"   . ("maple" nil "mint"))
-      ("6"   . ("maple" nil "mint"))
-      ("5.1" . ("maple" nil "mint"))
-      ("5"   . ("maple" nil "mint"))
-      ("4"   . ("maple" nil "mint"))))
-  "Assoc list specifying the available executables.
-Each item has the form \(RELEASE MAPLE MAPLE-INIFILE MINT\)
-where RELEASE is the Maple release corresponding to the
-executables MAPLE and MINT.  MAPLE must be the command line
-\(non-GUI\) version of Maple.  MAPLE-INIFILE is the maple
-initialization file for running Maple under Emacs;
-if nil the default initialization file is used."
-  :type '(repeat (list (string :tag "Maple Release")
+  '(("default" "maple" nil "mint"))
+  
+  "Association list specifying the available executables to
+permit selecting different installations of Maple.  Each sublist
+has the form \(ID MAPLE MAPLE-INIFILE MINT\).
+
+ID is a string used to select and identify the sublist; its value
+is arbitrary but will be displayed in the mode-line of the maple
+buffer.  The id of the first entry in this list is used as the
+default.
+
+MAPLE is the command that launches the tty version of Maple.  
+
+MAPLE-INIFILE is the maple initialization file for running Maple under Emacs;
+if nil the default initialization file is used, if it exists.
+
+MINT is the command to launch Mint, the Maple syntax checker.
+
+To determine the name and path to the Maple and Mint executables,
+launch Maple and execute \'kernelopts\(mapledir\)\', that
+returns the directory in which Maple is installed.
+
+On Linux or Mac, the shell commands are locate in the \`bin\'
+subdirectory of the installed directory and are named \`maple\'
+and \`mint\'.
+
+On Windows the shell commands are usually in the \`bin.wnt\'
+subdirectory of the installed directory and are named
+\`cmapleXXXX.exe\' and \`mintXXXX.exe\', where XXXX is the Maple
+release.  When entering the path to the binaries, use forward
+slashes (/) as the directory separators."
+
+  :type '(repeat (list (string :tag "Identifier")
                        (file   :tag "Maple Executable")
                        (choice :tag "Maple Initialization File"
                                file (const :tag "none" nil))
                        (file   :tag "Mint Executable ")))
-  :group 'maplev-executables
-  :group 'maplev-important)
-
-;; this isn't quite right, it doesn't permit assigning
-;; a new release.
-
-(defcustom maplev-default-release "15"
-  "Release of Maple used as the default executable.
-It must be a key in `maplev-executable-alist'."
-  :type `(choice ,@(mapcar (lambda (item)
-                             (list 'const (car item)))
-                           maplev-executable-alist))
-  :group 'maplev-executables
-  :group 'maplev-important)
-
-(defconst maplev-interface-kernelopts-settings
-  (concat "interface('prettyprint=1,verboseproc=2,errorbreak=0,warnlevel=2,errorcursor=false,screenheight=infinity'):\n"
-          "kernelopts('printbytes=false'):\n" )
-  "Maple commands that assign the default interface and kernelopts settings." )
-
-(defcustom maplev-default-init-string
-  (concat
-   "maplev_print := `if`(assigned(maplev['PrintProc']),maplev:-PrintProc,print):\n"
-   maplev-interface-kernelopts-settings)
-  "Default Maple commands used to initialize a Maple process.
-Use `maplev-init-string-alist' to customize initialization commands
-for particular releases.")
-
-(defcustom maplev-init-string-alist
-  (let ((init
-         (concat
-          "if not assigned(maplev_print) then maplev_print := proc(n)print(`if`(type(evaln(n),'procedure'),eval,readlib)(n))end:fi:\n"
-          maplev-interface-kernelopts-settings)))
-    `(("5.1" . ,init)
-      ("5"   . ,init)))
-  "Assoc list of Maple commands initializing a maple session.
-Each item has the form \(RELEASE COMMANDS\) where RELEASE is the
-Maple release.  COMMANDS must be a string of Maple commands.
-Overrides `maplev-default-init-string'."
-  :type '(repeat (cons (string :tag "Maple Release")
-                       (string :tag "Maple Commands")))
-  :group 'maplev-executables
-  :group 'maplev-important)
+  :group 'maplev-executables)
 
 (defcustom maplev-mint-info-level 3
   "Integer controlling amount of information that Mint outputs."
@@ -184,15 +122,6 @@ they are handled by `maplev-mint-info-level' and `maplev-include-path'.
 The line-width option (-w) is used to ensure that a reference to 
 an included file appears on a single line."
   :type 'list
-  ;;   :type '(repeat (choice (const :tag "no logo" " -q")
-  ;;                       (const :tag "suppress startup" " -s")
-  ;;                       (const :tag "syntax only" " -S")
-  ;;                       (const :tag "cross reference" " -x")
-  ;;                       (list :tag "library" (const " -b") directory)
-  ;;                       (list :tag "append database" (const " -a ") file)
-  ;;                       (list :tag "use database" (const " -d ") file)
-  ;;                       (list :tag "toggle error" (const " -t ") (string :tag "error number"))))
-
   :group 'maplev-mint)
 
 (defcustom maplev-include-path nil
@@ -293,8 +222,7 @@ either `maplev-add-declaration-leading-comma' or
 (defcustom maplev-copyright-owner "John Q. Public"
   "Copyright owner inserted in the copyright string by `maplev--template-proc-module'."
   :type 'string
-  :group 'maplev-templates
-  :group 'maplev-important)
+  :group 'maplev-templates)
 
 (defcustom maplev-comment-end-flag t
   "Non-nil means add a template's name as a comment following the end.
@@ -489,8 +417,7 @@ See the documentation for `align-exclude-rules-list' for more info."
   (not (string-match "windows-nt\\|ms-dos" (symbol-name system-type)))
   "Non-nil means the process echoes."
   :type 'boolean
-  :group 'maplev-buffer
-  :group 'maplev-important)
+  :group 'maplev-buffer)
 
 ;;}}}
 ;;{{{   maple setup
