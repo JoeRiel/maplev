@@ -235,7 +235,7 @@ dist: $(LISP-FILES) $(MAPLE-FILES) $(TEXI-FILES)
 	$(CP) $(MAPLE-FILES) $(PKG)-$(VERSION)/maple
 	$(CP) $(TEXI-FILES) $(PKG)-$(VERSION)/doc
 	$(CP) $(DIST-FILES-extra) $(DIST-extra) $(PKG)-$(VERSION)/
-	echo zip -r $(PKG)-$(VERSION).zip $(PKG)-$(VERSION)
+	zip -r $(PKG)-$(VERSION).zip $(PKG)-$(VERSION)
 	tar zcvf $(PKG)-$(VERSION).tar.gz $(PKG)-$(VERSION)
 
 .PHONY:  dist
