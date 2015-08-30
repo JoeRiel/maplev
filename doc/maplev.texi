@@ -91,6 +91,9 @@ Processes
 * Maple::                       Running Maple as a standalone process.
 * Help pages::                  Displaying Maple help pages.
 * Viewing::                     Viewing Maple library code.
+
+Appendices
+
 * Installation::                Installing MapleV.
 * Evolution::                   Credits, Bugs, Enhancements.
 
@@ -141,6 +144,7 @@ Abbreviations
 Miscellaneous features
 
 * Include statements::          Active include statements.
+* Indent trace output::         Hierarchically indent Maple trace output.
 
 Mint
 
@@ -832,9 +836,10 @@ Only the first macro in a @code{macro} assignment is indexed.
 
 @menu
 * Include statements::          Active include statements.
+* Indent trace output::         Hierarchically indent Maple trace output.
 @end menu
 
-@node Include statements,  , Miscellaneous features, Miscellaneous features
+@node Include statements, Indent trace output, Miscellaneous features, Miscellaneous features
 @section Include statements
 @cindex Include
 
@@ -856,6 +861,37 @@ The paths are searched in the order of occurrence in the list.
 The customizable variable @kbd{maplev-include-file-other-window-flag}
 determines whether the file is opened in the current window or 
 another window.
+
+@node Indent trace output,  , Include statements, Miscellaneous features
+@section Indent trace output
+@cindex Indent trace
+
+The Maple @code{trace} command causes Maple to print the
+assignments that occur in selected procedures.
+The following commands can be used to hierarchically
+indent the resulting output in an Emacs buffer.
+To be sensible, the output should be created with
+@code{interface(prettyprint=0)}.
+
+@table @code
+
+@findex maplev-trace-indent-buffer
+@item maplev-trace-indent-buffer
+Hierarchically indent all Maple trace output in the buffer.
+
+@findex maplev-trace-indent-region
+@item maplev-trace-indent-region
+Hierarchically indent selected region in the buffer.
+
+@vindex maplev-trace-indent
+@item maplev-trace-indent
+Emacs variable that sets the indentation level for trace output.
+The default is four spaces.
+
+@end table       
+
+
+
 
 @node Mint, Maple, Miscellaneous features, top
 @chapter Mint
@@ -1272,9 +1308,7 @@ started.  If the Maple engine is busy an error message, @samp{Maple
 busy}, is displayed in the message window.
 
 
-
 @c Appendices
-
 
 @node Installation, Evolution, Viewing, top
 @appendix Installation
