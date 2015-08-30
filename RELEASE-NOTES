@@ -5,6 +5,7 @@
 ** eliminate maplev-default-release and related variables
 ** add speedbar support for Maple source files
 ** change maplev-proc to maple-view and extend to print modules
+** add maplev-trace-indent commands for indenting Maple trace output
 ** update info pages
 ** button-lock: eliminate warning about use of cl
 * 2.31
