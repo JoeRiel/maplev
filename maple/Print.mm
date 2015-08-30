@@ -53,7 +53,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
     Dispatch := proc(indent :: nonnegint
                      , nomen
-                     , rel :: string
+                     , rel :: string # = or :=
                     )
     local expr;
         expr := _rest;
@@ -64,7 +64,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
         elif expr :: '`module`' then
             PrintModule(args);
         else
-            buf:-appendf("%*s%a %s %q", indent, "", nomen, rel, eval(expr));
+            buf:-appendf("%*s%a %s %q;", indent, "", nomen, rel, eval(expr));
         end if;
     end proc;
 

@@ -177,7 +177,7 @@ mla: $(mla)
 
 MAPLE-FILES = $(addprefix maple/,maplev.mpl Print.mm)
 
-%.mla: maple/%.mpl
+%.mla: maple/%.mpl maple/%.mm
 	@$(RM) $@
 	@echo "Building Maple archive $@"
 	@err=$$($(MAPLE) -q -I $(PWD)/maple -D BUILD-MLA $< ) ; \
