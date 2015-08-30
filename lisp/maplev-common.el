@@ -69,7 +69,7 @@ the buffer."
   (unless (assoc release maplev-executable-alist)
     (error "Invalid Maple release: %S" release))
   (setq maplev-release release)
-  (cond ((memq major-mode '(maplev-mode maplev-cmaple-mode maplev-proc-mode))
+  (cond ((memq major-mode '(maplev-mode maplev-cmaple-mode maplev-view-mode))
 	 (set-syntax-table maplev-mode-syntax-table))
         ;; for consistency also maplev-help-mode
         ((eq major-mode 'maplev-help-mode)

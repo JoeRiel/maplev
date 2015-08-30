@@ -17,7 +17,7 @@
 (declare-function maplev--cmaple-buffer "maplev-cmaple")
 (declare-function maplev--cmaple-get-init-string "maplev-cmaple")
 (declare-function maplev--cmaple-process "maplev-cmaple")
-(declare-function maplev--proc-buffer "maplev-proc")
+(declare-function maplev--proc-buffer "maplev-view")
 (declare-function maplev-cmaple--lock-access "maplev-cmaple")
 (declare-function maplev-cmaple--ready "maplev-cmaple")
 (declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
@@ -42,7 +42,7 @@
     (define-key map [?P]                         'maplev-help-parent)
     (define-key map [?\?]                        'maplev-help-at-point)
     (define-key map [(control ?\?)]              'maplev-help-at-point)
-    (define-key map [(meta ?\?)]                 'maplev-proc-at-point)
+    (define-key map [(meta ?\?)]                 'maplev-view-at-point)
     (define-key map [?f]                         'maplev-tear-off-window)
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
@@ -52,15 +52,15 @@
     (define-key map [?l]                         'maplev-switch-buffer-proc) ; short-cut
     (define-key map [?c]                         'maplev-switch-buffer-cmaple) ; short-cut
     (define-key map [(return)]                   'maplev-help-at-point)
-    (define-key map [(meta return)]              'maplev-proc-at-point)
+    (define-key map [(meta return)]              'maplev-view-at-point)
 
     ;; Bind mouse buttons
     (define-key map [(mouse-2)]               'maplev-help-follow-mouse)
     (define-key map [(shift mouse-2)]         'maplev-help-follow-mouse)
     (define-key map [(control shift mouse-2)] 'maplev-help-follow-mouse)
 
-    (define-key map [(meta mouse-2)]          'maplev-proc-follow-mouse)
-    (define-key map [(meta shift mouse-2)]    'maplev-proc-follow-mouse)
+    (define-key map [(meta mouse-2)]          'maplev-view-follow-mouse)
+    (define-key map [(meta shift mouse-2)]    'maplev-view-follow-mouse)
 
     (setq maplev-help-mode-map map)))
 
@@ -77,13 +77,13 @@
       ["Redraw"         maplev-history-redo-item t]
       ["Delete"         maplev-history-delete-item t]
       ["Goto help node" maplev-help-at-point t]
-      ["Goto proc node" maplev-proc-at-point t]
+      ["Goto proc node" maplev-view-at-point t]
       ["Clear history"  maplev-history-clear t]
       "---"
       ["Separate frame" maplev-tear-off-window
        :active (not (one-window-p t 'here))]
       "---"
-      ("Decoration" :included (eq major-mode 'maplev-proc-mode)
+      ("Decoration" :included (eq major-mode 'maplev-view-mode)
        ["reserved words"  (maplev-reset-font-lock 1) :style radio
 	:selected (equal font-lock-maximum-decoration 1)]
        ["+ special words"  (maplev-reset-font-lock 2) :style radio

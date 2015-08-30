@@ -14,10 +14,6 @@
   "Major mode for editing Maple source in Emacs"
   :group 'languages)
 
-(defgroup maplev-important nil
-  "STUFF THAT MUST BE CONFIGURED."
-  :group 'maplev)
-
 (defgroup maplev-declarations nil
   "Customizations for declaring variables."
   :group 'maplev)
@@ -70,17 +66,18 @@ has the form \(ID MAPLE MAPLE-INIFILE MINT\).
 
 ID is a string used to select and identify the sublist; its value
 is arbitrary but will be displayed in the mode-line of the maple
-buffer.  The id of the first entry is used as the default.
+buffer.  The id of the first entry in this list is used as the
+default.
 
 MAPLE is the command that launches the tty version of Maple.  
 
 MAPLE-INIFILE is the maple initialization file for running Maple under Emacs;
-if nil the default initialization file is used.
+if nil the default initialization file is used, if it exists.
 
 MINT is the command to launch Mint, the Maple syntax checker.
 
 To determine the name and path to the Maple and Mint executables,
-launch Maple and execute \'kernelopts\(mapledir\)\'.  That
+launch Maple and execute \'kernelopts\(mapledir\)\', that
 returns the directory in which Maple is installed.
 
 On Linux or Mac, the shell commands are locate in the \`bin\'
@@ -98,8 +95,7 @@ slashes (/) as the directory separators."
                        (choice :tag "Maple Initialization File"
                                file (const :tag "none" nil))
                        (file   :tag "Mint Executable ")))
-  :group 'maplev-executables
-  :group 'maplev-important)
+  :group 'maplev-executables)
 
 (defcustom maplev-mint-info-level 3
   "Integer controlling amount of information that Mint outputs."
@@ -226,8 +222,7 @@ either `maplev-add-declaration-leading-comma' or
 (defcustom maplev-copyright-owner "John Q. Public"
   "Copyright owner inserted in the copyright string by `maplev--template-proc-module'."
   :type 'string
-  :group 'maplev-templates
-  :group 'maplev-important)
+  :group 'maplev-templates)
 
 (defcustom maplev-comment-end-flag t
   "Non-nil means add a template's name as a comment following the end.
@@ -422,8 +417,7 @@ See the documentation for `align-exclude-rules-list' for more info."
   (not (string-match "windows-nt\\|ms-dos" (symbol-name system-type)))
   "Non-nil means the process echoes."
   :type 'boolean
-  :group 'maplev-buffer
-  :group 'maplev-important)
+  :group 'maplev-buffer)
 
 ;;}}}
 ;;{{{   maple setup

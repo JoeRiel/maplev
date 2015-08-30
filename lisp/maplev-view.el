@@ -1,4 +1,4 @@
-;;; maplev-proc.el --- mode for displaying Maple procedures
+;;; maplev-view.el --- mode for displaying Maple procedures
 
 ;;; Commentary:
 ;; 
@@ -33,36 +33,36 @@
 
 ;;{{{ mode map
 
-;; The mode map for maplev-proc-map is identical to that for
+;; The mode map for maplev-view-map is identical to that for
 ;; maplev-help-mode, with one exception: the parent function is not
 ;; needed, so its key is redefined to self-insert (which generates an
 ;; error, as does any other insertion, because the buffer if
 ;; read-only).
 
-(defvar maplev-proc-mode-map nil
-  "Keymap used in `maplev-proc-mode'.")
+(defvar maplev-view-mode-map nil
+  "Keymap used in `maplev-view-mode'.")
 
-(unless maplev-proc-mode-map
+(unless maplev-view-mode-map
   (let ((map (copy-keymap maplev-help-mode-map)))
     (define-key map [?P] 'self-insert-command)
-    (setq maplev-proc-mode-map map)))
+    (setq maplev-view-mode-map map)))
 
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-proc-mode (&optional release)
+(defun maplev-view-mode (&optional release)
   "Major mode for displaying the source code of Maple procedures.
 RELEASE is an id in `maplev-executable-alist'; if nil, the
 first id is used.
 
-\\{maplev-proc-mode-map}"
+\\{maplev-view-mode-map}"
   (interactive)
   (kill-all-local-variables)
 
-  (setq major-mode 'maplev-proc-mode) ;; needed by maplev-set-release
+  (setq major-mode 'maplev-view-mode) ;; needed by maplev-set-release
   (maplev-set-release release)
   (setq mode-name (format "Maple-Proc %s" maplev-release))
-  (use-local-map maplev-proc-mode-map)
+  (use-local-map maplev-view-mode-map)
 
   (set (make-local-variable 'maplev--process-item)
        (function maplev--proc-process))
@@ -80,7 +80,7 @@ first id is used.
   (maplev-reset-font-lock)
 
   (setq buffer-read-only t)
-  (run-hooks 'maplev-proc-mode-hook))
+  (run-hooks 'maplev-view-mode-hook))
 
 ;;}}}
 ;;{{{ functions
@@ -94,14 +94,14 @@ first id is used.
 ;;; Define functions for displaying a Maple procedure from the Maple
 ;;; library in a buffer.
 
-(defun maplev-proc-follow-mouse (click)
+(defun maplev-view-follow-mouse (click)
   "Display the Maple procedure at the mouse CLICK."
   (interactive "e")
   (set-buffer (window-buffer (event-window click)))
   (goto-char (event-point click))
   (maplev--proc-show-topic (maplev--ident-around-point)))
 
-(defun maplev-proc-at-point (proc)
+(defun maplev-view-at-point (proc)
   "Display the Maple procedure PROC.
 Request procedure name in minibuffer, using identifier at point as default."
   (interactive (list (maplev-ident-around-point-interactive
@@ -118,15 +118,15 @@ If optional arg HIDE is non-nil do not display buffer."
     (save-current-buffer
       (let ((release maplev-release)) ;; we switch buffers!
         (set-buffer (get-buffer-create (maplev--proc-buffer)))
-        (unless (eq major-mode 'maplev-proc-mode)
-          (maplev-proc-mode release))
+        (unless (eq major-mode 'maplev-view-mode)
+          (maplev-view-mode release))
         (maplev-history--stack-process proc hide)))))
 
 (defun maplev--proc-process (proc)
   "Display the Maple procedure PROC \(a string\) in `maplev--proc-buffer'."
   (let ((process (maplev--cmaple-process)))
     (maplev-cmaple--lock-access)
-    (set-process-filter process 'maplev-proc-filter)
+    (set-process-filter process 'maplev-view-filter)
     (set-buffer (maplev--proc-buffer))
     (setq mode-line-buffer-identification (format "%-12s" proc))
     (let (buffer-read-only)
@@ -137,7 +137,7 @@ If optional arg HIDE is non-nil do not display buffer."
     (comint-simple-send process (format "maplev:-Print(\"%s\"):" proc))
     (maplev-cmaple--send-end-notice process)))
 
-(defun maplev-proc-filter (process string)
+(defun maplev-view-filter (process string)
   "Pipe a Maple procedure listing into `maplev--proc-buffer'.
 PROCESS calls this filter.  STRING is the Maple procedure."
   (with-current-buffer (maplev--proc-buffer)
@@ -150,9 +150,9 @@ PROCESS calls this filter.  STRING is the Maple procedure."
           (maplev--cleanup-buffer))
         (goto-char (point-max))
         (if (maplev-cmaple--ready process)
-            (maplev-proc-cleanup-buffer))))))
+            (maplev-view-cleanup-buffer))))))
 
-(defun maplev-proc-cleanup-buffer ()
+(defun maplev-view-cleanup-buffer ()
   "Cleanup Maple procedure listings."
   (save-excursion
     (when maplev-cmaple-echoes-flag
@@ -174,6 +174,6 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 
 ;;}}}
 
-(provide 'maplev-proc)
+(provide 'maplev-view)
 
-;;; maplev-proc.el ends here
+;;; maplev-view.el ends here

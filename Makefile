@@ -12,7 +12,8 @@ include help-system.mak
 # {{{ Executables
 
 EMACS := emacs
-MAPLE := cmaple
+# cmaple is better for production release
+MAPLE := maple
 TEXI2HTML := makeinfo --html --number-sections
 TEXI2PDF := texi2pdf
 
@@ -69,7 +70,7 @@ ELFLAGS	= --no-site-file \
 
 ELC = $(EMACS) --batch $(ELFLAGS) --funcall=batch-byte-compile
 
-ELS = $(PKG) $(addprefix $(PKG),-cmaple -common -custom -help -history -indent -mint -proc -re -sb -utils) button-lock
+ELS = $(PKG) $(addprefix $(PKG),-cmaple -common -custom -help -history -indent -mint -re -sb -utils -view) button-lock
 
 LISP-FILES = $(ELS:%=lisp/%.el)
 ELC-FILES = $(LISP-FILES:.el=.elc)
@@ -177,7 +178,7 @@ mla: $(mla)
 %.mla: maple/%.mpl
 	@$(RM) $@
 	@echo "Building Maple archive $@"
-	@err=$$($(MAPLE) -q -I maple -D BUILD-MLA $< ) ; \
+	@err=$$($(MAPLE) -q -I $(PWD)/maple -D BUILD-MLA $< ) ; \
 		if [ ! -z "$$err" ]; then \
 			echo $(call warn,$$err); \
 		fi

@@ -337,7 +337,7 @@ PROCESS is the Maple process, STRING its output."
     (define-key map [(control c) (control c)] 'maplev-cmaple-interrupt)
     (define-key map [?\?]                     'maplev-help-at-point)
     (define-key map [(control ?\?)]           'maplev-help-at-point)
-    (define-key map [(meta ?\?)]              'maplev-proc-at-point)
+    (define-key map [(meta ?\?)]              'maplev-view-at-point)
     (define-key map [(meta tab)]              'maplev-complete-symbol)
     (define-key map [(control a)]             'comint-bol)
 
@@ -349,7 +349,7 @@ PROCESS is the Maple process, STRING its output."
     
     (define-key map [(shift mouse-2)]         'maplev-help-follow-mouse)
     (define-key map [(control shift mouse-2)] 'maplev-help-follow-mouse)
-    (define-key map [(meta shift mouse-2)]    'maplev-proc-follow-mouse)
+    (define-key map [(meta shift mouse-2)]    'maplev-view-follow-mouse)
 
     ;; in comint-mode-map of emacs 21, `C-c C-s' is bound to comint-write-output.
     ;; Remove it so that it can be used as a prefix key to switch buffers.

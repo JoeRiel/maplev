@@ -1,11 +1,13 @@
+#LINK ../Makefile
 ##MODULE maplev
 ##HALFLINE module used with Emacs maplev mode
 
 maplev := module()
 
-export Print, Setup;
+export GetSource, Print, Setup;
 
 $include <Print.mm>
+$include <GetSource.mm>
 
 ##PROCEDURE maplev[Setup]
 ##DESCRIPTION

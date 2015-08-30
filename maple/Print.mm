@@ -1,5 +1,11 @@
 #LINK maplev.mpl
 
+##MODULE Print
+##HALFLINE appliable module for printing a Maple expression
+##DESCRIPTION
+##- The `Print` module is used by the Emacs `maplev-view-mode` to display
+##  Maple library code in a buffer.
+
 Print := module()
 
 export ModuleApply;

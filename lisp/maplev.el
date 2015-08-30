@@ -33,7 +33,7 @@
 ;;   maplev-cmaple-mode: for running Maple
 ;;   maplev-mint-mode:   for displaying the output of mint
 ;;   maplev-help-mode:   for displaying Maple help pages
-;;   maplev-proc-mode:   for displaying Maple procedures
+;;   maplev-view-mode:   for displaying Maple procedures
 
 ;;; Features:
 
@@ -119,7 +119,7 @@
 (require 'maplev-help)			; maplev-help-mode (view help pages)
 (require 'maplev-indent)		; indentation engine
 (require 'maplev-mint)			; maplev-mint-mode (view mint output)
-(require 'maplev-proc)			; maplev-proc-mode (view procedures)
+(require 'maplev-view)			; maplev-view-mode (view procedures)
 (require 'maplev-re)			; regular expressions
 (require 'maplev-utils)			; not much here just yet
 (require 'maplev-speedbar "maplev-sb")
@@ -308,11 +308,11 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     ;; Help and proc comma
     
     (define-key map [(control ?\?)] 'maplev-help-at-point)
-    (define-key map [(meta ?\?)]    'maplev-proc-at-point)
+    (define-key map [(meta ?\?)]    'maplev-view-at-point)
     (define-key map [(control h) (meta d)] 'maplev-what-proc)
 
     (define-key map [(control shift mouse-2)] 'maplev-help-follow-mouse)
-    (define-key map [(meta shift mouse-2)]    'maplev-proc-follow-mouse)
+    (define-key map [(meta shift mouse-2)]    'maplev-view-follow-mouse)
 
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
@@ -703,8 +703,8 @@ Key bindings:
   (make-local-variable 'maplev-mint--code-end)
 
   ;; Is this what one wants??
-  ;; (set (make-local-variable 'beginning-of-defun-function) #'(lambda () (maplev-proc-beginning 1 t)))
-  ;; (set (make-local-variable 'end-of-defun-function)       #'(lambda () (maplev-proc-end 1 t)))
+  ;; (set (make-local-variable 'beginning-of-defun-function) #'(lambda () (maplev-view-beginning 1 t)))
+  ;; (set (make-local-variable 'end-of-defun-function)       #'(lambda () (maplev-view-end 1 t)))
   ;; (set (make-local-variable 'add-log-current-defun-function)
   ;;      #'maplev-current-defun-name) ;; not yet available
 
