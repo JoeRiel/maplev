@@ -38,10 +38,8 @@
 (eval-when-compile
   (defvar maplev-cmaple-echoes-flag)
   (defvar maplev-cmaple-end-notice)
-  (defvar maplev-default-init-string)
   (defvar maplev-executable-alist)
   (defvar maplev-include-path)
-  (defvar maplev-init-string-alist)
   (defvar maplev-mint-error-level)
   (defvar maplev-release)
   (defvar maplev-start-options)
@@ -68,22 +66,14 @@ Start one, if necessary."
         process
       (maplev-cmaple--start-process))))
 
-(defun maplev--cmaple-get-init-string (release)
-  "Return the initialization string passed to the Maple process.
-If RELEASE is an index in `maplev-init-string-alist' then use the entry,
-otherwise use `maplev-default-init-string'."
-  (let ((init (assoc release maplev-init-string-alist)))
-    (if init
-        (cdr init)
-      maplev-default-init-string)))
-
 (defun maplev-cmaple--start-process ()
   "Start a cmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it."
   (let* ((release maplev-release)
-         (cmaple (nth 0 (cdr (assoc release maplev-executable-alist))))
-         (inifile (nth 1 (cdr (assoc release maplev-executable-alist))))
+	 (executable (cdr (assoc release maplev-executable-alist)))
+         (cmaple (nth 0 executable))
+         (inifile (nth 1 executable))
          (buffer (get-buffer-create (maplev--cmaple-buffer)))
          (process (get-buffer-process buffer))
 	 (include-path maplev-include-path)
@@ -101,6 +91,7 @@ restart it."
                             buffer
                             cmaple
                             (append (and inifile (list "-i" inifile))
+				   '("-c maplev:-Setup()")
                                     maplev-start-options ;; add include path to argument list
                                     (and include-path
                                          (list (concat "-I " 
@@ -108,7 +99,7 @@ restart it."
        'maplev--cmaple-filter)
       (maplev-cmaple-mode release)
       (maplev-cmaple--lock-access t)
-      (comint-simple-send process (maplev--cmaple-get-init-string release))
+      ;; (comint-simple-send process init-code
       (maplev-cmaple--send-end-notice process)
       ;; Wait until cmaple is unlocked, that is, it has responded.
       ;; The time step, 100 milliseconds, should be customizable, some OSs
@@ -136,28 +127,20 @@ If access is already locked, generate an error
 unless optional arg NO-ERROR is non-nil."
   (if (and (not no-error) (maplev-cmaple--locked-p))
       (error "Maple busy")
-;;hieida:
-;;    (put 'maplev-cmaple-state maplev-release 'locked)))
     (put 'maplev-cmaple-state 'maplev-release 'locked)))
 
 (defun maplev-cmaple--unlock-access ()
   "Unlock access to cmaple.
 Interactively use \\[maplev-cmaple-interrupt]."
-;;hieida:
-;;  (put 'maplev-cmaple-state maplev-release nil))
   (put 'maplev-cmaple-state 'maplev-release nil))
 
 (defun maplev-cmaple--locked-p ()
   "Return non-nil if the Maple process is locked."
-;;hieida:
-;;  (eq (get 'maplev-cmaple-state maplev-release) 'locked))
   (eq (get 'maplev-cmaple-state 'maplev-release) 'locked))
 
 (defun maplev-cmaple-status ()
   "Status of Maple process."
   (interactive)
-;;hieida:
-;;  (let ((status (get 'maplev-cmaple-state maplev-release)))
   (let ((status (get 'maplev-cmaple-state 'maplev-release)))
     (message "Maple %s %s" maplev-release
              (cond ((eq status 'locked) "locked")
@@ -199,15 +182,6 @@ non-nil do not generate an error if time-out occurs."
 
 (defun maplev-cmaple--send-string (process string)
   "Send STRING to the cmaple process PROCESS."
-  ;; handle Maple `restart' by adding the initialization.
-  (let ((str "") case-fold-search)
-    (while (string-match "\\<restart[ \t\n]*[:;]" string)
-      (setq str (concat str (substring string 0 (match-end 0))
-                        (maplev--cmaple-get-init-string maplev-release))
-            string (if (> (length string) (match-end 0))
-                       (substring string (match-end 0))
-                     "")))
-    (setq string (concat str string)))
   (maplev-cmaple--lock-access)
   (set-process-filter process 'maplev--cmaple-filter)
   (comint-simple-send process string)
@@ -363,7 +337,7 @@ PROCESS is the Maple process, STRING its output."
     (define-key map [(control c) (control c)] 'maplev-cmaple-interrupt)
     (define-key map [?\?]                     'maplev-help-at-point)
     (define-key map [(control ?\?)]           'maplev-help-at-point)
-    (define-key map [(meta ?\?)]              'maplev-proc-at-point)
+    (define-key map [(meta ?\?)]              'maplev-view-at-point)
     (define-key map [(meta tab)]              'maplev-complete-symbol)
     (define-key map [(control a)]             'comint-bol)
 
@@ -375,7 +349,7 @@ PROCESS is the Maple process, STRING its output."
     
     (define-key map [(shift mouse-2)]         'maplev-help-follow-mouse)
     (define-key map [(control shift mouse-2)] 'maplev-help-follow-mouse)
-    (define-key map [(meta shift mouse-2)]    'maplev-proc-follow-mouse)
+    (define-key map [(meta shift mouse-2)]    'maplev-view-follow-mouse)
 
     ;; in comint-mode-map of emacs 21, `C-c C-s' is bound to comint-write-output.
     ;; Remove it so that it can be used as a prefix key to switch buffers.
@@ -394,8 +368,8 @@ PROCESS is the Maple process, STRING its output."
 
 (defun maplev-cmaple-mode (&optional release)
   "Major mode for interacting with cmaple.
-RELEASE is the release of Maple that should be started, if nil the
-`maplev-default-release' is used.  It has the same commands as
+RELEASE is an id in `maplev-executable-alist'; if omitted the
+first id is used.  This mode has the same commands as
 `comint-mode' plus some additional commands for interacting with
 cmaple.
 

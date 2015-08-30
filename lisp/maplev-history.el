@@ -25,11 +25,11 @@
 
 (defvar maplev-history--stack nil
   "Stack variable used for the history mechanism.
-It is local to the `maplev-help-mode' and `maplev-proc-mode' buffers.")
+It is local to the `maplev-help-mode' and `maplev-view-mode' buffers.")
 
 (defvar maplev--process-item nil
   "The name of a function that processes items on `maplev-history--stack'.
-It is local to the `maplev-help-mode' and `maplev-proc-mode' buffers.")
+It is local to the `maplev-help-mode' and `maplev-view-mode' buffers.")
 
 ;;{{{   Module
 
