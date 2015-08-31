@@ -222,8 +222,6 @@ help: $(call print-separator)
 DIST-extra = Copyright README RELEASE-NOTES install maplev.mla doc/maplev.info
 DIST-FILES-extra = ChangeLog Makefile /usr/local/include/help-system.mak
 
-$(info $(LISP-FILES))
-
 dist: $(call print-help,dist,	Create $(PKG)-$$TAG.tar.gz file)
 dist: $(LISP-FILES) $(MAPLE-FILES) $(TEXI-FILES)
 	$(RM) -r $(PKG)-$(VERSION)
@@ -243,10 +241,12 @@ dist: $(LISP-FILES) $(MAPLE-FILES) $(TEXI-FILES)
 # }}}
 # {{{ P4
 
-p4dir = /home/joe/work/MapleSoft/sandbox/groups/share/emacs/$(PKG)
-p4put: $(PKG).el 
-	(cd $(p4dir); p4 edit $?)
-	$(CP) $? $(p4dir)
+p4dir = /home/joe/maplesoft/sandbox/groups/scripts/share/emacs/$(PKG)
+p4put: 
+	$(CP) $(LISP-FILES) $(p4dir)/lisp
+	$(CP) $(MAPLE-FILES) $(p4dir)/maple
+	$(CP) $(TEXI-FILES) $(p4dir)/doc
+	$(CP) $(DIST-extra) $(DIST-FILES-extra) $(p4dir)
 
 p4get: 
 	$(CP) $(pfdir)/. .
