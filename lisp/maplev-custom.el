@@ -201,6 +201,11 @@ either `maplev-add-declaration-leading-comma' or
   :type 'integer
   :group 'maplev-indentation)
 
+(defcustom maplev-indent-tabs-mode nil
+  "Non-nil means indentation can insert tabs."
+  :type 'boolean
+  :group 'maplev-indentation)
+
 (defcustom maplev-dont-indent-re "[#$]"
   "Lines starting with this regular expression will not be auto-indented."
   :type '(choice string (const :tag "default" nil))

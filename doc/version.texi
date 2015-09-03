@@ -2,4 +2,4 @@
 @c Edition of the Manual
 @set EDITION 1.1
 @c Version of the Code
-@set VERSION 2.32
+@set VERSION 2.33
