@@ -23,7 +23,7 @@
 Group 1 is assigned if this matches an enter marker.
 Group 2, if assigned, matches ERROR.
 Group 3 matches a procedure name.
-Group 4, assigned if an exit or error, matches the procedure returned to."
+Group 4, assigned if an exit or error; matches the procedure returned to.")
 
 (defun maplev-trace-indent-region (beg end)
   "Hierarchically indent Maple trace output from BEG to END.

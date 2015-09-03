@@ -106,9 +106,7 @@
 
 (require 'button-lock)
 
-;; (require 'abbrevlist)
 (require 'comint)
-;; (require 'folding)
 (require 'font-lock)
 (require 'imenu)
 (require 'info)
@@ -121,6 +119,7 @@
 (require 'maplev-mint)			; maplev-mint-mode (view mint output)
 (require 'maplev-view)			; maplev-view-mode (view procedures)
 (require 'maplev-re)			; regular expressions
+(require 'maplev-trace)			; functions for indenting trace output
 (require 'maplev-utils)			; not much here just yet
 (require 'maplev-speedbar "maplev-sb")
 
@@ -652,10 +651,11 @@ Key bindings:
   (setq auto-fill-function 'maplev-auto-fill)
 
   ;; indentation
+  (setq indent-tabs-mode maplev-indent-tabs-mode)
+
   (set (make-local-variable 'indent-line-function)   #'maplev-indent-line)
   (set (make-local-variable 'indent-region-function) #'maplev-indent-region)
   (set (make-local-variable 'tab-width)               maplev-indent-level)
-  (set (make-local-variable 'indent-tabs-mode)        nil)
   (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
   (make-local-variable 'maplev-project-root)
 
@@ -1257,7 +1257,23 @@ otherwise use `maplev-tab-width'."
     "return" "save" "stop" "subset" "then" 
     "to" "try" "union" "use" "uses" 
     "while" "xor")
-  "List of reserved words for Maple.")
+  "List of reserved words in Maple.")
+
+(defconst maplev-special-words
+  '("args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
+    "_options" "_noptions" "_rest" "_nrest"
+    "_params" "_nparams" "_passed" "_npassed"
+    "_nresults" "static")
+  "List of special words in Maple.")
+
+(defconst maplev-initial-variables
+  '("Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
+    "integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
+    "`mod`" "Digits" "constants" "undefined" "I"
+    "UseHardwareFloats"
+    "Testzero" "Normalizer" "NumericEventHandlers"
+    "Rounding" "`index/newtable`")
+  "List of initial variables in Maple.")
 
 ;;}}}
 
@@ -1268,23 +1284,11 @@ otherwise use `maplev-tab-width'."
   "Regex of deprecated keywords and procedures.")
 
 (defconst maplev--special-words-re
-  (eval-when-compile
-    (maplev--list-to-word-re
-     '("args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
-       "_options" "_noptions" "_rest" "_nrest"
-       "_params" "_nparams" "_passed" "_npassed"
-       "_nresults" "static")))
+  (maplev--list-to-word-re maplev-special-words)
   "Regex of special words in Maple.")
 
 (defconst maplev--initial-variables-re
-  (eval-when-compile
-    (maplev--list-to-word-re
-     '("Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
-       "integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
-       "`mod`" "Digits" "constants" "undefined" "I"
-       "UseHardwareFloats"
-       "Testzero" "Normalizer" "NumericEventHandlers"
-       "Rounding" "`index/newtable`")))
+  (maplev--list-to-word-re maplev-initial-variables)
   "Regexp of global, environmental variables and constants.")
 
 (defconst maplev--preprocessor-directives-re
@@ -1310,7 +1314,7 @@ file (either < or \").  The second group matches the filename.")
 ;; quoted names rather than as builtin functions.  Fixing this
 ;; requires pulling them out.
 
-(defconst maplev--builtin-types
+(defconst maplev-builtin-types
   '("`::`" "`..`" "`!`"
     "algebraic" "anyfunc" "anything" "atomic"
     "boolean"
@@ -1332,7 +1336,7 @@ file (either < or \").  The second group matches the filename.")
     "tabular" "uneval" "zppoly")
   "List of builtin Maple types.")
 
-(defconst maplev--builtin-functions
+(defconst maplev-builtin-functions
   '("`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`"
     "`>=`" "`?()`" "`?[]`" "ASSERT" "Array" "ArrayOptions" "CopySign"
     "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" "ERROR"
@@ -1571,8 +1575,8 @@ minimum decoration keywords."
 Add builtin functions to the medium decoration keywords."
   (let ((max-specpdl-size 10000))       ; default 600 is too small
     (append (maplev-font-lock-keywords-2)
-            (list (list (maplev--list-to-word-re (append maplev--builtin-functions
-							 maplev--builtin-types))
+            (list (list (maplev--list-to-word-re (append maplev-builtin-functions
+							 maplev-builtin-types))
                         ;; Xemacs doesn't have font-lock-builtin-face
                         '(0 font-lock-builtin-face))
                   (list maplev--deprecated-re '(0 font-lock-warning-face))
