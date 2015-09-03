@@ -14,7 +14,7 @@ include help-system.mak
 EMACS := emacs
 # cmaple is better for production release
 MAPLE := maple
-TEXI2HTML := makeinfo --html --number-sections
+TEXI2HTML := $(MAKEINFO) --html --number-sections
 TEXI2PDF := texi2pdf
 
 BROWSER := x-www-browser
@@ -177,7 +177,7 @@ mla: $(mla)
 
 MAPLE-FILES = $(addprefix maple/,maplev.mpl Print.mm)
 
-%.mla: maple/%.mpl maple/%.mm
+%.mla: maple/%.mpl maple/Print.mm
 	@$(RM) $@
 	@echo "Building Maple archive $@"
 	@err=$$($(MAPLE) -q -I $(PWD)/maple -D BUILD-MLA $< ) ; \
@@ -219,7 +219,7 @@ clean-install: links-uninstall
 
 help: $(call print-separator)
 
-DIST-extra = Copyright README RELEASE-NOTES install maplev.mla doc/maplev.info
+DIST-extra = Copyright README.md RELEASE-NOTES maplev.mla doc/maplev.info
 DIST-FILES-extra = ChangeLog Makefile /usr/local/include/help-system.mak
 
 dist: $(call print-help,dist,	Create $(PKG)-$$TAG.tar.gz file)

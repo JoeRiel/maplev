@@ -15,21 +15,30 @@ MapleV provides several major modes:
 
 Requirements
 ------------
+
 * GNU Emacs 23.1+ (earlier versions may work)
 * Maple 5+
 
-
 Installation
 ------------
-Download the latest tarball from [the github download page][download],
-then MapleV can be installed with
+
+Download and unpack the latest [zip file](https://github.com/JoeRiel/maplev/archive/master.zip).
+
+Instructions for installing MapleV are given in its info manual, `maplev.info`,
+of which there is an html version, `maplev.html`.
+
+On a Linux machine you might be able to do
 
     make install
 
-This requires `emacs` and `makeinfo` binaries, so please make sure the relevant
-packages (generally `emacs` and `texinfo`) are installed on your system.
-This will put maplev.el and friends into `~/.emacs.d/maple`.
-Then add the following lines to the Emacs initialization file (`~/.emacs`):
+If needed, assign EMACS on the command line; for example
+
+	make install EMACS=/usr/bin/emacs24
+
+Configuration
+-------------
+
+Add the following lines to the Emacs initialization file (`~/.emacs`):
 
 	(add-to-list 'load-path (concat user-emacs-directory "maple"))
 	(autoload 'maplev "maplev")
@@ -40,6 +49,12 @@ Then add the following lines to the Emacs initialization file (`~/.emacs`):
 
 Use the Emacs custom group `maplev-group` to access MapleV's many customizations.
 
+Usage
+-----
 
-
-
+Fire up Emacs.  If you configured `auto-mode-alist`, as above, opening
+a Maple source file with extension `.mpl` should cause it to be opened
+in `maplev-mode`.  If the `maplev.info` file was installed where it
+can be found by Emacs, you can get help by calling
+`maplev-got-info-node`.  An html version of the help, `maplev.html`, is
+distributed with the source.
