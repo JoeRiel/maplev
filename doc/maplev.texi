@@ -1364,17 +1364,27 @@ regex @file{.mpl} to an extension appropriate for your usage:
 @node Maple Files, Customizing, Emacs Files, Installation
 @section Maple Files
 
-Install the Maple archive file @file{maplev.mla} into @file{~/maple/toolbox/emacs/lib}.
+A Maple archive file, @file{maplev.mla}, containing code
+used by @code{maplev-view}, is provided with the distribution.
+If desired it can be rebuilt from source by removing the existing file
+and executing
 
+@example
+maple maple/maplev.mpl
+@end example
+
+The file @file{maplev.mla} should be installed at @file{~/maple/toolbox/emacs/lib}.
 
 @node Customizing, Info documentation, Maple Files, Installation
 @section Customizing
 
 Some of MapleV's default settings must be customized for your
 installation.  Most significantly, you must specify the locations of the
-executable files for mint and the command line version of Maple.  You
-can specify multiple versions of mint and Maple.  The easiest method is
-to invoke @code{customize} using the following commands:
+executable files for @command{mint} and @command{maple}, 
+the command-line version of Maple.  
+Multiple versions of @command{mint} and @command{maple} can be assigned
+and selected.  The easiest method is to invoke @code{customize} 
+using the following commands:
 
 @example
 M-x load-library @key{RET} maplev @key{RET}
@@ -1384,10 +1394,14 @@ M-x customize-group @key{RET} maplev @key{RET}
 Select the @strong{MapleV Executables} subgroup and customize
 @code{maplev-executable-alist}.  It is a list of sublists.
 Each sublist contains four items:
-  an identifier,
-  the path to the Maple tty executable,
-  the path to the a Maple initialization file, and
-  the path to the Mint executable.
+an identifier,
+the path to the Maple tty executable,
+the path to the a Maple initialization file, and
+the path to the Mint executable.  An example of a sublist is
+
+@example
+("maple17" "/usr/local/maple17/bin/maple" nil "/usr/local/maple17/bin/mint")
+@end example
 
 The identifier is arbitrary.
 To determine the name and path to the Maple and Mint executables,
