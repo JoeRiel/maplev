@@ -1,0 +1,2382 @@
+<html lang="en">
+<head>
+<title>MapleV Emacs Mode 2.33</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="MapleV Emacs Mode 2.33">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="top" href="#Top">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+MapleV is a GNU Emacs major mode for developing source code for Maple,
+a computer algebra system (CAS) from WaterlooMapleInc.
+In this manual "MapleV" refers to the Emacs major mode and
+"Maple" to the CAS.  MapleV is written entirely in Emacs-Lisp and is
+distributed under the GNU General Public License.
+
+This manual is for MapleV version 2.33.
+
+Copyright (C) 2011, Joseph S. Riel
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with no Front-Cover texts,
+     and with no Back-Cover Texts.  A copy of the license is included
+     in the section entitled ``GNU Free Documentation License.''
+   -->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<h1 class="settitle">MapleV Emacs Mode 2.33</h1>
+<div class="node">
+<a name="Top"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Introduction">Introduction</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#dir">(dir)</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
+
+</div>
+
+<h2 class="unnumbered">MapleV</h2>
+
+<p>MapleV is a GNU Emacs major mode for developing source code for Maple<!-- /@w -->,
+a computer algebra system (CAS) from Waterloo&nbsp;Maple&nbsp;Inc<!-- /@w -->. 
+In this manual <dfn>MapleV</dfn> refers to the Emacs major mode and
+<dfn>Maple</dfn> to the CAS.  MapleV is written entirely in Emacs-Lisp and is
+distributed under the GNU General Public License.
+
+   <p>This manual is for MapleV version 2.33.
+
+   <p>Copyright &copy; 2011, Joseph S. Riel
+
+   <blockquote>
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled
+&ldquo;GNU Free Documentation License.&rdquo;
+</blockquote>
+
+<ul class="menu">
+<li><a accesskey="1" href="#Introduction">Introduction</a>:                 A brief tour of MapleV's features. 
+<li><a accesskey="2" href="#Basics">Basics</a>:                       A few basics.
+
+</li></ul>
+<p>Editing
+
+</p>
+<ul class="menu">
+<li><a accesskey="3" href="#Indentation">Indentation</a>:                  Indenting Maple code. 
+<li><a accesskey="4" href="#Font-Lock">Font Lock</a>:                    Syntactic highlighting of Maple code. 
+<li><a accesskey="5" href="#Comments">Comments</a>:                     Command for adding and aligning comments. 
+<li><a accesskey="6" href="#Shortcuts">Shortcuts</a>:                    Abbreviations and templates. 
+<li><a accesskey="7" href="#Imenu-support">Imenu support</a>:                Creating a procedure index. 
+<li><a accesskey="8" href="#Miscellaneous-features">Miscellaneous features</a>:       Useful editing features
+
+</li></ul>
+<p>Processes
+
+</p>
+<ul class="menu">
+<li><a accesskey="9" href="#Mint">Mint</a>:                         Syntax checking. 
+<li><a href="#Maple">Maple</a>:                        Running Maple as a standalone process. 
+<li><a href="#Help-pages">Help pages</a>:                   Displaying Maple help pages. 
+<li><a href="#Viewing">Viewing</a>:                      Viewing Maple library code.
+
+</li></ul>
+<p>Appendices
+
+</p>
+<ul class="menu">
+<li><a href="#Installation">Installation</a>:                 Installing MapleV. 
+<li><a href="#Evolution">Evolution</a>:                    Credits, Bugs, Enhancements.
+
+</li></ul>
+<p>Indices
+
+</p>
+<ul class="menu">
+<li><a href="#Key-Index">Key Index</a>:                    Key bindings and where they are described. 
+<li><a href="#Function-Index">Function Index</a>:               Functions mentioned in the manual. 
+<li><a href="#Variable-Index">Variable Index</a>:               Variables mentioned in the manual. 
+<li><a href="#Concept-Index">Concept Index</a>:                Concepts and features.
+
+<li><a href="#GNU-Free-Documentation-License">GNU Free Documentation License</a>:   Copying this manual.
+
+</li></ul>
+<p>--- The Detailed Node Listing ---
+
+<p>Introduction
+
+</p>
+<ul class="menu">
+<li><a href="#Summary">Summary</a>
+<li><a href="#Requirements">Requirements</a>
+
+</li></ul>
+<p>Indentation
+
+</p>
+<ul class="menu">
+<li><a href="#Indentation-Commands">Indentation Commands</a>:         Commands for inserting and aligning comments. 
+<li><a href="#Customizing-Indentation">Customizing Indentation</a>:      Variables that affect indentation. 
+<li><a href="#Indentation-Tricks">Indentation Tricks</a>:           Forcing and preventing indentation. 
+<li><a href="#Indentation-Details">Indentation Details</a>:          Overview of the indentation algorithm.
+
+</li></ul>
+<p>Indentation Tricks
+
+</p>
+<ul class="menu">
+<li><a href="#Forcing-indentation">Forcing indentation</a>:          Using parentheses to force indentation. 
+<li><a href="#Preventing-indentation">Preventing indentation</a>:       Using continued comments to prevent indentation.
+
+</li></ul>
+<p>Font Lock
+
+</p>
+<ul class="menu">
+<li><a href="#Decoration-level">Decoration level</a>:             Selecting the decoration level. 
+<li><a href="#Adding-keywords">Adding keywords</a>:              Customizing the font lock patterns. 
+<li><a href="#Display-faces">Display faces</a>:                Setting the display faces.
+
+</li></ul>
+<p>Shortcuts
+
+</p>
+<ul class="menu">
+<li><a href="#Abbreviations">Abbreviations</a>:                Abbreviations for common Maple functions. 
+<li><a href="#Templates">Templates</a>:                    Inserting procedures and assignments.
+
+</li></ul>
+<p>Abbreviations
+
+</p>
+<ul class="menu">
+<li><a href="#Customizing-Abbreviations">Customizing Abbreviations</a>
+
+</li></ul>
+<p>Miscellaneous features
+
+</p>
+<ul class="menu">
+<li><a href="#Include-statements">Include statements</a>:           Active include statements. 
+<li><a href="#Indent-trace-output">Indent trace output</a>:          Hierarchically indent Maple trace output.
+
+</li></ul>
+<p>Mint
+
+</p>
+<ul class="menu">
+<li><a href="#Running-mint">Running mint</a>:                 Commands for sending code to Mint. 
+<li><a href="#Mint-mode">Mint mode</a>:                    Mode for viewing the output of Mint.
+
+</li></ul>
+<p>Maple
+
+</p>
+<ul class="menu">
+<li><a href="#Running-Maple">Running Maple</a>:                Commands for sending code to the Maple engine. 
+<li><a href="#Cmaple-mode">Cmaple mode</a>:                  Mode for interacting with Maple.
+
+</li></ul>
+<p>Help pages
+
+</p>
+<ul class="menu">
+<li><a href="#Displaying-help-pages">Displaying help pages</a>:        Commands for displaying Maple help pages. 
+<li><a href="#MapleV-help-mode">MapleV help mode</a>:             Mode for viewing Maple help pages.
+
+</li></ul>
+<p>Viewing
+
+</p>
+<ul class="menu">
+<li><a href="#Displaying">Displaying</a>:                   Commands to display Maple expressions. 
+<li><a href="#MapleV-view-mode">MapleV view mode</a>:             Mode for viewing Maple library code.
+
+</li></ul>
+<p>Installation
+
+</p>
+<ul class="menu">
+<li><a href="#Emacs-Files">Emacs Files</a>:                  Installing and byte-compiling the lisp files
+<li><a href="#Maple-Files">Maple Files</a>:                  Installing the Maple archive
+<li><a href="#Customizing">Customizing</a>:                  Customizing the installation. 
+<li><a href="#Info-documentation">Info documentation</a>:           Installing the Info documentation.
+
+</li></ul>
+<p>Evolution
+
+</p>
+<ul class="menu">
+<li><a href="#Bugs">Bugs</a>
+<li><a href="#Acknowledgments">Acknowledgments</a>
+
+   </ul>
+
+<div class="node">
+<a name="Introduction"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Basics">Basics</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Top">Top</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">1 Introduction</h2>
+
+<p><a name="index-Introduction-1"></a>
+
+<ul class="menu">
+<li><a accesskey="1" href="#Summary">Summary</a>
+<li><a accesskey="2" href="#Requirements">Requirements</a>
+</ul>
+
+<div class="node">
+<a name="Summary"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Requirements">Requirements</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Introduction">Introduction</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Introduction">Introduction</a>
+
+</div>
+
+<h3 class="section">1.1 Summary</h3>
+
+<p><a name="index-Summary-2"></a>
+Following is a brief tour of MapleV's major features.
+
+<h4 class="subsection">1.1.1 Indentation</h4>
+
+<p>Maple source code is grammatically indented, either as you enter it or
+all at once.  Customizable variables permit a limited control of the
+indentation style.  The default settings produce a result that is very
+close to the pretty printed output of Maple.
+
+<h4 class="subsection">1.1.2 Font Lock</h4>
+
+<p>Maple reserved words, special words, initial variables, built-in
+functions, and top-level procedure assignments are font locked. 
+Comments and quotes are syntactically highlighted.  The amount of
+&ldquo;decoration&rdquo; can be customized.
+
+<h4 class="subsection">1.1.3 Comments</h4>
+
+<p>Commands are provided for inserting and aligning Maple comments. 
+Auto-filling can be enabled so that comments automatically wrap.
+
+<h4 class="subsection">1.1.4 Shortcuts</h4>
+
+<p>Abbreviations for common Maple words are defined and automatically
+expanded, if enabled.  A blank procedure template, including your
+copyright statement, can be inserted into the source.  It queries for
+the name of the procedure, optional arguments, and a description.
+
+<h4 class="subsection">1.1.5 Mint interface</h4>
+
+<p>All or portions of the buffer can be sent to <code>mint</code>, Maple's syntax
+checker.  The output is displayed in a buffer with a mode that
+highlights and activates warnings and error messages.  Clicking on the
+activated text either moves the cursor to the appropriate point in the
+source code or queries to automatically correct the error.
+
+<h4 class="subsection">1.1.6 Maple interface</h4>
+
+<p>All or portions of the buffer can be sent to the command line version of
+Maple, which is run in its own buffer.  You can work directly in that
+buffer to exercise the source code.
+
+<h4 class="subsection">1.1.7 Online help</h4>
+
+<p>Help pages from Maple help databases can be called up and displayed in a
+buffer.  The buffer has a mode that font locks section headings and
+provides commands for viewing other help pages and recalling previously
+visited pages.
+
+<h4 class="subsection">1.1.8 Viewing library code</h4>
+
+<p>Modules and procedures from Maple libraries can be displayed in a
+buffer.  They are font-locked the same as in a MapleV buffer.  A history
+provides a convenient means to return to previously displayed code.
+
+<h4 class="subsection">1.1.9 Multiple Maple releases</h4>
+
+<p>At installation MapleV is configured to work with a default release of
+Maple.  You may also specify alternate releases of Maple.  A MapleV
+buffer can then be configured to work with a release different than the
+default; it will access the versions of Maple and Mint appropriate for
+the release.
+
+<div class="node">
+<a name="Requirements"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Summary">Summary</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Introduction">Introduction</a>
+
+</div>
+
+<h3 class="section">1.2 Requirements</h3>
+
+<p><a name="index-requirements-3"></a>
+MapleV has been used with Maple version from 4 to 2015,
+with GNU Emacs 22 to 24, and on Linux, Mac, and Windows machines.
+
+<div class="node">
+<a name="Basics"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Indentation">Indentation</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Introduction">Introduction</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">2 Basics</h2>
+
+<p><a name="index-Top_002dlevel-procedures-4"></a><a name="index-Menubar-5"></a>
+For MapleV to properly locate, fontify, and index <dfn>top-level
+procedures</dfn>, that is, non-nested procedure assignments, the procedure
+name <em>must</em> be flush left.  Indenting the buffer moves top-level
+procedures to the left margin.
+
+   <p>There are a few exceptional cases in which what should be top-level
+procedures are, in fact, not.  The primary example is a Maple script in
+which procedures are conditionally assigned.  See <a href="#Preventing-indentation">Preventing indentation</a>, for an illustration and a method to automatically indent
+these procedures to the left column.
+
+   <p>Most of the higher-level MapleV functions, those that do more than edit
+text, are available on the menu-bar.
+
+<div class="node">
+<a name="Indentation"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Font-Lock">Font Lock</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Basics">Basics</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<!-- node-name,  next,  previous,  up -->
+<h2 class="chapter">3 Indentation</h2>
+
+<p><a name="index-Indentation-6"></a>
+Maple source code is indented according to its grammar.  The indentation
+can occur either as you enter the code or all at once; the latter action
+is useful when working with non-indented source code.  A grammatical
+error, typically an out of place keyword or parenthesis, generates an
+error and moves the cursor to the place where the error was detected.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Indentation-Commands">Indentation Commands</a>:         Commands for inserting and aligning comments. 
+<li><a accesskey="2" href="#Customizing-Indentation">Customizing Indentation</a>:      Variables that affect indentation. 
+<li><a accesskey="3" href="#Indentation-Tricks">Indentation Tricks</a>:           Forcing and preventing indentation. 
+<li><a accesskey="4" href="#Indentation-Details">Indentation Details</a>:          Overview of the indentation algorithm. 
+</ul>
+
+<div class="node">
+<a name="Indentation-Commands"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Customizing-Indentation">Customizing Indentation</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Indentation">Indentation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Indentation">Indentation</a>
+
+</div>
+
+<!-- node-name,  next,  previous,  up -->
+<h3 class="section">3.1 Commands</h3>
+
+<p><a name="index-Indentation-commands-7"></a><a name="index-Commands_002c-indentation-8"></a>
+<a name="index-C_002dj-9"></a><a name="index-C_002dc-_0040key_007bTAB_007d-_0040key_007bTAB_007d-10"></a><a name="index-C_002dc-_0040key_007bTAB_007d-b-11"></a><a name="index-C_002dc-_0040key_007bTAB_007d-p-12"></a><a name="index-C_002dc-_0040key_007bTAB_007d-r-13"></a>
+<a name="index-maplev_002delectric_002dtab-14"></a><a name="index-maplev_002dindent_002dnewline-15"></a><a name="index-maplev_002dindent_002dbuffer-16"></a><a name="index-maplev_002dindent_002dprocedure-17"></a><a name="index-maplev_002dindent_002dregion-18"></a>
+     <dl>
+<dt><kbd>&lt;TAB&gt;</kbd><dd>Indent the current line (<code>maplev-electric-tab</code>).
+
+     <br><dt><kbd>C-j</kbd><dd>Indent the current line, insert a new line, and indent that line
+(<code>maplev-indent-newline</code>).
+
+     <br><dt><kbd>C-c &lt;TAB&gt; &lt;TAB&gt;</kbd><dt><kbd>C-c &lt;TAB&gt; b</kbd><dd>Indent the buffer (<code>maplev-indent-buffer</code>).
+
+     <br><dt><kbd>C-c &lt;TAB&gt; p</kbd><dd>Indent a procedure (<code>maplev-indent-procedure</code>).
+
+     <br><dt><kbd>C-c &lt;TAB&gt; r</kbd><dd>Indent the region (<code>maplev-indent-region</code>).
+
+   </dl>
+
+<div class="node">
+<a name="Customizing-Indentation"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Indentation-Tricks">Indentation Tricks</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Indentation-Commands">Indentation Commands</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Indentation">Indentation</a>
+
+</div>
+
+<!-- node-name,  next,  previous,  up -->
+<h3 class="section">3.2 Customizing</h3>
+
+<p><a name="index-Customizing-indentation-19"></a><a name="index-Indentation_002c-customizing-20"></a>
+The following variables affect indentation:
+
+     
+<a name="index-maplev_002dindent_002dlevel-21"></a>
+<dl><dt><code>maplev-indent-level</code><a name="index-maplev_002dindent_002dlevel-22"></a><dd>The amount a subblock is indented. The default is 4.
+
+     <p><a name="index-maplev_002dindent_002dtabs_002dmode-23"></a><br><dt><code>maplev-indent-tabs-mode</code><a name="index-maplev_002dindent_002dtabs_002dmode-24"></a><dd>Non-nil means tabs may be used to indent.  The default is nil.
+
+     <p><a name="index-maplev_002dindent_002ddeclaration-25"></a><br><dt><code>maplev-indent-declaration-level</code><a name="index-maplev_002dindent_002ddeclaration_002dlevel-26"></a><dd>This value is used to initialize the buffer-local variable
+<code>maplev-indent-declaration</code>, which sets the amount Maple procedure
+declarations (<code>local</code>, <code>global</code>, <code>option</code>, and
+<code>description</code>) are indented.  The default is 0.
+
+     <br><dt><code>maplev-dont-indent-re</code><a name="index-maplev_002ddont_002dindent_002dre-27"></a><dd>A regex or nil.  If non-nil then lines that begin with a match are not
+indented.  The default, &lsquo;<samp><span class="samp">"#"</span></samp>&rsquo;, prevents flush left comment lines
+from being indented.
+
+     <br><dt><code>maplev-tab-width</code><a name="index-maplev_002dtab_002dwidth-28"></a><dd>This integer value is used to initialize the value of <code>tab-width</code>.
+
+     <p><a name="index-maplev_002dget_002dtab_002dwidth_002dfunction-29"></a><br><dt><code>maplev-get-tab-width-function</code><a name="index-maplev_002dget_002dtab_002dwidth_002dfunction-30"></a><dd>If assigned, this function is called, with the filename of the current buffer,
+when <code>maplev-mode</code> is executed.  It should return the desired value
+of <code>tab-width</code>.  If not assigned, <code>maplev-tab-width</code> is used as
+the value.
+
+   </dl>
+
+<div class="node">
+<a name="Indentation-Tricks"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Indentation-Details">Indentation Details</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Customizing-Indentation">Customizing Indentation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Indentation">Indentation</a>
+
+</div>
+
+<h3 class="section">3.3 Indentation Tricks</h3>
+
+<p>The indentation algorithm is not perfect.  It can fail to indent code
+that should be indented or it may indent code that should not be
+indented.  The following sections give examples and demonstrate workarounds.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Forcing-indentation">Forcing indentation</a>:          Using parentheses to force indentation. 
+<li><a accesskey="2" href="#Preventing-indentation">Preventing indentation</a>:       Using continued comments to prevent indentation. 
+</ul>
+
+<div class="node">
+<a name="Forcing-indentation"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Preventing-indentation">Preventing indentation</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Indentation-Tricks">Indentation Tricks</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Indentation-Tricks">Indentation Tricks</a>
+
+</div>
+
+<h4 class="subsection">3.3.1 Forcing indentation</h4>
+
+<p><a name="index-Forcing-indentation-31"></a><a name="index-Indentation_002c-forcing-32"></a><a name="index-Indenting-continued-expressions-33"></a><a name="index-Continued-expression_002c-indenting-34"></a>
+MapleV's indentation algorithm does not (currently) handle continued
+expressions.  It aligns continuations with the left most
+character in the preceding line.  In an assignment it is preferable to
+align with the right side of the assignment.
+
+<h5 class="subsubheading">Problem</h5>
+
+<p>Indenting the following code causes the continued line to be left
+aligned with the preceding line, as the following illustrates:
+
+<pre class="example">     ---------- Buffer: foo ----------
+     y := a + ( ... )
+          + b;-!-
+     ---------- Buffer: foo ----------
+     
+     &lt;TAB&gt;
+        &rArr;
+     ---------- Buffer: foo ----------
+     y := a + ( ... )
+     + b;-!-
+     ---------- Buffer: foo ----------
+</pre>
+   <h5 class="subsubheading">Solution</h5>
+
+<p>Use extra parentheses to prevent the continuation line from being
+aligned with the opening column:
+
+<pre class="example">     ---------- Buffer: foo ----------
+     y := ( a + ( ... )
+            + b );
+     ---------- Buffer: foo ----------
+</pre>
+   <div class="node">
+<a name="Preventing-indentation"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Forcing-indentation">Forcing indentation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Indentation-Tricks">Indentation Tricks</a>
+
+</div>
+
+<h4 class="subsection">3.3.2 Preventing indentation</h4>
+
+<h5 class="subsubheading">Problem</h5>
+
+<p>Consider an installation script in which the procedures &lsquo;<samp><span class="samp">foo1</span></samp>&rsquo; and
+&lsquo;<samp><span class="samp">foo2</span></samp>&rsquo; are assigned only when the flag <code>assign_procs</code> is
+&lsquo;<samp><span class="samp">true</span></samp>&rsquo;.  The following example shows what happens when the buffer
+is indented.
+
+<pre class="example">     ---------- Buffer: foo ----------
+     if assign_procs then
+     foo1 := proc() ... end:
+     foo2 := proc() ... end:
+     fi:
+     ---------- Buffer: foo ----------
+     
+     <kbd>M-x maplev-indent-buffer</kbd>
+        &rArr;
+     ---------- Buffer: foo ----------
+     if assign_procs then
+         foo1 := proc() ... end:
+         foo2 := proc() ... end:
+     fi:
+     ---------- Buffer: foo ----------
+</pre>
+   <p>Because <code>foo1</code> and <code>foo2</code> are no longer flush left they are
+not recognized as top-level procedures.  Their names are not properly
+font locked and MapleV commands that operate on top-level procedures do
+not work on them.
+
+<h5 class="subsubheading">Solution</h5>
+
+<p>Because MapleV ignores comment continuations that Maple respects
+(<a href="#Comments">Comments</a>), we can use the following technique to prevent
+&lsquo;<samp><span class="samp">foo1</span></samp>&rsquo; and &lsquo;<samp><span class="samp">foo2</span></samp>&rsquo; from being indented.
+
+<pre class="example">     ---------- Buffer: foo ----------
+     if assign_procs then       #\
+     fi                         # <span class="roman">Maple does not see this line</span>
+     foo1 := proc() ... end:
+     foo2 := proc() ... end:
+     #\
+     if then                    # <span class="roman">Maple does not see this line</span>
+     fi:
+     ---------- Buffer: foo ----------
+</pre>
+   <p>MapleV ignores the comment continuations and determines that each
+<code>if</code> statement is completed on the following line.  The procedures
+<code>foo1</code> and <code>foo2</code> are not indented.  Maple, however, continues
+the comments and so matches the initial <code>if</code> to the final
+<code>fi</code>; it ignores the dummy statements.
+
+<div class="node">
+<a name="Indentation-Details"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Indentation-Tricks">Indentation Tricks</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Indentation">Indentation</a>
+
+</div>
+
+<h3 class="section">3.4 Indentation Details</h3>
+
+<p><a name="index-Indentation-details-35"></a><a name="index-Details_002c-indentations-36"></a><a name="index-Indentation-grammar-37"></a><a name="index-Grammar_002c-indentation-38"></a><a name="index-Indenting_002c-speed-of-39"></a><a name="index-Speed-of_002c-indenting-40"></a>
+A grammar table (<code>maplev--grammar-alist</code>) defines the grammar
+used to indent Maple code.
+
+   <p>MapleV parses the source to compute the appropriate indentation for each
+line.  To speed this process, information from the last parse is saved
+and reused.  This method allows it to indent entire buffers reasonably
+quickly; the largest file in the Maple R5 share library
+(<samp><span class="file">gdev.mpl</span></samp>, 160K, by Bruno Salvy) took twelve seconds to indent on
+a PC running NTEmacs.  During editing, if the buffer is modified above
+the last indentation location then the indentation information is lost;
+consequently, you may occasionally notice small delays as the source is
+reparsed.
+
+<div class="node">
+<a name="Font-Lock"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Comments">Comments</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Indentation">Indentation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">4 Font Lock</h2>
+
+<p><a name="index-Font-lock-41"></a>
+
+<ul class="menu">
+<li><a accesskey="1" href="#Decoration-level">Decoration level</a>:             Selecting the decoration level. 
+<li><a accesskey="2" href="#Adding-keywords">Adding keywords</a>:              Customizing the font lock patterns. 
+<li><a accesskey="3" href="#Display-faces">Display faces</a>:                Setting the display faces. 
+</ul>
+
+<div class="node">
+<a name="Decoration-level"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Adding-keywords">Adding keywords</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Font-Lock">Font Lock</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Font-Lock">Font Lock</a>
+
+</div>
+
+<h3 class="section">4.1 Decoration level</h3>
+
+<p><a name="index-Font-lock_002c-decoration-level-42"></a><a name="index-Decoration-level_002c-font-lock-43"></a><a name="index-Maximum-decoration_002c-font-lock-44"></a>
+<a name="index-font_002dlock_002dmaximum_002ddecoration-45"></a><a name="index-maplev_002dreset_002dfont_002dlock-46"></a>
+The amount of syntactical highlighting, or &ldquo;decoration&rdquo;, is controlled
+by the global variable <code>font-lock-maximum-decoration</code>, which you
+may set in your <samp><span class="file">.emacs</span></samp> file.  see <a href="emacs.html#Font-Lock">Font Lock</a>, for
+information.  MapleV mode provides three levels of decoration:
+
+     <ol type=1 start=1>
+<li>Comments, quotes, top-level procedure names and Maple reserved works
+are highlighted.
+
+     <li>Everything in level 1 plus Maple special words, initial variables, and
+the ditto operators are highlighted.
+
+     <li>Everything in level 2 plus Maple built-in functions are highlighted.
+
+        </ol>
+
+   <p>Execute <kbd>M-x maplev-reset-font-lock &lt;RET&gt; LEVEL &lt;RET&gt;</kbd> or
+use the menubar, <kbd>MapleV -&gt; Setup -&gt; Decoration</kbd>, to change the
+decoration in a MapleV buffer.  <code>LEVEL</code> is an integer from 1 to 3.
+
+<div class="node">
+<a name="Adding-keywords"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Display-faces">Display faces</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Decoration-level">Decoration level</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Font-Lock">Font Lock</a>
+
+</div>
+
+<h3 class="section">4.2 Adding keywords</h3>
+
+<p><a name="index-Font-lock_002c-adding-keywords-47"></a><a name="index-Keywords_002c-font-locking-48"></a><a name="index-Customizing-font-lock-keywords-49"></a>
+You can use the usual method to add new keywords to font lock in MapleV
+mode.  For example, the following snippet can be added to your
+<samp><span class="file">.emacs</span></samp> file to font lock &lsquo;<samp><span class="samp">simplify</span></samp>&rsquo; and &lsquo;<samp><span class="samp">printf</span></samp>&rsquo; in
+MapleV mode.
+
+<pre class="example">     (font-lock-add-keywords
+      'maplev-mode
+      '(("simplify" . maplev-font-special-word-face)
+        ("printf"   . maplev-font-special-word-face)))
+</pre>
+   <div class="node">
+<a name="Display-faces"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Adding-keywords">Adding keywords</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Font-Lock">Font Lock</a>
+
+</div>
+
+<h3 class="section">4.3 Display faces</h3>
+
+<p><a name="index-Font-lock_002c-display-faces-50"></a><a name="index-Font-lock_002c-faces-51"></a><a name="index-Faces_002c-font-lock-52"></a><a name="index-Display-faces_002c-font-lock-53"></a>
+     <dl>
+<dt><code>maplev-special-word-face</code><a name="index-maplev_002dspecial_002dword_002dface-54"></a><dd>Display face used for Maple special words.  The special words are
+&lsquo;<samp><span class="samp">args</span></samp>&rsquo;, &lsquo;<samp><span class="samp">nargs</span></samp>&rsquo;, &lsquo;<samp><span class="samp">procname</span></samp>&rsquo;, &lsquo;<samp><span class="samp">RootOf</span></samp>&rsquo; and
+&lsquo;<samp><span class="samp">Float</span></samp>&rsquo;.
+
+     <br><dt><code>maplev-initial-variable-face</code><a name="index-maplev_002dinitial_002dvariable_002dface-55"></a><dd>Display face used for Maple initial variables.  These are
+&lsquo;<samp><span class="samp">Catalan</span></samp>&rsquo;, &lsquo;<samp><span class="samp">true</span></samp>&rsquo;, &lsquo;<samp><span class="samp">false</span></samp>&rsquo;, &lsquo;<samp><span class="samp">FAIL</span></samp>&rsquo;, &lsquo;<samp><span class="samp">infinity</span></samp>&rsquo;,
+&lsquo;<samp><span class="samp">Pi</span></samp>&rsquo;, &lsquo;<samp><span class="samp">gamma</span></samp>&rsquo;, &lsquo;<samp><span class="samp">integrate</span></samp>&rsquo;, &lsquo;<samp><span class="samp">libname</span></samp>&rsquo;, &lsquo;<samp><span class="samp">NULL</span></samp>&rsquo;,
+&lsquo;<samp><span class="samp">Order</span></samp>&rsquo;, &lsquo;<samp><span class="samp">printlevel</span></samp>&rsquo;, and &lsquo;<samp><span class="samp">lasterror</span></samp>&rsquo;.
+
+   </dl>
+
+<div class="node">
+<a name="Comments"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Shortcuts">Shortcuts</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Font-Lock">Font Lock</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">5 Comments</h2>
+
+<p><a name="index-Comments-56"></a>
+<a name="index-M_002d_003b-57"></a><a name="index-C_002dx-_003b-58"></a><a name="index-C_002du-_002d-C_002dx-_003b-59"></a><a name="index-M_002dq-60"></a>
+<a name="index-indent_002dfor_002dcomment-61"></a><a name="index-set_002dcomment_002dcolumn-62"></a><a name="index-kill_002dcomment-63"></a><a name="index-fill_002dparagraph-64"></a>
+<a name="index-comment_002dcolumn-65"></a><a name="index-fill_002dcolumn-66"></a>
+
+   <p>MapleV uses standard Emacs commands to enter, align and fill Maple
+comments.  see <a href="emacs.html#Comments">Comments</a>. The commands are reproduced here
+for convenience.
+
+     <dl>
+<dt><kbd>M-;</kbd><dd>Insert or align an inline comment (<code>indent-for-comment</code>).  The
+comment character is inserted at column <code>comment-column</code>.
+
+     <br><dt><kbd>C-x ;</kbd><dd>Set comment column (<code>set-comment-column</code>).
+
+     <br><dt><kbd>C-u - C-x ;</kbd><dd>Kill comment on current line (<code>kill-comment </code>).
+
+     <br><dt><kbd>M-q</kbd><dd>Fill a comment (<code>fill-paragraph</code>).  Wrap lines at column
+<code>fill-column</code> and insert new comment characters, aligned with the
+original comment character.
+
+   </dl>
+
+   <p>The following variables affect comments:
+
+     <dl>
+<dt><code>maplev-auto-fill-comment-flag</code><a name="index-maplev_002dauto_002dfill_002dcomment_002dflag-67"></a><dd>A boolean flag. If non-nil, the default, comment lines wrap as they are
+typed.  Wrapping, however, does not automatically start in an inline
+comment; it must be invoked with <code>fill-paragraph</code>.
+
+     <br><dt><code>maplev-comment-string</code><a name="index-maplev_002dcomment_002dstring-68"></a><dd>String variable inserted by <code>indent-for-comment</code>. 
+The default is &lsquo;<samp><span class="samp"># </span></samp>&rsquo;.
+
+     <br><dt><code>maplev-comment-column</code><a name="index-maplev_002dcomment_002dcolumn-69"></a><dd>Initial value of <code>comment-column</code>.  The default is 40.
+
+     <br><dt><code>maplev-comment-fill-column</code><a name="index-maplev_002dcomment_002dfill_002dcolumn-70"></a><dd>Initial value of <code>fill-column</code>.  The default is 79.
+
+   </dl>
+
+   <p>Maple comment lines can be continued to the next line by ending them
+with a backslash.  MapleV does <em>not</em> recognize this continuation
+and interprets the following line as code.  This can fool the MapleV
+indentation grammar; however, it can also be used to achieve certain
+effects.  See <a href="#Preventing-indentation">Preventing indentation</a>, for an example.
+
+<div class="node">
+<a name="Shortcuts"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Imenu-support">Imenu support</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Comments">Comments</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">6 Shortcuts</h2>
+
+<p><a name="index-Shortcuts-71"></a>
+
+<ul class="menu">
+<li><a accesskey="1" href="#Abbreviations">Abbreviations</a>:                Abbreviations for common Maple functions. 
+<li><a accesskey="2" href="#Templates">Templates</a>:                    Inserting procedures and assignments. 
+</ul>
+
+<div class="node">
+<a name="Abbreviations"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Templates">Templates</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Shortcuts">Shortcuts</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Shortcuts">Shortcuts</a>
+
+</div>
+
+<h3 class="section">6.1 Abbreviations</h3>
+
+<p><a name="index-Abbreviations-72"></a><a name="index-Custom-abbreviations-73"></a>
+Abbreviations are available for common or lengthy Maple keywords. They
+are expanded whenever <code>abbrev-mode</code> is active. 
+see <a href="emacs.html#Abbrevs">Abbrevs</a>. The command <code>maplev-abbrev-help</code> displays
+a list of the available abbreviations.
+
+   <p>The following variables affect the expansion of abbreviations:
+
+     <dl>
+<dt><code>maplev-initial-abbrev-mode-flag</code><dd>If non-nil <code>abbrev-mode</code> is activated when MapleV is started.  The
+default is &lsquo;<samp><span class="samp">t</span></samp>&rsquo;.
+
+     <br><dt><code>maplev-expand-abbrevs-in-comments-and-strings-flag</code><dd>If non-nil then the Maple abbreviations are expanded in comments and
+strings. The default is &lsquo;<samp><span class="samp">nil</span></samp>&rsquo;.
+
+   </dl>
+
+<ul class="menu">
+<li><a accesskey="1" href="#Customizing-Abbreviations">Customizing Abbreviations</a>
+</ul>
+
+<div class="node">
+<a name="Customizing-Abbreviations"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Abbreviations">Abbreviations</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Abbreviations">Abbreviations</a>
+
+</div>
+
+<h4 class="subsection">6.1.1 Customizing Abbreviations</h4>
+
+<p>The predefined MapleV abbreviations are stored in the abbreviation table
+<code>maplev-mode-abbrev-table</code>.  The following code may be added to
+your <samp><span class="file">.emacs</span></samp> file to assign &lsquo;<samp><span class="samp">simp</span></samp>&rsquo; as an abbreviation for
+&lsquo;<samp><span class="samp">simplify</span></samp>&rsquo;.
+
+<pre class="example">     (define-abbrev maplev-mode-abbrev-table
+             "simp" "simplify" 'maplev--abbrev-hook)
+</pre>
+   <p>The function &lsquo;<samp><span class="samp">'maplev--abbrev-hook</span></samp>&rsquo; prevents the abbreviation from
+being expanded inside a comment or quote.
+
+   <p>To remove an abbreviation from the table assign it <code>nil</code>.  For
+example, to prevent &lsquo;<samp><span class="samp">lib</span></samp>&rsquo; from expanding to &lsquo;<samp><span class="samp">libname</span></samp>&rsquo;, add the
+following to <samp><span class="file">emacs</span></samp>:
+
+<pre class="example">     (define-abbrev maplev-mode-abbrev-table "lib" nil nil)
+</pre>
+   <div class="node">
+<a name="Templates"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Abbreviations">Abbreviations</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Shortcuts">Shortcuts</a>
+
+</div>
+
+<h3 class="section">6.2 Templates</h3>
+
+<p><a name="index-Templates-74"></a><a name="index-Procedure-template-75"></a><a name="index-Template_002c-procedure-76"></a><a name="index-Assignment-operator_002c-template-77"></a>
+<a name="index-C_002dc-C_002dp-78"></a><a name="index-C_002d_003b-79"></a>
+<a name="index-maplev_002dtemplate_002dproc-80"></a><a name="index-maplev_002dinsert_002dassignment_002doperator-81"></a>
+     <dl>
+<dt><kbd>C-c C-p</kbd><dd>Insert a procedure template (<code>maplev-template-proc</code>). 
+The user is queried for the name, arguments, and a description of the procedure. 
+Any of the entries can be left blank.  If the name is blank then an
+anonymous procedure is inserted, otherwise an assignment is inserted
+with the procedure assigned to the given name.  Backquotes are added
+automatically to procedure names if required by Maple.
+
+     <br><dt><kbd>C-;</kbd><dd>Insert an assignment operator at the end of the current line
+(<code>maplev-insert-assignment-operator</code>).
+
+   </dl>
+
+   <p>The following variables affect the shortcuts:
+
+     <dl>
+<dt><code>maplev-insert-copyright-flag</code><a name="index-maplev_002dinsert_002dcopyright_002dflag-82"></a><dd>If non-nil then a copyright notice is inserted in the <code>option</code>
+declaration of the procedure template.  The default is <code>t</code>.
+
+     <br><dt><code>maplev-copyright-owner</code><a name="index-maplev_002dcopyright_002downer-83"></a><dd>String inserted as the copyright owner.
+
+     <br><dt><code>maplev-comment-end-flag</code><a name="index-maplev_002dcomment_002dend_002dflag-84"></a><dd>If non-nil then the name of the procedure is inserted as a comment to
+the right of the closing <code>end</code> statement.
+
+     <br><dt><code>maplev-assignment-operator</code><a name="index-maplev_002dassignment_002doperator-85"></a><dd>The string inserted by <code>maplev-insert-assignment-operator</code>. 
+The default value is &lsquo;<samp><span class="samp"> := </span></samp>&rsquo;.
+
+   </dl>
+
+<div class="node">
+<a name="Imenu-support"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Miscellaneous-features">Miscellaneous features</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Shortcuts">Shortcuts</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">7 Imenu support</h2>
+
+<p><a name="index-Imenu-86"></a><a name="index-Index_002c-procedures-87"></a><a name="index-Procedure-index-88"></a>
+<a name="index-maplev_002dadd_002dimenu-89"></a>
+Executing <kbd>maplev-add-imenu</kbd> or selecting <kbd>MapleV -&gt; Add Index</kbd>
+from the menubar creates an indexed menu of the top-level Maple
+procedures, global variables, and macro assignments.  The menu appears
+under the &lsquo;<samp><span class="samp">Index</span></samp>&rsquo; heading in the menubar.  Clicking on an item in
+the menu moves point to the assignment of that item.
+
+   <p>The assignments must be flush left to be indexed. 
+Only the first macro in a <code>macro</code> assignment is indexed.
+
+<div class="node">
+<a name="Miscellaneous-features"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Mint">Mint</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Imenu-support">Imenu support</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<!-- node-name,  next,  previous,  up -->
+<h2 class="chapter">8 Miscellaneous features</h2>
+
+<p><a name="index-Miscellaneous-90"></a>
+
+<ul class="menu">
+<li><a accesskey="1" href="#Include-statements">Include statements</a>:           Active include statements. 
+<li><a accesskey="2" href="#Indent-trace-output">Indent trace output</a>:          Hierarchically indent Maple trace output. 
+</ul>
+
+<div class="node">
+<a name="Include-statements"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Indent-trace-output">Indent trace output</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Miscellaneous-features">Miscellaneous features</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Miscellaneous-features">Miscellaneous features</a>
+
+</div>
+
+<h3 class="section">8.1 Include statements</h3>
+
+<p><a name="index-Include-91"></a>
+<a name="index-maplev_002dfind_002dinclude_002dfile_002dat_002dpoint-92"></a>Maple include statements, such as <code>$include &lt;somefile&gt;</code>,
+are font-locked and active. 
+Clicking on them, or typing <kbd>C-c C-o</kbd>,
+calls <kbd>maplev-find-include-file-at-point</kbd>,
+which searches for the file and, if successful, opens it. 
+If the path exists, but the file does not, the user is
+asked whether to create the file.
+
+   <p><a name="index-maplev_002dinclude_002dpath-93"></a>The include path can be
+assigned, as a list of strings, to the variable <kbd>maplev-include-path</kbd>. 
+The paths are searched in the order of occurrence in the list.
+
+   <p><a name="index-maplev_002dinclude_002dfile_002dother_002dwindow_002dflag-94"></a>The customizable variable <kbd>maplev-include-file-other-window-flag</kbd>
+determines whether the file is opened in the current window or
+another window.
+
+<div class="node">
+<a name="Indent-trace-output"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Include-statements">Include statements</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Miscellaneous-features">Miscellaneous features</a>
+
+</div>
+
+<h3 class="section">8.2 Indent trace output</h3>
+
+<p><a name="index-Indent-trace-95"></a>
+The Maple <code>trace</code> command causes Maple to print the
+assignments that occur in selected procedures. 
+The following commands can be used to hierarchically
+indent the resulting output in an Emacs buffer. 
+To be sensible, the output should be created with
+<code>interface(prettyprint=0)</code>.
+
+     
+<a name="index-maplev_002dtrace_002dindent_002dbuffer-96"></a>
+<dl><dt><code>maplev-trace-indent-buffer</code><dd>Hierarchically indent all Maple trace output in the buffer.
+
+     <p><a name="index-maplev_002dtrace_002dindent_002dregion-97"></a><br><dt><code>maplev-trace-indent-region</code><dd>Hierarchically indent selected region in the buffer.
+
+     <p><a name="index-maplev_002dtrace_002dindent-98"></a><br><dt><code>maplev-trace-indent</code><dd>Emacs variable that sets the indentation level for trace output. 
+The default is four spaces.
+
+   </dl>
+
+<div class="node">
+<a name="Mint"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Maple">Maple</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Miscellaneous-features">Miscellaneous features</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">9 Mint</h2>
+
+<p><a name="index-Mint-99"></a><a name="index-Syntax-checking-100"></a><a name="index-Checking-syntax-101"></a>
+Mint is Maple's syntax checker. It analyzes a Maple program and produces
+a report about the syntax and variable usage.  MapleV can run mint on
+the entire buffer or a portion of it.  The output of mint is displayed
+in a buffer with a special mode, <code>mint-mode</code>, that provides a
+convenient means for locating and correcting syntax errors.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Running-mint">Running mint</a>:                 Commands for sending code to Mint. 
+<li><a accesskey="2" href="#Mint-mode">Mint mode</a>:                    Mode for viewing the output of Mint. 
+</ul>
+
+<div class="node">
+<a name="Running-mint"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Mint-mode">Mint mode</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Mint">Mint</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Mint">Mint</a>
+
+</div>
+
+<h3 class="section">9.1 Running mint</h3>
+
+<p><a name="index-Running-mint-102"></a><a name="index-Mint_002c-running-103"></a>
+<a name="index-C_002dc-_0040key_007bRET_007d-b-104"></a><a name="index-C_002dc-_0040key_007bRET_007d-p-105"></a><a name="index-C_002dc-_0040key_007bRET_007d-r-106"></a><a name="index-C_002dc-_0040key_007bRET_007d-_0040key_007bRET_007d-107"></a>
+<a name="index-mint_002dbuffer-108"></a><a name="index-mint_002dprocedure-109"></a><a name="index-mint_002dregion-110"></a><a name="index-mint_002drerun-111"></a>
+The following commands send source code in the buffer to Mint:
+
+     <dl>
+<dt><kbd>C-c &lt;RET&gt; b</kbd><dd>Run Mint on the buffer (<code>mint-buffer</code>).
+
+     <br><dt><kbd>C-c &lt;RET&gt; p</kbd><dd>Run Mint on the current procedure (<code>mint-procedure</code>).
+
+     <br><dt><kbd>C-c &lt;RET&gt; r</kbd><dd>Run Mint on the marked region (<code>mint-region</code>).
+
+     <br><dt><kbd>C-c &lt;RET&gt; &lt;RET&gt;</kbd><dd>Rerun the previous Mint command (<code>mint-rerun</code>).
+
+   </dl>
+
+   <p>These commands are available through the menubar, <kbd>MapleV -&gt; Mint</kbd>. 
+The following variables affect the output of Mint:
+
+     <dl>
+<dt><code>mint-info-level</code><a name="index-mint_002dinfo_002dlevel-112"></a><dd>An integer from 0 to 4 that selects the amount of information displayed
+by Mint.  0 displays no information, 4 displays the most.  The default
+value is 3.  This value can be set through the menubar,
+<kbd>Maplev -&gt; Mint -&gt; Mint level</kbd>.
+
+     <br><dt><code>mint-start-options</code><a name="index-mint_002dstart_002doptions-113"></a><dd>A string passed to Mint at startup.  The default is &lsquo;<samp><span class="samp">"-q"</span></samp>&rsquo;, which
+suppresses the display of the Maple logo.  Type <kbd>?mint</kbd> in Maple for
+other options.
+
+     <br><dt><code>mint-coding-system</code><a name="index-mint_002dcoding_002dsystem-114"></a><dd>Symbol that defines the coding system used by Mint.  The default value
+is <code>undecided-dos</code>.
+
+   </dl>
+
+<div class="node">
+<a name="Mint-mode"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Running-mint">Running mint</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Mint">Mint</a>
+
+</div>
+
+<h3 class="section">9.2 Mint mode</h3>
+
+<p><a name="index-Mint-mode-115"></a><a name="index-Mode_002c-Mint-116"></a>
+Mint mode is applied to mint's output buffer.  Warnings and errors are
+font locked and activated.  Moving the mouse pointer over active text
+highlights it; clicking it (<kbd>mouse-1</kbd>) either moves the cursor to
+the appropriate point in the source code or queries to automatically
+correct an error.
+
+   <p>The following commands are available:
+
+     <dl>
+<dt><kbd>s</kbd><dd>Incremental forward search (<code>isearch-forward</code>).
+
+     <br><dt><kbd>r</kbd><dd>Incremental backward search (<code>isearch-backward</code>).
+
+     <br><dt><kbd>&lt;RET&gt;</kbd><dd>Re-execute the previous mint command (<code>mint-rerun</code>).
+
+     <br><dt><kbd>&lt;DEL&gt;</kbd><dd>Scroll down (<code>scroll-down</code>).
+
+     <br><dt><kbd>&lt;SPC&gt;</kbd><dd>Scroll up (<code>scroll-up</code>).
+
+     <br><dt><kbd>mouse-1</kbd><dd>Goto location in source, or fix error, depending on the active text.
+
+   </dl>
+
+   <p>The following variables set the display faces for the highlighted text in the
+Mint buffer:
+
+     <dl>
+<dt><code>mint-proc-face</code><a name="index-mint_002dproc_002dface-117"></a><dd>Face for procedure names.
+
+     <br><dt><code>mint-warning-face</code><a name="index-mint_002dwarning_002dface-118"></a><dd>Face for warnings.
+
+     <br><dt><code>mint-error-face</code><a name="index-mint_002derror_002dface-119"></a><dd>Face for errors.
+
+     <br><dt><code>mint-note-face</code><a name="index-mint_002dnote_002dface-120"></a><dd>Face for notes (usually &lsquo;<samp><span class="samp">on line</span></samp>&rsquo;).
+
+   </dl>
+
+<div class="node">
+<a name="Maple"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Help-pages">Help pages</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Mint">Mint</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">10 Maple</h2>
+
+<p><a name="index-Cmaple-121"></a><a name="index-Maple_002c-command-line-122"></a>
+The command line version of Maple can be started in a buffer.  All or
+portions of the code in the MapleV buffer can be passed directly to the
+Maple process.  Maple commands can be directly executed in the buffer.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Running-Maple">Running Maple</a>:                Commands for sending code to the Maple engine. 
+<li><a accesskey="2" href="#Cmaple-mode">Cmaple mode</a>:                  Mode for interacting with Maple. 
+</ul>
+
+<div class="node">
+<a name="Running-Maple"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Cmaple-mode">Cmaple mode</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Maple">Maple</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Maple">Maple</a>
+
+</div>
+
+<h3 class="section">10.1 Running Maple</h3>
+
+<p><a name="index-Cmaple_002c-running-123"></a><a name="index-Running_002c-Cmaple-124"></a>
+<a name="index-C_002dc-C_002dc-b-125"></a><a name="index-C_002dc-C_002dc-p-126"></a><a name="index-C_002dc-C_002dc-r-127"></a><a name="index-C_002dc-C_002dc-g-128"></a><a name="index-C_002dc-C_002dc-i-129"></a><a name="index-C_002dc-C_002dc-k-130"></a>
+<a name="index-cmaplev_002dsend_002dbuffer-131"></a><a name="index-cmaplev_002dsend_002dprocedure-132"></a><a name="index-cmaplev_002dsend_002dregion-133"></a><a name="index-cmaplev_002dgoto_002dbuffer-134"></a><a name="index-cmaplev_002dinterrupt-135"></a><a name="index-cmaplev_002dkill-136"></a>
+The following commands in the MapleV buffer affect the Maple engine:
+
+     <dl>
+<dt><kbd>C-c C-c b</kbd><dd>Send the entire buffer to the Maple engine (<code>cmaplev-send-buffer</code>).
+
+     <br><dt><kbd>C-c C-c p</kbd><dd>Send the current procedure to the Maple engine
+(<code>cmaplev-send-procedure</code>).
+
+     <br><dt><kbd>C-c C-c r</kbd><dd>Send the marked region to the Maple engine (<code>cmaplev-send-region</code>).
+
+     <br><dt><kbd>C-c C-c g</kbd><dd>Goto the Maple buffer (<code>cmaplev-goto-buffer</code>).
+
+     <br><dt><kbd>C-c C-c i</kbd><dd>Interrupt the Maple engine (<code>cmaplev-interrupt</code>).
+
+     <br><dt><kbd>C-c C-c k</kbd><dd>Kill the Maple engine (<code>cmaplev-kill</code>).
+
+   </dl>
+
+   <p>These commands are available through the menubar, <kbd>MapleV -&gt; Maple</kbd>.
+
+<div class="node">
+<a name="Cmaple-mode"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Running-Maple">Running Maple</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Maple">Maple</a>
+
+</div>
+
+<h3 class="section">10.2 Cmaple mode</h3>
+
+<p><a name="index-Cmaple-mode-137"></a><a name="index-Mode_002c-cmaple-138"></a>
+The command line version of Maple is run in a buffer with the mode
+<code>cmaple-process-mode</code> that is based on <code>comint-mode</code>. 
+see <a href="emacs.html#Shell-Mode">Shell Mode</a> for more information. 
+In addition to the normal <code>comint</code> commands, the following commands
+are available:
+
+     <dl>
+<dt><kbd>?</kbd><dt><kbd>C-?</kbd><dd>Display a Maple help topic (see <a href="#Help-pages">Help pages</a>).
+
+     <br><dt><kbd>M-?</kbd><dd>Display a Maple expression (see <a href="#Viewing">Viewing</a>).
+
+   </dl>
+
+<div class="node">
+<a name="Help-pages"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Viewing">Viewing</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Maple">Maple</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">11 Help pages</h2>
+
+<p><a name="index-Help-pages_002c-Maple-139"></a><a name="index-Maple-help-pages-140"></a>
+Help pages can be read from the Maple help databases and displayed in a
+buffer with major mode <code>maplev-help-mode</code>.  Text in the buffer is
+highlighted and cross references are activated.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Displaying-help-pages">Displaying help pages</a>:        Commands for displaying Maple help pages. 
+<li><a accesskey="2" href="#MapleV-help-mode">MapleV help mode</a>:             Mode for viewing Maple help pages. 
+</ul>
+
+<div class="node">
+<a name="Displaying-help-pages"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#MapleV-help-mode">MapleV help mode</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Help-pages">Help pages</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Help-pages">Help pages</a>
+
+</div>
+
+<h3 class="section">11.1 Displaying help pages</h3>
+
+<p><a name="index-C_002d_003f-141"></a><a name="index-S_002dmouse_002d2-142"></a>
+<a name="index-maplev_002dhelp_002dat_002dpoint-143"></a><a name="index-maplev_002dhelp_002dfollow_002dmouse-144"></a>
+The following commands display Maple help pages:
+
+     <dl>
+<dt><kbd>C-?</kbd><dd>Query for a help topic, using the word at point as a default.  Display
+the help page in a buffer (<code>maplev-help-at-point</code>).
+
+     <br><dt><kbd>S-mouse-2</kbd><dd>Display the Maple help page for the topic at the click
+(<code>maplev-help-follow-mouse</code>).
+
+   </dl>
+
+   <p>Help pages are displayed in a buffer with major mode
+<code>maplev-help-mode</code>.
+
+<div class="node">
+<a name="MapleV-help-mode"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Displaying-help-pages">Displaying help pages</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Help-pages">Help pages</a>
+
+</div>
+
+<h3 class="section">11.2 MapleV help mode</h3>
+
+<p><a name="index-MapleV-help-mode-145"></a><a name="index-Mode_002c-help_002c-MapleV-146"></a><a name="index-History_002c-help-mode-147"></a>
+<a name="index-maplev_002dhelp_002dmode-148"></a><a name="index-maplev_002dclear_002dhistory-149"></a>
+The major mode <code>maplev-help-mode</code> is active in the buffer that
+displays Maple help pages.  Section headers are font locked and text in
+the &lsquo;<samp><span class="samp">See Also</span></samp>&rsquo; section is activated so that clicking on it opens
+the help page for the topic.  The following commands are available:
+
+   <p><a name="index-s-150"></a><a name="index-p-151"></a><a name="index-n-152"></a><a name="index-P-153"></a><a name="index-r-154"></a><a name="index-g_t_003f-155"></a>
+     <dl>
+<dt><kbd>s</kbd><dd>Incremental forward search (<code>isearch-forward</code>).
+
+     <br><dt><kbd>p</kbd><dd>Previous help topic (<code>maplev-prev-item</code>).
+
+     <br><dt><kbd>n</kbd><dd>Next help topic (<code>maplev-next-item</code>).
+
+     <br><dt><kbd>P</kbd><dd>Parent help topic (<code>maplev-help-parent</code>).
+
+     <br><dt><kbd>r</kbd><dd>Redraw help page (<code>maple-redo-item</code>).
+
+     <br><dt><kbd>?</kbd><dt><kbd>C-?</kbd><dt><kbd>&lt;RTN&gt;</kbd><dd>Query for a help topic (<code>maplev-help-at-point</code>).
+
+     <br><dt><kbd>M-?</kbd><dd>Query for a procedure (<code>maplev-proc-at-point</code>).
+
+     <br><dt><kbd>&lt;SPC&gt;</kbd><dd>Scroll down.
+
+     <br><dt><kbd>&lt;DEL&gt;</kbd><dd>Scroll up.
+
+   </dl>
+
+   <p>MapleV help mode keeps a history of the help topics displayed. 
+Use the command <code>maplev-clear-history</code> to erase the history.
+
+   <p>The help page for a chosen topic is displayed by sending the string
+&lsquo;<samp><span class="samp">?TOPIC</span></samp>&rsquo; to the Maple engine and capturing the output.  If the
+Maple engine is busy an error message, &lsquo;<samp><span class="samp">Maple busy</span></samp>&rsquo;, is displayed in
+the message window.
+
+<div class="node">
+<a name="Viewing"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Installation">Installation</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Help-pages">Help pages</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">12 Viewing</h2>
+
+<p><a name="index-Viewing_002c-Maple-156"></a>
+Maple code for modules and procedures stored in Maple libraries, or
+otherwise known to Maple, can be displayed in a buffer with major mode
+<code>maplev-view-mode</code>.  The code is font-locked the same as in MapleV
+mode.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Displaying">Displaying</a>:                   Commands to display Maple expressions. 
+<li><a accesskey="2" href="#MapleV-view-mode">MapleV view mode</a>:             Mode for viewing Maple library code. 
+</ul>
+
+<div class="node">
+<a name="Displaying"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#MapleV-view-mode">MapleV view mode</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Viewing">Viewing</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Viewing">Viewing</a>
+
+</div>
+
+<h3 class="section">12.1 Displaying procedures</h3>
+
+<p><a name="index-M_002d_003f-157"></a><a name="index-M_002dS_002dmouse_002d2-158"></a>
+<a name="index-maplev_002dview_002dat_002dpoint-159"></a><a name="index-maplev_002dview_002dfollow_002dpoint-160"></a>
+The following commands display Maple procedures:
+
+     <dl>
+<dt><kbd>M-?</kbd><dd>Query for a procedure name, using the word at point as the default. 
+Read the procedure from the Maple library and display it in a buffer
+(<code>maplev-view-at-point</code>).
+
+     <br><dt><kbd>M-S-mouse-2</kbd><dd>Read the procedure at the click from the library and display it in a
+buffer (<code>maplev-view-follow-point</code>).
+
+   </dl>
+
+   <p>Procedures are displayed in a buffer with major mode
+<code>maplev-view-mode</code>.
+
+<div class="node">
+<a name="MapleV-view-mode"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Displaying">Displaying</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Viewing">Viewing</a>
+
+</div>
+
+<h3 class="section">12.2 MapleV view mode</h3>
+
+<p><a name="index-MapleV-view-mode-161"></a><a name="index-Mode_002c-view_002c-MapleV-162"></a><a name="index-History_002c-view-mode-163"></a>
+<a name="index-maplev_002dview_002dmode-164"></a>The major mode <code>maplev-view-mode</code> is active in the buffer that
+displays Maple modules and procedures read from a Maple library.  It
+font-locks the code, highlighting keywords the same as MapleV mode
+does.  Clicking on a name in the buffer displays its source
+code or opens a help page for them.  A history mechanism stores the
+previously displayed procedure.
+
+   <p>The following commands are available:
+
+     <dl>
+<dt><kbd>s</kbd><dd>Incremental forward search (<code>isearch-forward</code>).
+
+     <br><dt><kbd>p</kbd><dd>Previous procedure (<code>maplev-prev-item</code>).
+
+     <br><dt><kbd>n</kbd><dd>Next procedure (<code>maplev-next-item</code>).
+
+     <br><dt><kbd>r</kbd><dd>Redraw procedure (<code>maple-redo-item</code>).
+
+     <br><dt><kbd>?</kbd><dt><kbd>C-?</kbd><dt><kbd>&lt;RTN&gt;</kbd><dd>Query for a help topic (<code>maplev-help-at-point</code>).
+
+     <br><dt><kbd>M-?</kbd><dd>Query for a procedure (<code>maplev-view-at-point</code>).
+
+     <br><dt><kbd>&lt;SPC&gt;</kbd><dd>Scroll down.
+
+     <br><dt><kbd>&lt;DEL&gt;</kbd><dd>Scroll up.
+
+   </dl>
+
+   <p>MapleV help mode keeps a history of the help topics displayed. 
+Use the command <code>maplev-clear-history</code> to erase the history.
+
+   <p>A procedure is read from a library and displayed by using the Maple
+procedure &lsquo;<samp><span class="samp">maplev_print</span></samp>&rsquo; that is assigned when the Maple engine is
+started.  If the Maple engine is busy an error message, &lsquo;<samp><span class="samp">Maple
+busy</span></samp>&rsquo;, is displayed in the message window.
+
+<!-- Appendices -->
+<div class="node">
+<a name="Installation"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Evolution">Evolution</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Viewing">Viewing</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="appendix">Appendix A Installation</h2>
+
+<p><a name="index-Installation-165"></a><a name="index-g_t_0040file_007b_002eemacs_007d-166"></a><a name="index-Initialization-167"></a><a name="index-Customization-168"></a>
+This section describes how to install MapleV into GNU Emacs.
+
+<ul class="menu">
+<li><a accesskey="1" href="#Emacs-Files">Emacs Files</a>:                  Installing and byte-compiling the lisp files
+<li><a accesskey="2" href="#Maple-Files">Maple Files</a>:                  Installing the Maple archive
+<li><a accesskey="3" href="#Customizing">Customizing</a>:                  Customizing the installation. 
+<li><a accesskey="4" href="#Info-documentation">Info documentation</a>:           Installing the Info documentation. 
+</ul>
+
+<div class="node">
+<a name="Emacs-Files"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Maple-Files">Maple Files</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Installation">Installation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
+
+</div>
+
+<h3 class="section">A.1 Emacs Files</h3>
+
+<p>Install the Emacs lisp files, those with extension <samp><span class="file">.el</span></samp>,
+into the directory <samp><span class="file">~/.emacs.d/maple</span></samp>. 
+The tilde, <samp><span class="file">~</span></samp>, corresponds to your home directory.
+
+   <p>Byte-compile them from Emacs with the command
+
+<pre class="example">     <kbd>C-u 0 M-x byte-recompile-directory &lt;RET&gt; ~/emacs.d/maple &lt;RET&gt;</kbd>
+</pre>
+   <p>Add the following line to your <samp><span class="file">.emacs</span></samp> file
+
+<pre class="example">     (add-to-list 'load-path (concat user-emacs-directory "maple"))
+     (autoload 'maplev-mode "maplev" "Maple editing mode" t)
+</pre>
+   <p>To have Emacs auto-magically start in MapleV mode when editing Maple
+source, add the following to your <samp><span class="file">.emacs</span></samp> file, modifying the
+regex <samp><span class="file">.mpl</span></samp> to an extension appropriate for your usage:
+
+<pre class="example">     (setq auto-mode-alist
+           (cons `("\\.mpl\\'" . maplev-mode) auto-mode-alist))
+</pre>
+   <div class="node">
+<a name="Maple-Files"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Customizing">Customizing</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Emacs-Files">Emacs Files</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
+
+</div>
+
+<h3 class="section">A.2 Maple Files</h3>
+
+<p>Install the Maple archive file <samp><span class="file">maplev.mla</span></samp> into <samp><span class="file">~/maple/toolbox/emacs/lib</span></samp>.
+
+<div class="node">
+<a name="Customizing"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Info-documentation">Info documentation</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Maple-Files">Maple Files</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
+
+</div>
+
+<h3 class="section">A.3 Customizing</h3>
+
+<p>Some of MapleV's default settings must be customized for your
+installation.  Most significantly, you must specify the locations of the
+executable files for mint and the command line version of Maple.  You
+can specify multiple versions of mint and Maple.  The easiest method is
+to invoke <code>customize</code> using the following commands:
+
+<pre class="example">     M-x load-library &lt;RET&gt; maplev &lt;RET&gt;
+     M-x customize-group &lt;RET&gt; maplev &lt;RET&gt;
+</pre>
+   <p>Select the <strong>MapleV Executables</strong> subgroup and customize
+<code>maplev-executable-alist</code>.  It is a list of sublists. 
+Each sublist contains four items:
+  an identifier,
+  the path to the Maple tty executable,
+  the path to the a Maple initialization file, and
+  the path to the Mint executable.
+
+   <p>The identifier is arbitrary. 
+To determine the name and path to the Maple and Mint executables,
+launch Maple and execute <code>kernelopts(mapledir)</code>, that
+returns the directory in which Maple is installed.
+
+   <p>On Linux or Mac, the shell commands are locate in the <samp><span class="file">bin</span></samp>
+subdirectory of the installed directory and are named <samp><span class="file">maple</span></samp>
+and <samp><span class="file">mint</span></samp>.
+
+   <p>On Windows the shell commands are usually in the <samp><span class="file">bin.wnt</span></samp>
+subdirectory of the installed directory and are named
+<samp><span class="file">cmapleXXXX.exe</span></samp> and <samp><span class="file">mintXXXX.exe</span></samp>, where <samp><span class="file">XXXX</span></samp> is the
+Maple release.  When entering the path to the binaries, use forward
+slashes (<samp><span class="file">/</span></samp>) as the directory separators.
+
+   <p>After setting the values, click the &lsquo;<samp><span class="samp">Apply and Save</span></samp>&rsquo; button.
+
+<div class="node">
+<a name="Info-documentation"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Customizing">Customizing</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Installation">Installation</a>
+
+</div>
+
+<h3 class="section">A.4 Info documentation</h3>
+
+<p>Install the included <samp><span class="file">maplev.info</span></samp> file to a directory
+in the Info load path and then edit the <samp><span class="file">dir</span></samp> to point
+to it.  I add the following menu item to my <samp><span class="file">dir</span></samp> file:
+
+<pre class="example">     * MapleV: (maplev).       MapleV reference manual.
+</pre>
+   <div class="node">
+<a name="Evolution"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Key-Index">Key Index</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Installation">Installation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="appendix">Appendix B Evolution</h2>
+
+<ul class="menu">
+<li><a accesskey="1" href="#Bugs">Bugs</a>
+<li><a accesskey="2" href="#Acknowledgments">Acknowledgments</a>
+</ul>
+
+<div class="node">
+<a name="Bugs"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Acknowledgments">Acknowledgments</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Evolution">Evolution</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Evolution">Evolution</a>
+
+</div>
+
+<h3 class="section">B.1 Bugs</h3>
+
+<p>If you encounter a bug in this package, wish to suggest an enhancement,
+or want to make a smart remark, then send an email to me:
+
+   <p>Joseph S. Riel (Joe Riel) <a href="mailto:jriel@maplesoft.com">jriel@maplesoft.com</a>
+
+<div class="node">
+<a name="Acknowledgments"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Bugs">Bugs</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Evolution">Evolution</a>
+
+</div>
+
+<h3 class="section">B.2 Acknowledgements</h3>
+
+<p><a name="index-Acknowledgements-169"></a><a name="index-Credits-170"></a><a name="index-Gap-mode-171"></a>
+I'd like to thank a number of people who have contributed, either
+directly or indirectly, to this package.
+
+     <dl>
+<dt><b>Bruno Salvy</b><dd>For writing <code>maple-mode</code>, a small but useful Emacs
+mode for editing Maple code.
+
+     <br><dt><b>Michael Smith</b><dd>For writing <code>Gap-mode</code> and <code>Gap-process</code>. 
+These gave me the idea, and showed me how, to display help pages. 
+Displaying source code from the Maple libraries was a natural extension. 
+<code>Gap</code> is a CAS specialized for group theory.
+
+     <br><dt><b>Nicholas Thi&eacute;ry</b><dd>For writing <code>Maple-mode</code>, another Emacs mode for
+editing Maple code.  It introduced the idea of using a grammar to indent
+Maple source code.
+
+     <br><dt><b>Bob Glickstein</b><dd>For writing <cite>Writing GNU Emacs Extensions</cite>. 
+It allowed me, a novice Elisp programmer, to put it all together.
+
+     <br><dt><b>Christian Pomar</b><dd>For courageously agreeing to test a series of alpha
+versions of this package.  He found numerous errors and suggested many
+improvements.
+
+     <br><dt><b>Erik Postma</b><dd>For providing useful feedback and suggested enhancements.
+
+   </dl>
+
+<div class="node">
+<a name="Key-Index"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Function-Index">Function Index</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Evolution">Evolution</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<!-- node-name,         next,       previous, up -->
+<h2 class="unnumbered">Key Index</h2>
+
+<ul class="index-ky" compact>
+<li><a href="#index-g_t_003f-155"><code>?</code></a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-C_002d_003b-79"><code>C-;</code></a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-C_002d_003f-141"><code>C-?</code></a>: <a href="#Displaying-help-pages">Displaying help pages</a></li>
+<li><a href="#index-C_002dc-_0040key_007bRET_007d-_0040key_007bRET_007d-107"><code>C-c &lt;RET&gt; &lt;RET&gt;</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-C_002dc-_0040key_007bRET_007d-b-104"><code>C-c &lt;RET&gt; b</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-C_002dc-_0040key_007bRET_007d-p-105"><code>C-c &lt;RET&gt; p</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-C_002dc-_0040key_007bRET_007d-r-106"><code>C-c &lt;RET&gt; r</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-C_002dc-_0040key_007bTAB_007d-_0040key_007bTAB_007d-10"><code>C-c &lt;TAB&gt; &lt;TAB&gt;</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-C_002dc-_0040key_007bTAB_007d-b-11"><code>C-c &lt;TAB&gt; b</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-C_002dc-_0040key_007bTAB_007d-p-12"><code>C-c &lt;TAB&gt; p</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-C_002dc-_0040key_007bTAB_007d-r-13"><code>C-c &lt;TAB&gt; r</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-C_002dc-C_002dc-b-125"><code>C-c C-c b</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-C_002dc-C_002dc-g-128"><code>C-c C-c g</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-C_002dc-C_002dc-i-129"><code>C-c C-c i</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-C_002dc-C_002dc-k-130"><code>C-c C-c k</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-C_002dc-C_002dc-p-126"><code>C-c C-c p</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-C_002dc-C_002dc-r-127"><code>C-c C-c r</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-C_002dc-C_002dp-78"><code>C-c C-p</code></a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-C_002dj-9"><code>C-j</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-C_002du-_002d-C_002dx-_003b-59"><code>C-u - C-x ;</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-C_002dx-_003b-58"><code>C-x ;</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-M_002d_003b-57"><code>M-;</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-M_002d_003f-157"><code>M-?</code></a>: <a href="#Displaying">Displaying</a></li>
+<li><a href="#index-M_002dq-60"><code>M-q</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-M_002dS_002dmouse_002d2-158"><code>M-S-mouse-2</code></a>: <a href="#Displaying">Displaying</a></li>
+<li><a href="#index-n-152"><code>n</code></a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-P-153"><code>P</code></a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-p-151"><code>p</code></a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-r-154"><code>r</code></a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-s-150"><code>s</code></a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-S_002dmouse_002d2-142"><code>S-mouse-2</code></a>: <a href="#Displaying-help-pages">Displaying help pages</a></li>
+   </ul><div class="node">
+<a name="Function-Index"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Variable-Index">Variable Index</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Key-Index">Key Index</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<!-- node-name,         next,       previous, up -->
+<h2 class="unnumbered">Function Index</h2>
+
+
+
+<ul class="index-fn" compact>
+<li><a href="#index-cmaplev_002dgoto_002dbuffer-134"><code>cmaplev-goto-buffer</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-cmaplev_002dinterrupt-135"><code>cmaplev-interrupt</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-cmaplev_002dkill-136"><code>cmaplev-kill</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-cmaplev_002dsend_002dbuffer-131"><code>cmaplev-send-buffer</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-cmaplev_002dsend_002dprocedure-132"><code>cmaplev-send-procedure</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-cmaplev_002dsend_002dregion-133"><code>cmaplev-send-region</code></a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-fill_002dparagraph-64"><code>fill-paragraph</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-indent_002dfor_002dcomment-61"><code>indent-for-comment</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-kill_002dcomment-63"><code>kill-comment</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-maplev_002dadd_002dimenu-89"><code>maplev-add-imenu</code></a>: <a href="#Imenu-support">Imenu support</a></li>
+<li><a href="#index-maplev_002dclear_002dhistory-149"><code>maplev-clear-history</code></a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-maplev_002delectric_002dtab-14"><code>maplev-electric-tab</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-maplev_002dfind_002dinclude_002dfile_002dat_002dpoint-92"><code>maplev-find-include-file-at-point</code></a>: <a href="#Include-statements">Include statements</a></li>
+<li><a href="#index-maplev_002dget_002dtab_002dwidth_002dfunction-29"><code>maplev-get-tab-width-function</code></a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-maplev_002dhelp_002dat_002dpoint-143"><code>maplev-help-at-point</code></a>: <a href="#Displaying-help-pages">Displaying help pages</a></li>
+<li><a href="#index-maplev_002dhelp_002dfollow_002dmouse-144"><code>maplev-help-follow-mouse</code></a>: <a href="#Displaying-help-pages">Displaying help pages</a></li>
+<li><a href="#index-maplev_002dhelp_002dmode-148"><code>maplev-help-mode</code></a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-maplev_002dindent_002dbuffer-16"><code>maplev-indent-buffer</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-maplev_002dindent_002dnewline-15"><code>maplev-indent-newline</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-maplev_002dindent_002dprocedure-17"><code>maplev-indent-procedure</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-maplev_002dindent_002dregion-18"><code>maplev-indent-region</code></a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-maplev_002dinsert_002dassignment_002doperator-81"><code>maplev-insert-assignment-operator</code></a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-maplev_002dreset_002dfont_002dlock-46"><code>maplev-reset-font-lock</code></a>: <a href="#Decoration-level">Decoration level</a></li>
+<li><a href="#index-maplev_002dtemplate_002dproc-80"><code>maplev-template-proc</code></a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-maplev_002dtrace_002dindent_002dbuffer-96"><code>maplev-trace-indent-buffer</code></a>: <a href="#Indent-trace-output">Indent trace output</a></li>
+<li><a href="#index-maplev_002dtrace_002dindent_002dregion-97"><code>maplev-trace-indent-region</code></a>: <a href="#Indent-trace-output">Indent trace output</a></li>
+<li><a href="#index-maplev_002dview_002dat_002dpoint-159"><code>maplev-view-at-point</code></a>: <a href="#Displaying">Displaying</a></li>
+<li><a href="#index-maplev_002dview_002dfollow_002dpoint-160"><code>maplev-view-follow-point</code></a>: <a href="#Displaying">Displaying</a></li>
+<li><a href="#index-maplev_002dview_002dmode-164"><code>maplev-view-mode</code></a>: <a href="#MapleV-view-mode">MapleV view mode</a></li>
+<li><a href="#index-mint_002dbuffer-108"><code>mint-buffer</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-mint_002dprocedure-109"><code>mint-procedure</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-mint_002dregion-110"><code>mint-region</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-mint_002drerun-111"><code>mint-rerun</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-set_002dcomment_002dcolumn-62"><code>set-comment-column</code></a>: <a href="#Comments">Comments</a></li>
+   </ul><div class="node">
+<a name="Variable-Index"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Concept-Index">Concept Index</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Function-Index">Function Index</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<!-- node-name,         next,       previous, up -->
+<h2 class="unnumbered">Variable Index</h2>
+
+
+
+<ul class="index-vr" compact>
+<li><a href="#index-comment_002dcolumn-65"><code>comment-column</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-fill_002dcolumn-66"><code>fill-column</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-font_002dlock_002dmaximum_002ddecoration-45"><code>font-lock-maximum-decoration</code></a>: <a href="#Decoration-level">Decoration level</a></li>
+<li><a href="#index-maplev_002dassignment_002doperator-85"><code>maplev-assignment-operator</code></a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-maplev_002dauto_002dfill_002dcomment_002dflag-67"><code>maplev-auto-fill-comment-flag</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-maplev_002dcomment_002dcolumn-69"><code>maplev-comment-column</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-maplev_002dcomment_002dend_002dflag-84"><code>maplev-comment-end-flag</code></a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-maplev_002dcomment_002dfill_002dcolumn-70"><code>maplev-comment-fill-column</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-maplev_002dcomment_002dstring-68"><code>maplev-comment-string</code></a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-maplev_002dcopyright_002downer-83"><code>maplev-copyright-owner</code></a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-maplev_002ddont_002dindent_002dre-27"><code>maplev-dont-indent-re</code></a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-maplev_002dget_002dtab_002dwidth_002dfunction-30"><code>maplev-get-tab-width-function</code></a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-maplev_002dinclude_002dfile_002dother_002dwindow_002dflag-94"><code>maplev-include-file-other-window-flag</code></a>: <a href="#Include-statements">Include statements</a></li>
+<li><a href="#index-maplev_002dinclude_002dpath-93"><code>maplev-include-path</code></a>: <a href="#Include-statements">Include statements</a></li>
+<li><a href="#index-maplev_002dindent_002ddeclaration-25"><code>maplev-indent-declaration</code></a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-maplev_002dindent_002ddeclaration_002dlevel-26"><code>maplev-indent-declaration-level</code></a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-maplev_002dindent_002dlevel-21"><code>maplev-indent-level</code></a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-maplev_002dindent_002dtabs_002dmode-23"><code>maplev-indent-tabs-mode</code></a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-maplev_002dinitial_002dvariable_002dface-55"><code>maplev-initial-variable-face</code></a>: <a href="#Display-faces">Display faces</a></li>
+<li><a href="#index-maplev_002dinsert_002dcopyright_002dflag-82"><code>maplev-insert-copyright-flag</code></a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-maplev_002dspecial_002dword_002dface-54"><code>maplev-special-word-face</code></a>: <a href="#Display-faces">Display faces</a></li>
+<li><a href="#index-maplev_002dtab_002dwidth-28"><code>maplev-tab-width</code></a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-maplev_002dtrace_002dindent-98"><code>maplev-trace-indent</code></a>: <a href="#Indent-trace-output">Indent trace output</a></li>
+<li><a href="#index-mint_002dcoding_002dsystem-114"><code>mint-coding-system</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-mint_002derror_002dface-119"><code>mint-error-face</code></a>: <a href="#Mint-mode">Mint mode</a></li>
+<li><a href="#index-mint_002dinfo_002dlevel-112"><code>mint-info-level</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-mint_002dnote_002dface-120"><code>mint-note-face</code></a>: <a href="#Mint-mode">Mint mode</a></li>
+<li><a href="#index-mint_002dproc_002dface-117"><code>mint-proc-face</code></a>: <a href="#Mint-mode">Mint mode</a></li>
+<li><a href="#index-mint_002dstart_002doptions-113"><code>mint-start-options</code></a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-mint_002dwarning_002dface-118"><code>mint-warning-face</code></a>: <a href="#Mint-mode">Mint mode</a></li>
+   </ul><div class="node">
+<a name="Concept-Index"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#GNU-Free-Documentation-License">GNU Free Documentation License</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Variable-Index">Variable Index</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<!-- node-name,         next,       previous, up -->
+<h2 class="unnumbered">Concept Index</h2>
+
+<div class="node">
+<a name="GNU-Free-Documentation-License"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Concept-Index">Concept Index</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="appendix">Appendix A GNU Free Documentation License</h2>
+
+<!-- The GNU Free Documentation License. -->
+<div align="center">Version 1.3, 3 November 2008</div>
+
+<!-- This file is intended to be included within another document, -->
+<!-- hence no sectioning command or @node. -->
+<pre class="display">     Copyright &copy; 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
+     <a href="http://fsf.org/">http://fsf.org/</a>
+     
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+</pre>
+     <ol type=1 start=0>
+<li>PREAMBLE
+
+     <p>The purpose of this License is to make a manual, textbook, or other
+functional and useful document <dfn>free</dfn> in the sense of freedom: to
+assure everyone the effective freedom to copy and redistribute it,
+with or without modifying it, either commercially or noncommercially. 
+Secondarily, this License preserves for the author and publisher a way
+to get credit for their work, while not being considered responsible
+for modifications made by others.
+
+     <p>This License is a kind of &ldquo;copyleft&rdquo;, which means that derivative
+works of the document must themselves be free in the same sense.  It
+complements the GNU General Public License, which is a copyleft
+license designed for free software.
+
+     <p>We have designed this License in order to use it for manuals for free
+software, because free software needs free documentation: a free
+program should come with manuals providing the same freedoms that the
+software does.  But this License is not limited to software manuals;
+it can be used for any textual work, regardless of subject matter or
+whether it is published as a printed book.  We recommend this License
+principally for works whose purpose is instruction or reference.
+
+     <li>APPLICABILITY AND DEFINITIONS
+
+     <p>This License applies to any manual or other work, in any medium, that
+contains a notice placed by the copyright holder saying it can be
+distributed under the terms of this License.  Such a notice grants a
+world-wide, royalty-free license, unlimited in duration, to use that
+work under the conditions stated herein.  The &ldquo;Document&rdquo;, below,
+refers to any such manual or work.  Any member of the public is a
+licensee, and is addressed as &ldquo;you&rdquo;.  You accept the license if you
+copy, modify or distribute the work in a way requiring permission
+under copyright law.
+
+     <p>A &ldquo;Modified Version&rdquo; of the Document means any work containing the
+Document or a portion of it, either copied verbatim, or with
+modifications and/or translated into another language.
+
+     <p>A &ldquo;Secondary Section&rdquo; is a named appendix or a front-matter section
+of the Document that deals exclusively with the relationship of the
+publishers or authors of the Document to the Document's overall
+subject (or to related matters) and contains nothing that could fall
+directly within that overall subject.  (Thus, if the Document is in
+part a textbook of mathematics, a Secondary Section may not explain
+any mathematics.)  The relationship could be a matter of historical
+connection with the subject or with related matters, or of legal,
+commercial, philosophical, ethical or political position regarding
+them.
+
+     <p>The &ldquo;Invariant Sections&rdquo; are certain Secondary Sections whose titles
+are designated, as being those of Invariant Sections, in the notice
+that says that the Document is released under this License.  If a
+section does not fit the above definition of Secondary then it is not
+allowed to be designated as Invariant.  The Document may contain zero
+Invariant Sections.  If the Document does not identify any Invariant
+Sections then there are none.
+
+     <p>The &ldquo;Cover Texts&rdquo; are certain short passages of text that are listed,
+as Front-Cover Texts or Back-Cover Texts, in the notice that says that
+the Document is released under this License.  A Front-Cover Text may
+be at most 5 words, and a Back-Cover Text may be at most 25 words.
+
+     <p>A &ldquo;Transparent&rdquo; copy of the Document means a machine-readable copy,
+represented in a format whose specification is available to the
+general public, that is suitable for revising the document
+straightforwardly with generic text editors or (for images composed of
+pixels) generic paint programs or (for drawings) some widely available
+drawing editor, and that is suitable for input to text formatters or
+for automatic translation to a variety of formats suitable for input
+to text formatters.  A copy made in an otherwise Transparent file
+format whose markup, or absence of markup, has been arranged to thwart
+or discourage subsequent modification by readers is not Transparent. 
+An image format is not Transparent if used for any substantial amount
+of text.  A copy that is not &ldquo;Transparent&rdquo; is called &ldquo;Opaque&rdquo;.
+
+     <p>Examples of suitable formats for Transparent copies include plain
+ASCII without markup, Texinfo input format, LaTeX input
+format, SGML or XML using a publicly available
+DTD, and standard-conforming simple HTML,
+PostScript or PDF designed for human modification.  Examples
+of transparent image formats include PNG, XCF and
+JPG.  Opaque formats include proprietary formats that can be
+read and edited only by proprietary word processors, SGML or
+XML for which the DTD and/or processing tools are
+not generally available, and the machine-generated HTML,
+PostScript or PDF produced by some word processors for
+output purposes only.
+
+     <p>The &ldquo;Title Page&rdquo; means, for a printed book, the title page itself,
+plus such following pages as are needed to hold, legibly, the material
+this License requires to appear in the title page.  For works in
+formats which do not have any title page as such, &ldquo;Title Page&rdquo; means
+the text near the most prominent appearance of the work's title,
+preceding the beginning of the body of the text.
+
+     <p>The &ldquo;publisher&rdquo; means any person or entity that distributes copies
+of the Document to the public.
+
+     <p>A section &ldquo;Entitled XYZ&rdquo; means a named subunit of the Document whose
+title either is precisely XYZ or contains XYZ in parentheses following
+text that translates XYZ in another language.  (Here XYZ stands for a
+specific section name mentioned below, such as &ldquo;Acknowledgements&rdquo;,
+&ldquo;Dedications&rdquo;, &ldquo;Endorsements&rdquo;, or &ldquo;History&rdquo;.)  To &ldquo;Preserve the Title&rdquo;
+of such a section when you modify the Document means that it remains a
+section &ldquo;Entitled XYZ&rdquo; according to this definition.
+
+     <p>The Document may include Warranty Disclaimers next to the notice which
+states that this License applies to the Document.  These Warranty
+Disclaimers are considered to be included by reference in this
+License, but only as regards disclaiming warranties: any other
+implication that these Warranty Disclaimers may have is void and has
+no effect on the meaning of this License.
+
+     <li>VERBATIM COPYING
+
+     <p>You may copy and distribute the Document in any medium, either
+commercially or noncommercially, provided that this License, the
+copyright notices, and the license notice saying this License applies
+to the Document are reproduced in all copies, and that you add no other
+conditions whatsoever to those of this License.  You may not use
+technical measures to obstruct or control the reading or further
+copying of the copies you make or distribute.  However, you may accept
+compensation in exchange for copies.  If you distribute a large enough
+number of copies you must also follow the conditions in section 3.
+
+     <p>You may also lend copies, under the same conditions stated above, and
+you may publicly display copies.
+
+     <li>COPYING IN QUANTITY
+
+     <p>If you publish printed copies (or copies in media that commonly have
+printed covers) of the Document, numbering more than 100, and the
+Document's license notice requires Cover Texts, you must enclose the
+copies in covers that carry, clearly and legibly, all these Cover
+Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
+the back cover.  Both covers must also clearly and legibly identify
+you as the publisher of these copies.  The front cover must present
+the full title with all words of the title equally prominent and
+visible.  You may add other material on the covers in addition. 
+Copying with changes limited to the covers, as long as they preserve
+the title of the Document and satisfy these conditions, can be treated
+as verbatim copying in other respects.
+
+     <p>If the required texts for either cover are too voluminous to fit
+legibly, you should put the first ones listed (as many as fit
+reasonably) on the actual cover, and continue the rest onto adjacent
+pages.
+
+     <p>If you publish or distribute Opaque copies of the Document numbering
+more than 100, you must either include a machine-readable Transparent
+copy along with each Opaque copy, or state in or with each Opaque copy
+a computer-network location from which the general network-using
+public has access to download using public-standard network protocols
+a complete Transparent copy of the Document, free of added material. 
+If you use the latter option, you must take reasonably prudent steps,
+when you begin distribution of Opaque copies in quantity, to ensure
+that this Transparent copy will remain thus accessible at the stated
+location until at least one year after the last time you distribute an
+Opaque copy (directly or through your agents or retailers) of that
+edition to the public.
+
+     <p>It is requested, but not required, that you contact the authors of the
+Document well before redistributing any large number of copies, to give
+them a chance to provide you with an updated version of the Document.
+
+     <li>MODIFICATIONS
+
+     <p>You may copy and distribute a Modified Version of the Document under
+the conditions of sections 2 and 3 above, provided that you release
+the Modified Version under precisely this License, with the Modified
+Version filling the role of the Document, thus licensing distribution
+and modification of the Modified Version to whoever possesses a copy
+of it.  In addition, you must do these things in the Modified Version:
+
+          <ol type=A start=1>
+<li>Use in the Title Page (and on the covers, if any) a title distinct
+from that of the Document, and from those of previous versions
+(which should, if there were any, be listed in the History section
+of the Document).  You may use the same title as a previous version
+if the original publisher of that version gives permission.
+
+          <li>List on the Title Page, as authors, one or more persons or entities
+responsible for authorship of the modifications in the Modified
+Version, together with at least five of the principal authors of the
+Document (all of its principal authors, if it has fewer than five),
+unless they release you from this requirement.
+
+          <li>State on the Title page the name of the publisher of the
+Modified Version, as the publisher.
+
+          <li>Preserve all the copyright notices of the Document.
+
+          <li>Add an appropriate copyright notice for your modifications
+adjacent to the other copyright notices.
+
+          <li>Include, immediately after the copyright notices, a license notice
+giving the public permission to use the Modified Version under the
+terms of this License, in the form shown in the Addendum below.
+
+          <li>Preserve in that license notice the full lists of Invariant Sections
+and required Cover Texts given in the Document's license notice.
+
+          <li>Include an unaltered copy of this License.
+
+          <li>Preserve the section Entitled &ldquo;History&rdquo;, Preserve its Title, and add
+to it an item stating at least the title, year, new authors, and
+publisher of the Modified Version as given on the Title Page.  If
+there is no section Entitled &ldquo;History&rdquo; in the Document, create one
+stating the title, year, authors, and publisher of the Document as
+given on its Title Page, then add an item describing the Modified
+Version as stated in the previous sentence.
+
+          <li>Preserve the network location, if any, given in the Document for
+public access to a Transparent copy of the Document, and likewise
+the network locations given in the Document for previous versions
+it was based on.  These may be placed in the &ldquo;History&rdquo; section. 
+You may omit a network location for a work that was published at
+least four years before the Document itself, or if the original
+publisher of the version it refers to gives permission.
+
+          <li>For any section Entitled &ldquo;Acknowledgements&rdquo; or &ldquo;Dedications&rdquo;, Preserve
+the Title of the section, and preserve in the section all the
+substance and tone of each of the contributor acknowledgements and/or
+dedications given therein.
+
+          <li>Preserve all the Invariant Sections of the Document,
+unaltered in their text and in their titles.  Section numbers
+or the equivalent are not considered part of the section titles.
+
+          <li>Delete any section Entitled &ldquo;Endorsements&rdquo;.  Such a section
+may not be included in the Modified Version.
+
+          <li>Do not retitle any existing section to be Entitled &ldquo;Endorsements&rdquo; or
+to conflict in title with any Invariant Section.
+
+          <li>Preserve any Warranty Disclaimers.
+          </ol>
+
+     <p>If the Modified Version includes new front-matter sections or
+appendices that qualify as Secondary Sections and contain no material
+copied from the Document, you may at your option designate some or all
+of these sections as invariant.  To do this, add their titles to the
+list of Invariant Sections in the Modified Version's license notice. 
+These titles must be distinct from any other section titles.
+
+     <p>You may add a section Entitled &ldquo;Endorsements&rdquo;, provided it contains
+nothing but endorsements of your Modified Version by various
+parties&mdash;for example, statements of peer review or that the text has
+been approved by an organization as the authoritative definition of a
+standard.
+
+     <p>You may add a passage of up to five words as a Front-Cover Text, and a
+passage of up to 25 words as a Back-Cover Text, to the end of the list
+of Cover Texts in the Modified Version.  Only one passage of
+Front-Cover Text and one of Back-Cover Text may be added by (or
+through arrangements made by) any one entity.  If the Document already
+includes a cover text for the same cover, previously added by you or
+by arrangement made by the same entity you are acting on behalf of,
+you may not add another; but you may replace the old one, on explicit
+permission from the previous publisher that added the old one.
+
+     <p>The author(s) and publisher(s) of the Document do not by this License
+give permission to use their names for publicity for or to assert or
+imply endorsement of any Modified Version.
+
+     <li>COMBINING DOCUMENTS
+
+     <p>You may combine the Document with other documents released under this
+License, under the terms defined in section 4 above for modified
+versions, provided that you include in the combination all of the
+Invariant Sections of all of the original documents, unmodified, and
+list them all as Invariant Sections of your combined work in its
+license notice, and that you preserve all their Warranty Disclaimers.
+
+     <p>The combined work need only contain one copy of this License, and
+multiple identical Invariant Sections may be replaced with a single
+copy.  If there are multiple Invariant Sections with the same name but
+different contents, make the title of each such section unique by
+adding at the end of it, in parentheses, the name of the original
+author or publisher of that section if known, or else a unique number. 
+Make the same adjustment to the section titles in the list of
+Invariant Sections in the license notice of the combined work.
+
+     <p>In the combination, you must combine any sections Entitled &ldquo;History&rdquo;
+in the various original documents, forming one section Entitled
+&ldquo;History&rdquo;; likewise combine any sections Entitled &ldquo;Acknowledgements&rdquo;,
+and any sections Entitled &ldquo;Dedications&rdquo;.  You must delete all
+sections Entitled &ldquo;Endorsements.&rdquo;
+
+     <li>COLLECTIONS OF DOCUMENTS
+
+     <p>You may make a collection consisting of the Document and other documents
+released under this License, and replace the individual copies of this
+License in the various documents with a single copy that is included in
+the collection, provided that you follow the rules of this License for
+verbatim copying of each of the documents in all other respects.
+
+     <p>You may extract a single document from such a collection, and distribute
+it individually under this License, provided you insert a copy of this
+License into the extracted document, and follow this License in all
+other respects regarding verbatim copying of that document.
+
+     <li>AGGREGATION WITH INDEPENDENT WORKS
+
+     <p>A compilation of the Document or its derivatives with other separate
+and independent documents or works, in or on a volume of a storage or
+distribution medium, is called an &ldquo;aggregate&rdquo; if the copyright
+resulting from the compilation is not used to limit the legal rights
+of the compilation's users beyond what the individual works permit. 
+When the Document is included in an aggregate, this License does not
+apply to the other works in the aggregate which are not themselves
+derivative works of the Document.
+
+     <p>If the Cover Text requirement of section 3 is applicable to these
+copies of the Document, then if the Document is less than one half of
+the entire aggregate, the Document's Cover Texts may be placed on
+covers that bracket the Document within the aggregate, or the
+electronic equivalent of covers if the Document is in electronic form. 
+Otherwise they must appear on printed covers that bracket the whole
+aggregate.
+
+     <li>TRANSLATION
+
+     <p>Translation is considered a kind of modification, so you may
+distribute translations of the Document under the terms of section 4. 
+Replacing Invariant Sections with translations requires special
+permission from their copyright holders, but you may include
+translations of some or all Invariant Sections in addition to the
+original versions of these Invariant Sections.  You may include a
+translation of this License, and all the license notices in the
+Document, and any Warranty Disclaimers, provided that you also include
+the original English version of this License and the original versions
+of those notices and disclaimers.  In case of a disagreement between
+the translation and the original version of this License or a notice
+or disclaimer, the original version will prevail.
+
+     <p>If a section in the Document is Entitled &ldquo;Acknowledgements&rdquo;,
+&ldquo;Dedications&rdquo;, or &ldquo;History&rdquo;, the requirement (section 4) to Preserve
+its Title (section 1) will typically require changing the actual
+title.
+
+     <li>TERMINATION
+
+     <p>You may not copy, modify, sublicense, or distribute the Document
+except as expressly provided under this License.  Any attempt
+otherwise to copy, modify, sublicense, or distribute it is void, and
+will automatically terminate your rights under this License.
+
+     <p>However, if you cease all violation of this License, then your license
+from a particular copyright holder is reinstated (a) provisionally,
+unless and until the copyright holder explicitly and finally
+terminates your license, and (b) permanently, if the copyright holder
+fails to notify you of the violation by some reasonable means prior to
+60 days after the cessation.
+
+     <p>Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+     <p>Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, receipt of a copy of some or all of the same material does
+not give you any rights to use it.
+
+     <li>FUTURE REVISIONS OF THIS LICENSE
+
+     <p>The Free Software Foundation may publish new, revised versions
+of the GNU Free Documentation License from time to time.  Such new
+versions will be similar in spirit to the present version, but may
+differ in detail to address new problems or concerns.  See
+<a href="http://www.gnu.org/copyleft/">http://www.gnu.org/copyleft/</a>.
+
+     <p>Each version of the License is given a distinguishing version number. 
+If the Document specifies that a particular numbered version of this
+License &ldquo;or any later version&rdquo; applies to it, you have the option of
+following the terms and conditions either of that specified version or
+of any later version that has been published (not as a draft) by the
+Free Software Foundation.  If the Document does not specify a version
+number of this License, you may choose any version ever published (not
+as a draft) by the Free Software Foundation.  If the Document
+specifies that a proxy can decide which future versions of this
+License can be used, that proxy's public statement of acceptance of a
+version permanently authorizes you to choose that version for the
+Document.
+
+     <li>RELICENSING
+
+     <p>&ldquo;Massive Multiauthor Collaboration Site&rdquo; (or &ldquo;MMC Site&rdquo;) means any
+World Wide Web server that publishes copyrightable works and also
+provides prominent facilities for anybody to edit those works.  A
+public wiki that anybody can edit is an example of such a server.  A
+&ldquo;Massive Multiauthor Collaboration&rdquo; (or &ldquo;MMC&rdquo;) contained in the
+site means any set of copyrightable works thus published on the MMC
+site.
+
+     <p>&ldquo;CC-BY-SA&rdquo; means the Creative Commons Attribution-Share Alike 3.0
+license published by Creative Commons Corporation, a not-for-profit
+corporation with a principal place of business in San Francisco,
+California, as well as future copyleft versions of that license
+published by that same organization.
+
+     <p>&ldquo;Incorporate&rdquo; means to publish or republish a Document, in whole or
+in part, as part of another Document.
+
+     <p>An MMC is &ldquo;eligible for relicensing&rdquo; if it is licensed under this
+License, and if all works that were first published under this License
+somewhere other than this MMC, and subsequently incorporated in whole
+or in part into the MMC, (1) had no cover texts or invariant sections,
+and (2) were thus incorporated prior to November 1, 2008.
+
+     <p>The operator of an MMC Site may republish an MMC contained in the site
+under CC-BY-SA on the same site at any time before August 1, 2009,
+provided the MMC is eligible for relicensing.
+
+        </ol>
+
+<h3 class="heading">ADDENDUM: How to use this License for your documents</h3>
+
+<p>To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and
+license notices just after the title page:
+
+<pre class="smallexample">       Copyright (C)  <var>year</var>  <var>your name</var>.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+</pre>
+   <p>If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+replace the &ldquo;with<small class="dots">...</small>Texts.&rdquo; line with this:
+
+<pre class="smallexample">         with the Invariant Sections being <var>list their titles</var>, with
+         the Front-Cover Texts being <var>list</var>, and with the Back-Cover Texts
+         being <var>list</var>.
+</pre>
+   <p>If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   <p>If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License,
+to permit their use in free software.
+
+<!-- Local Variables: -->
+<!-- ispell-local-pdict: "ispell-dict" -->
+<!-- End: -->
+
+
+<ul class="index-cp" compact>
+<li><a href="#index-g_t_0040file_007b_002eemacs_007d-166"><samp><span class="file">.emacs</span></samp></a>: <a href="#Installation">Installation</a></li>
+<li><a href="#index-Abbreviations-72">Abbreviations</a>: <a href="#Abbreviations">Abbreviations</a></li>
+<li><a href="#index-Acknowledgements-169">Acknowledgements</a>: <a href="#Acknowledgments">Acknowledgments</a></li>
+<li><a href="#index-Assignment-operator_002c-template-77">Assignment operator, template</a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-Checking-syntax-101">Checking syntax</a>: <a href="#Mint">Mint</a></li>
+<li><a href="#index-Cmaple-121">Cmaple</a>: <a href="#Maple">Maple</a></li>
+<li><a href="#index-Cmaple-mode-137">Cmaple mode</a>: <a href="#Cmaple-mode">Cmaple mode</a></li>
+<li><a href="#index-Cmaple_002c-running-123">Cmaple, running</a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-Commands_002c-indentation-8">Commands, indentation</a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-Comments-56">Comments</a>: <a href="#Comments">Comments</a></li>
+<li><a href="#index-Continued-expression_002c-indenting-34">Continued expression, indenting</a>: <a href="#Forcing-indentation">Forcing indentation</a></li>
+<li><a href="#index-Credits-170">Credits</a>: <a href="#Acknowledgments">Acknowledgments</a></li>
+<li><a href="#index-Custom-abbreviations-73">Custom abbreviations</a>: <a href="#Abbreviations">Abbreviations</a></li>
+<li><a href="#index-Customization-168">Customization</a>: <a href="#Installation">Installation</a></li>
+<li><a href="#index-Customizing-font-lock-keywords-49">Customizing font lock keywords</a>: <a href="#Adding-keywords">Adding keywords</a></li>
+<li><a href="#index-Customizing-indentation-19">Customizing indentation</a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-Decoration-level_002c-font-lock-43">Decoration level, font lock</a>: <a href="#Decoration-level">Decoration level</a></li>
+<li><a href="#index-Details_002c-indentations-36">Details, indentations</a>: <a href="#Indentation-Details">Indentation Details</a></li>
+<li><a href="#index-Display-faces_002c-font-lock-53">Display faces, font lock</a>: <a href="#Display-faces">Display faces</a></li>
+<li><a href="#index-Faces_002c-font-lock-52">Faces, font lock</a>: <a href="#Display-faces">Display faces</a></li>
+<li><a href="#index-Font-lock-41">Font lock</a>: <a href="#Font-Lock">Font Lock</a></li>
+<li><a href="#index-Font-lock_002c-adding-keywords-47">Font lock, adding keywords</a>: <a href="#Adding-keywords">Adding keywords</a></li>
+<li><a href="#index-Font-lock_002c-decoration-level-42">Font lock, decoration level</a>: <a href="#Decoration-level">Decoration level</a></li>
+<li><a href="#index-Font-lock_002c-display-faces-50">Font lock, display faces</a>: <a href="#Display-faces">Display faces</a></li>
+<li><a href="#index-Font-lock_002c-faces-51">Font lock, faces</a>: <a href="#Display-faces">Display faces</a></li>
+<li><a href="#index-Forcing-indentation-31">Forcing indentation</a>: <a href="#Forcing-indentation">Forcing indentation</a></li>
+<li><a href="#index-Gap-mode-171">Gap mode</a>: <a href="#Acknowledgments">Acknowledgments</a></li>
+<li><a href="#index-Grammar_002c-indentation-38">Grammar, indentation</a>: <a href="#Indentation-Details">Indentation Details</a></li>
+<li><a href="#index-Help-pages_002c-Maple-139">Help pages, Maple</a>: <a href="#Help-pages">Help pages</a></li>
+<li><a href="#index-History_002c-help-mode-147">History, help mode</a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-History_002c-view-mode-163">History, view mode</a>: <a href="#MapleV-view-mode">MapleV view mode</a></li>
+<li><a href="#index-Imenu-86">Imenu</a>: <a href="#Imenu-support">Imenu support</a></li>
+<li><a href="#index-Include-91">Include</a>: <a href="#Include-statements">Include statements</a></li>
+<li><a href="#index-Indent-trace-95">Indent trace</a>: <a href="#Indent-trace-output">Indent trace output</a></li>
+<li><a href="#index-Indentation-6">Indentation</a>: <a href="#Indentation">Indentation</a></li>
+<li><a href="#index-Indentation-commands-7">Indentation commands</a>: <a href="#Indentation-Commands">Indentation Commands</a></li>
+<li><a href="#index-Indentation-details-35">Indentation details</a>: <a href="#Indentation-Details">Indentation Details</a></li>
+<li><a href="#index-Indentation-grammar-37">Indentation grammar</a>: <a href="#Indentation-Details">Indentation Details</a></li>
+<li><a href="#index-Indentation_002c-customizing-20">Indentation, customizing</a>: <a href="#Customizing-Indentation">Customizing Indentation</a></li>
+<li><a href="#index-Indentation_002c-forcing-32">Indentation, forcing</a>: <a href="#Forcing-indentation">Forcing indentation</a></li>
+<li><a href="#index-Indenting-continued-expressions-33">Indenting continued expressions</a>: <a href="#Forcing-indentation">Forcing indentation</a></li>
+<li><a href="#index-Indenting_002c-speed-of-39">Indenting, speed of</a>: <a href="#Indentation-Details">Indentation Details</a></li>
+<li><a href="#index-Index_002c-procedures-87">Index, procedures</a>: <a href="#Imenu-support">Imenu support</a></li>
+<li><a href="#index-Initialization-167">Initialization</a>: <a href="#Installation">Installation</a></li>
+<li><a href="#index-Installation-165">Installation</a>: <a href="#Installation">Installation</a></li>
+<li><a href="#index-Introduction-1">Introduction</a>: <a href="#Introduction">Introduction</a></li>
+<li><a href="#index-Keywords_002c-font-locking-48">Keywords, font locking</a>: <a href="#Adding-keywords">Adding keywords</a></li>
+<li><a href="#index-Maple-help-pages-140">Maple help pages</a>: <a href="#Help-pages">Help pages</a></li>
+<li><a href="#index-Maple_002c-command-line-122">Maple, command line</a>: <a href="#Maple">Maple</a></li>
+<li><a href="#index-MapleV-help-mode-145">MapleV help mode</a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-MapleV-view-mode-161">MapleV view mode</a>: <a href="#MapleV-view-mode">MapleV view mode</a></li>
+<li><a href="#index-Maximum-decoration_002c-font-lock-44">Maximum decoration, font lock</a>: <a href="#Decoration-level">Decoration level</a></li>
+<li><a href="#index-Menubar-5">Menubar</a>: <a href="#Basics">Basics</a></li>
+<li><a href="#index-Mint-99">Mint</a>: <a href="#Mint">Mint</a></li>
+<li><a href="#index-Mint-mode-115">Mint mode</a>: <a href="#Mint-mode">Mint mode</a></li>
+<li><a href="#index-Mint_002c-running-103">Mint, running</a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-Miscellaneous-90">Miscellaneous</a>: <a href="#Miscellaneous-features">Miscellaneous features</a></li>
+<li><a href="#index-Mode_002c-cmaple-138">Mode, cmaple</a>: <a href="#Cmaple-mode">Cmaple mode</a></li>
+<li><a href="#index-Mode_002c-help_002c-MapleV-146">Mode, help, MapleV</a>: <a href="#MapleV-help-mode">MapleV help mode</a></li>
+<li><a href="#index-Mode_002c-Mint-116">Mode, Mint</a>: <a href="#Mint-mode">Mint mode</a></li>
+<li><a href="#index-Mode_002c-view_002c-MapleV-162">Mode, view, MapleV</a>: <a href="#MapleV-view-mode">MapleV view mode</a></li>
+<li><a href="#index-Procedure-index-88">Procedure index</a>: <a href="#Imenu-support">Imenu support</a></li>
+<li><a href="#index-Procedure-template-75">Procedure template</a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-requirements-3">requirements</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-Running-mint-102">Running mint</a>: <a href="#Running-mint">Running mint</a></li>
+<li><a href="#index-Running_002c-Cmaple-124">Running, Cmaple</a>: <a href="#Running-Maple">Running Maple</a></li>
+<li><a href="#index-Shortcuts-71">Shortcuts</a>: <a href="#Shortcuts">Shortcuts</a></li>
+<li><a href="#index-Speed-of_002c-indenting-40">Speed of, indenting</a>: <a href="#Indentation-Details">Indentation Details</a></li>
+<li><a href="#index-Summary-2">Summary</a>: <a href="#Summary">Summary</a></li>
+<li><a href="#index-Syntax-checking-100">Syntax checking</a>: <a href="#Mint">Mint</a></li>
+<li><a href="#index-Template_002c-procedure-76">Template, procedure</a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-Templates-74">Templates</a>: <a href="#Templates">Templates</a></li>
+<li><a href="#index-Top_002dlevel-procedures-4">Top-level procedures</a>: <a href="#Basics">Basics</a></li>
+<li><a href="#index-Viewing_002c-Maple-156">Viewing, Maple</a>: <a href="#Viewing">Viewing</a></li>
+   </ul>
+<div class="shortcontents">
+<h2>Short Contents</h2>
+<ul>
+<li><a href="#toc_Top">MapleV</a></li>
+<li><a href="#toc_Introduction">1 Introduction</a></li>
+<li><a href="#toc_Basics">2 Basics</a></li>
+<li><a href="#toc_Indentation">3 Indentation</a></li>
+<li><a href="#toc_Font-Lock">4 Font Lock</a></li>
+<li><a href="#toc_Comments">5 Comments</a></li>
+<li><a href="#toc_Shortcuts">6 Shortcuts</a></li>
+<li><a href="#toc_Imenu-support">7 Imenu support</a></li>
+<li><a href="#toc_Miscellaneous-features">8 Miscellaneous features</a></li>
+<li><a href="#toc_Mint">9 Mint</a></li>
+<li><a href="#toc_Maple">10 Maple</a></li>
+<li><a href="#toc_Help-pages">11 Help pages</a></li>
+<li><a href="#toc_Viewing">12 Viewing</a></li>
+<li><a href="#toc_Installation">Appendix A Installation</a></li>
+<li><a href="#toc_Evolution">Appendix B Evolution</a></li>
+<li><a href="#toc_Key-Index">Key Index</a></li>
+<li><a href="#toc_Function-Index">Function Index</a></li>
+<li><a href="#toc_Variable-Index">Variable Index</a></li>
+<li><a href="#toc_Concept-Index">Concept Index</a></li>
+<li><a href="#toc_GNU-Free-Documentation-License">Appendix A GNU Free Documentation License</a></li>
+</ul>
+</div>
+
+   <div class="contents">
+<h2>Table of Contents</h2>
+<ul>
+<li><a name="toc_Top" href="#Top">MapleV</a>
+<li><a name="toc_Introduction" href="#Introduction">1 Introduction</a>
+<ul>
+<li><a href="#Summary">1.1 Summary</a>
+<ul>
+<li><a href="#Summary">1.1.1 Indentation</a>
+<li><a href="#Summary">1.1.2 Font Lock</a>
+<li><a href="#Summary">1.1.3 Comments</a>
+<li><a href="#Summary">1.1.4 Shortcuts</a>
+<li><a href="#Summary">1.1.5 Mint interface</a>
+<li><a href="#Summary">1.1.6 Maple interface</a>
+<li><a href="#Summary">1.1.7 Online help</a>
+<li><a href="#Summary">1.1.8 Viewing library code</a>
+<li><a href="#Summary">1.1.9 Multiple Maple releases</a>
+</li></ul>
+<li><a href="#Requirements">1.2 Requirements</a>
+</li></ul>
+<li><a name="toc_Basics" href="#Basics">2 Basics</a>
+<li><a name="toc_Indentation" href="#Indentation">3 Indentation</a>
+<ul>
+<li><a href="#Indentation-Commands">3.1 Commands</a>
+<li><a href="#Customizing-Indentation">3.2 Customizing</a>
+<li><a href="#Indentation-Tricks">3.3 Indentation Tricks</a>
+<ul>
+<li><a href="#Forcing-indentation">3.3.1 Forcing indentation</a>
+<li><a href="#Preventing-indentation">3.3.2 Preventing indentation</a>
+</li></ul>
+<li><a href="#Indentation-Details">3.4 Indentation Details</a>
+</li></ul>
+<li><a name="toc_Font-Lock" href="#Font-Lock">4 Font Lock</a>
+<ul>
+<li><a href="#Decoration-level">4.1 Decoration level</a>
+<li><a href="#Adding-keywords">4.2 Adding keywords</a>
+<li><a href="#Display-faces">4.3 Display faces</a>
+</li></ul>
+<li><a name="toc_Comments" href="#Comments">5 Comments</a>
+<li><a name="toc_Shortcuts" href="#Shortcuts">6 Shortcuts</a>
+<ul>
+<li><a href="#Abbreviations">6.1 Abbreviations</a>
+<ul>
+<li><a href="#Customizing-Abbreviations">6.1.1 Customizing Abbreviations</a>
+</li></ul>
+<li><a href="#Templates">6.2 Templates</a>
+</li></ul>
+<li><a name="toc_Imenu-support" href="#Imenu-support">7 Imenu support</a>
+<li><a name="toc_Miscellaneous-features" href="#Miscellaneous-features">8 Miscellaneous features</a>
+<ul>
+<li><a href="#Include-statements">8.1 Include statements</a>
+<li><a href="#Indent-trace-output">8.2 Indent trace output</a>
+</li></ul>
+<li><a name="toc_Mint" href="#Mint">9 Mint</a>
+<ul>
+<li><a href="#Running-mint">9.1 Running mint</a>
+<li><a href="#Mint-mode">9.2 Mint mode</a>
+</li></ul>
+<li><a name="toc_Maple" href="#Maple">10 Maple</a>
+<ul>
+<li><a href="#Running-Maple">10.1 Running Maple</a>
+<li><a href="#Cmaple-mode">10.2 Cmaple mode</a>
+</li></ul>
+<li><a name="toc_Help-pages" href="#Help-pages">11 Help pages</a>
+<ul>
+<li><a href="#Displaying-help-pages">11.1 Displaying help pages</a>
+<li><a href="#MapleV-help-mode">11.2 MapleV help mode</a>
+</li></ul>
+<li><a name="toc_Viewing" href="#Viewing">12 Viewing</a>
+<ul>
+<li><a href="#Displaying">12.1 Displaying procedures</a>
+<li><a href="#MapleV-view-mode">12.2 MapleV view mode</a>
+</li></ul>
+<li><a name="toc_Installation" href="#Installation">Appendix A Installation</a>
+<ul>
+<li><a href="#Emacs-Files">A.1 Emacs Files</a>
+<li><a href="#Maple-Files">A.2 Maple Files</a>
+<li><a href="#Customizing">A.3 Customizing</a>
+<li><a href="#Info-documentation">A.4 Info documentation</a>
+</li></ul>
+<li><a name="toc_Evolution" href="#Evolution">Appendix B Evolution</a>
+<ul>
+<li><a href="#Bugs">B.1 Bugs</a>
+<li><a href="#Acknowledgments">B.2 Acknowledgements</a>
+</li></ul>
+<li><a name="toc_Key-Index" href="#Key-Index">Key Index</a>
+<li><a name="toc_Function-Index" href="#Function-Index">Function Index</a>
+<li><a name="toc_Variable-Index" href="#Variable-Index">Variable Index</a>
+<li><a name="toc_Concept-Index" href="#Concept-Index">Concept Index</a>
+<li><a name="toc_GNU-Free-Documentation-License" href="#GNU-Free-Documentation-License">Appendix A GNU Free Documentation License</a>
+</li></ul>
+</div>
+
+</body></html>
+
