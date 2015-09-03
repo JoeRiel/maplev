@@ -1348,6 +1348,7 @@ Byte-compile them from Emacs with the command
 Add the following line to your @file{.emacs} file
 
 @example
+(add-to-list 'load-path (concat user-emacs-directory "maple"))
 (autoload 'maplev-mode "maplev" "Maple editing mode" t)
 @end example
 
