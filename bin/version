@@ -88,6 +88,11 @@ file="README"
 [ -z "$version" ] && echo -ne "$file:\t"
 sed $sed_opt "/^VERSION /$sed_cmd" "$file"
 
+# Update README.md
+file="README"
+[ -z "$version" ] && echo -ne "$file:\t"
+sed $sed_opt "/^\*\*VERSION /$sed_cmd" "$file"
+
 # Update Makefile
 file="Makefile"
 [ -z "$version" ] && echo -ne "$file:\t"
