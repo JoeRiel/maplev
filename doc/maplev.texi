@@ -364,8 +364,13 @@ The following variables affect indentation:
 
 @vtable @code
 
+@vindex maplev-indent-level
 @item maplev-indent-level
 The amount a subblock is indented. The default is 4.
+
+@vindex maplev-indent-tabs-mode
+@item maplev-indent-tabs-mode
+Non-nil means tabs may be used to indent.  The default is nil.
 
 @vindex maplev-indent-declaration
 @item maplev-indent-declaration-level
@@ -1343,6 +1348,7 @@ Byte-compile them from Emacs with the command
 Add the following line to your @file{.emacs} file
 
 @example
+(add-to-list 'load-path (concat user-emacs-directory "maple"))
 (autoload 'maplev-mode "maplev" "Maple editing mode" t)
 @end example
 

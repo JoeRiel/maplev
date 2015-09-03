@@ -14,7 +14,7 @@ include help-system.mak
 EMACS := emacs
 # cmaple is better for production release
 MAPLE := maple
-TEXI2HTML := makeinfo --html --number-sections
+TEXI2HTML := $(MAKEINFO) --html --number-sections
 TEXI2PDF := texi2pdf
 
 BROWSER := x-www-browser
@@ -177,7 +177,7 @@ mla: $(mla)
 
 MAPLE-FILES = $(addprefix maple/,maplev.mpl Print.mm)
 
-%.mla: maple/%.mpl
+%.mla: maple/%.mpl maple/Print.mm
 	@$(RM) $@
 	@echo "Building Maple archive $@"
 	@err=$$($(MAPLE) -q -I $(PWD)/maple -D BUILD-MLA $< ) ; \
@@ -219,10 +219,8 @@ clean-install: links-uninstall
 
 help: $(call print-separator)
 
-DIST-extra = Copyright README RELEASE-NOTES install maplev.mla doc/maplev.info
+DIST-extra = Copyright README.md RELEASE-NOTES maplev.mla doc/maplev.info
 DIST-FILES-extra = ChangeLog Makefile /usr/local/include/help-system.mak
-
-$(info $(LISP-FILES))
 
 dist: $(call print-help,dist,	Create $(PKG)-$$TAG.tar.gz file)
 dist: $(LISP-FILES) $(MAPLE-FILES) $(TEXI-FILES)
@@ -235,7 +233,7 @@ dist: $(LISP-FILES) $(MAPLE-FILES) $(TEXI-FILES)
 	$(CP) $(MAPLE-FILES) $(PKG)-$(VERSION)/maple
 	$(CP) $(TEXI-FILES) $(PKG)-$(VERSION)/doc
 	$(CP) $(DIST-FILES-extra) $(DIST-extra) $(PKG)-$(VERSION)/
-	echo zip -r $(PKG)-$(VERSION).zip $(PKG)-$(VERSION)
+	zip -r $(PKG)-$(VERSION).zip $(PKG)-$(VERSION)
 	tar zcvf $(PKG)-$(VERSION).tar.gz $(PKG)-$(VERSION)
 
 .PHONY:  dist
@@ -243,10 +241,12 @@ dist: $(LISP-FILES) $(MAPLE-FILES) $(TEXI-FILES)
 # }}}
 # {{{ P4
 
-p4dir = /home/joe/work/MapleSoft/sandbox/groups/share/emacs/$(PKG)
-p4put: $(PKG).el 
-	(cd $(p4dir); p4 edit $?)
-	$(CP) $? $(p4dir)
+p4dir = /home/joe/maplesoft/sandbox/groups/scripts/share/emacs/$(PKG)
+p4put: 
+	$(CP) $(LISP-FILES) $(p4dir)/lisp
+	$(CP) $(MAPLE-FILES) $(p4dir)/maple
+	$(CP) $(TEXI-FILES) $(p4dir)/doc
+	$(CP) $(DIST-extra) $(DIST-FILES-extra) $(p4dir)
 
 p4get: 
 	$(CP) $(pfdir)/. .

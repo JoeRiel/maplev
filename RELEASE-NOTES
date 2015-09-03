@@ -1,5 +1,8 @@
 -*- org -*-
 
+* 2.33
+** Add maplev-tabs-indent-mode 
+** Add README.md, delete README, install, tweak Makefile
 * 2.32
 ** eliminate customizing font-lock per release
 ** eliminate maplev-default-release and related variables
