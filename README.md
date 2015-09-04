@@ -17,7 +17,7 @@ Requirements
 ------------
 
 * [GNU Emacs](https://www.gnu.org/software/emacs/) 23.1+ (earlier versions may work)
-* [Maple](www.maplesoft.com) 5+
+* [Maple](https://www.maplesoft.com) 5+
 
 Installation
 ------------
