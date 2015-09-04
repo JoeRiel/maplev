@@ -16,8 +16,8 @@ MapleV provides several major modes:
 Requirements
 ------------
 
-* GNU Emacs 23.1+ (earlier versions may work)
-* Maple 5+
+* [GNU Emacs](https://www.gnu.org/software/emacs/) 23.1+ (earlier versions may work)
+* [Maple](www.maplesoft.com) 5+
 
 Installation
 ------------
