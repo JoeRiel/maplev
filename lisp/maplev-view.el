@@ -9,7 +9,7 @@
 (require 'comint)
 
 (eval-when-compile
-  (defvar maplev--builtin-functions)
+  (defvar maplev-builtin-functions)
   (defvar maplev--process-item)
   (defvar maplev-cmaple-echoes-flag)
   (defvar maplev-help-mode-map)
@@ -113,7 +113,7 @@ Request procedure name in minibuffer, using identifier at point as default."
 Push PROC onto the local stack, unless it is already on the top.
 If optional arg HIDE is non-nil do not display buffer."
   ;; Do not try to display builtin procedures.
-  (if (assoc proc (mapcar 'list maplev--builtin-functions))
+  (if (member proc maplev-builtin-functions)
       (message "Procedure \`%s\' builtin." proc)
     (save-current-buffer
       (let ((release maplev-release)) ;; we switch buffers!
