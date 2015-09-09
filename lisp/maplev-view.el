@@ -9,7 +9,7 @@
 (require 'comint)
 
 (eval-when-compile
-  (defvar maplev--builtin-functions)
+  (defvar maplev-builtin-functions)
   (defvar maplev--process-item)
   (defvar maplev-cmaple-echoes-flag)
   (defvar maplev-help-mode-map)
