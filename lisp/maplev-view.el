@@ -61,7 +61,7 @@ first id is used.
 
   (setq major-mode 'maplev-view-mode) ;; needed by maplev-set-release
   (maplev-set-release release)
-  (setq mode-name (format "Maple-Proc %s" maplev-release))
+  (setq mode-name (format "Maple-View %s" maplev-release))
   (use-local-map maplev-view-mode-map)
 
   (set (make-local-variable 'maplev--process-item)
