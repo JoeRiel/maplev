@@ -1,3 +1,4 @@
+<!--*- markdown -*-->
 MapleV:  An Emacs Package for Maple Developers
 ==============================================
 
@@ -41,7 +42,7 @@ Configuration
 Add the following lines to the Emacs initialization file (`~/.emacs`):
 
 	(add-to-list 'load-path (concat user-emacs-directory "maple"))
-	(autoload 'maplev "maplev")
+	(autoload 'maplev-mode "maplev" "Maple editing mode" 'interactive)
 	(setq auto-mode-alist (cons (cons (concat "\\." (regexp-opt '("mpl" "tst") t)
 	                                          "$")
 			                           'maplev-mode)

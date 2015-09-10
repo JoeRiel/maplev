@@ -1349,7 +1349,7 @@ Add the following line to your @file{.emacs} file
 
 @example
 (add-to-list 'load-path (concat user-emacs-directory "maple"))
-(autoload 'maplev-mode "maplev" "Maple editing mode" t)
+(autoload 'maplev-mode "maplev" "Maple editing mode" 'interactive)
 @end example
 
 To have Emacs auto-magically start in MapleV mode when editing Maple
