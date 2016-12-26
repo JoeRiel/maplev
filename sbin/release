@@ -81,14 +81,14 @@ fi
 require_clean_work_tree release
 
 git checkout release
-git merge --no-ff $branch
+git merge --no-ff -m "merge branch '$branch' into release" $branch
 bin/version $version
 git commit -m "prepare release" -a
 git tag -m "prepare release" "release-$version"
 git checkout master
-git merge --no-ff release
+git merge --no-ff -m "merge branch 'release'" release
 git checkout $branch
-git merge --no-ff master
+git merge --no-ff -m "merge branch 'master' into $branch" master
 
 #}}}
 
