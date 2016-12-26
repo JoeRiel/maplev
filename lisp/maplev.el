@@ -1269,10 +1269,11 @@ otherwise use `maplev-tab-width'."
 (defconst maplev-initial-variables
   '("Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
     "integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
-    "`mod`" "Digits" "constants" "undefined" "I"
+    "Digits" "constants" "undefined" "I"
     "UseHardwareFloats"
     "Testzero" "Normalizer" "NumericEventHandlers"
-    "Rounding" "`index/newtable`")
+    "Rounding" ;; "`mod`" "`index/newtable`"
+    )
   "List of initial variables in Maple.")
 
 ;;}}}
@@ -1315,7 +1316,7 @@ file (either < or \").  The second group matches the filename.")
 ;; requires pulling them out.
 
 (defconst maplev-builtin-types
-  '("`::`" "`..`" "`!`"
+  '(;"`::`" "`..`" "`!`"
     "algebraic" "anyfunc" "anything" "atomic"
     "boolean"
     "complex" "constant" "cx_infinity" "cx_zero"
@@ -1337,34 +1338,36 @@ file (either < or \").  The second group matches the filename.")
   "List of builtin Maple types.")
 
 (defconst maplev-builtin-functions
-  '("`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`"
-    "`>=`" "`?()`" "`?[]`" "ASSERT" "Array" "ArrayOptions" "CopySign"
+  '(;; "`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`?()`" "`?[]`" "`[]`" "`^`"
+    ;; "`and`" "`if`" "`evalf/hypergeom/kernel`" "`int/series`" "`intersect`" "`kernel/transpose`" "`not`"
+    ;; "`or`" "`quit`" "`union`" "`xor`" "`{}`" "`||`" "`~`" 
+    "ASSERT" "Array" "ArrayOptions" "CopySign"
     "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" "ERROR"
     "EqualEntries" "EqualStructure" "FromInert" "Im" "MPFloat" 
     "MorrBrilCull" "NameSpace" "NextAfter" "Normalizer" "NumericClass" 
     "NumericEvent" "NumericEventHandler" "NumericStatus" "Object"
     "OrderedNE" "RETURN" "Re" "Record" "SDMPolynom" "SFloatExponent"
     "SFloatMantissa" "Scale10" "Scale2" "SearchText" "TRACE" "ToInert"
-    "Unordered" "UpdateSource" "`[]`" "`^`" "_hackwareToPointer" "_jvm"
+    "Unordered" "UpdateSource" "_hackwareToPointer" "_jvm"
     "_local" "_maplet" "_savelib" "_treeMatch" "_unify" "_xml" "abs"
-    "add" "addressof" "anames" "`and`" "andmap" "appendto" "array"
+    "add" "addressof" "anames" "andmap" "appendto" "array"
     "assemble" "assign" "assigned" "attributes" "bind" "call_external"
     "callback" "cat" "coeff" "coeffs" "conjugate" "convert" "crinterp"
     "debugopts" "define_external" "degree" "denom" "diff" "disassemble"
     "divide" "dlclose" "done" "entries" "eval" "evalb" "evalf"
-    "`evalf/hypergeom/kernel`" "evalgf1" "evalhf" "evalindets" "evaln"
+     "evalgf1" "evalhf" "evalindets" "evaln"
     "expand" "exports" "factorial" "frem" "frontend" "gc" "genpoly"
-    "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "`if`"
+    "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "ifelse" 
     "igcd" "ilog10" "ilog2" "implies" "indets" "indices" "inner"
-    "`int/series`" "`intersect`" "iolib" "iquo" "irem" "is_gmp" "isqrt"
-    "`kernel/transpose`" "kernelopts" "lcoeff" "ldegree" "length"
+    "iolib" "iquo" "irem" "is_gmp" "isqrt"
+    "kernelopts" "lcoeff" "ldegree" "length"
     "lexorder" "lhs" "localGridInterfaceRun" "lowerbound" "lprint"
     "macro" "map" "map2" "max" "maxnorm" "member" "membertype" "min"
     "minus" "mod" "modp" "modp1" "modp2" "mods" "mul" "mvMultiply"
-    "negate" "nops" "normal" "`not`" "numboccur" "numelems" "numer"
-    "op" "`or`" "order" "ormap" "overload" "parse" "piecewise" "pointto"
-    "print" "`quit`" "readlib" "reduce_opr" "remove" "rhs" "rtable"
-    "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
+    "negate" "nops" "normal" "numboccur" "numelems" "numer"
+    "op" "order" "ormap" "overload" "parse" "piecewise" "pointto"
+    "print" "print_preprocess" "readlib" "reduce_opr" "remove" "rhs"
+    "rtable" "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
     "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
     "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_redim"
     "rtable_scale" "rtable_scanblock" "rtable_size" "rtable_sort_indices"
@@ -1372,9 +1375,8 @@ file (either < or \").  The second group matches the filename.")
     "series" "setattribute" "sign" "sort" "ssystem" "stop" "streamcall"
     "subs" "subset" "subsindets" "subsop" "substring" "system" "table"
     "taylor" "tcoeff" "time" "timelimit" "traperror" "trunc" "type"
-    "typematch" "unames" "unbind" "`union`" "upperbound" "userinfo"
-    "wbOpen" "wbOpenURI" "writeto" "`xor`" "`{}`" "`||`"
-    "`~`" "~Array" "~Matrix" "~Vector")
+    "typematch" "unames" "unbind" "upperbound" "userinfo"
+    "wbOpen" "wbOpenURI" "writeto" "~Array" "~Matrix" "~Vector")
   "List of builtin functions as of Maple 2016")
 
 ;; (defconst maplev--builtin-functions-alist
@@ -1506,7 +1508,7 @@ file (either < or \").  The second group matches the filename.")
 	      "whattype" "with" "ztrans"
 
 	      ;; miscellaneous procedures
-	      "interface" 
+	      "interface" "readline"
 	      ))
 	    "\\>"))
   "List of some of the protected names in Maple.
@@ -1772,6 +1774,7 @@ nil."
 			  :grouping 1
 			  :keyboard-binding "C-c C-o"
 			  :help-text "open file"))
+
 
 (defun maplev-find-link-file-at-point (toggle)
   "Open the maplev link file at point.
