@@ -20,7 +20,7 @@
 ;;
 ;; The amount that a particular line is indented is determined by the
 ;; grammar defined by the constant assoc list `maplev--grammar-alist'.
- 
+
 ;;; Code:
 ;;
 
@@ -30,7 +30,7 @@
 
 (eval-when-compile
   (defvar maplev--symbol-syntax-table))
-  
+
 
 ;;{{{ module
 
@@ -84,6 +84,11 @@ characters, with 0 being the left margin.")
   (interactive)
   (setq maplev-indent-info nil))
 
+(defvar maplev-find-indent-point-function nil
+  "Function to return point from which indentation can be computed.
+If assigned nil or it returns nil, the usual indentation method
+is used.  This function is called with no arguments.  It must
+preserve point.")
 
 (defun maplev-indent-validate-info ()
   "Update the variable `maplev-indent-info' if nil.
@@ -100,15 +105,17 @@ Set STATE and STACK in variable to nil."
     ;; of the buffer.  WHAT ABOUT NARROWING AND/OR FOLDING?
     (maplev-indent-info-assign
      (or (and (looking-at maplev--top-defun-begin-re) (point))
-         ;; Handle noweb mode.
-         ;; If noweb is active in the buffer, then search for
-         ;; the chunk starter.
-         ;;(and
-          ;;(boundp 'noweb-minor-mode) noweb-minor-mode
-          ;;(eq mmm-classes 'noweb)
-         (save-excursion
-           (when (re-search-backward "^<<\\(.*\\)>>=$" nil t)
-             (1+ (match-end 0))))
+	 (when maplev-find-indent-point-function
+	   (funcall maplev-find-indent-point-function))
+         ;; (save-excursion
+	 ;;   ;; Handle noweb mode.
+	 ;;   ;; If noweb is active in the buffer, then search for
+	 ;;   ;; the chunk starter.
+	 ;;   ;;(and
+	 ;;   ;;(boundp 'noweb-minor-mode) noweb-minor-mode
+	 ;;   ;;(eq mmm-classes 'noweb)
+         ;;   (when (re-search-backward "^<<\\(.*\\)>>=$" nil t)
+         ;;     (1+ (match-end 0))))
          (save-excursion
            (when (re-search-backward
                   (concat "\\(" maplev--top-defun-begin-re "\\)\\|"
@@ -283,10 +290,10 @@ syntax table and the grammar, `maplev-indent-grammar-alist'.  Restore point.
 The calling function must ensure that the previous info point is not
 beyond \(point\)."
 
-;; This uses unwind-protect to restore the syntax table.
-;; Why not use with-syntax-table instead?  One excuse for
-;; not changing this is that with-syntax-table is more complicated,
-;; it uses unwind-protect as well as save-current-buffer.
+  ;; This uses unwind-protect to restore the syntax table.
+  ;; Why not use with-syntax-table instead?  One excuse for
+  ;; not changing this is that with-syntax-table is more complicated,
+  ;; it uses unwind-protect as well as save-current-buffer.
   (save-excursion
     (let ((point (maplev-indent-info-point))
           (stack (maplev-indent-info-stack))
