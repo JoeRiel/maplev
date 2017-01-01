@@ -6,11 +6,12 @@
 ;;; Code:
 ;;
 
+(require 'maplev-config)
+(require 'maplev-find)
 (require 'maplev-re)
+(require 'eieio)
 
 (eval-when-compile
-  (defvar ffip-project-root)
-  (defvar ffip-patterns)
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
   (defvar maplev-executable-alist)
@@ -31,7 +32,6 @@
 (declare-function maplev-indent-newline "maplev")
 (declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-beginning-of-defun "maplev-common")
-(declare-function ffip-project-files "find-file-in-project")
 
 
 ;;{{{ customizable variables
@@ -126,10 +126,10 @@ CODE-BUFFER is the buffer that contains the source code.
   (kill-all-local-variables)
   (use-local-map maplev-mint-mode-map)
   (setq major-mode 'maplev-mint-mode
-        mode-name "Mint")
+        mode-name "Mint"
+	maplev-project-root project-root)
   (set-syntax-table maplev-mint-mode-syntax-table)
   (set (make-local-variable 'maplev-mint--code-buffer) code-buffer)
-  (set (make-local-variable 'ffip-project-root) project-root)
   (maplev-mint-fontify-buffer)
   (setq buffer-read-only t)
   (run-hooks 'maplev-mint-mode-hook))
@@ -251,26 +251,35 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
 
 
 (defun maplev-mint--goto-source-proc (pos)
-  "According to Mint buffer position POS, move point to the end of the
-initial assignment statement of a source procedure/module.  This would
-be either the closing parenthesis of the formal parameter list, or the
-terminating semicolon or colon of an optional procedure/module type
-declaration.  Return non-nil if this is a procedure, nil if an operator."
+  "Move to position in source buffer corresponding to link at POS in mint buffer.
+This position is after the formal parameter list of the operator,
+procedure, or module."
 
   ;; find the line number of the source buffer at which the defun starts
   (goto-char pos)
-  (let (line file)
+  (let (line file class)
     (save-excursion
       (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
+      ;; Assign class Procedure, Operator, or Module
+      (setq class (match-string-no-properties 3))
       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
       (setq line (1- (string-to-number (match-string-no-properties 1)))
-	    file (maplev-mint-get-source-file)))
-    ;; move point to the beginning of that line in the source
-    (maplev-mint--goto-source-pos line 0 file))
-  ;; move to the end of the defun opening statement
-  (re-search-forward ":=")
-  (goto-char (maplev--scan-lists 1))
-  (if (looking-at "\\s-*::[^;:]+[;:]") (goto-char (match-end 0))))
+	    file (maplev-mint-get-source-file))
+      ;; move point to the beginning of that line in the source
+      (maplev-mint--goto-source-pos line 0 file)
+      ;; Use class to position point after formal parameter list
+      (cond 
+       ((string= class "Procedure")
+	(when (re-search-forward "\\<proc *(" (line-end-position) t)
+	  (backward-char)
+	  (goto-char (maplev--scan-lists 1))))
+       ((string= class "Module")
+	(when (re-search-forward "\\<module *(" (line-end-position) t)
+	  (backward-char)
+	  (goto-char (maplev--scan-lists 1))))
+       ((string= class "Operator")
+	(when (re-search-forward " *->" (line-end-position) t)
+	  (goto-char (match-beginning 0))))))))
 
 (defun maplev-mint--goto-source-line (pos)
   "Goto the location in source specified by the line number in the Mint buffer.
@@ -290,14 +299,7 @@ The line number begins at character position POS."
 (defun maplev-mint-get-source-file ()
   "Return the absolute path to the source file."
   (when (looking-at "\\s-+\\(to\\s-+[0-9]+\\s-+\\)?of\\s-+\\(.*\\)")
-    (let* ((file (match-string-no-properties 2))
-	   (ffip-patterns '("*.mm" "*.mpl" "*.mi"))
-	   (project-files (ffip-project-files)))
-      (let ((file-abs (cdr (assoc file project-files))))
-	(unless file-abs
-	  (error "Cannot find source file %s" file))
-	file-abs))))
-
+    (maplev-find-file (match-string-no-properties 2) maplev-project-root)))
 
 (defun maplev--replace-string (string replace)
   "In STRING replace as specified by REPLACE.
@@ -355,7 +357,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
   '(("\\(^on line[ \t]*[0-9]+:\\)" maplev-mint-note-face)
     ("^[ \t]*\\(\\^.*$\\)" maplev-mint-error-face 'error)
     ("^\\(?:Nested \\)?\\(?:Procedure\\|Operator\\|Module\\)[ ]*\\([^(]*\\)" maplev-mint-link-face 'proc)
-    ("^\\(?:Nested \\)?Anonymous \\(?:Procedure\\|Operator\\)[ ]*\\(proc([^)]*)\\)" maplev-mint-link-face 'proc)
+    ("^\\(?:Nested \\)?Anonymous \\(?:Procedure\\|Operator\\|Module\\)[ ]*\\(\\(?:proc\\|module\\) *([^)]*)\\)" maplev-mint-link-face 'proc)
     ("These parameters were never used\\(?: explicitly\\)?:" maplev-mint-warning-face 'unused-arg t)
     ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
     ("These local variables were not declared explicitly:" maplev-mint-warning-face 'undecl-local t)
@@ -515,9 +517,21 @@ Return exit code of mint."
         (code-window (get-buffer-window (current-buffer)))
         (coding-system-for-read maplev-mint-coding-system)
         (mint-buffer (concat "*Mint " maplev-release "*"))
-        (mint (nth 2 (cdr (assoc maplev-release maplev-executable-alist))))
-	(include-path maplev-include-path)
-	(project-root maplev-project-root)
+        (mint 
+(nth 2 (cdr (assoc maplev-release maplev-executable-alist))))
+	(mint-options (if maplev-config
+			  (maplev-get-options maplev-config :mint-options)
+			(concat "-i" (number-to-string maplev-mint-info-level)
+				;; Add include path to argument list.
+				;; Use commas to separate directories (see ?mint)
+				(and maplev-include-path
+				     (concat " -s -I "
+					     (mapconcat 'identity maplev-include-path ",")))
+				maplev-mint-start-options)))
+	(project-root (if (and maplev-config
+			       (slot-boundp maplev-config :project-root))
+			  (oref maplev-config :project-root)
+			maplev-project-root))
         status eoi lines errpos)
     ;; Allocate markers, unless they exist
     (unless maplev-mint--code-beginning
@@ -537,16 +551,9 @@ Return exit code of mint."
       ;; remember end-of-input
       (setq eoi (point-max))
       ;; Run Mint
-      (setq status (apply 'call-process-region
-                          (point-min) (point-max)
-                          mint nil mint-buffer nil
-                          (concat "-i" (number-to-string maplev-mint-info-level)
-                                  ;; Add include path to argument list.
-                                  ;; Use commas to separate directories (see ?mint)
-                                  (and include-path
-                                       (concat " -s -I "
-                                               (mapconcat 'identity include-path ","))))
-                          maplev-mint-start-options))
+      (setq status (funcall #'call-process-region
+			    (point-min) (point-max)
+			    mint nil mint-buffer nil mint-options))
       (delete-region (point-min) eoi)
       ;; Display Mint output
       (maplev-mint-mode code-buffer project-root)

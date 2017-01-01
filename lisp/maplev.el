@@ -121,6 +121,7 @@
 (require 'maplev-re)			; regular expressions
 (require 'maplev-trace)			; functions for indenting trace output
 (require 'maplev-utils)			; not much here just yet
+(require 'maplev-config)                ; configure maple/mint/tester 
 (require 'maplev-speedbar "maplev-sb")
 
 ;;}}}
