@@ -1,5 +1,8 @@
-@set UPDATED 2 January 2010
-@c Edition of the Manual
-@set EDITION 1.1
-@c Version of the Code
+@c version.texi --- auto-generated file, do not edit.
 @set VERSION 2.33
+@set DATE 27 December 2016
+@c Local Variables:
+@c version-control: never
+@c coding: utf-8
+@c End:
+@c version.texi ends here.

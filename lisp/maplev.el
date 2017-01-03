@@ -5,7 +5,7 @@
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    2.33
+;; Version:    2.34
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -111,37 +111,61 @@
 (require 'imenu)
 (require 'info)
 
-(require 'maplev-cmaple)		; interact with Maple
-(require 'maplev-common)		; common functions
-(require 'maplev-custom)		; customizable variables
-(require 'maplev-help)			; maplev-help-mode (view help pages)
-(require 'maplev-indent)		; indentation engine
-(require 'maplev-mint)			; maplev-mint-mode (view mint output)
-(require 'maplev-view)			; maplev-view-mode (view procedures)
-(require 'maplev-re)			; regular expressions
-(require 'maplev-trace)			; functions for indenting trace output
-(require 'maplev-utils)			; not much here just yet
+(require 'maplev-cmaple)                ; interact with Maple
+(require 'maplev-common)                ; common functions
 (require 'maplev-config)                ; configure maple/mint/tester 
-(require 'maplev-speedbar "maplev-sb")
+(require 'maplev-custom)                ; customizable variables
+(require 'maplev-find)                  ; find files
+(require 'maplev-help)                  ; maplev-help-mode (view help pages)
+(require 'maplev-indent)                ; indentation engine
+(require 'maplev-mint)                  ; maplev-mint-mode (view mint output)
+(require 'maplev-re)                    ; regular expressions
+(require 'maplev-speedbar "maplev-sb")  ; speedbar for maple source
+(require 'maplev-trace)                 ; functions for indenting trace output
+(require 'maplev-utils)                 ; not much here just yet
+(require 'maplev-version)               ; assign version
+(require 'maplev-view)                  ; maplev-view-mode (view procedures)
 
 ;;}}}
 
 ;;{{{ Information
 
-(defconst maplev-version "2.33" "Version of MapleV mode.")
-
 (defconst maplev-developer
   "Joseph S. Riel <jriel@maplesoft.com>"
   "Developer/maintainer of `maplev-mode'.")
 
-(defun maplev-about ()
-  "Print information for `maplev-mode'."
-  (interactive)
-  (sit-for 0)
-  (message "maplev-mode version %s (C) %s" maplev-version maplev-developer))
-
 ;;}}}
 
+;;{{{ Version
+
+;; Reassign the functions maplev-release and maplev-git-release
+;; if the file maplev-release.el is available.
+
+(let* ((maplev-dir (file-name-directory (or (locate-library "maplev") "")))
+       (maplev-release.el (concat maplev-dir "maplev-release.el")))
+  (when (require 'maplev-release maplev-release.el 'noerror)
+    (autoload 'maplev-release     maplev-release.el)
+    (autoload 'maplev-git-release maplev-release.el)))
+
+;;;###autoload
+(defun maplev-version (&optional here full message)
+  "Show the maplev-mode version in the echo area.
+With prefix argument HERE, insert it at point.
+When FULL is non-nil, use a verbose version string.
+When MESSAGE is non-nil, display a message with the version."
+  (interactive (list current-prefix-arg t (not current-prefix-arg)))
+  (let* ((maplev-version (maplev-release))
+	 (git-version (maplev-git-version))
+	 (version (if full
+		      (format "Maplev-mode version %s (%s)"
+			      maplev-version
+			      git-version)
+		    maplev-version)))
+    (when here (insert version))
+    (when message (message "%s" version))
+    version))
+	
+;;}}}
 
 (eval-and-compile
   (condition-case nil (require 'imenu) (error nil))
@@ -165,6 +189,8 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
 (defvar maplev-project-root nil
   "Buffer-local variable assigned the root of the project.
 Used by mint-mode with ffip-project-files to locate the project files.")
+
+(make-variable-buffer-local 'maplev-project-root)
 
 
 ;;}}}
@@ -658,7 +684,6 @@ Key bindings:
   (set (make-local-variable 'indent-region-function) #'maplev-indent-region)
   (set (make-local-variable 'tab-width)               maplev-indent-level)
   (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
-  (make-local-variable 'maplev-project-root)
 
   (ad-activate 'fixup-whitespace)
 
