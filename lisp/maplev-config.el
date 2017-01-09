@@ -118,7 +118,7 @@ made buffer-local.  Return the object."
     (set (make-local-variable 'compile-command) (oref config :compile)))
   maplev-config)
 
-(defmethod maplev-get-options ((config maplev-config-class) option)
+(defmethod maplev-get-option-with-include ((config maplev-config-class) option)
   "Catenate the OPTION slot of CONFIG, an object of type `maplev-config-class',
 with an include-path option, prepended with \" -I \", unless the
 `:include-path' slot of CONFIG is nil or the empty string.  If

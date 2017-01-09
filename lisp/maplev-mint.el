@@ -517,16 +517,8 @@ Return exit code of mint."
         (code-window (get-buffer-window (current-buffer)))
         (coding-system-for-read maplev-mint-coding-system)
         (mint-buffer (concat "*Mint " maplev-release "*"))
-        (mint (nth 2 (cdr (assoc maplev-release maplev-executable-alist))))
-	(mint-options (if maplev-config
-			  (maplev-get-options maplev-config :mint-options)
-			(concat "-i" (number-to-string maplev-mint-info-level)
-				;; Add include path to argument list.
-				;; Use commas to separate directories (see ?mint)
-				(and maplev-include-path
-				     (concat " -s -I "
-					     (mapconcat 'identity maplev-include-path ",")))
-				maplev-mint-start-options)))
+        (mint (oref maplev-config :mint))
+	(mint-options (maplev-get-option-with-include maplev-config :mint-options))
 	(project-root (if (and maplev-config
 			       (slot-boundp maplev-config :project-root))
 			  (oref maplev-config :project-root)
