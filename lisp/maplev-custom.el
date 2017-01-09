@@ -7,6 +7,7 @@
 ;;
 
 (require 'align)
+(require 'maplev-config)
 
 ;;{{{ Group definitions
 
@@ -54,6 +55,11 @@
 
 ;;}}}
 ;;{{{ Configurable options
+
+(defcustom maplev-config-default (maplev-config-class "maplev-config")
+  "This `maplev-config-class' object holds default values for the variable `maplev-config'."
+  :group 'maplev
+  :type 'object)
 
 ;;{{{   executables
 

@@ -26,6 +26,9 @@
 ;; and execute mpldoc tests from within a Maple source file.
 
 (require 'eieio)
+(require 'eieio-custom)
+(eval-when-compile
+  (defvar maplev-config-default)) ; see maplev-custom.el
 
 (defclass maplev-config-class ()
 
@@ -37,7 +40,8 @@
    (include-path
     :initarg            :include-path
     :initform           ""
-    :type               (or list string)
+    :type               (or string list)
+    :custom             (choice string (repeat string))
     :documentation 
 "A string or list of strings of directories to search for files
 specified with $include statements in Maple source files.")
@@ -45,6 +49,7 @@ specified with $include statements in Maple source files.")
    (maple
     :initarg            :maple
     :initform           "maple"
+    :custom             string
     :type               string
     :documentation      "Command to execute tty Maple.")
 
@@ -52,41 +57,53 @@ specified with $include statements in Maple source files.")
     :initarg            :maple-options
     :initform           "-B -A2 -e2"
     :type               string
-    :documentation      "Options to pass to tty Maple.  See :include-path.")
-   
-   ;; (maple-root
-   ;;  :initarg            :maple-root
-   ;;  :initform           (getenv "MAPLE_ROOT")
-   ;;  :type               string
-   ;;  :documentation      "Path to installed Maple to use.  Currently not used.")
+    :custom             string
+    :documentation      "Options to pass to tty Maple.
+See the Maple help page for maple.")
 
+   (mint
+    :initarg            :mint
+    :initform           "mint"
+    :type               string
+    :custom             string
+    :documentation      "Command to execute Mint.")
+   
    (mint-options
     :initarg            :mint-options
-    :initform           "-q"
+    :initform           ""
     :type               string
-    :documentation      "Options to pass to mint.  See :include-path.")
+    :custom             string
+    :documentation      "Options to pass to Mint.
+See the Maple help page for mint.")
 
    (project-root
     :initarg            :project-root 
     :type               string
-    :documentation      "Path to root of project.  Used with mint to find files.")
+    :documentation      "Path to root of project.  
+Starting point from which to find source files when locating mint warnings.")
 
    (tester
     :initarg            :tester
     :initform           "tester"
     :type               string
-    :documentation      "Command to execute tester.  Used by `mpldoc-test-run-tester'")
+    :custom             string
+    :documentation      "Command to execute Maple tester.  
+Used by `mpldoc-test-run-tester'.")
 
    (tester-options
     :initarg            :tester-options
-    :initform           ""
-    :type               string
-    :documentation      "Options to pass to tester.  Used by `mpldoc-test-run-tester'."))
+    :initform           nil
+    :type               (or null string)
+    :custom             (choice (const :tag "Use default" nil) string)
+    :documentation      "Options to pass to tester.
+The default, nil, uses the value of the :maple slot for the -maple option
+and the value of the :maple-options slot for the -moptions option.
+Used by `mpldoc-test-run-tester'."))
   
-  "A class for Maple projects.")
+  "A class for configuring Maple projects.")
 
-(defvar maplev-config (make-instance 'maplev-config-class)
-  "Buffer-local variable that stores the configuration settings.
+(defvar maplev-config nil
+  "Buffer-local variable that stores the MapleV configuration settings.
 It is an instance of `maplev-config-class'.")
 
 (make-variable-buffer-local 'maplev-config)
@@ -95,18 +112,11 @@ It is an instance of `maplev-config-class'.")
   "Assign the buffer-local variable `maplev-config' by passing FIELDS
 to the object constructor for `maplev-config-class'.  If the slot
 `:compile' is assigned, assign its value to `compile-command' which is
-made buffer-local.  Unless the slot `:tester-options' is assigned,
-assign it to use the values of the slots `:maple' and `:maple-options'."
-  (setq maplev-config (apply #'make-instance 'maplev-config-class fields))
-  ;; assign compile
-  (if (slot-boundp maplev-config :compile)
-      (set (make-local-variable 'compile-command) (oref maplev-config :compile)))
-  ;; assign tester options
-  (unless (slot-boundp maplev-config :tester-options)
-    (oset maplev-config :tester-options
-          (format "-maple=%s -moptions=\"%s\""
-                  (oref maplev-config :maple)
-                  (oref maplev-config :maple-options)))))
+made buffer-local.  Return the object."
+  (setq maplev-config (apply #'clone maplev-config-default fields))
+  (when (slot-boundp maplev-config :compile)
+    (set (make-local-variable 'compile-command) (oref config :compile)))
+  maplev-config)
 
 (defmethod maplev-get-options ((config maplev-config-class) option)
   "Catenate the OPTION slot of CONFIG, an object of type `maplev-config-class',

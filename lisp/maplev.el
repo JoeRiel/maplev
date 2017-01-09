@@ -312,7 +312,6 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (define-key map [(control c) (tab) ?r]  'maplev-indent-region)
     (define-key map [(control c) (tab) ?k]  'maplev-indent-clear-info)
     
-
     ;; Cmaple commands
     (define-key map [(control c) (control c) ?b]      'maplev-cmaple-send-buffer)
     (define-key map [(control c) (control c) ?p]      'maplev-cmaple-send-procedure)
@@ -325,14 +324,12 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (define-key map [(control c) (control c) ?s]      'maplev-cmaple-status)
 
     ;; Mint commands
-
     (define-key map [(control c) return ?b] 'maplev-mint-buffer)
     (define-key map [(control c) return ?p] 'maplev-mint-procedure)
     (define-key map [(control c) return ?r] 'maplev-mint-region)
     (define-key map [(control c) return return] 'maplev-mint-rerun)
 
     ;; Help and proc comma
-    
     (define-key map [(control ?\?)] 'maplev-help-at-point)
     (define-key map [(meta ?\?)]    'maplev-view-at-point)
     (define-key map [(control h) (meta d)] 'maplev-what-proc)
@@ -748,7 +745,10 @@ Key bindings:
     (maplev-buttonize-includes)
     (maplev-buttonize-links))
 
+  ;; Create configuration object
   (if maplev-load-config-file-flag (maplev-load-config-file))
+  (unless maplev-config
+    (maplev-config))
 
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
