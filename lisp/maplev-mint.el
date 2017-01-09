@@ -6,10 +6,10 @@
 ;;; Code:
 ;;
 
+(require 'eieio)
 (require 'maplev-config)
 (require 'maplev-find)
 (require 'maplev-re)
-(require 'eieio)
 
 (eval-when-compile
   (defvar maplev-add-declaration-function)
@@ -517,8 +517,7 @@ Return exit code of mint."
         (code-window (get-buffer-window (current-buffer)))
         (coding-system-for-read maplev-mint-coding-system)
         (mint-buffer (concat "*Mint " maplev-release "*"))
-        (mint 
-(nth 2 (cdr (assoc maplev-release maplev-executable-alist))))
+        (mint (nth 2 (cdr (assoc maplev-release maplev-executable-alist))))
 	(mint-options (if maplev-config
 			  (maplev-get-options maplev-config :mint-options)
 			(concat "-i" (number-to-string maplev-mint-info-level)
