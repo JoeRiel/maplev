@@ -14,14 +14,15 @@
 (eval-when-compile
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
-  (defvar maplev-executable-alist)
   (defvar maplev-include-path)
   (defvar maplev-mint-info-level)
   (defvar maplev-mint-start-options)
-  (defvar maplev-project-root)
   (defvar maplev-release)
   (defvar maplev-var-declaration-symbol)
   (defvar maplev-variable-spacing))
+
+(defvar maplev-project-root nil
+  "Stores project root of associated maplev buffer")
 
 (declare-function event-window "maplev-common")
 (declare-function event-point "maplev-common")
@@ -126,8 +127,8 @@ CODE-BUFFER is the buffer that contains the source code.
   (kill-all-local-variables)
   (use-local-map maplev-mint-mode-map)
   (setq major-mode 'maplev-mint-mode
-        mode-name "Mint"
-	maplev-project-root project-root)
+        mode-name "Mint")
+  (set (make-local-variable 'maplev-project-root) project-root)
   (set-syntax-table maplev-mint-mode-syntax-table)
   (set (make-local-variable 'maplev-mint--code-buffer) code-buffer)
   (maplev-mint-fontify-buffer)
@@ -517,12 +518,7 @@ Return exit code of mint."
         (code-window (get-buffer-window (current-buffer)))
         (coding-system-for-read maplev-mint-coding-system)
         (mint-buffer (concat "*Mint " maplev-release "*"))
-        (mint (oref maplev-config :mint))
-	(mint-options (maplev-get-option-with-include maplev-config :mint-options))
-	(project-root (if (and maplev-config
-			       (slot-boundp maplev-config :project-root))
-			  (oref maplev-config :project-root)
-			maplev-project-root))
+	(config maplev-config)
         status eoi lines errpos)
     ;; Allocate markers, unless they exist
     (unless maplev-mint--code-beginning
@@ -544,10 +540,14 @@ Return exit code of mint."
       ;; Run Mint
       (setq status (funcall #'call-process-region
 			    (point-min) (point-max)
-			    mint nil mint-buffer nil mint-options))
+			    (oref config :mint) 
+			    nil ; do not delete
+			    mint-buffer
+			    nil  ; do not redisplay
+			    (maplev-get-option-with-include config :mint-options)))
       (delete-region (point-min) eoi)
       ;; Display Mint output
-      (maplev-mint-mode code-buffer project-root)
+      (maplev-mint-mode code-buffer (oref config :project-root))
       (setq lines (if (= (buffer-size) 0)
                       0
                     (count-lines (point-min) (point-max))))

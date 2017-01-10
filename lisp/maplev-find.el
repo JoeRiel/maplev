@@ -12,15 +12,13 @@
 (require 'eieio)
 (require 'maplev-config)
 
-(eval-when-compile
-  (defvar maplev-project-root))
-
 (defvar maplev-find-executable "find")
 
 (defun maplev-find-file (file &optional dir)
   "Find location of FILE, starting at DIR.
-If DIR is nil, use `maplev-project-root'."
-  (let ((dir (or dir maplev-project-root (error "no dir or maplev-project-root specified")))
+If DIR is nil, use the :project-root slot of `maplev-config'."
+  (let ((dir (or dir (or (oref maplev-config :project-root)
+			 (error "no dir or :project-root slot of maplev-config specified"))))
 	(cmd (format "%s . -name %s" 
 		     maplev-find-executable
 		     file))

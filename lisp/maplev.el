@@ -186,13 +186,6 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
 (defvar maplev-completion-release nil
   "Maple release for which completion has been requested.")
 
-(defvar maplev-project-root nil
-  "Buffer-local variable assigned the root of the project.
-Used by mint-mode with ffip-project-files to locate the project files.")
-
-(make-variable-buffer-local 'maplev-project-root)
-
-
 ;;}}}
 ;;{{{ Syntax table
 

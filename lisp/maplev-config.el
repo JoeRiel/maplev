@@ -78,7 +78,8 @@ See the Maple help page for mint.")
 
    (project-root
     :initarg            :project-root 
-    :type               string
+    :initform           nil
+    :type               (or null string)
     :documentation      "Path to root of project.  
 Starting point from which to find source files when locating mint warnings.")
 
@@ -115,7 +116,7 @@ to the object constructor for `maplev-config-class'.  If the slot
 made buffer-local.  Return the object."
   (setq maplev-config (apply #'clone maplev-config-default fields))
   (when (slot-boundp maplev-config :compile)
-    (set (make-local-variable 'compile-command) (oref config :compile)))
+    (set (make-local-variable 'compile-command) (oref maplev-config :compile)))
   maplev-config)
 
 (defmethod maplev-get-option-with-include ((config maplev-config-class) option)
