@@ -997,8 +997,7 @@ The real work is done by `maplev-complete-on-module-exports'."
 (defun maplev-complete-on-module-exports (module)
   "Add the exports of MODULE to `maplev-completions'."
 
-  (save-current-buffer
-    (set-buffer (maplev--cmaple-buffer))
+  (with-current-buffer (maplev--cmaple-buffer)
     (save-restriction
       ;; Print each export of module on a separate line in a narrowed buffer.
       (narrow-to-region (point-max) (point-max))
@@ -1051,9 +1050,7 @@ index/package help pages.  If it already exists, do nothing."
                         "lprint(interface('screenwidth'=infinity));" t))
           completions)
       (unwind-protect
-          (save-current-buffer
-            (set-buffer (get-buffer-create (maplev--help-buffer)))
-
+          (with-current-buffer (get-buffer-create (maplev--help-buffer))
             ;; Process help node "index/function".
             (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
@@ -1668,17 +1665,17 @@ If nil then `font-lock-maximum-decoration' selects the level."
   "Open the include file at point.
 If found, the file is opened either in this window or the other
 window, depending on the exclusive-or of TOGGLE with
-`maplev-include-file-other-window-flag'.  The variable
-`maplev-include-path' specifies the search paths; it is a list of
-rooted strings.  If the file cannot be found, but the proper
-directory exists, query user to create the file."
+`maplev-include-file-other-window-flag'.  The :include-path slot
+of `maplev-config' specifies the search paths.  If the file
+cannot be found, but the proper directory exists, query user to
+create the file."
   (interactive "P")
   (save-excursion
     (beginning-of-line)
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
     (let* ((inc-file (match-string-no-properties 2))
-	   (path maplev-include-path)
+	   (path (oref maplev-config :include-path))
 	   (inc-first (string= "<" (match-string-no-properties 1)))
 	   (other-window-flag (if maplev-include-file-other-window-flag
 				  (not toggle)
