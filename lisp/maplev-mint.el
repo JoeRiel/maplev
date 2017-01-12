@@ -14,14 +14,9 @@
 (eval-when-compile
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
-  (defvar maplev-include-path)
   (defvar maplev-mint-info-level)
-  (defvar maplev-mint-start-options)
   (defvar maplev-var-declaration-symbol)
   (defvar maplev-variable-spacing))
-
-(defvar maplev-project-root nil
-  "Stores project root of associated maplev buffer")
 
 (declare-function event-window "maplev-common")
 (declare-function event-point "maplev-common")
@@ -33,11 +28,11 @@
 (declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-beginning-of-defun "maplev-common")
 
-
 ;;{{{ customizable variables
 
 (defcustom maplev-mint-coding-system 'undecided-dos
   "Coding system used by Mint.  See `coding-system-for-read' for details."
+  ;; TBD: why is this customizable?
   :type '(choice (const undecided-dos) (const raw-text-unix) (symbol :tag "other"))
   :group 'maplev-mint)
 
@@ -49,12 +44,6 @@
 (defcustom maplev-mint-process-all-vars nil
   "Non-nil means process all variables in one step."
   :type 'boolean
-  :group 'maplev-mint)
-
-(defcustom maplev-mint-include-dir nil
-  "Directory of mint include files.
-This should probably be a list of directories."
-  :type 'string
   :group 'maplev-mint)
 
 ;;}}}
@@ -118,7 +107,7 @@ This should probably be a list of directories."
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-mint-mode (code-buffer project-root)
+(defun maplev-mint-mode (code-buffer config)
   "Major mode for displaying Mint output.
 CODE-BUFFER is the buffer that contains the source code.
 \\{maplev-mint-mode-map}"
@@ -126,8 +115,8 @@ CODE-BUFFER is the buffer that contains the source code.
   (kill-all-local-variables)
   (use-local-map maplev-mint-mode-map)
   (setq major-mode 'maplev-mint-mode
-        mode-name "Mint")
-  (set (make-local-variable 'maplev-project-root) project-root)
+        mode-name "Mint"
+	maplev-config config)
   (set-syntax-table maplev-mint-mode-syntax-table)
   (set (make-local-variable 'maplev-mint--code-buffer) code-buffer)
   (maplev-mint-fontify-buffer)
@@ -299,7 +288,7 @@ The line number begins at character position POS."
 (defun maplev-mint-get-source-file ()
   "Return the absolute path to the source file."
   (when (looking-at "\\s-+\\(to\\s-+[0-9]+\\s-+\\)?of\\s-+\\(.*\\)")
-    (maplev-find-file (match-string-no-properties 2) maplev-project-root)))
+    (maplev-find-file (match-string-no-properties 2) (oref maplev-config :project-root))))
 
 (defun maplev--replace-string (string replace)
   "In STRING replace as specified by REPLACE.
@@ -509,7 +498,7 @@ When called interactively, POS is position where point is."
 ;;}}}
 ;;{{{ regions
 
-(defun maplev-mint-region (beg end)
+(defun maplev-mint-region (beg end &optional syntax-only)
   "Run Mint on the current region \(from BEG to END\).
 Return exit code of mint."
   (interactive "r")
@@ -543,7 +532,11 @@ Return exit code of mint."
 			    nil ; do not delete
 			    mint-buffer
 			    nil  ; do not redisplay
-			    (maplev-get-option-with-include config :mint-options)))
+			    (mapconcat 'identity
+				       (list "-q"
+					     (if syntax-only "-S")
+					     (maplev-get-option-with-include config :mint-options))
+				       " ")))
       (delete-region (point-min) eoi)
       ;; Display Mint output
       (maplev-mint-mode code-buffer (oref config :project-root))
