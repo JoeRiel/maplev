@@ -17,7 +17,6 @@
   (defvar maplev-include-path)
   (defvar maplev-mint-info-level)
   (defvar maplev-mint-start-options)
-  (defvar maplev-release)
   (defvar maplev-var-declaration-symbol)
   (defvar maplev-variable-spacing))
 
@@ -517,7 +516,7 @@ Return exit code of mint."
   (let ((code-buffer (current-buffer))
         (code-window (get-buffer-window (current-buffer)))
         (coding-system-for-read maplev-mint-coding-system)
-        (mint-buffer (concat "*Mint " maplev-release "*"))
+        (mint-buffer "*Mint*")
 	(config maplev-config)
         status eoi lines errpos)
     ;; Allocate markers, unless they exist

@@ -15,7 +15,6 @@
 
 (declare-function maplev--cleanup-buffer "maplev-cmaple")
 (declare-function maplev--cmaple-buffer "maplev-cmaple")
-(declare-function maplev--cmaple-get-init-string "maplev-cmaple")
 (declare-function maplev--cmaple-process "maplev-cmaple")
 (declare-function maplev--proc-buffer "maplev-view")
 (declare-function maplev-cmaple--lock-access "maplev-cmaple")
@@ -95,18 +94,19 @@
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-help-mode (&optional release)
+(defun maplev-help-mode (config)
   "Major mode for displaying Maple help pages.
-RELEASE is an id in `maplev-executable-alist'; if nil, the
-first id is used.
+CONFIG is an object of type `maplev-config-class.
 
 \\{maplev-help-mode-map}"
   (interactive)
   (kill-all-local-variables)
-  (setq major-mode 'maplev-help-mode) ;; needed by maplev-set-release
-  (maplev-set-release release)
-  (setq mode-name (format "Maple-Help %s" maplev-release))
+  (setq major-mode 'maplev-help-mode
+	mode-name (format "Maple-Help: %s" (oref config :maple))
+	maplev-config config)
+
   (use-local-map maplev-help-mode-map)
+  
   (set (make-local-variable 'maplev--process-item)
        (function maplev--help-process))
 
@@ -125,7 +125,7 @@ first id is used.
 
 (defun maplev--help-buffer ()
   "Return the name of the Maple help buffer."
-  (format "Maple %s help" maplev-release))
+  (format "Maple help (%s)" (oref maplev-config :maple)))
 
 (defun maplev-help-follow-mouse (click)
   "Display the Maple help page of the topic at the mouse CLICK."
@@ -164,13 +164,12 @@ If HIDE is non-nil, do not bring buffer to front."
   (unless
       (and maplev-help-use-standard-flag
 	   (maplev-help-standard-help topic))
-    (save-current-buffer             ; maybe should be deeper (NEW!!!!!)
-      (let ((release maplev-release)) ;; we switch buffers!
-	(set-buffer (get-buffer-create (maplev--help-buffer)))
-	(unless (eq major-mode 'maplev-help-mode)
-	  (maplev-help-mode release))
-	;; Push TOPIC onto history stack
-	(maplev-history--stack-process topic hide)))))
+      (let ((config maplev-config))
+	(with-current-buffer (get-buffer-create (maplev--help-buffer))
+	  (unless (eq major-mode 'maplev-help-mode)
+	    (maplev-help-mode config))
+	  ;; Push TOPIC onto history stack
+	  (maplev-history--stack-process topic hide)))))
 
 
 (defun maplev--help-process (topic)
@@ -260,8 +259,8 @@ PROCESS calls this filter.  STRING is the output."
 
 (defun maplev-help-reset-help ()
   "Reset the settings that affect the display of help pages."
-  (interactive)
-  (maplev-cmaple-direct (maplev--cmaple-get-init-string maplev-release) 'delete))
+  (interactive))
+;;  (maplev-cmaple-direct " 'delete))
 
 (defun maplev-help-standard-help (topic)
   "Display help for TOPIC in the Standard help browser.

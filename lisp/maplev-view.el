@@ -7,13 +7,13 @@
 ;;
 
 (require 'comint)
+(require 'maplev-config)
 
 (eval-when-compile
   (defvar maplev-builtin-functions)
   (defvar maplev--process-item)
   (defvar maplev-cmaple-echoes-flag)
-  (defvar maplev-help-mode-map)
-  (defvar maplev-release))
+  (defvar maplev-help-mode-map))
 
 (declare-function event-point "maplev-common")
 (declare-function event-window "maplev-common")
@@ -28,7 +28,6 @@
 (declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-indent-buffer "maplev-indent")
 (declare-function maplev-reset-font-lock "maplev")
-(declare-function maplev-set-release "maplev-common")
 
 
 ;;{{{ mode map
@@ -50,18 +49,18 @@
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-view-mode (&optional release)
+(defun maplev-view-mode (config)
   "Major mode for displaying the source code of Maple procedures.
-RELEASE is an id in `maplev-executable-alist'; if nil, the
-first id is used.
+CONFIG is an object of type `maplev-config-class.
 
 \\{maplev-view-mode-map}"
   (interactive)
   (kill-all-local-variables)
 
-  (setq major-mode 'maplev-view-mode) ;; needed by maplev-set-release
-  (maplev-set-release release)
-  (setq mode-name (format "Maple-View %s" maplev-release))
+  (setq major-mode 'maplev-view-mode
+	mode-name (format "Maple-View: %s" (oref config :maple))
+	maplev-config config)
+
   (use-local-map maplev-view-mode-map)
 
   (set (make-local-variable 'maplev--process-item)
@@ -83,12 +82,12 @@ first id is used.
   (run-hooks 'maplev-view-mode-hook))
 
 ;;}}}
-;;{{{ functions
+;;{{{ mode functions
 
 
 (defun maplev--proc-buffer ()
   "Return the name of the Maple procedure listing buffer."
-  (format "Maple %s proc" maplev-release))
+  (format "Maple proc (%s)" (oref maplev-config :maple)))
 
 
 ;;; Define functions for displaying a Maple procedure from the Maple
@@ -115,12 +114,11 @@ If optional arg HIDE is non-nil do not display buffer."
   ;; Do not try to display builtin procedures.
   (if (member proc maplev-builtin-functions)
       (message "Procedure \`%s\' builtin." proc)
-    (save-current-buffer
-      (let ((release maplev-release)) ;; we switch buffers!
-        (set-buffer (get-buffer-create (maplev--proc-buffer)))
-        (unless (eq major-mode 'maplev-view-mode)
-          (maplev-view-mode release))
-        (maplev-history--stack-process proc hide)))))
+    (let ((config maplev-config))
+      (with-current-buffer (get-buffer-create (maplev--proc-buffer))
+	(unless (eq major-mode #'maplev-view-mode)
+	  (maplev-view-mode config))
+	(maplev-history--stack-process proc hide)))))
 
 (defun maplev--proc-process (proc)
   "Display the Maple procedure PROC \(a string\) in `maplev--proc-buffer'."
@@ -131,9 +129,7 @@ If optional arg HIDE is non-nil do not display buffer."
     (setq mode-line-buffer-identification (format "%-12s" proc))
     (let (buffer-read-only)
       (delete-region (point-min) (point-max))
-      (goto-char (point-min))
-      ;;(insert proc " := ")
-      )
+      (goto-char (point-min)))
     (comint-simple-send process (format "maplev:-Print(\"%s\"):" proc))
     (maplev-cmaple--send-end-notice process)))
 

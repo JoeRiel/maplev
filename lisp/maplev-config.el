@@ -34,7 +34,8 @@
 
   ((compile
     :initarg            :compile
-    :type               string
+    :initform           nil
+    :type               (or null string)
     :documentation      "Command to build and install the mla.")
 
    (include-path
@@ -112,11 +113,12 @@ It is an instance of `maplev-config-class'.")
 (defun maplev-config (&rest fields)
   "Assign the buffer-local variable `maplev-config' by passing FIELDS
 to the object constructor for `maplev-config-class'.  If the slot
-`:compile' is assigned, assign its value to `compile-command' which is
+`:compile' is non-nil, assign its value to `compile-command' which is
 made buffer-local.  Return the object."
   (setq maplev-config (apply #'clone maplev-config-default fields))
-  (when (slot-boundp maplev-config :compile)
-    (set (make-local-variable 'compile-command) (oref maplev-config :compile)))
+  (let ((compile (oref maplev-config :compile)))
+    (when compile
+      (set (make-local-variable 'compile-command) compile)))
   maplev-config)
 
 (defmethod maplev-get-option-with-include ((config maplev-config-class) option)
@@ -126,10 +128,21 @@ with an include-path option, prepended with \" -I \", unless the
 the `:include-path' slot is a list of strings, join them with
 commas separating each string."
     (concat (slot-value config option)
-	    (let ((path (oref config :include-path)))
-	      (unless (stringp path)
-		(setq path (mapconcat 'identity path ",")))
-	      (unless (string= path "")
-		(concat " -I " path)))))
+	    " "
+	    (maplev-include-option config)))
+
+(defmethod maplev-include-option ((config maplev-config-class))
+  "Return the option that sets the include path for maple.
+Use the :include-path slot of CONFIG, an object of type `maplev-config-class'.
+The option includes the -I."
+  (let ((path (oref config :include-path)))
+    (when path
+      (when (listp path)
+	(setq path (mapconcat 'identity path ",")))
+      (setq path (replace-regexp-in-string (rx (or (: bos (* (any " \t\n")))
+						   (: (* (any " \t\n")) eos)))
+					   "" path))
+      (unless (string= path "")
+	(concat "-I " path)))))
 
 (provide 'maplev-config)

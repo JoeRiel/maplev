@@ -91,7 +91,7 @@
 ;; - add clean up routine to kill buffers and processes
 ;;   when exiting maplev-mode
 ;; - indent continued assignments (this could be tricky)
-;; - more complete definition of maplev-completion-alist based on
+;; - more complete definition of maplev-completions based on
 ;;   the maple help node `index[package]'
 ;;
 ;; Low Priority:
@@ -178,13 +178,8 @@ When MESSAGE is non-nil, display a message with the version."
 
 ;;{{{ Internal variables
 
-
-(defvar maplev-completion-alist nil
-  "Alist for minibuffer completion.
-It has the form ((maple-release1  (...)) (maple-release2 (...)))")
-
-(defvar maplev-completion-release nil
-  "Maple release for which completion has been requested.")
+(defvar maplev-completions nil
+  "List for minibuffer completion.")
 
 ;;}}}
 ;;{{{ Syntax table
@@ -374,13 +369,6 @@ It has the form ((maple-release1  (...)) (maple-release2 (...)))")
        ["Highlighted" maplev-help-region t])
       "---"
       ("Setup"
-       ("Maple Release"
-        ,@(mapcar (lambda (item)
-                    (let ((key (car item)))
-                      `[,key (maplev-set-release ,key)
-                             :style radio
-                             :selected (string= maplev-release ,key)]))
-                  maplev-executable-alist))
        ("Abbrevs"
         ["Enable abbrevs" abbrev-mode
          :style toggle :selected abbrev-mode]
@@ -726,13 +714,8 @@ Key bindings:
 
   (maplev-add-maple-to-compilation)
 
-  ;; Release support
-  (maplev-set-release)
-  ;; the file's local variables specs might change maplev-release
-  ;; xemacs version of make-local-hook returns t, not the hook. (JR)
-  ;; make-local-hook is obsolete in GNU emacs 21.1
-  ;;(make-local-hook 'hack-local-variables-hook)
-  (add-hook 'hack-local-variables-hook 'maplev-mode-name nil t)
+  (set-syntax-table maplev-mode-syntax-table)
+  (maplev-reset-font-lock)
 
   (when maplev-buttonize-includes-flag
     (maplev-buttonize-includes)
@@ -1005,17 +988,15 @@ Prompt for the EXPRSEQ."
 ;; modules to the completion list.
 
 (defun maplev-add-exports-of-module-at-point (module)
-  "Add the exports of MODULE at point to `maplev-completion-alist'.
+  "Add the exports of MODULE at point to `maplev-completions'.
 The real work is done by `maplev-complete-on-module-exports'."
   (interactive (list (maplev-ident-around-point-interactive
                       "Complete on Maple exports of module")))
   (maplev-complete-on-module-exports module))
 
 (defun maplev-complete-on-module-exports (module)
-  "Add the exports of MODULE to `maplev-completion-alist'."
+  "Add the exports of MODULE to `maplev-completions'."
 
-  ;; First, ensure that `maplev-completion-alist' is assigned.
-  (maplev--generate-initial-completion-alist)
   (save-current-buffer
     (set-buffer (maplev--cmaple-buffer))
     (save-restriction
@@ -1039,7 +1020,7 @@ The real work is done by `maplev-complete-on-module-exports'."
             (message "The argument `%s' is not a Maple module" module)
             (sit-for 2))
         ;; Initialize completions to those previously assigned
-        (let ((completions (car (cdr (assoc maplev-release maplev-completion-alist)))))
+        (let ((completions maplev-completions))
           ;; Goto end of buffer and read upwards, a line at a time,
           ;; adding it to the exports list.
           (goto-char (point-max))
@@ -1049,17 +1030,17 @@ The real work is done by `maplev-complete-on-module-exports'."
                                (point) (line-end-position))
                               nil)
                         completions)))
-          ;; Replace the completion alist.
-          (setcar (cdr (assoc maplev-release maplev-completion-alist))
-                  (maplev-remove-dupes
-                   (sort completions #'(lambda (a b) (string< (car a) (car b))))))))
+          ;; Replace the completion list.
+          (setq maplev-completions
+		(maplev-remove-dupes
+		 (sort completions #'(lambda (a b) (string< (car a) (car b))))))))
       ;; Delete the output from the cmaple buffer.
       (delete-region (point-min) (point-max)))))
 
-(defun maplev--generate-initial-completion-alist ()
-  "Generate `maplev-completion-alist' from the index/function and
+(defun maplev--generate-initial-completions ()
+  "Generate `maplev-completions' from the index/function and
 index/package help pages.  If it already exists, do nothing."
-  (unless (assoc maplev-release maplev-completion-alist)
+  (unless maplev-completions)
 
     ;; To make it easy to pick out the package names from the
     ;; index/package help page, set the interface variable
@@ -1123,11 +1104,8 @@ index/package help pages.  If it already exists, do nothing."
             (maplev-cmaple--wait 3)
             (maplev-history-delete-item))
 
-        ;; Assign `maplev-completion-alist'.  Sort the completions.
-        (setq completions (sort completions #'(lambda (a b) (string< (car a) (car b))))
-              maplev-completion-alist
-              (cons (cons maplev-release (list completions))
-                    maplev-completion-alist)))
+        ;; Assign `maplev-completions'.  Sort the completions.
+        (setq maplev-completions (sort completions #'(lambda (a b) (string< (car a) (car b)))))
       ;; Restore the original interface screenwidth.
       (maplev-cmaple-direct (concat "interface('screenwidth'=" screenwidth ");") t))))
 
@@ -1135,19 +1113,18 @@ index/package help pages.  If it already exists, do nothing."
 (defun maplev--completion (word predicate mode)
   "Generate minibuffer completion using maple function names.
 For the meaning of args see Info node `(elisp)Programmed Completion'."
-  (let ((maplev-release maplev-completion-release))
-    (maplev--generate-initial-completion-alist)
-    (let ((possibilities (cadr (assoc maplev-release maplev-completion-alist))))
-      (cond ((eq mode t)
-             (all-completions word possibilities predicate))
-            ((not mode)
-             (try-completion word possibilities predicate))
-            ((eq mode 'lambda)
-             (assoc word possibilities))))))
+  (maplev--generate-initial-completions)
+  (let ((possibilities maplev-completions))
+    (cond ((eq mode t)
+	   (all-completions word possibilities predicate))
+	  ((not mode)
+	   (try-completion word possibilities predicate))
+	  ((eq mode 'lambda)
+	   (assoc word possibilities)))))
 
 (defun maplev-complete-symbol (&optional prefix)
   "Perform completion on maple symbol preceding point.
-Compare that symbol against `maplev-completion-alist'."
+Compare that symbol against `maplev-completions'."
   ;; Code borrowed from lisp-complete-symbol.
   (interactive)
   (let* ((end (point))
@@ -1155,11 +1132,10 @@ Compare that symbol against `maplev-completion-alist'."
                 (backward-sexp 1)
                 (point)))
 	 (pattern (buffer-substring-no-properties beg end))
-         (maplev-completion-release maplev-release)
 	 (completion (try-completion pattern 'maplev--completion)))
     (cond ((eq completion t))
 	  ((null completion)
-	   (message "Can't find completion for \"%s\"" pattern)
+	   (message "Cannot find completion for \"%s\"" pattern)
 	   (ding))
 	  ((not (string= pattern completion))
 	   (delete-region beg end)

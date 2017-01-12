@@ -34,6 +34,7 @@
 ;;; Code:
 
 (require 'comint)
+(require 'maplev-config)
 
 (eval-when-compile
   (defvar maplev-cmaple-echoes-flag)
@@ -41,22 +42,20 @@
   (defvar maplev-executable-alist)
   (defvar maplev-include-path)
   (defvar maplev-mint-error-level)
-  (defvar maplev-release)
-  (defvar maplev-start-options)
   (defvar maplev-startup-directory))
 
 (declare-function maplev-mint-region "maplev-mint")
 (declare-function maplev-current-defun "maplev-common")
-(declare-function maplev-set-release "maplev-common")
 
 (defconst maplev-cmaple-prompt "> "
-  "String inserted as a prompt.")
+  "String inserted as a prompt.  
+Must match interface(prompt).")
 
-;;{{{ functions
+;;{{{ mode functions
 
 (defun maplev--cmaple-buffer ()
   "Return the name of the Maple cmaple buffer."
-  (format "Maple %s" maplev-release))
+  (format "Maple (%s)" (oref maplev-config :maple)))
 
 (defun maplev--cmaple-process ()
   "Return the cmaple process associated with the current buffer.
@@ -70,34 +69,27 @@ Start one, if necessary."
   "Start a cmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it."
-  (let* ((release maplev-release)
-	 (executable (cdr (assoc release maplev-executable-alist)))
-         (cmaple (nth 0 executable))
-         (inifile (nth 1 executable))
+  (let* ((config maplev-config)
+	 (cmaple (oref config :maple))
+	 (maple-options (maplev-get-option-with-include config :maple-options))
          (buffer (get-buffer-create (maplev--cmaple-buffer)))
          (process (get-buffer-process buffer))
-	 (include-path maplev-include-path)
          ;; Just testing this.  Is there an advantage to a PTY process?
-         (process-connection-type 'pty)) 
+	 (process-connection-type 'pty))
     (with-current-buffer buffer
-      (message "Starting Maple %s..." release)
+      (message "Starting Maple...")
       (if process (delete-process process))
       (if maplev-startup-directory
           (cd (expand-file-name maplev-startup-directory)))
       (set-process-filter
-       ;; `apply' is used because `maplev-start-options' is a list.
-       (setq process (apply 'start-process
-                            (format "Maple %s" release)
+       (setq process (funcall #'start-process
+                            "Maple"
                             buffer
                             cmaple
-                            (append (and inifile (list "-i" inifile))
-				   '("-c maplev:-Setup()")
-                                    maplev-start-options ;; add include path to argument list
-                                    (and include-path
-                                         (list (concat "-I " 
-                                                       (mapconcat 'identity include-path ",")))))))
+			    "-q -c maplev:-Setup()"
+			    maple-options))
        'maplev--cmaple-filter)
-      (maplev-cmaple-mode release)
+      (maplev-cmaple-mode config)
       (maplev-cmaple--lock-access t)
       ;; (comint-simple-send process init-code
       (maplev-cmaple--send-end-notice process)
@@ -106,7 +98,7 @@ restart it."
       ;; do not support fractions of seconds.
       ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
       (maplev-cmaple--wait)
-      (message "Maple %s started" release)
+      (message "Maple started")
       process)))
 
 ;; Access control
@@ -142,10 +134,9 @@ Interactively use \\[maplev-cmaple-interrupt]."
   "Status of Maple process."
   (interactive)
   (let ((status (get 'maplev-cmaple-state 'maplev-release)))
-    (message "Maple %s %s" maplev-release
-             (cond ((eq status 'locked) "locked")
-                   ((not status) "unlocked")
-                   (status)))))
+    (message "Maple %s" (cond ((eq status 'locked) "locked")
+			      ((not status) "unlocked")
+			      (status)))))
 
 (defun maplev-cmaple--wait (&optional max-cnt no-err)
   "Wait for cmaple to become available.  
@@ -171,7 +162,7 @@ non-nil do not generate an error if time-out occurs."
   (interactive)
   (let ((pmark (process-mark (maplev--cmaple-process)))
         (maplev-mint-info-level maplev-mint-error-level)
-        (comint-input-sender (function maplev-cmaple--send-string)))
+        (comint-input-sender #'maplev-cmaple--send-string))
     ;; Only _new_ input is checked for typos, see comint-send-input.
     ;; We might need something smarter for comint-get-old-input.
     ;; Why does comint-send-input use (line-end-position) instead of
@@ -283,20 +274,12 @@ Reset the filter for PROCESS \(cmaple\) and unlock access."
     (delete-region (point-min) (point-max))))
                  
 
-(defun maplev-cmaple-pop-to-buffer (&optional release)
-  "Pop up a buffer with command line Maple.  Start Maple, if necessary.
-Optional arg RELEASE defaults to `maplev-release'."
-  (interactive
-   (list (if current-prefix-arg
-             (completing-read "Maple release: "
-                              (mapcar #'(lambda (item) (list (car item)))
-                                      maplev-executable-alist)
-                              nil t))))
-  (unless release (setq release maplev-release))
-  (let ((maplev-release release))
-    (maplev--cmaple-process)
-    (pop-to-buffer (maplev--cmaple-buffer))
-    (goto-char (point-max))))
+(defun maplev-cmaple-pop-to-buffer ()
+  "Pop up a buffer with command line Maple.  Start Maple, if necessary."
+  (interactive)
+  (maplev--cmaple-process)
+  (pop-to-buffer (maplev--cmaple-buffer))
+  (goto-char (point-max)))
 
 (defalias 'cmaple 'maplev-cmaple-pop-to-buffer)
 
@@ -360,18 +343,18 @@ PROCESS is the Maple process, STRING its output."
     (setq maplev-cmaple-map map)))
 
 ;;}}}
-;;{{{ mode
+;;{{{ mode definition
 
 (defconst maplev-input-line-keyword
   `((,(concat "^" maplev-cmaple-prompt ".*$") . maplev-input-face))
   "Keyword for font locking input lines in cmaple mode.")
 
-(defun maplev-cmaple-mode (&optional release)
+(defun maplev-cmaple-mode (config)
   "Major mode for interacting with cmaple.
-RELEASE is an id in `maplev-executable-alist'; if omitted the
-first id is used.  This mode has the same commands as
-`comint-mode' plus some additional commands for interacting with
-cmaple.
+CONFIG is an object of type `maplev-config-class.
+
+This mode has the same commands as `comint-mode' plus some
+additional commands for interacting with cmaple.
 
 \\{maplev-cmaple-map}"
   (interactive)
@@ -380,7 +363,9 @@ cmaple.
         ;; GNU Emacs 21
         comint-eol-on-send t
         major-mode 'maplev-cmaple-mode
-        mode-name "Maple")
+        mode-name "Maple"
+	maplev-config config)
+
   (if (< emacs-major-version 22)
       (with-no-warnings
 	(setq comint-use-prompt-regexp-instead-of-fields t))
@@ -390,7 +375,6 @@ cmaple.
   (make-local-variable 'maplev-mint--code-beginning)
   (make-local-variable 'maplev-mint--code-end)
 
-  (maplev-set-release release)
   (use-local-map maplev-cmaple-map)
   (set (make-local-variable 'font-lock-defaults)
        '(maplev-input-line-keyword))
