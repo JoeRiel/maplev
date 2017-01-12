@@ -631,6 +631,7 @@ Key bindings:
 \\{maplev-mode-map}"
   :group 'maplev
   :abbrev maplev-mode-abbrev-table
+  :syntax-table maplev-mode-syntax-table
 
   ;; paragraph filling
   ;;
@@ -714,7 +715,6 @@ Key bindings:
 
   (maplev-add-maple-to-compilation)
 
-  (set-syntax-table maplev-mode-syntax-table)
   (maplev-reset-font-lock)
 
   (when maplev-buttonize-includes-flag
