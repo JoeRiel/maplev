@@ -10,6 +10,7 @@
 (require 'maplev-config)
 
 (eval-when-compile
+  (defvar maplev-config-default)
   (defvar maplev--process-item)
   (defvar maplev-builtin-functions)
   (defvar maplev-cmaple-echoes-flag)
@@ -53,15 +54,16 @@
 
 (defun maplev-view-mode (&optional config)
   "Major mode for displaying the source code of Maple procedures.
-CONFIG is an object of type `maplev-config-class.
+The optional parameter CONFIG is an object of type
+`maplev-config-class'.  The default is `maplev-config-default'.
 
 \\{maplev-view-mode-map}"
   (interactive)
   (kill-all-local-variables)
 
   (setq major-mode 'maplev-view-mode
-	mode-name (format "Maple-View: %s" (oref config :maple))
-	maplev-config config)
+	maplev-config (or config maplev-config-default)
+	mode-name (format "Maple-View: %s" (oref maplev-config :maple)))
 
   (use-local-map maplev-view-mode-map)
 
