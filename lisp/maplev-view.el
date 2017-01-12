@@ -44,13 +44,14 @@
 
 (unless maplev-view-mode-map
   (let ((map (copy-keymap maplev-help-mode-map)))
-    (define-key map [?P] 'self-insert-command)
+    ;; remove P (parent) key-binding
+    (define-key map [?P] nil)
     (setq maplev-view-mode-map map)))
 
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-view-mode (config)
+(defun maplev-view-mode (&optional config)
   "Major mode for displaying the source code of Maple procedures.
 CONFIG is an object of type `maplev-config-class.
 
