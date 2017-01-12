@@ -444,6 +444,11 @@ Otherwise use the default directory of `maplev-cmaple-buffer'."
   :type '(choice string (const :tag "default" nil))
   :group 'maplev-executables)
 
+(defcustom maplev-cmaple-prompt "(**) "
+  "String inserted as prompt in Maple buffer."
+  :type 'string
+  :group 'maplev-executables)
+
 ;;}}}
 ;;{{{   help
 
