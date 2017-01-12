@@ -10,10 +10,11 @@
 (require 'maplev-config)
 
 (eval-when-compile
-  (defvar maplev-builtin-functions)
   (defvar maplev--process-item)
+  (defvar maplev-builtin-functions)
   (defvar maplev-cmaple-echoes-flag)
-  (defvar maplev-help-mode-map))
+  (defvar maplev-help-mode-map)
+  (defvar maplev-mode-syntax-table))
 
 (declare-function event-point "maplev-common")
 (declare-function event-window "maplev-common")
@@ -74,6 +75,7 @@ CONFIG is an object of type `maplev-config-class.
   (make-local-variable 'maplev-mint--code-end)
 
   ;; font-lock support
+  (set-syntax-table maplev-mode-syntax-table)
   (make-local-variable 'font-lock-defaults)
   (make-local-variable 'font-lock-maximum-decoration)
   (maplev-reset-font-lock)
