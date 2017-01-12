@@ -40,11 +40,11 @@
 
    (include-path
     :initarg            :include-path
-    :initform           ""
-    :type               (or string list)
-    :custom             (choice string (repeat string))
+    :initform           nil
+    :type               list
+    :custom             (repeat string)
     :documentation 
-"A string or list of strings of directories to search for files
+"A list of strings of directories to search for files
 specified with $include statements in Maple source files.")
 
    (maple
@@ -128,21 +128,8 @@ with an include-path option, prepended with \" -I \", unless the
 the `:include-path' slot is a list of strings, join them with
 commas separating each string."
     (concat (slot-value config option)
-	    " "
-	    (maplev-include-option config)))
-
-(defmethod maplev-include-option ((config maplev-config-class))
-  "Return the option that sets the include path for maple.
-Use the :include-path slot of CONFIG, an object of type `maplev-config-class'.
-The option includes the -I."
-  (let ((path (oref config :include-path)))
-    (when path
-      (when (listp path)
-	(setq path (mapconcat 'identity path ",")))
-      (setq path (replace-regexp-in-string (rx (or (: bos (* (any " \t\n")))
-						   (: (* (any " \t\n")) eos)))
-					   "" path))
-      (unless (string= path "")
-	(concat "-I " path)))))
+	    (let ((path (oref config :include-path)))
+	      (when path
+		(concat " -I " (mapconcat 'identity path ","))))))
 
 (provide 'maplev-config)
