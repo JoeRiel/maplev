@@ -78,6 +78,7 @@
       ["Goto help node" maplev-help-at-point t]
       ["Goto proc node" maplev-view-at-point t]
       ["Clear history"  maplev-history-clear t]
+      ["Reset"          maplev-help-reset-help t]
       "---"
       ["Separate frame" maplev-tear-off-window
        :active (not (one-window-p t 'here))]
