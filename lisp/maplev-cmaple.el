@@ -83,7 +83,7 @@ restart it."
                             "Maple"
                             buffer
                             cmaple
-			    "-q -c maplev:-Setup()"
+			    "-q --historyfile=none -c maplev:-Setup()"
 			    maple-options))
        'maplev--cmaple-filter)
       (maplev-cmaple-mode config)
