@@ -22,6 +22,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
     ModuleApply := proc(s :: string
                         , { return_string :: truefalse := false }
+                        , { keep_line_numbers :: truefalse := false }
                        )
 
     local expr, opacity, width;
@@ -33,7 +34,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
             buf:-clear();
             expr := parse(s);
-            Dispatch(0, expr, ":=", expr);
+            Dispatch(0, expr, ":=", keep_line_numbers, expr);
 
         finally
             # restore configuration
@@ -54,6 +55,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
     Dispatch := proc(indent :: nonnegint
                      , nomen
                      , rel :: string # = or :=
+                     , keep_line_numbers :: truefalse
                     )
     local expr;
         expr := _rest;
@@ -79,6 +81,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
     PrintModule := proc(indent :: nonnegint
                         , nomen
                         , rel :: string
+                        , keep_line_numbers :: truefalse
                         , m
                        )
     local em, ex, moddef, nm, obj;
@@ -113,6 +116,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
                          , convert(convert(ex,string),name)
                          , ":: static :="
                          , ex
+                         , keep_line_numbers
                         );
                 buf:-newline();
             end do;
@@ -120,7 +124,12 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
             # print exports
             for ex in exports(m) do
                 buf:-newline();
-                Dispatch(indent + indent_amount, ex, ":=", m[ex]);
+                Dispatch(indent + indent_amount
+                         , ex
+                         , ":="
+                         , keep_line_numbers
+                         , m[ex]
+                        );
                 buf:-newline();
             end do;
             # print locals;
@@ -128,7 +137,12 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
                 if ex :: '{procedure,`module`}' then
                     nm := convert(StringTools:-StringSplit(ex,":-")[-1],name);
                     buf:-newline();
-                    Dispatch(indent + indent_amount, nm, ":=", ex);
+                    Dispatch(indent + indent_amount
+                             , nm
+                             , ":="
+                             , keep_line_numbers
+                             , ex
+                            );
                     buf:-newline();
                 end if;
             end do;
@@ -144,6 +158,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
     PrintProc := proc(indent :: nonnegint
                       , nomen
                       , rel :: string
+                      , keep_line_numbers :: truefalse
                       , p
                      )
     description "Print like showstat, but without line numbers";
@@ -170,10 +185,16 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
                        , indent, ""
                        , foldr(StringTools:-RegSubs
                                , str
+                               (* the following are applied in reverse order *)
                                , "^[^ ]* :=" = rep
                                , "\n"      = sprintf("\n%*s", indent, "") # indent
-                               , "\n( +)"  = "\n\\1\\1" # double spaces used for indenting
-                               , "\n ...." = "\n"       # remove statement numbers
+                               , ifelse(keep_line_numbers
+                                        , NULL
+                                        , op([NULL
+                                              , "\n( +)" = "\n\\1\\1" # double spaces used for indenting
+                                              , "\n (....)" = "\n"    # remove numbers
+                                             ])
+                                       )
                               )
                       );
 
@@ -209,6 +230,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
     PrintRecord := proc(indent :: nonnegint
                         , nomen
                         , rel :: string
+                        , keep_line_numbers :: truefalse
                         , rec
                        )
     local ex;
@@ -219,11 +241,13 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
                 Dispatch(indent + indent_amount
                          , ex
                          , ""
+                         , keep_line_numbers
                         );
             else
                 Dispatch(indent + indent_amount
                          , ex
                          , "="
+                         , keep_line_numbers
                          , rec[ex]
                         );
             end if;
