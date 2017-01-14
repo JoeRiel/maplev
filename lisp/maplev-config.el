@@ -41,7 +41,7 @@
    (include-path
     :initarg            :include-path
     :initform           nil
-    :type               list
+    :type               (or list string)
     :custom             (repeat string)
     :documentation 
 "A list of strings of directories to search for files
@@ -119,6 +119,9 @@ made buffer-local.  Return the object."
   (let ((compile (oref maplev-config :compile)))
     (when compile
       (set (make-local-variable 'compile-command) compile)))
+  (let ((path (oref maplev-config :include-path)))
+    (when (stringp path)
+      (oset maplev-config :include-path (list path))))
   maplev-config)
 
 (defmethod maplev-get-option-with-include ((config maplev-config-class) option)
