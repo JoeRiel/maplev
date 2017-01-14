@@ -25,11 +25,14 @@
 (declare-function maplev-cmaple--lock-access "maplev-cmaple")
 (declare-function maplev-cmaple--ready "maplev-cmaple")
 (declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
+(declare-function maplev-history--stack-current "maplev-history")
 (declare-function maplev-history--stack-process "maplev-history")
 (declare-function maplev-history-clear "maplev-history")
 (declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-indent-buffer "maplev-indent")
+(declare-function maplev-mode "maplev")
 (declare-function maplev-reset-font-lock "maplev")
+(declare-function maplev-cmaple-direct "maplev-cmaple")
 
 
 ;;{{{ mode map
@@ -47,6 +50,8 @@
   (let ((map (copy-keymap maplev-help-mode-map)))
     ;; remove P (parent) key-binding
     (define-key map [?P] nil)
+    ;; (define-key map [?v] 'maplev-view-toggle-view)
+    (define-key map [?g] 'maplev-view-goto-source)
     (setq maplev-view-mode-map map)))
 
 ;;}}}
@@ -62,7 +67,7 @@ The optional parameter CONFIG is an object of type
   (kill-all-local-variables)
 
   (setq major-mode 'maplev-view-mode
-	maplev-config (or config maplev-config-default)
+	maplev-config (or config maplev-config maplev-config-default)
 	mode-name (format "Maple-View: %s" (oref maplev-config :maple)))
 
   (use-local-map maplev-view-mode-map)
@@ -172,6 +177,85 @@ PROCESS calls this filter.  STRING is the Maple procedure."
   (maplev-indent-buffer)
   (set-buffer-modified-p nil)
   (font-lock-fontify-buffer))
+
+;;}}}
+
+;;{{{ view source
+
+(defun maplev-view-toggle-view ()
+  "Toggle the view of the code between showstat and file."
+  (interactive))
+
+(defun maplev-view--show-source (proc)
+  "Display the source of Maple procedure PROC."
+  (let ((file-line (maplev-view--get-source-and-line proc)))
+    (when file-line
+      (let ((file (car file-line))
+	    (line (cdr file-line)))
+	(delete-region (point-min) (point-max))
+	(insert-file-contents file)
+	(goto-char (point-min))
+	(forward-line (1- line))))))
+    
+(defun maplev-view-goto-source ( download )
+  "Goto the source of the current Maple procedure.
+If optional DOWNLOAD is non-nil and the source file does not
+exist and the environment variable MAPLE_ROOT is assigned and
+ends in /main, use perforce to copy the file from the respository
+to the expected location under MAPLE_ROOT."
+  
+  (interactive "P")
+  (let* ((proc (maplev-history--stack-current))
+	 (file-line (maplev-view--get-source-and-line proc)))
+    (if file-line
+	(let* ((file (car file-line))
+	       (line (cdr file-line))
+	       (base file)
+	       mroot file-exists)
+	  (when (and (= (aref file 0) ?>)
+		     (setq mroot (getenv "MAPLE_ROOT"))
+		     (setq base (substring file 1)))
+	    (setq file (concat mroot "/" base)))
+
+	  (if (not (file-exists-p file))
+	      (if download
+		  (if (setq mroot (or mroot (getenv "MAPLE_ROOT")))
+		      (if (string= "main" (file-name-nondirectory mroot))
+			  (let ((cmd (format "p4 print -q -k -o %s //wmi/projects/mapleV/main/%s"
+					     file base))
+				(dir (file-name-directory file)))
+			    (unless (file-exists-p dir)
+			      (make-directory dir 'parents))
+			    (message "Downloading file from perforce...")
+			    (unless (zerop (call-process-shell-command cmd))
+			      (if (file-exists-p file) (delete-file file))
+			      (error "Problem downloading file %s" file)))
+			(error "Can only download from/to main"))
+		    (error "Environment variable MAPLE_ROOT is not assigned"))
+		(error "File %s does not exist" file)))
+
+	  ;; Open the file
+	  (find-file file)
+	  (if (equal major-mode 'fundamental-mode)
+	      (maplev-mode))
+	  (goto-char (point-min))
+	  (forward-line (1- line)))
+      (error "No line-info data for %s" proc))))
+
+(defun maplev-view--get-source-and-line (proc &optional download)
+  "Return the filename and line number of the source for Maple procedure PROC.
+If found, they are returned as a cons-cell \(file \. line\),
+otherwise nil is returned."
+  (let* ((cmd (format "lprint(maplev:-GetSource(\"%s\",'download'=%s)):"
+		      proc
+		      (if download "true" "false")))
+	 (res (maplev-cmaple-direct cmd 'delete))
+	  file line)
+    (when (and (not (string= res "NULL"))
+	       (string-match "^\\[\"\\([^\"]*\\)\", \\([0-9]+\\)" res))
+      (setq file (match-string 1 res)
+	    line (string-to-number (match-string 2 res)))
+      (cons file line))))
 
 ;;}}}
 
