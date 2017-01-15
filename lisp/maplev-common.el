@@ -160,7 +160,7 @@ the Nth preceding defun."
   "Put mark at end of this defun, point at beginning.
 The defun marked is the one that contains point."
   (interactive)
-  (push-mark (point))
+  (push-mark)
   (beginning-of-line)
   (if (looking-at maplev--defun-begin-re) (goto-char (match-end 0)))
   (let ((count 1)
