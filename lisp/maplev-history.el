@@ -31,7 +31,7 @@ It is local to the `maplev-help-mode' and `maplev-view-mode' buffers.")
   "The name of a function that processes items on `maplev-history--stack'.
 It is local to the `maplev-help-mode' and `maplev-view-mode' buffers.")
 
-;;{{{   Module
+;;{{{ Module
 
 ;; Implement a stack-like structure for providing a history mechanism
 ;; for the Help and Proc modes.  The stack is a list.  The car of the
@@ -78,7 +78,7 @@ Do not change the pointer."
   (nth (car maplev-history--stack) (cdr maplev-history--stack)))
 
 ;;}}}
-;;{{{   Commands
+;;{{{ Commands
 
 ;;; The following commands process the history items.  The symbol
 ;;; `maplev--process-item' should be buffer local and assigned the
