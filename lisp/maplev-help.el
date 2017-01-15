@@ -95,16 +95,17 @@
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-help-mode (config)
+(defun maplev-help-mode (&optional config)
   "Major mode for displaying Maple help pages.
-CONFIG is an object of type `maplev-config-class.
+The optional CONFIG argument is an object of type `maplev-config-class.
+Its default is `maplev-config' or `maple-config-default', in that order.
 
 \\{maplev-help-mode-map}"
   (interactive)
   (kill-all-local-variables)
   (setq major-mode 'maplev-help-mode
-	mode-name (format "Maple-Help: %s" (oref config :maple))
-	maplev-config config)
+	maplev-config (or config maplev-config maplev-config-default)
+	mode-name (format "Maple-Help: %s" (oref maplev-config :maple)))
 
   (use-local-map maplev-help-mode-map)
   
