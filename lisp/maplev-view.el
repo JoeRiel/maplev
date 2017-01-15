@@ -73,9 +73,9 @@
 
   (setq buffer-read-only t))
 
-(defun maplev-view-setup (config)
+(defun maplev-view-setup (&optional config)
   "Unless already assigned, set `major-mode' to `maplev-view-mode'.
-CONFIG is an object of type `maplev-config-class'."
+Optional CONFIG is an object of type `maplev-config-class'."
   (unless (eq major-mode 'maplev-view-mode)
     (maplev-view-mode))
   (setq maplev-config (or config maplev-config maplev-config-default)
