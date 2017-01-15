@@ -37,12 +37,6 @@
 
 ;;{{{ mode map
 
-;; The mode map for maplev-view-map is identical to that for
-;; maplev-help-mode, with one exception: the parent function is not
-;; needed, so its key is redefined to self-insert (which generates an
-;; error, as does any other insertion, because the buffer if
-;; read-only).
-
 (defvar maplev-view-mode-map nil
   "Keymap used in `maplev-view-mode'.")
 
@@ -57,23 +51,13 @@
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-view-mode (&optional config)
+(define-derived-mode maplev-view-mode fundamental-mode
   "Major mode for displaying the source code of Maple procedures.
-The optional parameter CONFIG is an object of type
-`maplev-config-class'.  The default is `maplev-config-default'.
-
 \\{maplev-view-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-
-  (setq major-mode 'maplev-view-mode
-	maplev-config (or config maplev-config maplev-config-default)
-	mode-name (format "Maple-View: %s" (oref maplev-config :maple)))
-
-  (use-local-map maplev-view-mode-map)
-
-  (set (make-local-variable 'maplev--process-item)
-       (function maplev--proc-process))
+  :syntax-table maplev-mode-syntax-table
+  :abbrev-table nil
+  
+  (set (make-local-variable 'maplev--process-item) #'maplev--proc-process)
 
   (make-local-variable 'maplev-history--stack) ; set up the stack
   (maplev-history-clear)
@@ -83,13 +67,19 @@ The optional parameter CONFIG is an object of type
   (make-local-variable 'maplev-mint--code-end)
 
   ;; font-lock support
-  (set-syntax-table maplev-mode-syntax-table)
   (make-local-variable 'font-lock-defaults)
   (make-local-variable 'font-lock-maximum-decoration)
   (maplev-reset-font-lock)
 
-  (setq buffer-read-only t)
-  (run-hooks 'maplev-view-mode-hook))
+  (setq buffer-read-only t))
+
+(defun maplev-view-setup (config)
+  "Unless already assigned, set `major-mode' to `maplev-view-mode'.
+CONFIG is an object of type `maplev-config-class'."
+  (unless (eq major-mode 'maplev-view-mode)
+    (maplev-view-mode))
+  (setq maplev-config (or config maplev-config maplev-config-default)
+	mode-name (format "Maple-View: %s" (oref maplev-config :maple))))
 
 ;;}}}
 ;;{{{ mode functions
@@ -126,8 +116,7 @@ If optional arg HIDE is non-nil do not display buffer."
       (message "Procedure \`%s\' builtin." proc)
     (let ((config maplev-config))
       (with-current-buffer (get-buffer-create (maplev--proc-buffer))
-	(unless (eq major-mode #'maplev-view-mode)
-	  (maplev-view-mode config))
+	(maplev-view-setup config)
 	(maplev-history--stack-process proc hide)))))
 
 (defun maplev--proc-process (proc)
@@ -236,7 +225,7 @@ to the expected location under MAPLE_ROOT."
 
 	  ;; Open the file
 	  (find-file file)
-	  (if (equal major-mode 'fundamental-mode)
+	  (if (eq major-mode 'fundamental-mode)
 	      (maplev-mode))
 	  (goto-char (point-min))
 	  (forward-line (1- line)))
