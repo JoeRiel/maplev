@@ -61,7 +61,7 @@
   :group 'maplev
   :type 'object)
 
-;;{{{   comments
+;;{{{ (*) comments
 
 (defcustom maplev-comment-column 40
   "Column for inline comments.
@@ -86,7 +86,7 @@ Use \\[indent-for-comment] to insert or align an inline comment."
   :group 'maplev-comments)
 
 ;;}}}
-;;{{{   declarations
+;;{{{ (*) declarations
 
 (defcustom maplev-var-declaration-symbol " :: "
   "Separator inserted between declared variable and type."
@@ -146,7 +146,7 @@ either `maplev-add-declaration-leading-comma' or
   :group 'maplev-indentation)
 
 ;;}}}
-;;{{{   templates
+;;{{{ (*) templates
 
 (defcustom maplev-copyright-owner "John Q. Public"
   "Copyright owner inserted in the copyright string by `maplev--template-proc-module'."
@@ -194,7 +194,7 @@ double quote.  Procbody, alas, does not handle a double quote."
   :group 'maplev-templates)
 
 ;;}}}
-;;{{{   completion
+;;{{{ (*) completion
 
 (defcustom maplev-completion-longdelim-p nil
   "If non-nil use the long delimiter when completing a Maple control structure.
@@ -205,7 +205,7 @@ than the long delimiter is never used."
   :group 'maplev-completions)
 
 ;;}}}
-;;{{{   miscellaneous
+;;{{{ (*) miscellaneous
 
 ;; Leading commas
 
@@ -259,7 +259,7 @@ an elisp file.  No error occurs if the file does not exist."
   :group 'maplev-misc)
 
 ;;}}}
-;;{{{   align rules
+;;{{{ (*) align rules
 
 ;; Define the maplev alignment rules.
 ;; Align the assignment operator (`:='), equals signs,
@@ -330,7 +330,7 @@ See the documentation for `align-exclude-rules-list' for more info."
       :group 'maplev-align)))
 
 ;;}}}
-;;{{{   buffers
+;;{{{ (*) buffers
 
 (defcustom maplev-pop-up-frames-flag nil
   "Non-nil means help pages and procedure listings start in a separate frame."
@@ -349,7 +349,7 @@ See the documentation for `align-exclude-rules-list' for more info."
   :group 'maplev-buffer)
 
 ;;}}}
-;;{{{   maple setup
+;;{{{ (*) maple setup
 
 (defcustom maplev-start-options (list "-q")
   "List of Maple command line options.  Each item is a string."
@@ -368,7 +368,7 @@ Otherwise use the default directory of `maplev-cmaple-buffer'."
   :group 'maplev-executables)
 
 ;;}}}
-;;{{{   help
+;;{{{ (*) help
 
 (defcustom maplev-help-port 3141
   "Port number used to communicate to a Maple help server."
