@@ -1,4 +1,6 @@
 #LINK ../Makefile
+#LINK .maplev
+
 ##MODULE maplev
 ##HALFLINE module used with Emacs maplev mode
 
