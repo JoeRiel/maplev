@@ -1,3 +1,4 @@
+
 ;;; maplev-cmaple.el --- Communicate with Maple process
 
 ;;; Commentary:
@@ -86,7 +87,7 @@ restart it."
 			    "-q --historyfile=none -c maplev:-Setup()"
 			    maple-options))
        'maplev--cmaple-filter)
-      (maplev-cmaple-mode config)
+      (maplev-cmaple-setup config)
       (maplev-cmaple--lock-access t)
       ;; (comint-simple-send process init-code
       (maplev-cmaple--send-end-notice process)
@@ -353,22 +354,17 @@ PROCESS is the Maple process, STRING its output."
   `((,(concat "^" maplev-cmaple-prompt ".*$") . maplev-input-face))
   "Keyword for font locking input lines in cmaple mode.")
 
-(defun maplev-cmaple-mode (config)
+(define-derived-mode maplev-cmaple-mode comint-mode
   "Major mode for interacting with cmaple.
-CONFIG is an object of type `maplev-config-class.
 
 This mode has the same commands as `comint-mode' plus some
 additional commands for interacting with cmaple.
 
 \\{maplev-cmaple-map}"
-  (interactive)
-  (comint-mode)
   (setq comint-prompt-regexp (concat "^\\(" maplev-cmaple-prompt "\\)+ *")
         ;; GNU Emacs 21
         comint-eol-on-send t
-        major-mode 'maplev-cmaple-mode
-        mode-name "Maple"
-	maplev-config config)
+        mode-name "Maple")
 
   (if (< emacs-major-version 22)
       (with-no-warnings
@@ -379,14 +375,20 @@ additional commands for interacting with cmaple.
   (make-local-variable 'maplev-mint--code-beginning)
   (make-local-variable 'maplev-mint--code-end)
 
-  (use-local-map maplev-cmaple-map)
   (set (make-local-variable 'font-lock-defaults)
        '(maplev-input-line-keyword))
   (set (make-local-variable 'comint-process-echoes)
        maplev-cmaple-echoes-flag)
   (make-local-variable 'maplev-cmaple-prompt)
-  (font-lock-mode 1)
-  (run-hooks 'maplev-cmaple-mode-hook))
+  (font-lock-mode 1))
+
+(defun maplev-cmaple-setup (config)
+  "Set `major-mode' to `maplev-cmaple-mode'.
+CONFIG is an object of type `maplev-config-class."
+  (maplev-cmaple-mode)
+  (setq maplev-config config))
+
+  
 
 ;;}}}
 
