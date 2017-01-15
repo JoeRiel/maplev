@@ -110,6 +110,7 @@
 (defun maplev-mint-mode (code-buffer config)
   "Major mode for displaying Mint output.
 CODE-BUFFER is the buffer that contains the source code.
+CONFIG is an object of class `maplev-config-class'.
 \\{maplev-mint-mode-map}"
   (interactive)
   (kill-all-local-variables)
@@ -539,7 +540,7 @@ Return exit code of mint."
 				       " ")))
       (delete-region (point-min) eoi)
       ;; Display Mint output
-      (maplev-mint-mode code-buffer (oref config :project-root))
+      (maplev-mint-mode code-buffer config)
       (setq lines (if (= (buffer-size) 0)
                       0
                     (count-lines (point-min) (point-max))))
