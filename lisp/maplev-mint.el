@@ -150,7 +150,7 @@ Return position of error in Maple source."
       (goto-char pos)
       ;; The location of the error is indicated by the caret
       ;; in the Mint output.
-      (when (re-search-backward "\\^" (line-beginning-position) t)
+      (when (search-backward "^" (line-beginning-position) t)
         (setq col (current-column))
         (forward-line -1)
         (re-search-forward  "[0-9]+")
@@ -450,51 +450,51 @@ When called interactively, POS is position where point is."
           ;;
           (cond
            ;; Jump to the start of a procedure in the source.
-           ((equal prop 'proc)
+           ((eq prop 'proc)
             (maplev-mint--goto-source-proc pos))
            ;;
            ;; Jump to the location of an error in the source code.
-           ((equal prop 'error)
+           ((eq prop 'error)
             (maplev-mint--goto-error pos))
            ;;
            ;; Remove unused args from argument list.
-           ((equal prop 'unused-arg)
+           ((eq prop 'unused-arg)
             (when (maplev-mint-query "Delete `%s' from argument list? " string)
               (maplev-mint--goto-source-proc pos)
               (maplev-delete-vars (maplev--scan-lists -1) (point) vars)))
            ;;
            ;; Remove unused local variables from local declaration.
-           ((equal prop 'unused-local)
+           ((eq prop 'unused-local)
             (when (maplev-mint-query "Delete `%s' from local statement? " string)
               (maplev-mint--goto-source-proc pos)
               (maplev-delete-declaration "local" vars)))
            ;;
            ;; Remove repeated args from argument list.
-           ((equal prop 'repeat-arg)
+           ((eq prop 'repeat-arg)
             (when (maplev-mint-query "Remove duplicate `%s' from parameters? " string)
               (maplev-mint--goto-source-proc pos)
               (maplev-delete-vars (maplev--scan-lists -1) (point) vars 1)))
            ;;
            ;; Remove repeated local variables from local declaration.
-           ((equal prop 'repeat-local)
+           ((eq prop 'repeat-local)
             (when (maplev-mint-query "Remove duplicate `%s' from local statement? " string)
               (maplev-mint--goto-source-proc pos)
               (maplev-delete-declaration "local" vars 1)))
            ;;
            ;; Declaration of undeclared locals variables.
-           ((equal prop 'undecl-local)
+           ((eq prop 'undecl-local)
             (when (maplev-mint-query "Add `%s' to local statement? " string)
               (maplev-mint--goto-source-proc pos)
               (maplev-add-declaration "local" string)))
            ;;
            ;; Declaration of undeclared global variables.
-           ((equal prop 'undecl-global)
+           ((eq prop 'undecl-global)
             (when (maplev-mint-query "Add `%s' to global statement? " string)
               (maplev-mint--goto-source-proc pos)
               (maplev-add-declaration "global" string)))
            ;;
            ;; Goto line
-           ((equal prop 'goto-line)
+           ((eq prop 'goto-line)
             (maplev-mint--goto-source-line pos))
            )))))
 
@@ -811,7 +811,7 @@ declarations, otherwise it is inserted at the end."
                 (if (< (point) end)
                     (insert (format "%s," var))
                   (forward-line -1)
-                  (re-search-forward ";" (line-end-position))
+                  (search-forward ";" (line-end-position))
                   (replace-match ",")
                   (forward-line)
                   (insert (format "%s;" var)))
@@ -874,7 +874,7 @@ defaults to the identifier point is on."
                      ;; It seems bad from to use types one one-line; regardless,
                      ;; `maplev-add-declaration-one-line' currently does not
                      ;; handle types.
-                     (unless (equal maplev-add-declaration-function 'maplev-add-declaration-one-line)
+                     (unless (eq maplev-add-declaration-function 'maplev-add-declaration-one-line)
                        (let ((type (read-string
                                     "Type (empty for no type): "
                                     nil
