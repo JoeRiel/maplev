@@ -118,7 +118,7 @@
   (maplev-mint-fontify-buffer))
 
 (defun maplev-mint-setup (code-buffer config)
-  "Unless already assigned, setu `major-mode' to `maplev-mint-mode'.
+  "Unless already assigned, set `major-mode' to `maplev-mint-mode'.
 Set `maplev-mint--code-buffer' to CODE-BUFFER, the buffer that
 contains the source code.  Set `maplev-config' to CONFIG."
   (unless (eq major-mode 'maple-mint-mode)
