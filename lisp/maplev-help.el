@@ -95,22 +95,12 @@
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-help-mode (&optional config)
+(define-derived-mode maplev-help-mode fundamental-mode
   "Major mode for displaying Maple help pages.
-The optional CONFIG argument is an object of type `maplev-config-class.
-Its default is `maplev-config' or `maple-config-default', in that order.
 
 \\{maplev-help-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-  (setq major-mode 'maplev-help-mode
-	maplev-config (or config maplev-config maplev-config-default)
-	mode-name (format "Maple-Help: %s" (oref maplev-config :maple)))
 
-  (use-local-map maplev-help-mode-map)
-  
-  (set (make-local-variable 'maplev--process-item)
-       (function maplev--help-process))
+  (set (make-local-variable 'maplev--process-item) #'maplev--help-process)
 
   (make-local-variable 'maplev-history--stack) ; set up the stack
   (maplev-history-clear)
@@ -119,8 +109,17 @@ Its default is `maplev-config' or `maple-config-default', in that order.
   (set (make-local-variable 'parse-sexp-lookup-properties) t)
 
   (maplev-help-fontify-node)
-  (setq buffer-read-only t)
-  (run-hooks 'maplev-help-mode-hook))
+  (setq buffer-read-only t))
+
+(defun maplev-help-setup (&optional config)
+  "Unless already assigned, set `major-mode' to `maplev-help-mode'.
+The optional CONFIG argument is an object of type `maplev-config-class.
+Its default is `maplev-config' or `maple-config-default', in that order."
+  (unless (eq major-mode 'maplev-help-mode)
+    (maplev-help-mode))
+  (setq maplev-config (or config maplev-config maplev-config-default)
+	mode-name (format "Maple-Help: %s" (oref maplev-config :maple))))
+  
 
 ;;}}}
 ;;{{{ mode functions
@@ -168,8 +167,7 @@ If HIDE is non-nil, do not bring buffer to front."
 	   (maplev-help-standard-help topic))
       (let ((config maplev-config))
 	(with-current-buffer (get-buffer-create (maplev--help-buffer))
-	  (unless (eq major-mode 'maplev-help-mode)
-	    (maplev-help-mode config))
+	  (maplev-help-setup config)
 	  ;; Push TOPIC onto history stack
 	  (maplev-history--stack-process topic hide)))))
 
