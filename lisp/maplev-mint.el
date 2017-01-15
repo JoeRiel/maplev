@@ -107,22 +107,24 @@
 ;;}}}
 ;;{{{ mode definition
 
-(defun maplev-mint-mode (code-buffer config)
+(define-derived-mode maplev-mint-mode fundamental-mode
   "Major mode for displaying Mint output.
-CODE-BUFFER is the buffer that contains the source code.
-CONFIG is an object of class `maplev-config-class'.
 \\{maplev-mint-mode-map}"
-  (interactive)
-  (kill-all-local-variables)
-  (use-local-map maplev-mint-mode-map)
-  (setq major-mode 'maplev-mint-mode
-        mode-name "Mint"
-	maplev-config config)
-  (set-syntax-table maplev-mint-mode-syntax-table)
-  (set (make-local-variable 'maplev-mint--code-buffer) code-buffer)
-  (maplev-mint-fontify-buffer)
-  (setq buffer-read-only t)
-  (run-hooks 'maplev-mint-mode-hook))
+  :syntax-table maplev-mint-mode-syntax-table
+  :abbrev-table nil
+  (setq mode-name "Mint"
+	buffer-read-only t)
+  (make-local-variable 'maplev-mint--code-buffer)
+  (maplev-mint-fontify-buffer))
+
+(defun maplev-mint-setup (code-buffer config)
+  "Unless already assigned, setu `major-mode' to `maplev-mint-mode'.
+Set `maplev-mint--code-buffer' to CODE-BUFFER, the buffer that
+contains the source code.  Set `maplev-config' to CONFIG."
+  (unless (eq major-mode 'maple-mint-mode)
+    (maplev-mint-mode))
+  (setq maplev-config config
+	maplev-mint--code-buffer code-buffer))
 
 ;;}}}
 ;;{{{ mode functions
@@ -540,7 +542,7 @@ Return exit code of mint."
 				       " ")))
       (delete-region (point-min) eoi)
       ;; Display Mint output
-      (maplev-mint-mode code-buffer config)
+      (maplev-mint-setup code-buffer config)
       (setq lines (if (= (buffer-size) 0)
                       0
                     (count-lines (point-min) (point-max))))
