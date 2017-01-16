@@ -53,6 +53,13 @@
   (when (eq major-mode 'maplev-mode)
     (maplev-reset-font-lock)))
 
+(defun maplev-maple-root (version)
+  "Return the maple-root corresponding to VERSION.
+This uses `maplev-source-alist'."
+  (let ((data (assoc version maplev-source-alist)))
+    (when data
+      (nth 1 data))))
+
 ;;}}}
 ;;{{{ Mark Maple procedures
 
