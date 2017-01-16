@@ -128,7 +128,6 @@ includes the decimal and fractional part; for example, \"2016.2\".
 
 MAPLE-ROOT is the directory of the installed Maple sandbox;
 for example, \"/home/joe/maplesoft/sandbox/2016.2\".
-The path corresponds to the server on which Emacs is running.
 
 PERFORCE-DIR is the Perforce directory, in depot syntax; for
 example, \"//wmi/projects/Maple/2016.2\".  It is used when a
