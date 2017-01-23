@@ -114,32 +114,21 @@ either `maplev-add-declaration-leading-comma' or
   :group 'maplev-declarations)
 
 
-
-
 ;;}}}
 ;;{{{ (*) developers
 
 (defcustom maplev-source-alist nil
-  "Alist mapping a Maple version to the library and perforce source locations.
-Each element has the form \(version maple-root perforce-dir\).
+  "Alist mapping a Maple version to the library source.
+Each element has the form \(version maple-root\).
 
 VERSION comes from the string returned by kernelopts(version) and 
 includes the decimal and fractional part; for example, \"2016.2\".
 
 MAPLE-ROOT is the directory of the installed Maple sandbox;
-for example, \"/home/joe/maplesoft/sandbox/2016.2\".
-
-PERFORCE-DIR is the Perforce directory, in depot syntax; for
-example, \"//wmi/projects/Maple/2016.2\".  It is used when a
-requested source file is not present in MAPLE-ROOT.  If nil,
-files will not be pulled from perforce."
+for example, \"/home/joe/maplesoft/sandbox/2016.2\"."
   :group 'maplev-developer
   :type '(alist :key-type   (string :tag "Version")
-		:value-type (group
-			     (directory :tag "Maple root")
-			     (radio :tag "Perforce depot" 
-				    (const :tag "none" nil)
-				    (directory :tag "Directory")))))
+		:value-type (directory :tag "Maple root")))
   
 
 ;;}}}

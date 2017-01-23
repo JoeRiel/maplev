@@ -58,7 +58,7 @@
 This uses `maplev-source-alist'."
   (let ((data (assoc version maplev-source-alist)))
     (when data
-      (nth 1 data))))
+      (cdr data))))
 
 ;;}}}
 ;;{{{ Mark Maple procedures
