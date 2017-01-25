@@ -115,23 +115,6 @@ either `maplev-add-declaration-leading-comma' or
 
 
 ;;}}}
-;;{{{ (*) developers
-
-(defcustom maplev-source-alist nil
-  "Alist mapping a Maple version to the library source.
-Each element has the form \(version maple-root\).
-
-VERSION comes from the string returned by kernelopts(version) and 
-includes the decimal and fractional part; for example, \"2016.2\".
-
-MAPLE-ROOT is the directory of the installed Maple sandbox;
-for example, \"/home/joe/maplesoft/sandbox/2016.2\"."
-  :group 'maplev-developer
-  :type '(alist :key-type   (string :tag "Version")
-		:value-type (directory :tag "Maple root")))
-  
-
-;;}}}
 ;;{{{ (*) indentation
 
 (defcustom maplev-indent-level 4
