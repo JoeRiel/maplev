@@ -1,4 +1,3 @@
-/.gitignore~
 /maplev
 /maplev.aux
 /maplev.cp
@@ -6,13 +5,11 @@
 /maplev.dvi
 /maplev.fn
 /maplev.fns
-/maplev.html
 /maplev.ky
 /maplev.kys
 /maplev.log
 /maplev.pdf
 /maplev.pg
-/maplev.texi~
 /maplev.toc
 /maplev.tp
 /maplev.vr

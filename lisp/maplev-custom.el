@@ -7,6 +7,7 @@
 ;;
 
 (require 'align)
+(require 'maplev-config)
 
 ;;{{{ Group definitions
 
@@ -16,6 +17,10 @@
 
 (defgroup maplev-declarations nil
   "Customizations for declaring variables."
+  :group 'maplev)
+
+(defgroup maplev-developer nil
+  "Customization group for Maple developers."
   :group 'maplev)
 
 (defgroup maplev-faces nil
@@ -55,89 +60,12 @@
 ;;}}}
 ;;{{{ Configurable options
 
-;;{{{   executables
+(defcustom maplev-config-default (maplev-config-class "maplev-config")
+  "This `maplev-config-class' object holds default values for the variable `maplev-config'."
+  :group 'maplev
+  :type 'object)
 
-(defcustom maplev-executable-alist
-  '(("default" "maple" nil "mint"))
-  
-  "Association list specifying the available executables to
-permit selecting different installations of Maple.  Each sublist
-has the form \(ID MAPLE MAPLE-INIFILE MINT\).
-
-ID is a string used to select and identify the sublist; its value
-is arbitrary but will be displayed in the mode-line of the maple
-buffer.  The id of the first entry in this list is used as the
-default.
-
-MAPLE is the command that launches the tty version of Maple.  
-
-MAPLE-INIFILE is the maple initialization file for running Maple under Emacs;
-if nil the default initialization file is used, if it exists.
-
-MINT is the command to launch Mint, the Maple syntax checker.
-
-To determine the name and path to the Maple and Mint executables,
-launch Maple and execute \'kernelopts\(mapledir\)\', that
-returns the directory in which Maple is installed.
-
-On Linux or Mac, the shell commands are locate in the \`bin\'
-subdirectory of the installed directory and are named \`maple\'
-and \`mint\'.
-
-On Windows the shell commands are usually in the \`bin.wnt\'
-subdirectory of the installed directory and are named
-\`cmapleXXXX.exe\' and \`mintXXXX.exe\', where XXXX is the Maple
-release.  When entering the path to the binaries, use forward
-slashes (/) as the directory separators."
-
-  :type '(repeat (list (string :tag "Identifier")
-                       (file   :tag "Maple Executable")
-                       (choice :tag "Maple Initialization File"
-                               file (const :tag "none" nil))
-                       (file   :tag "Mint Executable ")))
-  :group 'maplev-executables)
-
-(defcustom maplev-mint-info-level 3
-  "Integer controlling amount of information that Mint outputs."
-  :type '(choice (const :tag "no info" 0)
-                 (const :tag "severe errors" 1)
-                 (const :tag "+ serious errors" 2)
-                 (const :tag "+ warnings" 3)
-                 (const :tag "full report" 4))
-  :group 'maplev-mint)
-
-(defcustom maplev-mint-error-level 1
-  "Integer controlling Mint error checking in Maple input."
-  :type '(choice (const :tag "no info" 0)
-                 (const :tag "severe errors" 1)
-                 (const :tag "+ serious errors" 2)
-                 (const :tag "+ warnings" 3)
-                 (const :tag "full report" 4))
-  :group 'maplev-mint)
-
-(defcustom maplev-mint-start-options (list "-q" "-w 200")
-  "List of mint command line options.
-Do not include the info level or the include path,
-they are handled by `maplev-mint-info-level' and `maplev-include-path'.
-The line-width option (-w) is used to ensure that a reference to 
-an included file appears on a single line."
-  :type 'list
-  :group 'maplev-mint)
-
-(defcustom maplev-include-path nil
-  "List of directories to search for files to include.
-Each element is a string (directory name) or nil.
-The directories are passed to maple and to mint
-via the \"-I\" option; they are searched for files
-specified in Maple preprocessor $include directives."
-  :type '(choice (const nil) (repeat string))
-  :group 'maplev-executables
-  :group 'maplev-mint)
-
-(make-variable-buffer-local 'maplev-include-path)
-
-;;}}}
-;;{{{   comments
+;;{{{ (*) comments
 
 (defcustom maplev-comment-column 40
   "Column for inline comments.
@@ -162,7 +90,7 @@ Use \\[indent-for-comment] to insert or align an inline comment."
   :group 'maplev-comments)
 
 ;;}}}
-;;{{{   declarations
+;;{{{ (*) declarations
 
 (defcustom maplev-var-declaration-symbol " :: "
   "Separator inserted between declared variable and type."
@@ -186,10 +114,8 @@ either `maplev-add-declaration-leading-comma' or
   :group 'maplev-declarations)
 
 
-
-
 ;;}}}
-;;{{{   indentation
+;;{{{ (*) indentation
 
 (defcustom maplev-indent-level 4
   "Indentation of Maple statements with respect to containing block."
@@ -222,7 +148,7 @@ either `maplev-add-declaration-leading-comma' or
   :group 'maplev-indentation)
 
 ;;}}}
-;;{{{   templates
+;;{{{ (*) templates
 
 (defcustom maplev-copyright-owner "John Q. Public"
   "Copyright owner inserted in the copyright string by `maplev--template-proc-module'."
@@ -270,7 +196,7 @@ double quote.  Procbody, alas, does not handle a double quote."
   :group 'maplev-templates)
 
 ;;}}}
-;;{{{   completion
+;;{{{ (*) completion
 
 (defcustom maplev-completion-longdelim-p nil
   "If non-nil use the long delimiter when completing a Maple control structure.
@@ -281,7 +207,7 @@ than the long delimiter is never used."
   :group 'maplev-completions)
 
 ;;}}}
-;;{{{   miscellaneous
+;;{{{ (*) miscellaneous
 
 ;; Leading commas
 
@@ -335,7 +261,7 @@ an elisp file.  No error occurs if the file does not exist."
   :group 'maplev-misc)
 
 ;;}}}
-;;{{{   align rules
+;;{{{ (*) align rules
 
 ;; Define the maplev alignment rules.
 ;; Align the assignment operator (`:='), equals signs,
@@ -406,7 +332,7 @@ See the documentation for `align-exclude-rules-list' for more info."
       :group 'maplev-align)))
 
 ;;}}}
-;;{{{   buffers
+;;{{{ (*) buffers
 
 (defcustom maplev-pop-up-frames-flag nil
   "Non-nil means help pages and procedure listings start in a separate frame."
@@ -425,7 +351,7 @@ See the documentation for `align-exclude-rules-list' for more info."
   :group 'maplev-buffer)
 
 ;;}}}
-;;{{{   maple setup
+;;{{{ (*) maple setup
 
 (defcustom maplev-start-options (list "-q")
   "List of Maple command line options.  Each item is a string."
@@ -438,8 +364,13 @@ Otherwise use the default directory of `maplev-cmaple-buffer'."
   :type '(choice string (const :tag "default" nil))
   :group 'maplev-executables)
 
+(defcustom maplev-cmaple-prompt "(**) "
+  "String inserted as prompt in Maple buffer."
+  :type 'string
+  :group 'maplev-executables)
+
 ;;}}}
-;;{{{   help
+;;{{{ (*) help
 
 (defcustom maplev-help-port 3141
   "Port number used to communicate to a Maple help server."

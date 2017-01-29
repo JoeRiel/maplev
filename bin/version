@@ -64,7 +64,13 @@ fi
 #}}}
 #{{{ Update source files
 
-# Update lisp
+#{{{ * VERSION
+
+file="VERSION"
+[ -z "$version" ] || echo "${version}" > ${file}
+
+#}}}
+#{{{ * lisp/maplev.el
 
 file="lisp/maplev.el"
 [ -z "$version" ] && echo -ne "$file:\t"
@@ -73,31 +79,27 @@ sed $sed_opt "
 /defconst maplev-version/{$sed_cmd}
 " "$file"
 
-# Update texinfo
-
-file="doc/maplev.texi"
+#}}}
+#{{{ * README.md
+file="README.md"
 [ -z "$version" ] && echo -ne "$file:\t"
-sed $sed_opt "/^@set VERSION /$sed_cmd" "$file"
+sed $sed_opt "/^\*\*\Version /$sed_cmd" "$file"
 
-file="doc/version.texi"
+#}}}
+#{{{ * run-installer
+
+file="run-installer"
 [ -z "$version" ] && echo -ne "$file:\t"
-sed $sed_opt "/^@set VERSION /$sed_cmd" "$file"
+sed $sed_opt "/VERSION=/$sed_cmd" "$file"
 
-# Update README
-file="README"
+#}}}
+#{{{ * run-installer.bat
+
+file="run-installer.bat"
 [ -z "$version" ] && echo -ne "$file:\t"
-sed $sed_opt "/^VERSION /$sed_cmd" "$file"
+sed $sed_opt "/VERSION=/$sed_cmd" "$file"
 
-# Update README.md
-file="README"
-[ -z "$version" ] && echo -ne "$file:\t"
-sed $sed_opt "/^\*\*VERSION /$sed_cmd" "$file"
-
-# Update Makefile
-file="Makefile"
-[ -z "$version" ] && echo -ne "$file:\t"
-sed $sed_opt "/^VERSION := /$sed_cmd" "$file"
-
+#}}}
 
 #}}}
 
