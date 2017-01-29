@@ -35,7 +35,7 @@
 ;;	  (lambda ()
 ;;	    (require 'maplev-speedbar)))
 ;;
-;; Use M-x customize-group mapve-speedbar to customize the extension.
+;; Use M-x customize-group maplev-speedbar to customize the extension.
 
 ;;; Code:
 

@@ -1,5 +1,12 @@
 -*- org -*-
 
+* 2.34
+** Add ob-maple.el: provide org-babel functions for Maple evaluation
+** Add maplev-config.el: configure maplev for a project
+** Add maplev-version.el: used to embed git-version.
+** Improve indentation speed for single line balanced expressions
+** Remove maplev-executable-alist.   
+
 * 2.33
 ** Add maplev-tabs-indent-mode 
 ** Add README.md, delete README, install, tweak Makefile

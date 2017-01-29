@@ -5,7 +5,7 @@
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    2.33
+;; Version:    2.34
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -91,7 +91,7 @@
 ;; - add clean up routine to kill buffers and processes
 ;;   when exiting maplev-mode
 ;; - indent continued assignments (this could be tricky)
-;; - more complete definition of maplev-completion-alist based on
+;; - more complete definition of maplev-completions based on
 ;;   the maple help node `index[package]'
 ;;
 ;; Low Priority:
@@ -111,36 +111,61 @@
 (require 'imenu)
 (require 'info)
 
-(require 'maplev-cmaple)		; interact with Maple
-(require 'maplev-common)		; common functions
-(require 'maplev-custom)		; customizable variables
-(require 'maplev-help)			; maplev-help-mode (view help pages)
-(require 'maplev-indent)		; indentation engine
-(require 'maplev-mint)			; maplev-mint-mode (view mint output)
-(require 'maplev-view)			; maplev-view-mode (view procedures)
-(require 'maplev-re)			; regular expressions
-(require 'maplev-trace)			; functions for indenting trace output
-(require 'maplev-utils)			; not much here just yet
-(require 'maplev-speedbar "maplev-sb")
+(require 'maplev-cmaple)                ; interact with Maple
+(require 'maplev-common)                ; common functions
+(require 'maplev-config)                ; configure maple/mint/tester 
+(require 'maplev-custom)                ; customizable variables
+(require 'maplev-find)                  ; find files
+(require 'maplev-help)                  ; maplev-help-mode (view help pages)
+(require 'maplev-indent)                ; indentation engine
+(require 'maplev-mint)                  ; maplev-mint-mode (view mint output)
+(require 'maplev-re)                    ; regular expressions
+(require 'maplev-speedbar "maplev-sb")  ; speedbar for maple source
+(require 'maplev-trace)                 ; functions for indenting trace output
+(require 'maplev-utils)                 ; not much here just yet
+(require 'maplev-version)               ; assign version
+(require 'maplev-view)                  ; maplev-view-mode (view procedures)
 
 ;;}}}
 
 ;;{{{ Information
 
-(defconst maplev-version "2.33" "Version of MapleV mode.")
-
 (defconst maplev-developer
   "Joseph S. Riel <jriel@maplesoft.com>"
   "Developer/maintainer of `maplev-mode'.")
 
-(defun maplev-about ()
-  "Print information for `maplev-mode'."
-  (interactive)
-  (sit-for 0)
-  (message "maplev-mode version %s (C) %s" maplev-version maplev-developer))
-
 ;;}}}
 
+;;{{{ Version
+
+;; Reassign the functions maplev-release and maplev-git-release
+;; if the file maplev-release.el is available.
+
+(let* ((maplev-dir (file-name-directory (or (locate-library "maplev") "")))
+       (maplev-release.el (concat maplev-dir "maplev-release.el")))
+  (when (require 'maplev-release maplev-release.el 'noerror)
+    (autoload 'maplev-release     maplev-release.el)
+    (autoload 'maplev-git-release maplev-release.el)))
+
+;;;###autoload
+(defun maplev-version (&optional here full message)
+  "Show the maplev-mode version in the echo area.
+With prefix argument HERE, insert it at point.
+When FULL is non-nil, use a verbose version string.
+When MESSAGE is non-nil, display a message with the version."
+  (interactive (list current-prefix-arg t (not current-prefix-arg)))
+  (let* ((maplev-version (maplev-release))
+	 (git-version (maplev-git-version))
+	 (version (if full
+		      (format "Maplev-mode version %s (%s)"
+			      maplev-version
+			      git-version)
+		    maplev-version)))
+    (when here (insert version))
+    (when message (message "%s" version))
+    version))
+	
+;;}}}
 
 (eval-and-compile
   (condition-case nil (require 'imenu) (error nil))
@@ -153,18 +178,8 @@
 
 ;;{{{ Internal variables
 
-
-(defvar maplev-completion-alist nil
-  "Alist for minibuffer completion.
-It has the form ((maple-release1  (...)) (maple-release2 (...)))")
-
-(defvar maplev-completion-release nil
-  "Maple release for which completion has been requested.")
-
-(defvar maplev-project-root nil
-  "Buffer-local variable assigned the root of the project.
-Used by mint-mode with ffip-project-files to locate the project files.")
-
+(defvar maplev-completions nil
+  "List for minibuffer completion.")
 
 ;;}}}
 ;;{{{ Syntax table
@@ -285,7 +300,6 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (define-key map [(control c) (tab) ?r]  'maplev-indent-region)
     (define-key map [(control c) (tab) ?k]  'maplev-indent-clear-info)
     
-
     ;; Cmaple commands
     (define-key map [(control c) (control c) ?b]      'maplev-cmaple-send-buffer)
     (define-key map [(control c) (control c) ?p]      'maplev-cmaple-send-procedure)
@@ -298,14 +312,12 @@ Used by mint-mode with ffip-project-files to locate the project files.")
     (define-key map [(control c) (control c) ?s]      'maplev-cmaple-status)
 
     ;; Mint commands
-
     (define-key map [(control c) return ?b] 'maplev-mint-buffer)
     (define-key map [(control c) return ?p] 'maplev-mint-procedure)
     (define-key map [(control c) return ?r] 'maplev-mint-region)
     (define-key map [(control c) return return] 'maplev-mint-rerun)
 
     ;; Help and proc comma
-    
     (define-key map [(control ?\?)] 'maplev-help-at-point)
     (define-key map [(meta ?\?)]    'maplev-view-at-point)
     (define-key map [(control h) (meta d)] 'maplev-what-proc)
@@ -357,13 +369,6 @@ Used by mint-mode with ffip-project-files to locate the project files.")
        ["Highlighted" maplev-help-region t])
       "---"
       ("Setup"
-       ("Maple Release"
-        ,@(mapcar (lambda (item)
-                    (let ((key (car item)))
-                      `[,key (maplev-set-release ,key)
-                             :style radio
-                             :selected (string= maplev-release ,key)]))
-                  maplev-executable-alist))
        ("Abbrevs"
         ["Enable abbrevs" abbrev-mode
          :style toggle :selected abbrev-mode]
@@ -626,6 +631,7 @@ Key bindings:
 \\{maplev-mode-map}"
   :group 'maplev
   :abbrev maplev-mode-abbrev-table
+  :syntax-table maplev-mode-syntax-table
 
   ;; paragraph filling
   ;;
@@ -657,7 +663,6 @@ Key bindings:
   (set (make-local-variable 'indent-region-function) #'maplev-indent-region)
   (set (make-local-variable 'tab-width)               maplev-indent-level)
   (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
-  (make-local-variable 'maplev-project-root)
 
   (ad-activate 'fixup-whitespace)
 
@@ -710,19 +715,16 @@ Key bindings:
 
   (maplev-add-maple-to-compilation)
 
-  ;; Release support
-  (maplev-set-release)
-  ;; the file's local variables specs might change maplev-release
-  ;; xemacs version of make-local-hook returns t, not the hook. (JR)
-  ;; make-local-hook is obsolete in GNU emacs 21.1
-  ;;(make-local-hook 'hack-local-variables-hook)
-  (add-hook 'hack-local-variables-hook 'maplev-mode-name nil t)
+  (maplev-reset-font-lock)
 
   (when maplev-buttonize-includes-flag
     (maplev-buttonize-includes)
     (maplev-buttonize-links))
 
+  ;; Create configuration object
   (if maplev-load-config-file-flag (maplev-load-config-file))
+  (unless maplev-config
+    (maplev-config))
 
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
@@ -986,19 +988,16 @@ Prompt for the EXPRSEQ."
 ;; modules to the completion list.
 
 (defun maplev-add-exports-of-module-at-point (module)
-  "Add the exports of MODULE at point to `maplev-completion-alist'.
+  "Add the exports of MODULE at point to `maplev-completions'.
 The real work is done by `maplev-complete-on-module-exports'."
   (interactive (list (maplev-ident-around-point-interactive
                       "Complete on Maple exports of module")))
   (maplev-complete-on-module-exports module))
 
 (defun maplev-complete-on-module-exports (module)
-  "Add the exports of MODULE to `maplev-completion-alist'."
+  "Add the exports of MODULE to `maplev-completions'."
 
-  ;; First, ensure that `maplev-completion-alist' is assigned.
-  (maplev--generate-initial-completion-alist)
-  (save-current-buffer
-    (set-buffer (maplev--cmaple-buffer))
+  (with-current-buffer (maplev--cmaple-buffer)
     (save-restriction
       ;; Print each export of module on a separate line in a narrowed buffer.
       (narrow-to-region (point-max) (point-max))
@@ -1020,7 +1019,7 @@ The real work is done by `maplev-complete-on-module-exports'."
             (message "The argument `%s' is not a Maple module" module)
             (sit-for 2))
         ;; Initialize completions to those previously assigned
-        (let ((completions (car (cdr (assoc maplev-release maplev-completion-alist)))))
+        (let ((completions maplev-completions))
           ;; Goto end of buffer and read upwards, a line at a time,
           ;; adding it to the exports list.
           (goto-char (point-max))
@@ -1030,17 +1029,17 @@ The real work is done by `maplev-complete-on-module-exports'."
                                (point) (line-end-position))
                               nil)
                         completions)))
-          ;; Replace the completion alist.
-          (setcar (cdr (assoc maplev-release maplev-completion-alist))
-                  (maplev-remove-dupes
-                   (sort completions #'(lambda (a b) (string< (car a) (car b))))))))
+          ;; Replace the completion list.
+          (setq maplev-completions
+		(maplev-remove-dupes
+		 (sort completions #'(lambda (a b) (string< (car a) (car b))))))))
       ;; Delete the output from the cmaple buffer.
       (delete-region (point-min) (point-max)))))
 
-(defun maplev--generate-initial-completion-alist ()
-  "Generate `maplev-completion-alist' from the index/function and
+(defun maplev--generate-initial-completions ()
+  "Generate `maplev-completions' from the index/function and
 index/package help pages.  If it already exists, do nothing."
-  (unless (assoc maplev-release maplev-completion-alist)
+  (unless maplev-completions)
 
     ;; To make it easy to pick out the package names from the
     ;; index/package help page, set the interface variable
@@ -1051,9 +1050,7 @@ index/package help pages.  If it already exists, do nothing."
                         "lprint(interface('screenwidth'=infinity));" t))
           completions)
       (unwind-protect
-          (save-current-buffer
-            (set-buffer (get-buffer-create (maplev--help-buffer)))
-
+          (with-current-buffer (get-buffer-create (maplev--help-buffer))
             ;; Process help node "index/function".
             (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
@@ -1104,11 +1101,8 @@ index/package help pages.  If it already exists, do nothing."
             (maplev-cmaple--wait 3)
             (maplev-history-delete-item))
 
-        ;; Assign `maplev-completion-alist'.  Sort the completions.
-        (setq completions (sort completions #'(lambda (a b) (string< (car a) (car b))))
-              maplev-completion-alist
-              (cons (cons maplev-release (list completions))
-                    maplev-completion-alist)))
+        ;; Assign `maplev-completions'.  Sort the completions.
+        (setq maplev-completions (sort completions #'(lambda (a b) (string< (car a) (car b)))))
       ;; Restore the original interface screenwidth.
       (maplev-cmaple-direct (concat "interface('screenwidth'=" screenwidth ");") t))))
 
@@ -1116,19 +1110,18 @@ index/package help pages.  If it already exists, do nothing."
 (defun maplev--completion (word predicate mode)
   "Generate minibuffer completion using maple function names.
 For the meaning of args see Info node `(elisp)Programmed Completion'."
-  (let ((maplev-release maplev-completion-release))
-    (maplev--generate-initial-completion-alist)
-    (let ((possibilities (cadr (assoc maplev-release maplev-completion-alist))))
-      (cond ((eq mode t)
-             (all-completions word possibilities predicate))
-            ((not mode)
-             (try-completion word possibilities predicate))
-            ((eq mode 'lambda)
-             (assoc word possibilities))))))
+  (maplev--generate-initial-completions)
+  (let ((possibilities maplev-completions))
+    (cond ((eq mode t)
+	   (all-completions word possibilities predicate))
+	  ((not mode)
+	   (try-completion word possibilities predicate))
+	  ((eq mode 'lambda)
+	   (assoc word possibilities)))))
 
 (defun maplev-complete-symbol (&optional prefix)
   "Perform completion on maple symbol preceding point.
-Compare that symbol against `maplev-completion-alist'."
+Compare that symbol against `maplev-completions'."
   ;; Code borrowed from lisp-complete-symbol.
   (interactive)
   (let* ((end (point))
@@ -1136,11 +1129,10 @@ Compare that symbol against `maplev-completion-alist'."
                 (backward-sexp 1)
                 (point)))
 	 (pattern (buffer-substring-no-properties beg end))
-         (maplev-completion-release maplev-release)
 	 (completion (try-completion pattern 'maplev--completion)))
     (cond ((eq completion t))
 	  ((null completion)
-	   (message "Can't find completion for \"%s\"" pattern)
+	   (message "Cannot find completion for \"%s\"" pattern)
 	   (ding))
 	  ((not (string= pattern completion))
 	   (delete-region beg end)
@@ -1269,10 +1261,11 @@ otherwise use `maplev-tab-width'."
 (defconst maplev-initial-variables
   '("Catalan" "true" "false" "FAIL" "infinity" "Pi" "gamma"
     "integrate" "libname" "NULL" "Order" "printlevel" "lasterror" "lastexception"
-    "`mod`" "Digits" "constants" "undefined" "I"
+    "Digits" "constants" "undefined" "I"
     "UseHardwareFloats"
     "Testzero" "Normalizer" "NumericEventHandlers"
-    "Rounding" "`index/newtable`")
+    "Rounding" ;; "`mod`" "`index/newtable`"
+    )
   "List of initial variables in Maple.")
 
 ;;}}}
@@ -1315,7 +1308,7 @@ file (either < or \").  The second group matches the filename.")
 ;; requires pulling them out.
 
 (defconst maplev-builtin-types
-  '("`::`" "`..`" "`!`"
+  '(;"`::`" "`..`" "`!`"
     "algebraic" "anyfunc" "anything" "atomic"
     "boolean"
     "complex" "constant" "cx_infinity" "cx_zero"
@@ -1337,34 +1330,36 @@ file (either < or \").  The second group matches the filename.")
   "List of builtin Maple types.")
 
 (defconst maplev-builtin-functions
-  '("`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`"
-    "`>=`" "`?()`" "`?[]`" "ASSERT" "Array" "ArrayOptions" "CopySign"
+  '(;; "`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`?()`" "`?[]`" "`[]`" "`^`"
+    ;; "`and`" "`if`" "`evalf/hypergeom/kernel`" "`int/series`" "`intersect`" "`kernel/transpose`" "`not`"
+    ;; "`or`" "`quit`" "`union`" "`xor`" "`{}`" "`||`" "`~`" 
+    "ASSERT" "Array" "ArrayOptions" "CopySign"
     "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" "ERROR"
     "EqualEntries" "EqualStructure" "FromInert" "Im" "MPFloat" 
     "MorrBrilCull" "NameSpace" "NextAfter" "Normalizer" "NumericClass" 
     "NumericEvent" "NumericEventHandler" "NumericStatus" "Object"
     "OrderedNE" "RETURN" "Re" "Record" "SDMPolynom" "SFloatExponent"
     "SFloatMantissa" "Scale10" "Scale2" "SearchText" "TRACE" "ToInert"
-    "Unordered" "UpdateSource" "`[]`" "`^`" "_hackwareToPointer" "_jvm"
+    "Unordered" "UpdateSource" "_hackwareToPointer" "_jvm"
     "_local" "_maplet" "_savelib" "_treeMatch" "_unify" "_xml" "abs"
-    "add" "addressof" "anames" "`and`" "andmap" "appendto" "array"
+    "add" "addressof" "anames" "andmap" "appendto" "array"
     "assemble" "assign" "assigned" "attributes" "bind" "call_external"
     "callback" "cat" "coeff" "coeffs" "conjugate" "convert" "crinterp"
     "debugopts" "define_external" "degree" "denom" "diff" "disassemble"
     "divide" "dlclose" "done" "entries" "eval" "evalb" "evalf"
-    "`evalf/hypergeom/kernel`" "evalgf1" "evalhf" "evalindets" "evaln"
+     "evalgf1" "evalhf" "evalindets" "evaln"
     "expand" "exports" "factorial" "frem" "frontend" "gc" "genpoly"
-    "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "`if`"
+    "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "ifelse" 
     "igcd" "ilog10" "ilog2" "implies" "indets" "indices" "inner"
-    "`int/series`" "`intersect`" "iolib" "iquo" "irem" "is_gmp" "isqrt"
-    "`kernel/transpose`" "kernelopts" "lcoeff" "ldegree" "length"
+    "iolib" "iquo" "irem" "is_gmp" "isqrt"
+    "kernelopts" "lcoeff" "ldegree" "length"
     "lexorder" "lhs" "localGridInterfaceRun" "lowerbound" "lprint"
     "macro" "map" "map2" "max" "maxnorm" "member" "membertype" "min"
     "minus" "mod" "modp" "modp1" "modp2" "mods" "mul" "mvMultiply"
-    "negate" "nops" "normal" "`not`" "numboccur" "numelems" "numer"
-    "op" "`or`" "order" "ormap" "overload" "parse" "piecewise" "pointto"
-    "print" "`quit`" "readlib" "reduce_opr" "remove" "rhs" "rtable"
-    "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
+    "negate" "nops" "normal" "numboccur" "numelems" "numer"
+    "op" "order" "ormap" "overload" "parse" "piecewise" "pointto"
+    "print" "print_preprocess" "readlib" "reduce_opr" "remove" "rhs"
+    "rtable" "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
     "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
     "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_redim"
     "rtable_scale" "rtable_scanblock" "rtable_size" "rtable_sort_indices"
@@ -1372,9 +1367,8 @@ file (either < or \").  The second group matches the filename.")
     "series" "setattribute" "sign" "sort" "ssystem" "stop" "streamcall"
     "subs" "subset" "subsindets" "subsop" "substring" "system" "table"
     "taylor" "tcoeff" "time" "timelimit" "traperror" "trunc" "type"
-    "typematch" "unames" "unbind" "`union`" "upperbound" "userinfo"
-    "wbOpen" "wbOpenURI" "writeto" "`xor`" "`{}`" "`||`"
-    "`~`" "~Array" "~Matrix" "~Vector")
+    "typematch" "unames" "unbind" "upperbound" "userinfo"
+    "wbOpen" "wbOpenURI" "writeto" "~Array" "~Matrix" "~Vector")
   "List of builtin functions as of Maple 2016")
 
 ;; (defconst maplev--builtin-functions-alist
@@ -1506,7 +1500,7 @@ file (either < or \").  The second group matches the filename.")
 	      "whattype" "with" "ztrans"
 
 	      ;; miscellaneous procedures
-	      "interface" 
+	      "interface" "readline"
 	      ))
 	    "\\>"))
   "List of some of the protected names in Maple.
@@ -1671,17 +1665,17 @@ If nil then `font-lock-maximum-decoration' selects the level."
   "Open the include file at point.
 If found, the file is opened either in this window or the other
 window, depending on the exclusive-or of TOGGLE with
-`maplev-include-file-other-window-flag'.  The variable
-`maplev-include-path' specifies the search paths; it is a list of
-rooted strings.  If the file cannot be found, but the proper
-directory exists, query user to create the file."
+`maplev-include-file-other-window-flag'.  The :include-path slot
+of `maplev-config' specifies the search paths.  If the file
+cannot be found, but the proper directory exists, query user to
+create the file."
   (interactive "P")
   (save-excursion
     (beginning-of-line)
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
     (let* ((inc-file (match-string-no-properties 2))
-	   (path maplev-include-path)
+	   (path (oref maplev-config :include-path))
 	   (inc-first (string= "<" (match-string-no-properties 1)))
 	   (other-window-flag (if maplev-include-file-other-window-flag
 				  (not toggle)
@@ -1772,6 +1766,7 @@ nil."
 			  :grouping 1
 			  :keyboard-binding "C-c C-o"
 			  :help-text "open file"))
+
 
 (defun maplev-find-link-file-at-point (toggle)
   "Open the maplev link file at point.

@@ -1,4 +1,6 @@
 #LINK ../Makefile
+#LINK .maplev
+
 ##MODULE maplev
 ##HALFLINE module used with Emacs maplev mode
 
@@ -16,13 +18,13 @@ $include <GetSource.mm>
 ##  the Emacs **maplev-mode**.
 
     Setup := proc()
-        kernelopts(printbytes = false);
-        interface(prettyprint    = 1
-                  , verboseproc  = 2
-                  , errorbreak   = 0
-                  , warnlevel    = 2
-                  , errorcursor  = false
-                  , screenheight = infinity
+        kernelopts('printbytes' = false);
+        interface('prettyprint'    = 1
+                  , 'verboseproc'  = 2
+                  , 'errorbreak'   = 0
+                  , 'warnlevel'    = 2
+                  , 'errorcursor'  = false
+                  , 'screenheight' = infinity
                  );
         NULL;
     end proc;

@@ -1,3 +1,4 @@
+
 ;;; maplev-cmaple.el --- Communicate with Maple process
 
 ;;; Commentary:
@@ -34,29 +35,25 @@
 ;;; Code:
 
 (require 'comint)
+(require 'maplev-config)
+(require 'maplev-custom)
 
 (eval-when-compile
   (defvar maplev-cmaple-echoes-flag)
   (defvar maplev-cmaple-end-notice)
   (defvar maplev-executable-alist)
-  (defvar maplev-include-path)
   (defvar maplev-mint-error-level)
-  (defvar maplev-release)
-  (defvar maplev-start-options)
   (defvar maplev-startup-directory))
 
 (declare-function maplev-mint-region "maplev-mint")
 (declare-function maplev-current-defun "maplev-common")
-(declare-function maplev-set-release "maplev-common")
 
-(defconst maplev-cmaple-prompt "> "
-  "String inserted as a prompt.")
-
-;;{{{ functions
+;;{{{ mode functions
 
 (defun maplev--cmaple-buffer ()
-  "Return the name of the Maple cmaple buffer."
-  (format "Maple %s" maplev-release))
+  "Return the name of the Maple cmaple buffer associated with the current buffer.
+Use the buffer-local `maplev-config' object."
+  (format "Maple (%s)" (oref maplev-config :maple)))
 
 (defun maplev--cmaple-process ()
   "Return the cmaple process associated with the current buffer.
@@ -70,34 +67,27 @@ Start one, if necessary."
   "Start a cmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it."
-  (let* ((release maplev-release)
-	 (executable (cdr (assoc release maplev-executable-alist)))
-         (cmaple (nth 0 executable))
-         (inifile (nth 1 executable))
+  (let* ((config maplev-config)
+	 (cmaple (oref config :maple))
+	 (maple-options (maplev-get-option-with-include config :maple-options))
          (buffer (get-buffer-create (maplev--cmaple-buffer)))
          (process (get-buffer-process buffer))
-	 (include-path maplev-include-path)
          ;; Just testing this.  Is there an advantage to a PTY process?
-         (process-connection-type 'pty)) 
+	 (process-connection-type 'pty))
     (with-current-buffer buffer
-      (message "Starting Maple %s..." release)
+      (message "Starting Maple...")
       (if process (delete-process process))
       (if maplev-startup-directory
           (cd (expand-file-name maplev-startup-directory)))
       (set-process-filter
-       ;; `apply' is used because `maplev-start-options' is a list.
-       (setq process (apply 'start-process
-                            (format "Maple %s" release)
+       (setq process (funcall #'start-process
+                            "Maple"
                             buffer
                             cmaple
-                            (append (and inifile (list "-i" inifile))
-				   '("-c maplev:-Setup()")
-                                    maplev-start-options ;; add include path to argument list
-                                    (and include-path
-                                         (list (concat "-I " 
-                                                       (mapconcat 'identity include-path ",")))))))
+			    "-q --historyfile=none -c maplev:-Setup()"
+			    maple-options))
        'maplev--cmaple-filter)
-      (maplev-cmaple-mode release)
+      (maplev-cmaple-setup config)
       (maplev-cmaple--lock-access t)
       ;; (comint-simple-send process init-code
       (maplev-cmaple--send-end-notice process)
@@ -106,10 +96,10 @@ restart it."
       ;; do not support fractions of seconds.
       ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
       (maplev-cmaple--wait)
-      (message "Maple %s started" release)
+      (message "Maple started")
       process)))
 
-;; Access control
+;;{{{ (*) Access control
 
 ;; JR: Are the lines marked "hieida" the original or his suggested
 ;; correction?  I don't see the point of using a fixed symbol,
@@ -121,31 +111,35 @@ restart it."
 ;; flag variable that is local to the Maple output buffer and assign
 ;; to it.
 
+(defvar maplev-cmaple--locked-flag nil
+  "Non-nil means the associated cmaple process is locked.
+This is a buffer-local variable.")
+
+(make-variable-buffer-local 'maplev-cmaple--locked-flag)
+
 (defun maplev-cmaple--lock-access (&optional no-error)
   "Lock access to cmaple.
 If access is already locked, generate an error
 unless optional arg NO-ERROR is non-nil."
   (if (and (not no-error) (maplev-cmaple--locked-p))
       (error "Maple busy")
-    (put 'maplev-cmaple-state 'maplev-release 'locked)))
+    (setq maplev-cmaple--locked-flag t)))
 
 (defun maplev-cmaple--unlock-access ()
   "Unlock access to cmaple.
 Interactively use \\[maplev-cmaple-interrupt]."
-  (put 'maplev-cmaple-state 'maplev-release nil))
+  (setq maplev-cmaple--locked-flag nil))
 
 (defun maplev-cmaple--locked-p ()
   "Return non-nil if the Maple process is locked."
-  (eq (get 'maplev-cmaple-state 'maplev-release) 'locked))
+  maplev-cmaple--locked-flag)
 
 (defun maplev-cmaple-status ()
   "Status of Maple process."
   (interactive)
-  (let ((status (get 'maplev-cmaple-state 'maplev-release)))
-    (message "Maple %s %s" maplev-release
-             (cond ((eq status 'locked) "locked")
-                   ((not status) "unlocked")
-                   (status)))))
+  (message "Maple %s" (if (maplev-cmaple--locked-p)
+			  "locked"
+			"unlocked")))
 
 (defun maplev-cmaple--wait (&optional max-cnt no-err)
   "Wait for cmaple to become available.  
@@ -164,20 +158,21 @@ non-nil do not generate an error if time-out occurs."
            (maplev-cmaple--locked-p)
            (error "Maple busy")))))
 
+;;}}}
+
 ;; Functions that send stuff to cmaple
 
 (defun maplev-cmaple-send ()
   "Send input to Maple."
   (interactive)
   (let ((pmark (process-mark (maplev--cmaple-process)))
-        (maplev-mint-info-level maplev-mint-error-level)
-        (comint-input-sender (function maplev-cmaple--send-string)))
+        (comint-input-sender #'maplev-cmaple--send-string))
     ;; Only _new_ input is checked for typos, see comint-send-input.
     ;; We might need something smarter for comint-get-old-input.
     ;; Why does comint-send-input use (line-end-position) instead of
     ;; (point-max)?  To be consistent maplev-mint-region does the same.
     (if (or (< (point) (marker-position pmark))
-            (equal 0 (maplev-mint-region pmark (line-end-position))))
+	    (zerop (maplev-mint-region pmark (line-end-position) 'syntax-only)))
         (comint-send-input))))
 
 (defun maplev-cmaple--send-string (process string)
@@ -190,13 +185,13 @@ non-nil do not generate an error if time-out occurs."
 (defun maplev-cmaple-send-region (beg end)
   "Send the region from BEG to END to cmaple.
 If called interactively use the marked region.
-If called with a prefix the cmaple buffer is first cleared."
+If called with a prefix the cmaple buffer is first cleared.
+Use mint to syntax check the region before sending to cmaple."
   (interactive "r")
-  (let ((maplev-mint-info-level maplev-mint-error-level)) ;; TODO: Change to -S for syntax only!
-    (when (equal 0 (maplev-mint-region beg end))
-      (and current-prefix-arg (maplev-cmaple--clear-buffer))
-      (maplev-cmaple--send-string (maplev--cmaple-process)
-                                  (buffer-substring-no-properties beg end)))))
+  (when (equal 0 (maplev-mint-region beg end 'syntax-only))
+    (and current-prefix-arg (maplev-cmaple--clear-buffer))
+    (maplev-cmaple--send-string (maplev--cmaple-process)
+				(buffer-substring-no-properties beg end))))
 
 (defun maplev-cmaple-send-line ()
   "Send the current line to cmaple."
@@ -223,9 +218,8 @@ that the input consists of one line and the output is on the following line."
   (interactive)
   ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
   (maplev-cmaple--wait)
-  (save-current-buffer
-    (let ((proc (maplev--cmaple-process))) ; ensure Maple is started
-      (set-buffer (maplev--cmaple-buffer))
+  (let ((proc (maplev--cmaple-process))) ; ensure Maple is started
+    (with-current-buffer (maplev--cmaple-buffer)
       (save-restriction
         (narrow-to-region (point-max) (point-max))
         (maplev-cmaple--send-string proc input)
@@ -266,9 +260,11 @@ Reset the filter for PROCESS \(cmaple\) and unlock access."
   "Interrupt Maple."
   (interactive)
   (let ((process (get-buffer-process (maplev--cmaple-buffer))))
-    (message "Interrupt process %s" (process-name process))
-    (interrupt-process process)
-    (maplev-cmaple--unlock-access)))
+    (if (null process)
+	(error "The buffer has no process")
+      (message "Interrupt process %s" (process-name process))
+      (interrupt-process process)
+      (maplev-cmaple--unlock-access))))
 
 (defun maplev-cmaple-kill ()
   "Kill Maple."
@@ -283,20 +279,12 @@ Reset the filter for PROCESS \(cmaple\) and unlock access."
     (delete-region (point-min) (point-max))))
                  
 
-(defun maplev-cmaple-pop-to-buffer (&optional release)
-  "Pop up a buffer with command line Maple.  Start Maple, if necessary.
-Optional arg RELEASE defaults to `maplev-release'."
-  (interactive
-   (list (if current-prefix-arg
-             (completing-read "Maple release: "
-                              (mapcar #'(lambda (item) (list (car item)))
-                                      maplev-executable-alist)
-                              nil t))))
-  (unless release (setq release maplev-release))
-  (let ((maplev-release release))
-    (maplev--cmaple-process)
-    (pop-to-buffer (maplev--cmaple-buffer))
-    (goto-char (point-max))))
+(defun maplev-cmaple-pop-to-buffer ()
+  "Pop up a buffer with command line Maple.  Start Maple, if necessary."
+  (interactive)
+  (maplev--cmaple-process)
+  (pop-to-buffer (maplev--cmaple-buffer))
+  (goto-char (point-max)))
 
 (defalias 'cmaple 'maplev-cmaple-pop-to-buffer)
 
@@ -360,27 +348,24 @@ PROCESS is the Maple process, STRING its output."
     (setq maplev-cmaple-map map)))
 
 ;;}}}
-;;{{{ mode
+;;{{{ mode definition
 
 (defconst maplev-input-line-keyword
   `((,(concat "^" maplev-cmaple-prompt ".*$") . maplev-input-face))
   "Keyword for font locking input lines in cmaple mode.")
 
-(defun maplev-cmaple-mode (&optional release)
+(define-derived-mode maplev-cmaple-mode comint-mode
   "Major mode for interacting with cmaple.
-RELEASE is an id in `maplev-executable-alist'; if omitted the
-first id is used.  This mode has the same commands as
-`comint-mode' plus some additional commands for interacting with
-cmaple.
+
+This mode has the same commands as `comint-mode' plus some
+additional commands for interacting with cmaple.
 
 \\{maplev-cmaple-map}"
-  (interactive)
-  (comint-mode)
   (setq comint-prompt-regexp (concat "^\\(" maplev-cmaple-prompt "\\)+ *")
         ;; GNU Emacs 21
         comint-eol-on-send t
-        major-mode 'maplev-cmaple-mode
         mode-name "Maple")
+
   (if (< emacs-major-version 22)
       (with-no-warnings
 	(setq comint-use-prompt-regexp-instead-of-fields t))
@@ -390,15 +375,20 @@ cmaple.
   (make-local-variable 'maplev-mint--code-beginning)
   (make-local-variable 'maplev-mint--code-end)
 
-  (maplev-set-release release)
-  (use-local-map maplev-cmaple-map)
   (set (make-local-variable 'font-lock-defaults)
        '(maplev-input-line-keyword))
   (set (make-local-variable 'comint-process-echoes)
        maplev-cmaple-echoes-flag)
   (make-local-variable 'maplev-cmaple-prompt)
-  (font-lock-mode 1)
-  (run-hooks 'maplev-cmaple-mode-hook))
+  (font-lock-mode 1))
+
+(defun maplev-cmaple-setup (config)
+  "Set `major-mode' to `maplev-cmaple-mode'.
+CONFIG is an object of type `maplev-config-class."
+  (maplev-cmaple-mode)
+  (setq maplev-config config))
+
+  
 
 ;;}}}
 

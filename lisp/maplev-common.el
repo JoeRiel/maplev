@@ -12,10 +12,8 @@
 (require 'maplev-re)
 
 (eval-when-compile
-  (defvar maplev-help-mode-syntax-table)
   (defvar maplev-mode-syntax-table)
   (defvar maplev-mode-4-syntax-table)
-  (defvar maplev-executable-alist)
   (defvar maplev-help-mode-syntax-table)
   (defvar maplev-history-list)
   (defvar maplev-mode-4-syntax-table)
@@ -45,42 +43,15 @@
 ;;}}}
 ;;{{{ Release
 
-(defun maplev--default-release ()
-  "Return the car of the first item in `maplev-executable-alist'"
-  (caar maplev-executable-alist))
-
-(defvar maplev-release (maplev--default-release)
-  "Buffer local string variable assigned the selected release of Maple.
-Used to index `maplev-executable-alist'.")
-(make-variable-buffer-local 'maplev-release)
-
-(defun maplev-set-release (&optional release)
-  "Assign the buffer local variable `maplev-release'.
-RELEASE is a key in `maplev-executable-alist'; if not supplied
-use value returned by `maplev--default-release'.  Set syntax
-table according to RELEASE.  If in `maplev-mode' also refontify
-the buffer."
-  (interactive
-   (list (completing-read "Use Maple release: "
-                          (mapcar #'(lambda (item) (list (car item)))
-                                  maplev-executable-alist)
-                          nil t)))
-  (setq release (or release (maplev--default-release)))
-  (unless (assoc release maplev-executable-alist)
-    (error "Invalid Maple release: %S" release))
-  (setq maplev-release release)
+(defun maplev-setup ()
+  "If in `maplev-mode' also refontify the buffer."
   (cond ((memq major-mode '(maplev-mode maplev-cmaple-mode maplev-view-mode))
 	 (set-syntax-table maplev-mode-syntax-table))
         ;; for consistency also maplev-help-mode
         ((eq major-mode 'maplev-help-mode)
          (set-syntax-table maplev-help-mode-syntax-table)))
   (when (eq major-mode 'maplev-mode)
-    (maplev-reset-font-lock)
-    (maplev-mode-name)))
-
-(defun maplev-mode-name ()
-  "Set `mode-name' in `maplev-mode' according to `maplev-release'."
-  (setq mode-name (format "Maple %s" maplev-release)))
+    (maplev-reset-font-lock)))
 
 
 ;;}}}
@@ -190,7 +161,7 @@ the Nth preceding defun."
   "Put mark at end of this defun, point at beginning.
 The defun marked is the one that contains point."
   (interactive)
-  (push-mark (point))
+  (push-mark)
   (beginning-of-line)
   (if (looking-at maplev--defun-begin-re) (goto-char (match-end 0)))
   (let ((count 1)
@@ -270,7 +241,6 @@ Minibuffer completion is used if COMPLETE is non-nil."
   (if (not default) (setq default t))
   (let ((enable-recursive-minibuffers t)
         (ident (maplev--ident-around-point default))
-        (maplev-completion-release maplev-release)
         choice)
     (setq prompt (concat prompt (unless (string-equal ident "")
                                   (concat " (default " ident ")"))

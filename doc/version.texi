@@ -1,5 +1,4 @@
-@set UPDATED 2 January 2010
-@c Edition of the Manual
-@set EDITION 1.1
-@c Version of the Code
+@c version.texi --- auto-generated file, do not edit.
 @set VERSION 2.33
+@set DATE 28 January 2017
+@c mds-version.texi ends here
