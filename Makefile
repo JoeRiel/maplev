@@ -137,7 +137,11 @@ HTML-FILES = doc/$(PKG).html
 DOC-FILES = $(TEXI-FILES) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
 
 $(TEXI-VERSION): doc/$(PKG).texi
-	@doc/MakeVersion $@ $(VERSION)
+	@echo "Update $@: $(MDS-VERSION) ($(GIT-VERSION))"
+	@echo "@c version.texi --- auto-generated file, do not edit." > $@
+	@echo "@set VERSION $(VERSION)" >> $@
+	@echo "@set DATE $(DATE)" >> $@
+	@echo "@c mds-version.texi ends here" >> $@
 
 doc: $(call print-help,doc,	Create the info and html documentation)
 doc:  info html
