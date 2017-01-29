@@ -1,14 +1,12 @@
-
 \input texinfo
 
+@setfilename maplev.info
 @include version.texi
-
-@setfilename maplev
 @settitle MapleV Emacs Mode @value{VERSION}
 
 @dircategory Emacs
 @direntry
-* MapleV: (maplev).       A GNU-Emacs mode for developing Maple code.
+* MapleV: (maplev).       Emacs mode for developing Maple code.
 @end direntry
 
 
