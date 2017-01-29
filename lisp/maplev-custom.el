@@ -19,10 +19,6 @@
   "Customizations for declaring variables."
   :group 'maplev)
 
-(defgroup maplev-developer nil
-  "Customization group for Maple developers."
-  :group 'maplev)
-
 (defgroup maplev-faces nil
   "Faces for highlighting text in MapleV mode."
   :group 'maplev)
@@ -352,11 +348,6 @@ See the documentation for `align-exclude-rules-list' for more info."
 
 ;;}}}
 ;;{{{ (*) maple setup
-
-(defcustom maplev-start-options (list "-q")
-  "List of Maple command line options.  Each item is a string."
-  :type 'list
-  :group 'maplev-executables)
 
 (defcustom maplev-startup-directory nil
   "If non-nil, change to this directory before running Maple.
