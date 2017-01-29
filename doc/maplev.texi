@@ -78,13 +78,14 @@ Editing
 
 * Indentation::                 Indenting Maple code.
 * Font Lock::                   Syntactic highlighting of Maple code.
-* Comments::                    Command for adding and aligning comments.
+* Comments::                    Commands for adding and aligning comments.
 * Shortcuts::                   Abbreviations and templates.
 * Imenu support::               Creating a procedure index.
 * Miscellaneous features::      Useful editing features
 
 Processes
 
+* Configuration::               Configuring executables.
 * Mint::                        Syntax checking.
 * Maple::                       Running Maple as a standalone process.
 * Help pages::                  Displaying Maple help pages.
@@ -109,8 +110,8 @@ Indices
 
 Introduction
 
-* Summary::
-* Requirements::
+* Summary::                     A brief tour of MapleV.
+* Requirements::                Emacs and Maple requirements.
 
 Indentation
 
@@ -123,12 +124,6 @@ Indentation Tricks
 
 * Forcing indentation::         Using parentheses to force indentation.
 * Preventing indentation::      Using continued comments to prevent indentation.
-
-Font Lock
-
-* Decoration level::            Selecting the decoration level.
-* Adding keywords::             Customizing the font lock patterns.
-* Display faces::               Setting the display faces.
 
 Shortcuts
 
@@ -143,6 +138,11 @@ Miscellaneous features
 
 * Include statements::          Active include statements.
 * Indent trace output::         Hierarchically indent Maple trace output.
+
+Configuration
+
+* Configuration Object::        Configuring MapleV executables and their options.
+* Configuration Example::       Example configuration (.maplev file).
 
 Mint
 
@@ -173,8 +173,8 @@ Installation
 
 Evolution
 
-* Bugs::
-* Acknowledgments::
+* Bugs::                        Where to report them.
+* Acknowledgments::             People who have contributed.
 
 @end detailmenu
 @end menu
@@ -184,8 +184,8 @@ Evolution
 @cindex Introduction
 
 @iftex
-MapleV is a GNU Emacs major mode for developing source code for @w{Maple
-V}, a computer algebra system (CAS) owned by @w{Waterloo Maple Inc}.  In
+MapleV is a GNU Emacs major mode for developing source code for Maple, 
+a computer algebra system (CAS) owned by @w{Waterloo Maple Inc}.  In
 this manual @dfn{MapleV} refers to the Emacs major mode and @dfn{Maple}
 to the CAS.  MapleV is written entirely in Emacs-Lisp and is distributed
 under the GNU General Public License.
@@ -301,7 +301,7 @@ text, are available on the menu-bar.
 Maple source code is indented according to its grammar.  The indentation
 can occur either as you enter the code or all at once; the latter action
 is useful when working with non-indented source code.  A grammatical
-error, typically an out of place keyword or parenthesis, generates an
+error, typically an out-of-place keyword or parenthesis, generates an
 error and moves the cursor to the place where the error was detected.
 
 @menu
@@ -343,11 +343,20 @@ Indent the current line, insert a new line, and indent that line
 @itemx C-c @key{TAB} b
 Indent the buffer (@code{maplev-indent-buffer}).
 
+@item C-c @key{TAB} k
+Clear the indentation information (@code{maplev-indent-clear-info}).
+To increase speed, MapleV's indentation algorithm stores
+the last valid indentation point.  Moving the point may
+occasionally cause indentation errors; use this procedure
+to recompute the indentation point.
+
 @item C-c @key{TAB} p
 Indent a procedure (@code{maplev-indent-procedure}).
+The smallest procedure, or module, at point is indented.
 
 @item C-c @key{TAB} r
 Indent the region (@code{maplev-indent-region}).
+The selected region is indented.
 
 @end table
 
@@ -378,7 +387,7 @@ declarations (@code{local}, @code{global}, @code{option}, and
 @code{description}) are indented.  The default is 0.
 
 @item maplev-dont-indent-re
-A regex or nil.  If non-nil then lines that begin with a match are not
+A regular expression or nil.  If non-nil then lines that begin with a match are not
 indented.  The default, @samp{"#"}, prevents flush left comment lines
 from being indented.
 
@@ -546,15 +555,6 @@ reparsed.
 @cindex Font lock
 
 
-@menu
-* Decoration level::            Selecting the decoration level.
-* Adding keywords::             Customizing the font lock patterns.
-* Display faces::               Setting the display faces.
-@end menu
-
-
-@node Decoration level, Adding keywords, Font Lock, Font Lock
-@section Decoration level
 @cindex Font lock, decoration level
 @cindex Decoration level, font lock
 @cindex Maximum decoration, font lock
@@ -584,49 +584,6 @@ Everything in level 2 plus Maple built-in functions are highlighted.
 Execute @kbd{M-x maplev-reset-font-lock @key{RET} LEVEL @key{RET}} or
 use the menubar, @kbd{MapleV -> Setup -> Decoration}, to change the
 decoration in a MapleV buffer.  @code{LEVEL} is an integer from 1 to 3.
-
-
-
-@node Adding keywords, Display faces, Decoration level, Font Lock
-@section Adding keywords
-@cindex Font lock, adding keywords
-@cindex Keywords, font locking
-@cindex Customizing font lock keywords
-
-You can use the usual method to add new keywords to font lock in MapleV
-mode.  For example, the following snippet can be added to your
-@file{.emacs} file to font lock @samp{simplify} and @samp{printf} in
-MapleV mode.
-
-@example
-(font-lock-add-keywords 
- 'maplev-mode
- '(("simplify" . maplev-font-special-word-face)
-   ("printf"   . maplev-font-special-word-face)))
-@end example
-
-
-@node Display faces,  , Adding keywords, Font Lock
-@section Display faces
-@cindex Font lock, display faces
-@cindex Font lock, faces
-@cindex Faces, font lock
-@cindex Display faces, font lock
-
-@vtable @code
-@item maplev-special-word-face
-Display face used for Maple special words.  The special words are
-@samp{args}, @samp{nargs}, @samp{procname}, @samp{RootOf} and
-@samp{Float}.
-
-@item maplev-initial-variable-face
-Display face used for Maple initial variables.  These are
-@samp{Catalan}, @samp{true}, @samp{false}, @samp{FAIL}, @samp{infinity},
-@samp{Pi}, @samp{gamma}, @samp{integrate}, @samp{libname}, @samp{NULL},
-@samp{Order}, @samp{printlevel}, and @samp{lasterror}.
-
-@end vtable
-
 
 
 @node Comments, Shortcuts, Font Lock, top
@@ -832,7 +789,7 @@ the menu moves point to the assignment of that item.
 The assignments must be flush left to be indexed.
 Only the first macro in a @code{macro} assignment is indexed.
 
-@node Miscellaneous features, Mint, Imenu support, top
+@node Miscellaneous features, Configuration, Imenu support, top
 @comment  node-name,  next,  previous,  up
 @chapter Miscellaneous features
 @cindex Miscellaneous
@@ -894,9 +851,113 @@ The default is four spaces.
 @end table       
 
 
+@node Configuration, Mint, Miscellaneous features, top
+@chapter Configuration
+@cindex Configuration
+@vindex maplev-load-config-file-flag
+@vindex default-directory
+
+When Maplev-mode is called,
+  a search is made for a @file{.maplev} file
+  if the flag @code{maplev-load-config-file-flag} is non-nil.
+The search begins in @code{default-directory},
+which is typically the directory associated with the current buffer,
+  and moves upward through the file hierarchy, 
+  stopping when the file is found or root is reached.
+If the file is found, it is loaded as an Emacs lisp file.
+
+The @code{maplev-config} function can be used in the @file{.maplev} file
+to create an object that configures MapleV on a per-project basis.
 
 
-@node Mint, Maple, Miscellaneous features, top
+@menu
+* Configuration Object::        Configuring MapleV executables and their options.
+* Configuration Example::       Example configuration (.maplev file).
+@end menu
+
+@node Configuration Object, Configuration Example, Configuration, Configuration
+@section Configuration Object
+@cindex Configuration Object
+@findex maplev-config
+@vindex maplev-config-class
+
+The function @code{maplev-config} constructs 
+an @code{eieio} object of class @code{maplev-config-class}
+and assigns it to the eponymous buffer-local variable @code{maplev-config}.
+@inforef{Top,,eieio} for general details about objects.
+The following fields are defined.
+
+@table @kbd
+
+@item :compile
+Shell command to build and install a Maple archive.
+If assigned, the string is assigned to the Emacs lisp
+variable @var{compile-command}, which is then made buffer-local.
+Executing the Emacs function @code{compile} in a MapleV buffer
+that uses this configuration runs the assigned shell command.
+Typically assigned to a @command{make} command.
+@xref{Configuration Example}.
+
+@item :include-path
+A string or list of strings of directories to search for files
+specified with @code{$include} statements in Maple source files.
+Used by Mint, Maple's syntax checker.
+
+@item :maple
+Shell command to execute tty (command-line) Maple.
+The default is @samp{maple}.
+
+@item :maple-options
+A string of options to pass to Maple.
+The default is @samp{-B -A2 -e2}.
+
+@item :mint-options
+A string of options to pass to Mint.
+The default is the empty string.
+
+@item :project-root
+The path to the root of the project.
+Used with Mint to locate the source of mint output.
+
+@item :tester
+Shell command to execute the Maple tester.
+Used by @code{mpldoc-test-run-tester}, 
+which is part of the @code{mpldoc} package.
+@inforef{Top,,mpldoc}.
+Use of this requires access to Maplesoft's @code{tester} facility.
+
+@item :tester-options
+A string of options to pass to tester.  See above.
+The default is the empty string.
+
+@end table
+
+
+@node Configuration Example,  , Configuration Object, Configuration
+@section Configuration Example 
+
+Following is a typical example of the content of a @file{.maplev} file,
+for a Maple package/project named @code{Bark}.
+
+@example
+(let ((proj-root (concat (getenv "HOME") "/maple/Bark")))
+  (maplev-config
+   :mint-options "-l" ; ignore variables with leading underscore
+   :include-path proj-root
+   :project-root (concat proj-root "/maple")
+   :compile (format "make -C %s mla-install" proj-root)))
+@end example
+
+The @code{:compile} value in this example is a shell command
+that passes the @code{mla-install} target
+to a project-specific @file{Makefile}.  
+The associated rule in the @file{Makefile}
+presumably builds and installs the Maple library archive, @file{Bark.mla}.
+
+
+
+
+@node Mint, Maple, Configuration, top
 @chapter Mint
 @cindex Mint
 @cindex Syntax checking
@@ -955,11 +1016,6 @@ An integer from 0 to 4 that selects the amount of information displayed
 by Mint.  0 displays no information, 4 displays the most.  The default
 value is 3.  This value can be set through the menubar,
 @kbd{Maplev -> Mint -> Mint level}.
-
-@item mint-start-options
-A string passed to Mint at startup.  The default is @samp{"-q"}, which
-suppresses the display of the Maple logo.  Type @kbd{?mint} in Maple for
-other options.
 
 @item mint-coding-system
 Symbol that defines the coding system used by Mint.  The default value
@@ -1059,7 +1115,7 @@ Maple process.  Maple commands can be directly executed in the buffer.
 The following commands in the MapleV buffer affect the Maple engine:
 
 @table @kbd
-@itemx C-c C-c b
+@item C-c C-c b
 Send the entire buffer to the Maple engine (@code{cmaplev-send-buffer}).
 
 @item C-c C-c p
@@ -1347,12 +1403,12 @@ Add the following line to your @file{.emacs} file
 
 @example
 (add-to-list 'load-path (concat user-emacs-directory "maple"))
-(autoload 'maplev-mode "maplev" "Maple editing mode" t)
+(autoload 'maplev-mode "maplev" "Maple editing mode" 'interactive)
 @end example
 
 To have Emacs auto-magically start in MapleV mode when editing Maple
 source, add the following to your @file{.emacs} file, modifying the
-regex @file{.mpl} to an extension appropriate for your usage:
+regular expression as needed.
 
 @example
 (setq auto-mode-alist 
@@ -1362,17 +1418,27 @@ regex @file{.mpl} to an extension appropriate for your usage:
 @node Maple Files, Customizing, Emacs Files, Installation
 @section Maple Files
 
-Install the Maple archive file @file{maplev.mla} into @file{~/maple/toolbox/emacs/lib}.
+A Maple archive file, @file{maplev.mla}, containing code
+used by @code{maplev-view}, is provided with the distribution.
+If desired it can be rebuilt from source by removing the existing file
+and executing
 
+@example
+maple maple/maplev.mpl
+@end example
+
+The file @file{maplev.mla} should be installed at @file{~/maple/toolbox/emacs/lib}.
 
 @node Customizing, Info documentation, Maple Files, Installation
 @section Customizing
 
 Some of MapleV's default settings must be customized for your
 installation.  Most significantly, you must specify the locations of the
-executable files for mint and the command line version of Maple.  You
-can specify multiple versions of mint and Maple.  The easiest method is
-to invoke @code{customize} using the following commands:
+executable files for @command{mint} and @command{maple}, 
+the command-line version of Maple.  
+Multiple versions of @command{mint} and @command{maple} can be assigned
+and selected.  The easiest method is to invoke @code{customize} 
+using the following commands:
 
 @example
 M-x load-library @key{RET} maplev @key{RET}
@@ -1382,10 +1448,14 @@ M-x customize-group @key{RET} maplev @key{RET}
 Select the @strong{MapleV Executables} subgroup and customize
 @code{maplev-executable-alist}.  It is a list of sublists.
 Each sublist contains four items:
-  an identifier,
-  the path to the Maple tty executable,
-  the path to the a Maple initialization file, and
-  the path to the Mint executable.
+an identifier,
+the path to the Maple tty executable,
+the path to the a Maple initialization file, and
+the path to the Mint executable.  An example of a sublist is
+
+@example
+("maple17" "/usr/local/maple17/bin/maple" nil "/usr/local/maple17/bin/mint")
+@end example
 
 The identifier is arbitrary.
 To determine the name and path to the Maple and Mint executables,
