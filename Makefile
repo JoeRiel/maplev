@@ -203,9 +203,9 @@ mla := maplev.mla
 mla: $(call print-help,mla,	Create Maple archive: $(mla))
 mla: $(mla)
 
-MAPLE-FILES = $(addprefix maple/,maplev.mpl Print.mm)
+MAPLE-FILES = $(addprefix maple/,maplev.mpl Print.mm GetSource.mm)
 
-%.mla: maple/%.mpl maple/Print.mm
+%.mla: maple/%.mpl maple/*.mm
 	@$(RM) $@
 	@echo "Building Maple archive $@"
 	@err=$$($(MAPLE) -q -I $(PWD)/maple -D BUILD-MLA $< ) ; \
