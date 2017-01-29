@@ -1,7 +1,8 @@
+<!--*- markdown -*-->
 MapleV:  An Emacs Package for Maple Developers
 ==============================================
 
-**Version 2.32**
+**Version 2.34.18**
 
 MapleV is an Emacs package for developing Maple code.
 Maple is computer algebra system sold by [Maplesoft](http://www.maplesoft.com/).
@@ -16,8 +17,8 @@ MapleV provides several major modes:
 Requirements
 ------------
 
-* GNU Emacs 23.1+ (earlier versions may work)
-* Maple 5+
+* [GNU Emacs](https://www.gnu.org/software/emacs/) 23.1+ (earlier versions may work)
+* [Maple](https://www.maplesoft.com) 5+
 
 Installation
 ------------
@@ -38,15 +39,13 @@ If needed, assign EMACS on the command line; for example
 Configuration
 -------------
 
-Add the following lines to the Emacs initialization file (`~/.emacs`):
+Add the following lines to the Emacs initialization file, which is
+given by the value of user-init-file.
 
 	(add-to-list 'load-path (concat user-emacs-directory "maple"))
-	(autoload 'maplev "maplev")
-	(setq auto-mode-alist (cons (cons (concat "\\." (regexp-opt '("mpl" "tst") t)
-	                                          "$")
-			                           'maplev-mode)
-	                             auto-mode-alist))
-
+	(autoload 'maplev-mode "maplev" "Maple editing mode" 'interactive)
+	(add-to-list 'auto-mode-alist '("\\.mpl\\'" . maplev-mode))
+								 
 Use the Emacs custom group `maplev-group` to access MapleV's many customizations.
 
 Usage
@@ -56,5 +55,5 @@ Fire up Emacs.  If you configured `auto-mode-alist`, as above, opening
 a Maple source file with extension `.mpl` should cause it to be opened
 in `maplev-mode`.  If the `maplev.info` file was installed where it
 can be found by Emacs, you can get help by calling
-`maplev-got-info-node`.  An html version of the help, `maplev.html`, is
-distributed with the source.
+`maplev-got-info-node`.  An html version of the help, `maplev.html`,
+is distributed with the source.
