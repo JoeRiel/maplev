@@ -114,6 +114,7 @@ lisp-install: $(EL-FILES) $(ELC-FILES)
 
 lisp-uninstall: $(call print-help,lisp-uninstall,Remove installed lisp files)
 lisp-uninstall:
+	@echo "removing installed lisp files"
 	@$(RM) $(addprefix $(LISP-DIR)/,$(notdir $(EL-FILES) $(ELC-FILES)))
 
 links-install: $(call print-help,links-install,Install links to the lisp files)
@@ -234,8 +235,7 @@ install: $(call print-help,install,	Install everything)
 install: $(addsuffix -install,info lisp mla)
 
 uninstall: $(call print-help,uninstall,Remove installed files)
-uninstall:
-	$(RM) $(addprefix $(LISP-DIR)/,$(PKG)*.*)
+uninstall: lisp-uninstall
 	$(RM) $(addprefix $(INFO-DIR)/,$(PKG).info)
 	$(RM) $(MAPLE-LIB-DIR)/$(mla)
 
