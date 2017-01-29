@@ -18,11 +18,10 @@
 @end iftex
 
 @copying
-MapleV is a GNU Emacs major mode for developing source code for @w{Maple}, 
-a computer algebra system (CAS) from @w{Waterloo Maple Inc}.
-In this manual @dfn{MapleV} refers to the Emacs major mode and
-@dfn{Maple} to the CAS.  MapleV is written entirely in Emacs-Lisp and is
-distributed under the GNU General Public License.
+MapleV is a GNU Emacs major mode for developing source code for Maple, 
+a computer algebra system (CAS) from @w{Waterloo Maple Inc}.  MapleV is
+written entirely in Emacs-Lisp and is distributed under the GNU General
+Public License.
 
 This manual is for MapleV version @value{VERSION}.
 
