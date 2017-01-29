@@ -164,11 +164,11 @@ doc/$(PKG).html: doc/$(PKG).texi $(TEXI-VERSION)
 
 clean-doc: $(call print-help,clean-doc,Remove the auxiliary files in doc)
 clean-doc:
-	$(RM) $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILES) doc/fdl.texi doc/MakeVersion, $(wildcard doc/*))
+	$(RM) $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILES) doc/fdl.texi, $(wildcard doc/*))
 
 clean-doc-all: $(call print-help,clean-doc-all,Remove all generated documentation)
 clean-doc-all: clean-doc
-	$(RM) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
+	$(RM) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES) $(TEXI-VERSION)
 
 info-install: $(call print-help,info-install,Install info files in $(INFO-DIR))
 info-install: $(INFO-FILES)
