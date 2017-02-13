@@ -8,7 +8,6 @@
 
 (require 'eieio)
 (require 'maplev-config)
-(require 'maplev-find)
 (require 'maplev-re)
 
 (eval-when-compile
@@ -18,15 +17,17 @@
   (defvar maplev-var-declaration-symbol)
   (defvar maplev-variable-spacing))
 
-(declare-function event-window "maplev-common")
 (declare-function event-point "maplev-common")
-(declare-function maplev--ident-around-point "maplev-common")
-(declare-function maplev-current-defun "maplev-common")
+(declare-function event-window "maplev-common")
 (declare-function maplev--end-of-defun-pos "maplev-common")
+(declare-function maplev--ident-around-point "maplev-common")
+(declare-function maplev-beginning-of-defun "maplev-common")
+(declare-function maplev-current-defun "maplev-common")
+(declare-function maplev-find-include-file "maplev")
+(declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-indent-line "maplev-indent")
 (declare-function maplev-indent-newline "maplev")
-(declare-function maplev-ident-around-point-interactive "maplev-common")
-(declare-function maplev-beginning-of-defun "maplev-common")
+(declare-function maplev-expand->file-name "maplev")
 
 ;;{{{ customizable variables
 
@@ -289,9 +290,10 @@ The line number begins at character position POS."
        (maplev-mint-get-source-file))))))
 
 (defun maplev-mint-get-source-file ()
-  "Return the absolute path to the source file."
+  "Return the absolute path to the source file starting at current position."
   (when (looking-at "\\s-+\\(to\\s-+[0-9]+\\s-+\\)?of\\s-+\\(.*\\)")
-    (maplev-find-file (match-string-no-properties 2) (oref maplev-config :project-root))))
+    (let ((file (maplev-expand->file-name (match-string-no-properties 2) (oref maplev-config :mapledir))))
+      (maplev-find-include-file file 'inc-first (oref maplev-config :include-path)))))
 
 (defun maplev--replace-string (string replace)
   "In STRING replace as specified by REPLACE.

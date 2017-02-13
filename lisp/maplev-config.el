@@ -54,6 +54,13 @@ specified with $include statements in Maple source files.")
     :type               string
     :documentation      "Command to execute tty Maple.")
 
+   (mapledir
+    :initarg            :mapledir
+    :initform           nil
+    :type               (or null string)
+    :documentation      "Location of Maple installation.
+Same as result of kernelopts('mapledir').")
+
    (maple-options
     :initarg            :maple-options
     :initform           "-B -A2 -e2"
@@ -71,18 +78,11 @@ See the Maple help page for maple.")
    
    (mint-options
     :initarg            :mint-options
-    :initform           ""
+    :initform           "-i2 -q -v -w 100"
     :type               string
     :custom             string
     :documentation      "Options to pass to Mint.
 See the Maple help page for mint.")
-
-   (project-root
-    :initarg            :project-root 
-    :initform           nil
-    :type               (or null string)
-    :documentation      "Path to root of project.  
-Starting point from which to find source files when locating mint warnings.")
 
    (tester
     :initarg            :tester
@@ -111,10 +111,15 @@ It is an instance of `maplev-config-class'.")
 (make-variable-buffer-local 'maplev-config)
 
 (defun maplev-config (&rest fields)
-  "Assign the buffer-local variable `maplev-config' by passing FIELDS
-to the object constructor for `maplev-config-class'.  If the slot
-`:compile' is non-nil, assign its value to `compile-command' which is
-made buffer-local.  Return the object."
+  "Assign the buffer-local variable `maplev-config' by passing
+FIELDS to the object constructor for `maplev-config-class'. 
+
+ If the slot `:compile' is non-nil, assign its value to
+`compile-command' which is made buffer-local.  
+
+If the slot `:mapledir' is nil, assign its value by calling Maple.
+
+Return the object."
   (setq maplev-config (apply #'clone maplev-config-default fields))
   (let ((compile (oref maplev-config :compile)))
     (when compile
@@ -122,7 +127,13 @@ made buffer-local.  Return the object."
   (let ((path (oref maplev-config :include-path)))
     (when (stringp path)
       (oset maplev-config :include-path (list path))))
+  (unless (oref maplev-config :mapledir)
+    ;; Assign the :mapledir slot
+    (oset maplev-config :mapledir (shell-command-to-string
+				   (format "%s -q -c 'printf(kernelopts(mapledir))' -c done"
+					   (oref maplev-config :maple)))))
   maplev-config)
+
 
 (defmethod maplev-get-option-with-include ((config maplev-config-class) option)
   "Catenate the OPTION slot of CONFIG, an object of type `maplev-config-class',
