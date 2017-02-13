@@ -241,7 +241,18 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
       ;; try again without explicitly specifying the argument list.
       (goto-char (maplev--scan-lists 1)))))
 
-
+(defun maplev-mint--goto-include-file (pos)
+  "Open include file corresponding to link at POS in mint buffer."
+  (goto-char pos)
+  (when (re-search-backward "included: ")
+    (goto-char (match-end 0))
+    (when (looking-at ".*$")
+      (let ((file (maplev-find-include-file 
+		   (match-string-no-properties 0) 
+		   'inc-first (oref maplev-config :include-path))))
+	(when file
+	  (find-file-other-window file))))))
+  
 
 (defun maplev-mint--goto-source-proc (pos)
   "Move to position in source buffer corresponding to link at POS in mint buffer.
@@ -259,20 +270,20 @@ procedure, or module."
       (setq line (1- (string-to-number (match-string-no-properties 1)))
 	    file (maplev-mint-get-source-file))
       ;; move point to the beginning of that line in the source
-      (maplev-mint--goto-source-pos line 0 file)
-      ;; Use class to position point after formal parameter list
-      (cond 
-       ((string= class "Procedure")
-	(when (re-search-forward "\\<proc *(" (line-end-position) t)
-	  (backward-char)
-	  (goto-char (maplev--scan-lists 1))))
-       ((string= class "Module")
-	(when (re-search-forward "\\<module *(" (line-end-position) t)
-	  (backward-char)
-	  (goto-char (maplev--scan-lists 1))))
-       ((string= class "Operator")
-	(when (re-search-forward " *->" (line-end-position) t)
-	  (goto-char (match-beginning 0))))))))
+      (maplev-mint--goto-source-pos line 0 file))
+    ;; Use class to position point after formal parameter list
+    (cond 
+     ((string= class "Procedure")
+      (when (re-search-forward "\\<proc *(" (line-end-position) t)
+	(backward-char)
+	(goto-char (maplev--scan-lists 1))))
+     ((string= class "Module")
+      (when (re-search-forward "\\<module *(" (line-end-position) t)
+	(backward-char)
+	(goto-char (maplev--scan-lists 1))))
+     ((string= class "Operator")
+      (when (re-search-forward " *->" (line-end-position) t)
+	(goto-char (match-beginning 0)))))))
 
 (defun maplev-mint--goto-source-line (pos)
   "Goto the location in source specified by the line number in the Mint buffer.
@@ -311,7 +322,6 @@ REPLACE is an alist with elements \(OLD . NEW\)."
 
 ;;}}}
 ;;{{{ fontify
-
 
 (defcustom maplev-mint-proc-face 'font-lock-function-name-face
   "Face name for procedure names in a Mint buffer."
@@ -352,10 +362,12 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("^[ \t]*\\(\\^.*$\\)" maplev-mint-error-face 'error)
     ("^\\(?:Nested \\)?\\(?:Procedure\\|Operator\\|Module\\)[ ]*\\([^(]*\\)" maplev-mint-link-face 'proc)
     ("^\\(?:Nested \\)?Anonymous \\(?:Procedure\\|Operator\\|Module\\)[ ]*\\(\\(?:proc\\|module\\) *([^)]*)\\)" maplev-mint-link-face 'proc)
+    ("^This source file is included: \\(.*\\)" maplev-mint-link-face 'include-file)
     ("These parameters were never used\\(?: explicitly\\)?:" maplev-mint-warning-face 'unused-arg t)
     ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
     ("These local variables were not declared explicitly:" maplev-mint-warning-face 'undecl-local t)
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
+    ;;("These local variables were assigned a vlue, but otherwise unused:" ... )
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
     ("\\(on line +[0-9]+\\)" maplev-mint-link-face 'goto-line)
@@ -368,8 +380,10 @@ REPLACE is an alist with elements \(OLD . NEW\)."
 Each element is a list of the form \(REGEXP FACE PROP VAR\),
 where REGEXP is to be matched and FACE is a face.  Optional third
 element PROP is a symbol used for marking the category of SUBEXP.
-Optional fourth element VAR is non-nil if REGEXP is concatenated
-with `maplev-mint-variables-re'.")
+Optional fourth element VAR is non-nil if REGEXP is catenated
+with `maplev-mint-variables-re'.  The text that matches the first
+group of the full regular expression is given face property face
+and text property PROP.")
 
 (defun maplev-mint-fontify-buffer ()
   "Fontify the mint buffer.  Does not use font-lock mode."
@@ -451,6 +465,10 @@ When called interactively, POS is position where point is."
                   vars (list string)))
           ;;
           (cond
+	   ;; Jump to an included file
+	   ((eq prop 'include-file)
+	    (maplev-mint--goto-include-file pos))
+	   ;;
            ;; Jump to the start of a procedure in the source.
            ((eq prop 'proc)
             (maplev-mint--goto-source-proc pos))
