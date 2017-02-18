@@ -107,8 +107,8 @@ Indices
 
 Introduction
 
-* Summary::                     A brief tour of MapleV.
-* Requirements::                Emacs and Maple requirements.
+* Summary::
+* Requirements::
 
 Indentation
 
@@ -143,8 +143,8 @@ Configuration
 
 Mint
 
-* Running mint::                Commands for sending code to Mint.
-* Mint mode::                   Mode for viewing the output of Mint.
+* Running mint::                Commands for sending code to @command{mint}.
+* Mint mode::                   Mode for viewing the output of @command{mint}.
 
 Maple
 
@@ -170,8 +170,8 @@ Installation
 
 Evolution
 
-* Bugs::                        Where to report them.
-* Acknowledgments::             People who have contributed.
+* Bugs::
+* Acknowledgments::
 
 @end detailmenu
 @end menu
@@ -252,18 +252,9 @@ Modules and procedures from Maple libraries can be displayed in a
 buffer.  They are font-locked the same as in a MapleV buffer.  A history
 provides a convenient means to return to previously displayed code.
 
-@subsection Multiple Maple releases
-
-At installation MapleV is configured to work with a default release of
-Maple.  You may also specify alternate releases of Maple.  A MapleV
-buffer can then be configured to work with a release different than the
-default; it will access the versions of Maple and Mint appropriate for
-the release.
-
-
 @node Requirements,  , Summary, Introduction
 @section Requirements
-@cindex requirements
+@cindex Requirements for MapleV
 
 MapleV has been used with Maple version from 4 to 2015,
 with GNU Emacs 22 to 24, and on Linux, Mac, and Windows machines.
@@ -881,7 +872,7 @@ to create an object that configures MapleV on a per-project basis.
 The function @code{maplev-config} constructs 
 an @code{eieio} object of class @code{maplev-config-class}
 and assigns it to the eponymous buffer-local variable @code{maplev-config}.
-@inforef{Top,,eieio} for general details about objects.
+For details about objects, see @ref{Top,,, eieio, The EIEIO Manual}.
 The following fields are defined.
 
 @table @kbd
@@ -898,33 +889,52 @@ Typically assigned to a @command{make} command.
 @item :include-path
 A string or list of strings of directories to search for files
 specified with @code{$include} statements in Maple source files.
-Used by Mint, Maple's syntax checker.
+Used by @command{mint}, Maple's syntax checker,
+by hyperlinked @code{$include} statements,
+and by the @code{mpldoc} tester,
+see the @code{:tester} entry, below.
+
 
 @item :maple
 Shell command to execute tty (command-line) Maple.
-The default is @samp{maple}.
+The default is @samp{maple}.  @xref{Maple}.
+
+@item :mapledir
+The path to the installation of Maple.
+If left nil, the default, this field is automatically
+assigned by the function @code{maplev-config}.
 
 @item :maple-options
-A string of options to pass to Maple.
+A string of options to pass to @command{maple}.
 The default is @samp{-B -A2 -e2}.
+See the Maple help page for @command{maple}
+for a description of the available options.
+
+@item :mint
+Shell command to execute Mint, the Maple syntax-checker.
+The default is @samp{mint}.  @xref{Mint}.
 
 @item :mint-options
-A string of options to pass to Mint.
-The default is the empty string.
-
-@item :project-root
-The path to the root of the project.
-Used with Mint to locate the source of mint output.
+A string of options to pass to @command{mint}.
+The default is @samp{-i2 -q -v -w 100}.
+The use of the verbose option, @samp{-v},
+is necessary so that @command{mint} output for include files
+shows the path to the file; the information is used 
+to jump to the source location of a mint warning.
+Maplesoft developers: be aware that @command{smint} 
+use @samp{-V} for the verbose option.
+See the Maple help page for @command{mint}
+for a description of the available options.
 
 @item :tester
-Shell command to execute the Maple tester.
+Shell command to execute Maplesoft @command{tester}.
 Used by @code{mpldoc-test-run-tester}, 
 which is part of the @code{mpldoc} package.
-@inforef{Top,,mpldoc}.
+@xref{Testing,, Testing, mpldoc, The Mpldoc Manual}.
 Use of this requires access to Maplesoft's @code{tester} facility.
 
 @item :tester-options
-A string of options to pass to tester.  See above.
+A string of options to pass to @command{tester}.  See above.
 The default is the empty string.
 
 @end table
@@ -939,9 +949,8 @@ for a Maple package/project named @code{Bark}.
 @example
 (let ((proj-root (concat (getenv "HOME") "/maple/Bark")))
   (maplev-config
-   :mint-options "-l" ; ignore variables with leading underscore
+   :mint-options "-l -v"
    :include-path proj-root
-   :project-root (concat proj-root "/maple")
    :compile (format "make -C %s mla-install" proj-root)))
 @end example
 
@@ -961,14 +970,20 @@ presumably builds and installs the Maple library archive, @file{Bark.mla}.
 @cindex Checking syntax
 
 Mint is Maple's syntax checker. It analyzes a Maple program and produces
-a report about the syntax and variable usage.  MapleV can run mint on
-the entire buffer or a portion of it.  The output of mint is displayed
-in a buffer with a special mode, @code{mint-mode}, that provides a
-convenient means for locating and correcting syntax errors.
+a report about the syntax and variable usage.  MapleV can run
+@command{mint} on the entire buffer or a portion of it.  The output of
+mint is displayed in a buffer with a special mode, @code{mint-mode},
+that provides a convenient means for locating and correcting syntax
+errors.
+
+To allow Emacs to run @command{mint},
+the @code{:mint} and @code{:mint-options} fields
+of @code{maplev-config} must be properly configured.
+@xref{Configuration}.
 
 @menu
-* Running mint::                Commands for sending code to Mint.
-* Mint mode::                   Mode for viewing the output of Mint.
+* Running mint::                Commands for sending code to @command{mint}.
+* Mint mode::                   Mode for viewing the output of @command{mint}.
 @end menu
 
 
@@ -987,35 +1002,35 @@ convenient means for locating and correcting syntax errors.
 @findex mint-region
 @findex mint-rerun
 
-The following commands send source code in the buffer to Mint:
+The following commands send source code in the buffer to @command{mint}:
 
 @table @kbd
 @item C-c @key{RET} b
-Run Mint on the buffer (@code{mint-buffer}).
+Run @command{mint} on the buffer (@code{mint-buffer}).
 
 @item C-c @key{RET} p
-Run Mint on the current procedure (@code{mint-procedure}).
+Run @command{mint} on the current procedure (@code{mint-procedure}).
 
 @item C-c @key{RET} r
-Run Mint on the marked region (@code{mint-region}).
+Run @command{mint} on the marked region (@code{mint-region}).
 
 @item C-c @key{RET} @key{RET}
-Rerun the previous Mint command (@code{mint-rerun}).
+Rerun the previous @command{mint} command (@code{mint-rerun}).
 
 @end table
 
 These commands are available through the menubar, @kbd{MapleV -> Mint}.
-The following variables affect the output of Mint:
+The following variables affect the output of @command{mint}:
 
 @vtable @code
 @item mint-info-level
 An integer from 0 to 4 that selects the amount of information displayed
-by Mint.  0 displays no information, 4 displays the most.  The default
+by @command{mint}.  0 displays no information, 4 displays the most.  The default
 value is 3.  This value can be set through the menubar,
 @kbd{Maplev -> Mint -> Mint level}.
 
 @item mint-coding-system
-Symbol that defines the coding system used by Mint.  The default value
+Symbol that defines the coding system used by @command{mint}.  The default value
 is @code{undecided-dos}.
 
 @end vtable
@@ -1056,7 +1071,7 @@ Goto location in source, or fix error, depending on the active text.
 @end table
 
 The following variables set the display faces for the highlighted text in the
-Mint buffer:
+mint buffer:
 
 @vtable @code
 @item mint-proc-face
@@ -1448,15 +1463,15 @@ Each sublist contains four items:
 an identifier,
 the path to the Maple tty executable,
 the path to the a Maple initialization file, and
-the path to the Mint executable.  An example of a sublist is
+the path to the @command{mint} executable.  An example of a sublist is
 
 @example
 ("maple17" "/usr/local/maple17/bin/maple" nil "/usr/local/maple17/bin/mint")
 @end example
 
 The identifier is arbitrary.
-To determine the name and path to the Maple and Mint executables,
-launch Maple and execute @code{kernelopts(mapledir)}, that
+To determine the name and path to the @command{maple} and @command{mint} executables,
+launch @command{maple} and execute @code{kernelopts(mapledir)}, that
 returns the directory in which Maple is installed.
    
 On Linux or Mac, the shell commands are locate in the @file{bin}
@@ -1547,31 +1562,26 @@ For providing useful feedback and suggested enhancements.
 @node Key Index, Function Index, Evolution, top
 @comment    node-name,         next,       previous, up
 @unnumbered Key Index
-
 @printindex ky
 
 @node Function Index, Variable Index, Key Index, top
 @comment    node-name,         next,       previous, up
 @unnumbered Function Index
-
 @printindex fn
 
 @node Variable Index, Concept Index, Function Index, top
 @comment    node-name,         next,       previous, up
 @unnumbered Variable Index
-
 @printindex vr
 
 @node Concept Index, GNU Free Documentation License, Variable Index, top
 @comment    node-name,         next,       previous, up
 @unnumbered Concept Index
+@printindex cp
 
 @node GNU Free Documentation License,  , Concept Index, top
 @appendix GNU Free Documentation License
 @include fdl.texi
-
-
-@printindex cp
 
 @summarycontents
 @contents
