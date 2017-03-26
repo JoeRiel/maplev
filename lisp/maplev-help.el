@@ -306,7 +306,7 @@ from the parent defined in the Maple help system."
 ;;}}}
 ;;{{{ fontify
 
-;;{{{     fonts
+;;{{{ (*) fonts
 
 (defcustom maplev-help-function-face 'font-lock-function-name-face
   "Face name for functions in title lines of Maple help pages."
@@ -368,7 +368,7 @@ The title is the phrase following the function name."
   :group 'maplev-help)
 
 ;;}}}
-;;{{{     regular expressions
+;;{{{ (*) regular expressions
 
 (defconst maplev--help-section-re
   (concat "^\\(Calling Sequences?"
@@ -382,6 +382,8 @@ The title is the phrase following the function name."
           "\\|Notes"
           "\\|Options"
           "\\|Algorithm"
+	  "\\|Compatibility"
+	  "\\|Thread Safety"
           "\\|\\(?:List of \\([][a-zA-Z_]+ \\)?\\(Package\\|Subpackage\\|Module\\) Commands\\)"
           "\\):?")
   "Regular expression for sections in a Maple help page.")
@@ -397,7 +399,7 @@ The title is the phrase following the function name."
   "Regular expression for dictionary hyperlinks.")
 
 ;;}}}
-;;{{{     functions
+;;{{{ (*) functions
 
 (defun maplev-help-fontify-node ()
   "Fontify a Maple help page buffer.  Does not use font-lock mode."
