@@ -266,9 +266,11 @@ PROCESS calls this filter.  STRING is the output."
   "Display help for TOPIC in the Standard help browser.
 If successful, return t, otherwise return nil."
   (condition-case nil
-      (let ((tcp-proc (open-network-stream "tcp-proc" nil "localhost" maplev-help-port)))
-	(process-send-string tcp-proc topic)
+      (let ((tcp-proc (open-network-stream "tcp-proc" nil "localhost" maplev-help-port))
+	    (request (format "help(%s)" topic)))
+	(process-send-string tcp-proc request)
 	(delete-process tcp-proc)
+	(message "Help sent to Maple GUI")
 	t)
     (error
        (message "cannot connect to Maple help server")
@@ -286,9 +288,15 @@ use the tty help browser, in an Emacs buffer."
   (message "Standard help %s"
 	   (if maplev-help-use-standard-flag
 	       "enabled" "disabled")))
-	
-				  
 
+(defun maplev-launch-standard-gui-with-server ()
+  "Launch the Maple Standard GUI, opening a worksheet that starts the MapleServer.
+The MapleServer displays help pages and worksheets upon request."
+  (interactive)
+  (let* ((mw (expand-file-name "~/maple/toolbox/MapleServer/data/MapleServer.mw"))
+	 (cmd (format "maple -x \"%s\" &" mw)))
+    (if (file-exists-p mw)
+	(shell-command cmd))))
 
 ;;}}}
 ;;{{{ history mechanism
