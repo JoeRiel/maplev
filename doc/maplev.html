@@ -1,0 +1,3076 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- MapleV is a GNU Emacs major mode for developing source code for Maple, 
+a computer algebra system (CAS) from Waterloo Maple Inc.  MapleV is
+written entirely in Emacs-Lisp and is distributed under the GNU General
+Public License.
+
+This manual is for MapleV version 2.34.
+
+Copyright (C) 2011, Joseph S. Riel
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled
+"GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>MapleV Emacs Mode 2.34</title>
+
+<meta name="description" content="MapleV Emacs Mode 2.34">
+<meta name="keywords" content="MapleV Emacs Mode 2.34">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="#Top" rel="start" title="top">
+<link href="#Key-Index" rel="index" title="Key Index">
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="dir.html#Top" rel="up" title="(dir)">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<h1 class="settitle" align="center">MapleV Emacs Mode 2.34</h1>
+
+
+
+
+
+
+
+
+
+
+
+<a name="Top"></a>
+<div class="header">
+<p>
+Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previous: <a href="dir.html#Top" accesskey="p" rel="prev">(dir)</a>, Up: <a href="dir.html#Top" accesskey="u" rel="up">(dir)</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="MapleV"></a>
+<h1 class="top">MapleV</h1>
+
+<p>MapleV is a GNU Emacs major mode for developing source code for Maple, 
+a computer algebra system (CAS) from Waterloo&nbsp;Maple&nbsp;Inc<!-- /@w -->.  MapleV is
+written entirely in Emacs-Lisp and is distributed under the GNU General
+Public License.
+</p>
+<p>This manual is for MapleV version 2.34.
+</p>
+<p>Copyright &copy; 2011, Joseph S. Riel
+</p>
+<blockquote>
+<p>Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled
+&ldquo;GNU Free Documentation License.&rdquo;
+</p></blockquote>
+
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Introduction" accesskey="1">Introduction</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">A brief tour of MapleV&rsquo;s features.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Basics" accesskey="2">Basics</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">A few basics.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Editing
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Indentation" accesskey="3">Indentation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Indenting Maple code.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Font-Lock" accesskey="4">Font Lock</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Syntactic highlighting of Maple code.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Comments" accesskey="5">Comments</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands for adding and aligning comments.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Shortcuts" accesskey="6">Shortcuts</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Abbreviations and templates.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Imenu-support" accesskey="7">Imenu support</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Creating a procedure index.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Miscellaneous-features" accesskey="8">Miscellaneous features</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Useful editing features
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Processes
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Configuration" accesskey="9">Configuration</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Configuring executables.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Mint">Mint</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Syntax checking.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Maple">Maple</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Running Maple as a standalone process.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Help-pages">Help pages</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Displaying Maple help pages.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Viewing">Viewing</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Viewing Maple library code.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Appendices
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Installation">Installation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Installing MapleV.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Evolution">Evolution</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Credits, Bugs, Enhancements.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Indices
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Key-Index">Key Index</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Key bindings and where they are described.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Function-Index">Function Index</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Functions mentioned in the manual.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Variable-Index">Variable Index</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Variables mentioned in the manual.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Concept-Index">Concept Index</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Concepts and features.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#GNU-Free-Documentation-License">GNU Free Documentation License</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Copying this manual.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+</pre></th></tr><tr><th colspan="3" align="left" valign="top"><pre class="menu-comment"> &mdash; The Detailed Node Listing &mdash;
+
+Introduction
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Summary">Summary</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Requirements">Requirements</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Indentation
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Indentation-Commands">Indentation Commands</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands for inserting and aligning comments.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Customizing-Indentation">Customizing Indentation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Variables that affect indentation.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Indentation-Tricks">Indentation Tricks</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Forcing and preventing indentation.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Indentation-Details">Indentation Details</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Overview of the indentation algorithm.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Indentation Tricks
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Forcing-indentation">Forcing indentation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Using parentheses to force indentation.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Preventing-indentation">Preventing indentation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Using continued comments to prevent indentation.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Shortcuts
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Abbreviations">Abbreviations</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Abbreviations for common Maple functions.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Templates">Templates</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Inserting procedures and assignments.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Abbreviations
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Customizing-Abbreviations">Customizing Abbreviations</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Miscellaneous features
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Include-statements">Include statements</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Active include statements.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Indent-trace-output">Indent trace output</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Hierarchically indent Maple trace output.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Configuration
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Configuration-Object">Configuration Object</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Configuring MapleV executables and their options.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Configuration-Example">Configuration Example</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Example configuration (.maplev file).
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Mint
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Running-mint">Running mint</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands for sending code to <code>mint</code>.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Mint-mode">Mint mode</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Mode for viewing the output of <code>mint</code>.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Maple
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Running-Maple">Running Maple</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands for sending code to the Maple engine.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Cmaple-mode">Cmaple mode</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Mode for interacting with Maple.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Help pages
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Displaying-help-pages">Displaying help pages</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands for displaying Maple help pages.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#MapleV-help-mode">MapleV help mode</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Mode for viewing Maple help pages.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Viewing
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Displaying">Displaying</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands to display Maple expressions.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#MapleV-view-mode">MapleV view mode</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Mode for viewing Maple library code.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Installation
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Emacs-Files">Emacs Files</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Installing and byte-compiling the lisp files
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Maple-Files">Maple Files</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Installing the Maple archive
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Customizing">Customizing</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Customizing the installation.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Info-documentation">Info documentation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Installing the Info documentation.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+Evolution
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Bugs">Bugs</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Acknowledgments">Acknowledgments</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+</pre></th></tr></table>
+
+<hr>
+<a name="Introduction"></a>
+<div class="header">
+<p>
+Next: <a href="#Basics" accesskey="n" rel="next">Basics</a>, Previous: <a href="#Top" accesskey="p" rel="prev">top</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Introduction-1"></a>
+<h2 class="chapter">1 Introduction</h2>
+<a name="index-Introduction"></a>
+
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Summary" accesskey="1">Summary</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Requirements" accesskey="2">Requirements</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr>
+<a name="Summary"></a>
+<div class="header">
+<p>
+Next: <a href="#Requirements" accesskey="n" rel="next">Requirements</a>, Previous: <a href="#Introduction" accesskey="p" rel="prev">Introduction</a>, Up: <a href="#Introduction" accesskey="u" rel="up">Introduction</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Summary-1"></a>
+<h3 class="section">1.1 Summary</h3>
+<a name="index-Summary"></a>
+
+<p>Following is a brief tour of MapleV&rsquo;s major features.
+</p>
+<a name="Indentation-1"></a>
+<h4 class="subsection">1.1.1 Indentation</h4>
+
+<p>Maple source code is grammatically indented, either as you enter it or
+all at once.  Customizable variables permit a limited control of the
+indentation style.  The default settings produce a result that is very
+close to the pretty printed output of Maple.
+</p>
+<a name="Font-Lock-1"></a>
+<h4 class="subsection">1.1.2 Font Lock</h4>
+
+<p>Maple reserved words, special words, initial variables, built-in
+functions, and top-level procedure assignments are font locked.
+Comments and quotes are syntactically highlighted.  The amount of
+&ldquo;decoration&rdquo; can be customized.
+</p>
+<a name="Comments-1"></a>
+<h4 class="subsection">1.1.3 Comments</h4>
+
+<p>Commands are provided for inserting and aligning Maple comments.
+Auto-filling can be enabled so that comments automatically wrap.
+</p>
+<a name="Shortcuts-1"></a>
+<h4 class="subsection">1.1.4 Shortcuts</h4>
+
+<p>Abbreviations for common Maple words are defined and automatically
+expanded, if enabled.  A blank procedure template, including your
+copyright statement, can be inserted into the source.  It queries for
+the name of the procedure, optional arguments, and a description.
+</p>
+<a name="Mint-interface"></a>
+<h4 class="subsection">1.1.5 Mint interface</h4>
+
+<p>All or portions of the buffer can be sent to <code>mint</code>, Maple&rsquo;s syntax
+checker.  The output is displayed in a buffer with a mode that
+highlights and activates warnings and error messages.  Clicking on the
+activated text either moves the cursor to the appropriate point in the
+source code or queries to automatically correct the error.
+</p>
+<a name="Maple-interface"></a>
+<h4 class="subsection">1.1.6 Maple interface</h4>
+
+<p>All or portions of the buffer can be sent to the command line version of
+Maple, which is run in its own buffer.  You can work directly in that
+buffer to exercise the source code.
+</p>
+<a name="Online-help"></a>
+<h4 class="subsection">1.1.7 Online help</h4>
+
+<p>Help pages from Maple help databases can be called up and displayed in a
+buffer.  The buffer has a mode that font locks section headings and
+provides commands for viewing other help pages and recalling previously
+visited pages.
+</p>
+<a name="Viewing-library-code"></a>
+<h4 class="subsection">1.1.8 Viewing library code</h4>
+
+<p>Modules and procedures from Maple libraries can be displayed in a
+buffer.  They are font-locked the same as in a MapleV buffer.  A history
+provides a convenient means to return to previously displayed code.
+</p>
+<hr>
+<a name="Requirements"></a>
+<div class="header">
+<p>
+Previous: <a href="#Summary" accesskey="p" rel="prev">Summary</a>, Up: <a href="#Introduction" accesskey="u" rel="up">Introduction</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Requirements-1"></a>
+<h3 class="section">1.2 Requirements</h3>
+<a name="index-Requirements-for-MapleV"></a>
+
+<p>MapleV has been used with Maple version from 4 to 2015,
+with GNU Emacs 22 to 24, and on Linux, Mac, and Windows machines.
+</p>
+<hr>
+<a name="Basics"></a>
+<div class="header">
+<p>
+Next: <a href="#Indentation" accesskey="n" rel="next">Indentation</a>, Previous: <a href="#Introduction" accesskey="p" rel="prev">Introduction</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Basics-1"></a>
+<h2 class="chapter">2 Basics</h2>
+<a name="index-Top_002dlevel-procedures"></a>
+<a name="index-Menubar"></a>
+
+<p>For MapleV to properly locate, fontify, and index <em>top-level
+procedures</em>, that is, non-nested procedure assignments, the procedure
+name <em>must</em> be flush left.  Indenting the buffer moves top-level
+procedures to the left margin.
+</p>
+<p>There are a few exceptional cases in which what should be top-level
+procedures are, in fact, not.  The primary example is a Maple script in
+which procedures are conditionally assigned.  See <a href="#Preventing-indentation">Preventing indentation</a>, for an illustration and a method to automatically indent
+these procedures to the left column.
+</p>
+<p>Most of the higher-level MapleV functions, those that do more than edit
+text, are available on the menu-bar.
+</p>
+
+
+
+<hr>
+<a name="Indentation"></a>
+<div class="header">
+<p>
+Next: <a href="#Font-Lock" accesskey="n" rel="next">Font Lock</a>, Previous: <a href="#Basics" accesskey="p" rel="prev">Basics</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Indentation-2"></a>
+<h2 class="chapter">3 Indentation</h2>
+<a name="index-Indentation"></a>
+
+<p>Maple source code is indented according to its grammar.  The indentation
+can occur either as you enter the code or all at once; the latter action
+is useful when working with non-indented source code.  A grammatical
+error, typically an out-of-place keyword or parenthesis, generates an
+error and moves the cursor to the place where the error was detected.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Indentation-Commands" accesskey="1">Indentation Commands</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands for inserting and aligning comments.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Customizing-Indentation" accesskey="2">Customizing Indentation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Variables that affect indentation.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Indentation-Tricks" accesskey="3">Indentation Tricks</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Forcing and preventing indentation.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Indentation-Details" accesskey="4">Indentation Details</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Overview of the indentation algorithm.
+</td></tr>
+</table>
+
+
+<hr>
+<a name="Indentation-Commands"></a>
+<div class="header">
+<p>
+Next: <a href="#Customizing-Indentation" accesskey="n" rel="next">Customizing Indentation</a>, Previous: <a href="#Indentation" accesskey="p" rel="prev">Indentation</a>, Up: <a href="#Indentation" accesskey="u" rel="up">Indentation</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Commands"></a>
+<h3 class="section">3.1 Commands</h3>
+
+<a name="index-Indentation-commands"></a>
+<a name="index-Commands_002c-indentation"></a>
+
+<a name="index-C_002dj"></a>
+<a name="index-C_002dc-TAB-TAB"></a>
+<a name="index-C_002dc-TAB-b"></a>
+<a name="index-C_002dc-TAB-p"></a>
+<a name="index-C_002dc-TAB-r"></a>
+
+<a name="index-maplev_002delectric_002dtab"></a>
+<a name="index-maplev_002dindent_002dnewline"></a>
+<a name="index-maplev_002dindent_002dbuffer"></a>
+<a name="index-maplev_002dindent_002dprocedure"></a>
+<a name="index-maplev_002dindent_002dregion"></a>
+
+<dl compact="compact">
+<dt><kbd><span class="key">TAB</span></kbd></dt>
+<dd><p>Indent the current line (<code>maplev-electric-tab</code>).
+</p>
+</dd>
+<dt><kbd>C-j</kbd></dt>
+<dd><p>Indent the current line, insert a new line, and indent that line
+(<code>maplev-indent-newline</code>).
+</p>
+</dd>
+<dt><kbd>C-c <span class="key">TAB</span> <span class="key">TAB</span></kbd></dt>
+<dt><kbd>C-c <span class="key">TAB</span> b</kbd></dt>
+<dd><p>Indent the buffer (<code>maplev-indent-buffer</code>).
+</p>
+</dd>
+<dt><kbd>C-c <span class="key">TAB</span> k</kbd></dt>
+<dd><p>Clear the indentation information (<code>maplev-indent-clear-info</code>).
+To increase speed, MapleV&rsquo;s indentation algorithm stores
+the last valid indentation point.  Moving the point may
+occasionally cause indentation errors; use this procedure
+to recompute the indentation point.
+</p>
+</dd>
+<dt><kbd>C-c <span class="key">TAB</span> p</kbd></dt>
+<dd><p>Indent a procedure (<code>maplev-indent-procedure</code>).
+The smallest procedure, or module, at point is indented.
+</p>
+</dd>
+<dt><kbd>C-c <span class="key">TAB</span> r</kbd></dt>
+<dd><p>Indent the region (<code>maplev-indent-region</code>).
+The selected region is indented.
+</p>
+</dd>
+</dl>
+
+
+<hr>
+<a name="Customizing-Indentation"></a>
+<div class="header">
+<p>
+Next: <a href="#Indentation-Tricks" accesskey="n" rel="next">Indentation Tricks</a>, Previous: <a href="#Indentation-Commands" accesskey="p" rel="prev">Indentation Commands</a>, Up: <a href="#Indentation" accesskey="u" rel="up">Indentation</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Customizing-1"></a>
+<h3 class="section">3.2 Customizing</h3>
+<a name="index-Customizing-indentation"></a>
+<a name="index-Indentation_002c-customizing"></a>
+
+<p>The following variables affect indentation:
+</p>
+<dl compact="compact">
+<dd>
+<a name="index-maplev_002dindent_002dlevel"></a>
+</dd>
+<dt><code>maplev-indent-level</code>
+<a name="index-maplev_002dindent_002dlevel-1"></a>
+</dt>
+<dd><p>The amount a subblock is indented. The default is 4.
+</p>
+<a name="index-maplev_002dindent_002dtabs_002dmode"></a>
+</dd>
+<dt><code>maplev-indent-tabs-mode</code>
+<a name="index-maplev_002dindent_002dtabs_002dmode-1"></a>
+</dt>
+<dd><p>Non-nil means tabs may be used to indent.  The default is nil.
+</p>
+<a name="index-maplev_002dindent_002ddeclaration"></a>
+</dd>
+<dt><code>maplev-indent-declaration-level</code>
+<a name="index-maplev_002dindent_002ddeclaration_002dlevel"></a>
+</dt>
+<dd><p>This value is used to initialize the buffer-local variable
+<code>maplev-indent-declaration</code>, which sets the amount Maple procedure
+declarations (<code>local</code>, <code>global</code>, <code>option</code>, and
+<code>description</code>) are indented.  The default is 0.
+</p>
+</dd>
+<dt><code>maplev-dont-indent-re</code>
+<a name="index-maplev_002ddont_002dindent_002dre"></a>
+</dt>
+<dd><p>A regular expression or nil.  If non-nil then lines that begin with a match are not
+indented.  The default, &lsquo;<samp>&quot;#&quot;</samp>&rsquo;, prevents flush left comment lines
+from being indented.
+</p>
+</dd>
+<dt><code>maplev-tab-width</code>
+<a name="index-maplev_002dtab_002dwidth"></a>
+</dt>
+<dd><p>This integer value is used to initialize the value of <code>tab-width</code>.
+</p>
+<a name="index-maplev_002dget_002dtab_002dwidth_002dfunction"></a>
+</dd>
+<dt><code>maplev-get-tab-width-function</code>
+<a name="index-maplev_002dget_002dtab_002dwidth_002dfunction-1"></a>
+</dt>
+<dd><p>If assigned, this function is called, with the filename of the current buffer,
+when <code>maplev-mode</code> is executed.  It should return the desired value
+of <code>tab-width</code>.  If not assigned, <code>maplev-tab-width</code> is used as
+the value.
+</p>
+</dd>
+</dl>
+
+
+<hr>
+<a name="Indentation-Tricks"></a>
+<div class="header">
+<p>
+Next: <a href="#Indentation-Details" accesskey="n" rel="next">Indentation Details</a>, Previous: <a href="#Customizing-Indentation" accesskey="p" rel="prev">Customizing Indentation</a>, Up: <a href="#Indentation" accesskey="u" rel="up">Indentation</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Indentation-Tricks-1"></a>
+<h3 class="section">3.3 Indentation Tricks</h3>
+
+<p>The indentation algorithm is not perfect.  It can fail to indent code
+that should be indented or it may indent code that should not be
+indented.  The following sections give examples and demonstrate workarounds.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Forcing-indentation" accesskey="1">Forcing indentation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Using parentheses to force indentation.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Preventing-indentation" accesskey="2">Preventing indentation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Using continued comments to prevent indentation.
+</td></tr>
+</table>
+
+
+<hr>
+<a name="Forcing-indentation"></a>
+<div class="header">
+<p>
+Next: <a href="#Preventing-indentation" accesskey="n" rel="next">Preventing indentation</a>, Previous: <a href="#Indentation-Tricks" accesskey="p" rel="prev">Indentation Tricks</a>, Up: <a href="#Indentation-Tricks" accesskey="u" rel="up">Indentation Tricks</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Forcing-indentation-1"></a>
+<h4 class="subsection">3.3.1 Forcing indentation</h4>
+<a name="index-Forcing-indentation"></a>
+<a name="index-Indentation_002c-forcing"></a>
+<a name="index-Indenting-continued-expressions"></a>
+<a name="index-Continued-expression_002c-indenting"></a>
+
+<p>MapleV&rsquo;s indentation algorithm does not (currently) handle continued
+expressions.  It aligns continuations with the left most
+character in the preceding line.  In an assignment it is preferable to
+align with the right side of the assignment.  
+</p>
+<a name="Problem"></a>
+<h4 class="subsubheading">Problem</h4>
+
+<p>Indenting the following code causes the continued line to be left
+aligned with the preceding line, as the following illustrates:
+</p>
+<div class="example">
+<pre class="example">---------- Buffer: foo ----------
+y := a + ( ... ) 
+     + b;&lowast;
+---------- Buffer: foo ----------
+
+<span class="key">TAB</span>
+   &rArr;
+---------- Buffer: foo ----------
+y := a + ( ... ) 
++ b;&lowast;
+---------- Buffer: foo ----------        
+</pre></div>
+
+<a name="Solution"></a>
+<h4 class="subsubheading">Solution</h4>
+
+<p>Use extra parentheses to prevent the continuation line from being
+aligned with the opening column:
+</p>
+<div class="example">
+<pre class="example">---------- Buffer: foo ----------
+y := ( a + ( ... ) 
+       + b );
+---------- Buffer: foo ----------
+</pre></div>
+
+
+<hr>
+<a name="Preventing-indentation"></a>
+<div class="header">
+<p>
+Previous: <a href="#Forcing-indentation" accesskey="p" rel="prev">Forcing indentation</a>, Up: <a href="#Indentation-Tricks" accesskey="u" rel="up">Indentation Tricks</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Preventing-indentation-1"></a>
+<h4 class="subsection">3.3.2 Preventing indentation</h4>
+
+<a name="Problem-1"></a>
+<h4 class="subsubheading">Problem</h4>
+
+<p>Consider an installation script in which the procedures &lsquo;<samp>foo1</samp>&rsquo; and
+&lsquo;<samp>foo2</samp>&rsquo; are assigned only when the flag <code>assign_procs</code> is
+&lsquo;<samp>true</samp>&rsquo;.  The following example shows what happens when the buffer
+is indented.
+</p>
+<div class="example">
+<pre class="example">---------- Buffer: foo ----------
+if assign_procs then
+foo1 := proc() ... end:
+foo2 := proc() ... end:
+fi:
+---------- Buffer: foo ----------
+
+<kbd>M-x maplev-indent-buffer</kbd>
+   &rArr;
+---------- Buffer: foo ----------
+if assign_procs then
+    foo1 := proc() ... end:
+    foo2 := proc() ... end:
+fi:
+---------- Buffer: foo ----------
+</pre></div>
+
+
+<p>Because <code>foo1</code> and <code>foo2</code> are no longer flush left they are
+not recognized as top-level procedures.  Their names are not properly
+font locked and MapleV commands that operate on top-level procedures do
+not work on them.
+</p>
+<a name="Solution-1"></a>
+<h4 class="subsubheading">Solution</h4>
+
+<p>Because MapleV ignores comment continuations that Maple respects
+(<a href="#Comments">Comments</a>), we can use the following technique to prevent
+&lsquo;<samp>foo1</samp>&rsquo; and &lsquo;<samp>foo2</samp>&rsquo; from being indented.
+</p>
+<div class="example">
+<pre class="example">---------- Buffer: foo ----------
+if assign_procs then       #\
+fi                         # <span class="roman">Maple does not see this line</span>
+foo1 := proc() ... end:
+foo2 := proc() ... end:
+#\
+if then                    # <span class="roman">Maple does not see this line</span>
+fi:
+---------- Buffer: foo ----------
+</pre></div>
+
+<p>MapleV ignores the comment continuations and determines that each
+<code>if</code> statement is completed on the following line.  The procedures
+<code>foo1</code> and <code>foo2</code> are not indented.  Maple, however, continues
+the comments and so matches the initial <code>if</code> to the final
+<code>fi</code>; it ignores the dummy statements.
+</p>
+
+
+
+<hr>
+<a name="Indentation-Details"></a>
+<div class="header">
+<p>
+Previous: <a href="#Indentation-Tricks" accesskey="p" rel="prev">Indentation Tricks</a>, Up: <a href="#Indentation" accesskey="u" rel="up">Indentation</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Indentation-Details-1"></a>
+<h3 class="section">3.4 Indentation Details</h3>
+<a name="index-Indentation-details"></a>
+<a name="index-Details_002c-indentations"></a>
+<a name="index-Indentation-grammar"></a>
+<a name="index-Grammar_002c-indentation"></a>
+<a name="index-Indenting_002c-speed-of"></a>
+<a name="index-Speed-of_002c-indenting"></a>
+
+<p>A grammar table (<code>maplev--grammar-alist</code>) defines the grammar
+used to indent Maple code.
+</p>
+<p>MapleV parses the source to compute the appropriate indentation for each
+line.  To speed this process, information from the last parse is saved
+and reused.  This method allows it to indent entire buffers reasonably
+quickly; the largest file in the Maple R5 share library
+(<samp>gdev.mpl</samp>, 160K, by Bruno Salvy) took twelve seconds to indent on
+a PC running NTEmacs.  During editing, if the buffer is modified above
+the last indentation location then the indentation information is lost;
+consequently, you may occasionally notice small delays as the source is
+reparsed.
+</p>
+
+
+<hr>
+<a name="Font-Lock"></a>
+<div class="header">
+<p>
+Next: <a href="#Comments" accesskey="n" rel="next">Comments</a>, Previous: <a href="#Indentation" accesskey="p" rel="prev">Indentation</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Font-Lock-2"></a>
+<h2 class="chapter">4 Font Lock</h2>
+<a name="index-Font-lock"></a>
+
+
+<a name="index-Font-lock_002c-decoration-level"></a>
+<a name="index-Decoration-level_002c-font-lock"></a>
+<a name="index-Maximum-decoration_002c-font-lock"></a>
+
+<a name="index-font_002dlock_002dmaximum_002ddecoration"></a>
+<a name="index-maplev_002dreset_002dfont_002dlock"></a>
+
+<p>The amount of syntactical highlighting, or &ldquo;decoration&rdquo;, is controlled
+by the global variable <code>font-lock-maximum-decoration</code>, which you
+may set in your <samp>.emacs</samp> file.  See <a href="http://www.gnu.org/software/emacs/manual/html_mono/emacs.html#Font-Lock">(emacs)Font Lock</a>, for
+information.  MapleV mode provides three levels of decoration:
+</p>
+<ol>
+<li> Comments, quotes, top-level procedure names and Maple reserved works
+are highlighted.
+
+</li><li> Everything in level 1 plus Maple special words, initial variables, and
+the ditto operators are highlighted.
+
+</li><li> Everything in level 2 plus Maple built-in functions are highlighted.
+
+</li></ol>
+
+<p>Execute <kbd>M-x maplev-reset-font-lock <span class="key">RET</span> LEVEL <span class="key">RET</span></kbd> or
+use the menubar, <kbd>MapleV -&gt; Setup -&gt; Decoration</kbd>, to change the
+decoration in a MapleV buffer.  <code>LEVEL</code> is an integer from 1 to 3.
+</p>
+
+<hr>
+<a name="Comments"></a>
+<div class="header">
+<p>
+Next: <a href="#Shortcuts" accesskey="n" rel="next">Shortcuts</a>, Previous: <a href="#Font-Lock" accesskey="p" rel="prev">Font Lock</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Comments-2"></a>
+<h2 class="chapter">5 Comments</h2>
+
+<a name="index-Comments"></a>
+
+<a name="index-M_002d_003b"></a>
+<a name="index-C_002dx-_003b"></a>
+<a name="index-C_002du-_002d-C_002dx-_003b"></a>
+<a name="index-M_002dq"></a>
+
+<a name="index-indent_002dfor_002dcomment"></a>
+<a name="index-set_002dcomment_002dcolumn"></a>
+<a name="index-kill_002dcomment"></a>
+<a name="index-fill_002dparagraph"></a>
+
+<a name="index-comment_002dcolumn"></a>
+<a name="index-fill_002dcolumn"></a>
+
+
+<p>MapleV uses standard Emacs commands to enter, align and fill Maple
+comments.  See <a href="http://www.gnu.org/software/emacs/manual/html_mono/emacs.html#Comments">(emacs)Comments</a>. The commands are reproduced here
+for convenience.
+</p>
+<dl compact="compact">
+<dt><kbd>M-;</kbd></dt>
+<dd><p>Insert or align an inline comment (<code>indent-for-comment</code>).  The
+comment character is inserted at column <code>comment-column</code>.
+</p>
+</dd>
+<dt><kbd>C-x ;</kbd></dt>
+<dd><p>Set comment column (<code>set-comment-column</code>).
+</p>
+</dd>
+<dt><kbd>C-u - C-x ;</kbd></dt>
+<dd><p>Kill comment on current line (<code>kill-comment </code>).
+</p>
+</dd>
+<dt><kbd>M-q</kbd></dt>
+<dd><p>Fill a comment (<code>fill-paragraph</code>).  Wrap lines at column
+<code>fill-column</code> and insert new comment characters, aligned with the
+original comment character.
+</p>
+</dd>
+</dl>
+
+<p>The following variables affect comments:
+</p>
+<dl compact="compact">
+<dt><code>maplev-auto-fill-comment-flag</code>
+<a name="index-maplev_002dauto_002dfill_002dcomment_002dflag"></a>
+</dt>
+<dd><p>A boolean flag. If non-nil, the default, comment lines wrap as they are
+typed.  Wrapping, however, does not automatically start in an inline
+comment; it must be invoked with <code>fill-paragraph</code>.
+</p>
+</dd>
+<dt><code>maplev-comment-string</code>
+<a name="index-maplev_002dcomment_002dstring"></a>
+</dt>
+<dd><p>String variable inserted by <code>indent-for-comment</code>.
+The default is &lsquo;<samp># </samp>&rsquo;.
+</p>
+</dd>
+<dt><code>maplev-comment-column</code>
+<a name="index-maplev_002dcomment_002dcolumn"></a>
+</dt>
+<dd><p>Initial value of <code>comment-column</code>.  The default is 40.
+</p>
+</dd>
+<dt><code>maplev-comment-fill-column</code>
+<a name="index-maplev_002dcomment_002dfill_002dcolumn"></a>
+</dt>
+<dd><p>Initial value of <code>fill-column</code>.  The default is 79.
+</p>
+</dd>
+</dl>
+
+<p>Maple comment lines can be continued to the next line by ending them
+with a backslash.  MapleV does <em>not</em> recognize this continuation
+and interprets the following line as code.  This can fool the MapleV
+indentation grammar; however, it can also be used to achieve certain
+effects.  See <a href="#Preventing-indentation">Preventing indentation</a>, for an example.
+</p>
+
+<hr>
+<a name="Shortcuts"></a>
+<div class="header">
+<p>
+Next: <a href="#Imenu-support" accesskey="n" rel="next">Imenu support</a>, Previous: <a href="#Comments" accesskey="p" rel="prev">Comments</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Shortcuts-2"></a>
+<h2 class="chapter">6 Shortcuts</h2>
+<a name="index-Shortcuts"></a>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Abbreviations" accesskey="1">Abbreviations</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Abbreviations for common Maple functions.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Templates" accesskey="2">Templates</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Inserting procedures and assignments.
+</td></tr>
+</table>
+
+
+<hr>
+<a name="Abbreviations"></a>
+<div class="header">
+<p>
+Next: <a href="#Templates" accesskey="n" rel="next">Templates</a>, Previous: <a href="#Shortcuts" accesskey="p" rel="prev">Shortcuts</a>, Up: <a href="#Shortcuts" accesskey="u" rel="up">Shortcuts</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Abbreviations-1"></a>
+<h3 class="section">6.1 Abbreviations</h3>
+<a name="index-Abbreviations"></a>
+<a name="index-Custom-abbreviations"></a>
+
+<p>Abbreviations are available for common or lengthy Maple keywords. They
+are expanded whenever <code>abbrev-mode</code> is active.
+See <a href="http://www.gnu.org/software/emacs/manual/html_mono/emacs.html#Abbrevs">(emacs)Abbrevs</a>. The command <code>maplev-abbrev-help</code> displays
+a list of the available abbreviations.
+</p>
+<p>The following variables affect the expansion of abbreviations:
+</p>
+<dl compact="compact">
+<dt><code>maplev-initial-abbrev-mode-flag</code></dt>
+<dd><p>If non-nil <code>abbrev-mode</code> is activated when MapleV is started.  The
+default is &lsquo;<samp>t</samp>&rsquo;.
+</p>
+</dd>
+<dt><code>maplev-expand-abbrevs-in-comments-and-strings-flag</code></dt>
+<dd><p>If non-nil then the Maple abbreviations are expanded in comments and
+strings. The default is &lsquo;<samp>nil</samp>&rsquo;.
+</p>
+</dd>
+</dl>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Customizing-Abbreviations" accesskey="1">Customizing Abbreviations</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+
+
+
+<hr>
+<a name="Customizing-Abbreviations"></a>
+<div class="header">
+<p>
+Previous: <a href="#Abbreviations" accesskey="p" rel="prev">Abbreviations</a>, Up: <a href="#Abbreviations" accesskey="u" rel="up">Abbreviations</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Customizing-Abbreviations-1"></a>
+<h4 class="subsection">6.1.1 Customizing Abbreviations</h4>
+
+<p>The predefined MapleV abbreviations are stored in the abbreviation table
+<code>maplev-mode-abbrev-table</code>.  The following code may be added to
+your <samp>.emacs</samp> file to assign &lsquo;<samp>simp</samp>&rsquo; as an abbreviation for
+&lsquo;<samp>simplify</samp>&rsquo;.
+</p>
+<div class="example">
+<pre class="example">(define-abbrev maplev-mode-abbrev-table 
+        &quot;simp&quot; &quot;simplify&quot; 'maplev--abbrev-hook)
+</pre></div>
+
+<p>The function &lsquo;<samp>'maplev--abbrev-hook</samp>&rsquo; prevents the abbreviation from
+being expanded inside a comment or quote.
+</p>
+<p>To remove an abbreviation from the table assign it <code>nil</code>.  For
+example, to prevent &lsquo;<samp>lib</samp>&rsquo; from expanding to &lsquo;<samp>libname</samp>&rsquo;, add the
+following to <samp>emacs</samp>:
+</p>
+<div class="example">
+<pre class="example">(define-abbrev maplev-mode-abbrev-table &quot;lib&quot; nil nil)
+</pre></div>
+
+
+
+
+<hr>
+<a name="Templates"></a>
+<div class="header">
+<p>
+Previous: <a href="#Abbreviations" accesskey="p" rel="prev">Abbreviations</a>, Up: <a href="#Shortcuts" accesskey="u" rel="up">Shortcuts</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Templates-1"></a>
+<h3 class="section">6.2 Templates</h3>
+<a name="index-Templates"></a>
+<a name="index-Procedure-template"></a>
+<a name="index-Template_002c-procedure"></a>
+<a name="index-Assignment-operator_002c-template"></a>
+
+<a name="index-C_002dc-C_002dp"></a>
+<a name="index-C_002d_003b"></a>
+
+<a name="index-maplev_002dtemplate_002dproc"></a>
+<a name="index-maplev_002dinsert_002dassignment_002doperator"></a>
+
+<dl compact="compact">
+<dt><kbd>C-c C-p</kbd></dt>
+<dd><p>Insert a procedure template (<code>maplev-template-proc</code>).  
+The user is queried for the name, arguments, and a description of the procedure.
+Any of the entries can be left blank.  If the name is blank then an
+anonymous procedure is inserted, otherwise an assignment is inserted
+with the procedure assigned to the given name.  Backquotes are added
+automatically to procedure names if required by Maple.
+</p>
+</dd>
+<dt><kbd>C-;</kbd></dt>
+<dd><p>Insert an assignment operator at the end of the current line
+(<code>maplev-insert-assignment-operator</code>).
+</p>
+</dd>
+</dl>
+
+
+<p>The following variables affect the shortcuts:
+</p>
+<dl compact="compact">
+<dt><code>maplev-insert-copyright-flag</code>
+<a name="index-maplev_002dinsert_002dcopyright_002dflag"></a>
+</dt>
+<dd><p>If non-nil then a copyright notice is inserted in the <code>option</code>
+declaration of the procedure template.  The default is <code>t</code>.
+</p>
+</dd>
+<dt><code>maplev-copyright-owner</code>
+<a name="index-maplev_002dcopyright_002downer"></a>
+</dt>
+<dd><p>String inserted as the copyright owner.
+</p>
+</dd>
+<dt><code>maplev-comment-end-flag</code>
+<a name="index-maplev_002dcomment_002dend_002dflag"></a>
+</dt>
+<dd><p>If non-nil then the name of the procedure is inserted as a comment to
+the right of the closing <code>end</code> statement.
+</p>
+</dd>
+<dt><code>maplev-assignment-operator</code>
+<a name="index-maplev_002dassignment_002doperator"></a>
+</dt>
+<dd><p>The string inserted by <code>maplev-insert-assignment-operator</code>.
+The default value is &lsquo;<samp> := </samp>&rsquo;.
+</p>
+</dd>
+</dl>
+
+
+
+<hr>
+<a name="Imenu-support"></a>
+<div class="header">
+<p>
+Next: <a href="#Miscellaneous-features" accesskey="n" rel="next">Miscellaneous features</a>, Previous: <a href="#Shortcuts" accesskey="p" rel="prev">Shortcuts</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Imenu-support-1"></a>
+<h2 class="chapter">7 Imenu support</h2>
+<a name="index-Imenu"></a>
+<a name="index-Index_002c-procedures"></a>
+<a name="index-Procedure-index"></a>
+
+<a name="index-maplev_002dadd_002dimenu"></a>
+
+<p>Executing <kbd>maplev-add-imenu</kbd> or selecting <kbd>MapleV -&gt; Add Index</kbd>
+from the menubar creates an indexed menu of the top-level Maple
+procedures, global variables, and macro assignments.  The menu appears
+under the &lsquo;<samp>Index</samp>&rsquo; heading in the menubar.  Clicking on an item in
+the menu moves point to the assignment of that item.
+</p>
+<p>The assignments must be flush left to be indexed.
+Only the first macro in a <code>macro</code> assignment is indexed.
+</p>
+<hr>
+<a name="Miscellaneous-features"></a>
+<div class="header">
+<p>
+Next: <a href="#Configuration" accesskey="n" rel="next">Configuration</a>, Previous: <a href="#Imenu-support" accesskey="p" rel="prev">Imenu support</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Miscellaneous-features-1"></a>
+<h2 class="chapter">8 Miscellaneous features</h2>
+<a name="index-Miscellaneous"></a>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Include-statements" accesskey="1">Include statements</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Active include statements.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Indent-trace-output" accesskey="2">Indent trace output</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Hierarchically indent Maple trace output.
+</td></tr>
+</table>
+
+<hr>
+<a name="Include-statements"></a>
+<div class="header">
+<p>
+Next: <a href="#Indent-trace-output" accesskey="n" rel="next">Indent trace output</a>, Previous: <a href="#Miscellaneous-features" accesskey="p" rel="prev">Miscellaneous features</a>, Up: <a href="#Miscellaneous-features" accesskey="u" rel="up">Miscellaneous features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Include-statements-1"></a>
+<h3 class="section">8.1 Include statements</h3>
+<a name="index-Include"></a>
+
+<a name="index-maplev_002dfind_002dinclude_002dfile_002dat_002dpoint"></a>
+<p>Maple include statements, such as <code>$include &lt;somefile&gt;</code>,
+are font-locked and active.  
+Clicking on them, or typing <kbd>C-c C-o</kbd>,
+calls <kbd>maplev-find-include-file-at-point</kbd>,
+which searches for the file and, if successful, opens it.
+If the path exists, but the file does not, the user is
+asked whether to create the file.  
+</p>
+<a name="index-maplev_002dinclude_002dpath"></a>
+<p>The include path can be
+assigned, as a list of strings, to the variable <kbd>maplev-include-path</kbd>.
+The paths are searched in the order of occurrence in the list.
+</p>
+<a name="index-maplev_002dinclude_002dfile_002dother_002dwindow_002dflag"></a>
+<p>The customizable variable <kbd>maplev-include-file-other-window-flag</kbd>
+determines whether the file is opened in the current window or 
+another window.
+</p>
+<hr>
+<a name="Indent-trace-output"></a>
+<div class="header">
+<p>
+Previous: <a href="#Include-statements" accesskey="p" rel="prev">Include statements</a>, Up: <a href="#Miscellaneous-features" accesskey="u" rel="up">Miscellaneous features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Indent-trace-output-1"></a>
+<h3 class="section">8.2 Indent trace output</h3>
+<a name="index-Indent-trace"></a>
+
+<p>The Maple <code>trace</code> command causes Maple to print the
+assignments that occur in selected procedures.
+The following commands can be used to hierarchically
+indent the resulting output in an Emacs buffer.
+To be sensible, the output should be created with
+<code>interface(prettyprint=0)</code>.
+</p>
+<dl compact="compact">
+<dd>
+<a name="index-maplev_002dtrace_002dindent_002dbuffer"></a>
+</dd>
+<dt><code>maplev-trace-indent-buffer</code></dt>
+<dd><p>Hierarchically indent all Maple trace output in the buffer.
+</p>
+<a name="index-maplev_002dtrace_002dindent_002dregion"></a>
+</dd>
+<dt><code>maplev-trace-indent-region</code></dt>
+<dd><p>Hierarchically indent selected region in the buffer.
+</p>
+<a name="index-maplev_002dtrace_002dindent"></a>
+</dd>
+<dt><code>maplev-trace-indent</code></dt>
+<dd><p>Emacs variable that sets the indentation level for trace output.
+The default is four spaces.
+</p>
+</dd>
+</dl>
+
+
+<hr>
+<a name="Configuration"></a>
+<div class="header">
+<p>
+Next: <a href="#Mint" accesskey="n" rel="next">Mint</a>, Previous: <a href="#Miscellaneous-features" accesskey="p" rel="prev">Miscellaneous features</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Configuration-1"></a>
+<h2 class="chapter">9 Configuration</h2>
+<a name="index-Configuration"></a>
+<a name="index-maplev_002dload_002dconfig_002dfile_002dflag"></a>
+<a name="index-default_002ddirectory"></a>
+
+<p>When Maplev-mode is called,
+  a search is made for a <samp>.maplev</samp> file
+  if the flag <code>maplev-load-config-file-flag</code> is non-nil.
+The search begins in <code>default-directory</code>,
+which is typically the directory associated with the current buffer,
+  and moves upward through the file hierarchy, 
+  stopping when the file is found or root is reached.
+If the file is found, it is loaded as an Emacs lisp file.
+</p>
+<p>The <code>maplev-config</code> function can be used in the <samp>.maplev</samp> file
+to create an object that configures MapleV on a per-project basis.
+</p>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Configuration-Object" accesskey="1">Configuration Object</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Configuring MapleV executables and their options.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Configuration-Example" accesskey="2">Configuration Example</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Example configuration (.maplev file).
+</td></tr>
+</table>
+
+<hr>
+<a name="Configuration-Object"></a>
+<div class="header">
+<p>
+Next: <a href="#Configuration-Example" accesskey="n" rel="next">Configuration Example</a>, Previous: <a href="#Configuration" accesskey="p" rel="prev">Configuration</a>, Up: <a href="#Configuration" accesskey="u" rel="up">Configuration</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Configuration-Object-1"></a>
+<h3 class="section">9.1 Configuration Object</h3>
+<a name="index-Configuration-Object"></a>
+<a name="index-maplev_002dconfig"></a>
+<a name="index-maplev_002dconfig_002dclass"></a>
+
+<p>The function <code>maplev-config</code> constructs 
+an <code>eieio</code> object of class <code>maplev-config-class</code>
+and assigns it to the eponymous buffer-local variable <code>maplev-config</code>.
+For details about objects, see <cite><a href="http://www.gnu.org/software/emacs/manual/html_mono/eieio.html#Top">The EIEIO Manual</a></cite>.
+The following fields are defined.
+</p>
+<dl compact="compact">
+<dt><kbd>:compile</kbd></dt>
+<dd><p>Shell command to build and install a Maple archive.
+If assigned, the string is assigned to the Emacs lisp
+variable <var>compile-command</var>, which is then made buffer-local.
+Executing the Emacs function <code>compile</code> in a MapleV buffer
+that uses this configuration runs the assigned shell command.
+Typically assigned to a <code>make</code> command.
+See <a href="#Configuration-Example">Configuration Example</a>.
+</p>
+</dd>
+<dt><kbd>:include-path</kbd></dt>
+<dd><p>A string or list of strings of directories to search for files
+specified with <code>$include</code> statements in Maple source files.
+Used by <code>mint</code>, Maple&rsquo;s syntax checker,
+by hyperlinked <code>$include</code> statements,
+and by the <code>mpldoc</code> tester,
+see the <code>:tester</code> entry, below.
+</p>
+
+</dd>
+<dt><kbd>:maple</kbd></dt>
+<dd><p>Shell command to execute tty (command-line) Maple.
+The default is &lsquo;<samp>maple</samp>&rsquo;.  See <a href="#Maple">Maple</a>.
+</p>
+</dd>
+<dt><kbd>:mapledir</kbd></dt>
+<dd><p>The path to the installation of Maple.
+If left nil, the default, this field is automatically
+assigned by the function <code>maplev-config</code>.
+</p>
+</dd>
+<dt><kbd>:maple-options</kbd></dt>
+<dd><p>A string of options to pass to <code>maple</code>.
+The default is &lsquo;<samp>-B -A2 -e2</samp>&rsquo;.
+See the Maple help page for <code>maple</code>
+for a description of the available options.
+</p>
+</dd>
+<dt><kbd>:mint</kbd></dt>
+<dd><p>Shell command to execute Mint, the Maple syntax-checker.
+The default is &lsquo;<samp>mint</samp>&rsquo;.  See <a href="#Mint">Mint</a>.
+</p>
+</dd>
+<dt><kbd>:mint-options</kbd></dt>
+<dd><p>A string of options to pass to <code>mint</code>.
+The default is &lsquo;<samp>-i2 -q -v -w 100</samp>&rsquo;.
+The use of the verbose option, &lsquo;<samp>-v</samp>&rsquo;,
+is necessary so that <code>mint</code> output for include files
+shows the path to the file; the information is used 
+to jump to the source location of a mint warning.
+Maplesoft developers: be aware that <code>smint</code> 
+use &lsquo;<samp>-V</samp>&rsquo; for the verbose option.
+See the Maple help page for <code>mint</code>
+for a description of the available options.
+</p>
+</dd>
+<dt><kbd>:tester</kbd></dt>
+<dd><p>Shell command to execute Maplesoft <code>tester</code>.
+Used by <code>mpldoc-test-run-tester</code>, 
+which is part of the <code>mpldoc</code> package.
+See <a href="mpldoc.html#Testing">Testing</a> in <cite>The Mpldoc Manual</cite>.
+Use of this requires access to Maplesoft&rsquo;s <code>tester</code> facility.
+</p>
+</dd>
+<dt><kbd>:tester-options</kbd></dt>
+<dd><p>A string of options to pass to <code>tester</code>.  See above.
+The default is the empty string.
+</p>
+</dd>
+</dl>
+
+
+<hr>
+<a name="Configuration-Example"></a>
+<div class="header">
+<p>
+Previous: <a href="#Configuration-Object" accesskey="p" rel="prev">Configuration Object</a>, Up: <a href="#Configuration" accesskey="u" rel="up">Configuration</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Configuration-Example-1"></a>
+<h3 class="section">9.2 Configuration Example</h3>
+
+<p>Following is a typical example of the content of a <samp>.maplev</samp> file,
+for a Maple package/project named <code>Bark</code>.
+</p>
+<div class="example">
+<pre class="example">(let ((proj-root (concat (getenv &quot;HOME&quot;) &quot;/maple/Bark&quot;)))
+  (maplev-config
+   :mint-options &quot;-l -v&quot;
+   :include-path proj-root
+   :compile (format &quot;make -C %s mla-install&quot; proj-root)))
+</pre></div>
+
+<p>The <code>:compile</code> value in this example is a shell command
+that passes the <code>mla-install</code> target
+to a project-specific <samp>Makefile</samp>.  
+The associated rule in the <samp>Makefile</samp>
+presumably builds and installs the Maple library archive, <samp>Bark.mla</samp>.
+</p>
+
+
+
+<hr>
+<a name="Mint"></a>
+<div class="header">
+<p>
+Next: <a href="#Maple" accesskey="n" rel="next">Maple</a>, Previous: <a href="#Configuration" accesskey="p" rel="prev">Configuration</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Mint-1"></a>
+<h2 class="chapter">10 Mint</h2>
+<a name="index-Mint"></a>
+<a name="index-Syntax-checking"></a>
+<a name="index-Checking-syntax"></a>
+
+<p>Mint is Maple&rsquo;s syntax checker. It analyzes a Maple program and produces
+a report about the syntax and variable usage.  MapleV can run
+<code>mint</code> on the entire buffer or a portion of it.  The output of
+mint is displayed in a buffer with a special mode, <code>mint-mode</code>,
+that provides a convenient means for locating and correcting syntax
+errors.
+</p>
+<p>To allow Emacs to run <code>mint</code>,
+the <code>:mint</code> and <code>:mint-options</code> fields
+of <code>maplev-config</code> must be properly configured.
+See <a href="#Configuration">Configuration</a>.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Running-mint" accesskey="1">Running mint</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands for sending code to <code>mint</code>.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Mint-mode" accesskey="2">Mint mode</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Mode for viewing the output of <code>mint</code>.
+</td></tr>
+</table>
+
+
+<hr>
+<a name="Running-mint"></a>
+<div class="header">
+<p>
+Next: <a href="#Mint-mode" accesskey="n" rel="next">Mint mode</a>, Previous: <a href="#Mint" accesskey="p" rel="prev">Mint</a>, Up: <a href="#Mint" accesskey="u" rel="up">Mint</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Running-mint-1"></a>
+<h3 class="section">10.1 Running mint</h3>
+<a name="index-Running-mint"></a>
+<a name="index-Mint_002c-running"></a>
+
+<a name="index-C_002dc-RET-b"></a>
+<a name="index-C_002dc-RET-p"></a>
+<a name="index-C_002dc-RET-r"></a>
+<a name="index-C_002dc-RET-RET"></a>
+
+<a name="index-mint_002dbuffer"></a>
+<a name="index-mint_002dprocedure"></a>
+<a name="index-mint_002dregion"></a>
+<a name="index-mint_002drerun"></a>
+
+<p>The following commands send source code in the buffer to <code>mint</code>:
+</p>
+<dl compact="compact">
+<dt><kbd>C-c <span class="key">RET</span> b</kbd></dt>
+<dd><p>Run <code>mint</code> on the buffer (<code>mint-buffer</code>).
+</p>
+</dd>
+<dt><kbd>C-c <span class="key">RET</span> p</kbd></dt>
+<dd><p>Run <code>mint</code> on the current procedure (<code>mint-procedure</code>).
+</p>
+</dd>
+<dt><kbd>C-c <span class="key">RET</span> r</kbd></dt>
+<dd><p>Run <code>mint</code> on the marked region (<code>mint-region</code>).
+</p>
+</dd>
+<dt><kbd>C-c <span class="key">RET</span> <span class="key">RET</span></kbd></dt>
+<dd><p>Rerun the previous <code>mint</code> command (<code>mint-rerun</code>).
+</p>
+</dd>
+</dl>
+
+<p>These commands are available through the menubar, <kbd>MapleV -&gt; Mint</kbd>.
+The following variables affect the output of <code>mint</code>:
+</p>
+<dl compact="compact">
+<dt><code>mint-info-level</code>
+<a name="index-mint_002dinfo_002dlevel"></a>
+</dt>
+<dd><p>An integer from 0 to 4 that selects the amount of information displayed
+by <code>mint</code>.  0 displays no information, 4 displays the most.  The default
+value is 3.  This value can be set through the menubar,
+<kbd>Maplev -&gt; Mint -&gt; Mint level</kbd>.
+</p>
+</dd>
+<dt><code>mint-coding-system</code>
+<a name="index-mint_002dcoding_002dsystem"></a>
+</dt>
+<dd><p>Symbol that defines the coding system used by <code>mint</code>.  The default value
+is <code>undecided-dos</code>.
+</p>
+</dd>
+</dl>
+
+
+<hr>
+<a name="Mint-mode"></a>
+<div class="header">
+<p>
+Previous: <a href="#Running-mint" accesskey="p" rel="prev">Running mint</a>, Up: <a href="#Mint" accesskey="u" rel="up">Mint</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Mint-mode-1"></a>
+<h3 class="section">10.2 Mint mode</h3>
+<a name="index-Mint-mode"></a>
+<a name="index-Mode_002c-Mint"></a>
+
+<p>Mint mode is applied to mint&rsquo;s output buffer.  Warnings and errors are
+font locked and activated.  Moving the mouse pointer over active text
+highlights it; clicking it (<kbd>mouse-1</kbd>) either moves the cursor to
+the appropriate point in the source code or queries to automatically
+correct an error.
+</p>
+<p>The following commands are available:
+</p>
+<dl compact="compact">
+<dt><kbd>s</kbd></dt>
+<dd><p>Incremental forward search (<code>isearch-forward</code>).
+</p>
+</dd>
+<dt><kbd>r</kbd></dt>
+<dd><p>Incremental backward search (<code>isearch-backward</code>).
+</p>
+</dd>
+<dt><kbd><span class="key">RET</span></kbd></dt>
+<dd><p>Re-execute the previous mint command (<code>mint-rerun</code>).
+</p>
+</dd>
+<dt><kbd><span class="key">DEL</span></kbd></dt>
+<dd><p>Scroll down (<code>scroll-down</code>).
+</p>
+</dd>
+<dt><kbd><span class="key">SPC</span></kbd></dt>
+<dd><p>Scroll up (<code>scroll-up</code>).
+</p>
+</dd>
+<dt><kbd>mouse-1</kbd></dt>
+<dd><p>Goto location in source, or fix error, depending on the active text.
+</p>
+</dd>
+</dl>
+
+<p>The following variables set the display faces for the highlighted text in the
+mint buffer:
+</p>
+<dl compact="compact">
+<dt><code>mint-proc-face</code>
+<a name="index-mint_002dproc_002dface"></a>
+</dt>
+<dd><p>Face for procedure names.
+</p>
+</dd>
+<dt><code>mint-warning-face</code>
+<a name="index-mint_002dwarning_002dface"></a>
+</dt>
+<dd><p>Face for warnings.
+</p>
+</dd>
+<dt><code>mint-error-face</code>
+<a name="index-mint_002derror_002dface"></a>
+</dt>
+<dd><p>Face for errors.
+</p>
+</dd>
+<dt><code>mint-note-face</code>
+<a name="index-mint_002dnote_002dface"></a>
+</dt>
+<dd><p>Face for notes (usually &lsquo;<samp>on line</samp>&rsquo;).
+</p>
+</dd>
+</dl>
+
+
+
+<hr>
+<a name="Maple"></a>
+<div class="header">
+<p>
+Next: <a href="#Help-pages" accesskey="n" rel="next">Help pages</a>, Previous: <a href="#Mint" accesskey="p" rel="prev">Mint</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Maple-1"></a>
+<h2 class="chapter">11 Maple</h2>
+<a name="index-Cmaple"></a>
+<a name="index-Maple_002c-command-line"></a>
+
+<p>The command line version of Maple can be started in a buffer.  All or
+portions of the code in the MapleV buffer can be passed directly to the
+Maple process.  Maple commands can be directly executed in the buffer.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Running-Maple" accesskey="1">Running Maple</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands for sending code to the Maple engine.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Cmaple-mode" accesskey="2">Cmaple mode</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Mode for interacting with Maple.
+</td></tr>
+</table>
+
+
+<hr>
+<a name="Running-Maple"></a>
+<div class="header">
+<p>
+Next: <a href="#Cmaple-mode" accesskey="n" rel="next">Cmaple mode</a>, Previous: <a href="#Maple" accesskey="p" rel="prev">Maple</a>, Up: <a href="#Maple" accesskey="u" rel="up">Maple</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Running-Maple-1"></a>
+<h3 class="section">11.1 Running Maple</h3>
+<a name="index-Cmaple_002c-running"></a>
+<a name="index-Running_002c-Cmaple"></a>
+
+<a name="index-C_002dc-C_002dc-b"></a>
+<a name="index-C_002dc-C_002dc-p"></a>
+<a name="index-C_002dc-C_002dc-r"></a>
+<a name="index-C_002dc-C_002dc-g"></a>
+<a name="index-C_002dc-C_002dc-i"></a>
+<a name="index-C_002dc-C_002dc-k"></a>
+
+<a name="index-cmaplev_002dsend_002dbuffer"></a>
+<a name="index-cmaplev_002dsend_002dprocedure"></a>
+<a name="index-cmaplev_002dsend_002dregion"></a>
+<a name="index-cmaplev_002dgoto_002dbuffer"></a>
+<a name="index-cmaplev_002dinterrupt"></a>
+<a name="index-cmaplev_002dkill"></a>
+
+<p>The following commands in the MapleV buffer affect the Maple engine:
+</p>
+<dl compact="compact">
+<dt><kbd>C-c C-c b</kbd></dt>
+<dd><p>Send the entire buffer to the Maple engine (<code>cmaplev-send-buffer</code>).
+</p>
+</dd>
+<dt><kbd>C-c C-c p</kbd></dt>
+<dd><p>Send the current procedure to the Maple engine
+(<code>cmaplev-send-procedure</code>).
+</p>
+</dd>
+<dt><kbd>C-c C-c r</kbd></dt>
+<dd><p>Send the marked region to the Maple engine (<code>cmaplev-send-region</code>).
+</p>
+</dd>
+<dt><kbd>C-c C-c g</kbd></dt>
+<dd><p>Goto the Maple buffer (<code>cmaplev-goto-buffer</code>).
+</p>
+</dd>
+<dt><kbd>C-c C-c i</kbd></dt>
+<dd><p>Interrupt the Maple engine (<code>cmaplev-interrupt</code>).
+</p>
+</dd>
+<dt><kbd>C-c C-c k</kbd></dt>
+<dd><p>Kill the Maple engine (<code>cmaplev-kill</code>).
+</p>
+</dd>
+</dl>
+
+<p>These commands are available through the menubar, <kbd>MapleV -&gt; Maple</kbd>.
+</p>
+
+<hr>
+<a name="Cmaple-mode"></a>
+<div class="header">
+<p>
+Previous: <a href="#Running-Maple" accesskey="p" rel="prev">Running Maple</a>, Up: <a href="#Maple" accesskey="u" rel="up">Maple</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Cmaple-mode-1"></a>
+<h3 class="section">11.2 Cmaple mode</h3>
+<a name="index-Cmaple-mode"></a>
+<a name="index-Mode_002c-cmaple"></a>
+
+<p>The command line version of Maple is run in a buffer with the mode
+<code>cmaple-process-mode</code> that is based on <code>comint-mode</code>.
+See <a href="http://www.gnu.org/software/emacs/manual/html_mono/emacs.html#Shell-Mode">(emacs)Shell Mode</a> for more information.
+In addition to the normal <code>comint</code> commands, the following commands
+are available:
+</p>
+<dl compact="compact">
+<dt><kbd>?</kbd></dt>
+<dt><kbd>C-?</kbd></dt>
+<dd><p>Display a Maple help topic (see <a href="#Help-pages">Help pages</a>).
+</p>
+</dd>
+<dt><kbd>M-?</kbd></dt>
+<dd><p>Display a Maple expression (see <a href="#Viewing">Viewing</a>).
+</p>
+</dd>
+</dl>
+
+
+
+<hr>
+<a name="Help-pages"></a>
+<div class="header">
+<p>
+Next: <a href="#Viewing" accesskey="n" rel="next">Viewing</a>, Previous: <a href="#Maple" accesskey="p" rel="prev">Maple</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Help-pages-1"></a>
+<h2 class="chapter">12 Help pages</h2>
+<a name="index-Help-pages_002c-Maple"></a>
+<a name="index-Maple-help-pages"></a>
+
+<p>Help pages can be read from the Maple help databases and displayed in a
+buffer with major mode <code>maplev-help-mode</code>.  Text in the buffer is
+highlighted and cross references are activated.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Displaying-help-pages" accesskey="1">Displaying help pages</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands for displaying Maple help pages.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#MapleV-help-mode" accesskey="2">MapleV help mode</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Mode for viewing Maple help pages.
+</td></tr>
+</table>
+
+
+<hr>
+<a name="Displaying-help-pages"></a>
+<div class="header">
+<p>
+Next: <a href="#MapleV-help-mode" accesskey="n" rel="next">MapleV help mode</a>, Previous: <a href="#Help-pages" accesskey="p" rel="prev">Help pages</a>, Up: <a href="#Help-pages" accesskey="u" rel="up">Help pages</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Displaying-help-pages-1"></a>
+<h3 class="section">12.1 Displaying help pages</h3>
+
+<a name="index-C_002d_003f"></a>
+<a name="index-S_002dmouse_002d2"></a>
+
+<a name="index-maplev_002dhelp_002dat_002dpoint"></a>
+<a name="index-maplev_002dhelp_002dfollow_002dmouse"></a>
+
+<p>The following commands display Maple help pages:
+</p>
+<dl compact="compact">
+<dt><kbd>C-?</kbd></dt>
+<dd><p>Query for a help topic, using the word at point as a default.  Display
+the help page in a buffer (<code>maplev-help-at-point</code>).
+</p>
+</dd>
+<dt><kbd>S-mouse-2</kbd></dt>
+<dd><p>Display the Maple help page for the topic at the click
+(<code>maplev-help-follow-mouse</code>).
+</p>
+</dd>
+</dl>
+
+<p>Help pages are displayed in a buffer with major mode
+<code>maplev-help-mode</code>.
+</p>
+
+<hr>
+<a name="MapleV-help-mode"></a>
+<div class="header">
+<p>
+Previous: <a href="#Displaying-help-pages" accesskey="p" rel="prev">Displaying help pages</a>, Up: <a href="#Help-pages" accesskey="u" rel="up">Help pages</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="MapleV-help-mode-1"></a>
+<h3 class="section">12.2 MapleV help mode</h3>
+<a name="index-MapleV-help-mode"></a>
+<a name="index-Mode_002c-help_002c-MapleV"></a>
+<a name="index-History_002c-help-mode"></a>
+
+<a name="index-maplev_002dhelp_002dmode"></a>
+<a name="index-maplev_002dclear_002dhistory"></a>
+
+<p>The major mode <code>maplev-help-mode</code> is active in the buffer that
+displays Maple help pages.  Section headers are font locked and text in
+the &lsquo;<samp>See Also</samp>&rsquo; section is activated so that clicking on it opens
+the help page for the topic.  The following commands are available:
+</p>
+<a name="index-s"></a>
+<a name="index-p"></a>
+<a name="index-n"></a>
+<a name="index-P"></a>
+<a name="index-r"></a>
+<a name="index-_003f"></a>
+
+<dl compact="compact">
+<dt><kbd>s</kbd></dt>
+<dd><p>Incremental forward search (<code>isearch-forward</code>).
+</p>
+</dd>
+<dt><kbd>p</kbd></dt>
+<dd><p>Previous help topic (<code>maplev-prev-item</code>).
+</p>
+</dd>
+<dt><kbd>n</kbd></dt>
+<dd><p>Next help topic (<code>maplev-next-item</code>).
+</p>
+</dd>
+<dt><kbd>P</kbd></dt>
+<dd><p>Parent help topic (<code>maplev-help-parent</code>).
+</p>
+</dd>
+<dt><kbd>r</kbd></dt>
+<dd><p>Redraw help page (<code>maple-redo-item</code>).
+</p>
+</dd>
+<dt><kbd>?</kbd></dt>
+<dt><kbd>C-?</kbd></dt>
+<dt><kbd><span class="key">RTN</span></kbd></dt>
+<dd><p>Query for a help topic (<code>maplev-help-at-point</code>).
+</p>
+</dd>
+<dt><kbd>M-?</kbd></dt>
+<dd><p>Query for a procedure (<code>maplev-proc-at-point</code>).
+</p>
+</dd>
+<dt><kbd><span class="key">SPC</span></kbd></dt>
+<dd><p>Scroll down.
+</p>
+</dd>
+<dt><kbd><span class="key">DEL</span></kbd></dt>
+<dd><p>Scroll up.
+</p>
+</dd>
+</dl>
+
+<p>MapleV help mode keeps a history of the help topics displayed.
+Use the command <code>maplev-clear-history</code> to erase the history.
+</p>
+<p>The help page for a chosen topic is displayed by sending the string
+&lsquo;<samp>?TOPIC</samp>&rsquo; to the Maple engine and capturing the output.  If the
+Maple engine is busy an error message, &lsquo;<samp>Maple busy</samp>&rsquo;, is displayed in
+the message window.  
+</p>
+
+
+<hr>
+<a name="Viewing"></a>
+<div class="header">
+<p>
+Next: <a href="#Installation" accesskey="n" rel="next">Installation</a>, Previous: <a href="#Help-pages" accesskey="p" rel="prev">Help pages</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Viewing-1"></a>
+<h2 class="chapter">13 Viewing</h2>
+<a name="index-Viewing_002c-Maple"></a>
+
+<p>Maple code for modules and procedures stored in Maple libraries, or
+otherwise known to Maple, can be displayed in a buffer with major mode
+<code>maplev-view-mode</code>.  The code is font-locked the same as in MapleV
+mode.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Displaying" accesskey="1">Displaying</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commands to display Maple expressions.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#MapleV-view-mode" accesskey="2">MapleV view mode</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Mode for viewing Maple library code.
+</td></tr>
+</table>
+
+
+<hr>
+<a name="Displaying"></a>
+<div class="header">
+<p>
+Next: <a href="#MapleV-view-mode" accesskey="n" rel="next">MapleV view mode</a>, Previous: <a href="#Viewing" accesskey="p" rel="prev">Viewing</a>, Up: <a href="#Viewing" accesskey="u" rel="up">Viewing</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Displaying-procedures"></a>
+<h3 class="section">13.1 Displaying procedures</h3>
+<a name="index-M_002d_003f"></a>
+<a name="index-M_002dS_002dmouse_002d2"></a>
+
+<a name="index-maplev_002dview_002dat_002dpoint"></a>
+<a name="index-maplev_002dview_002dfollow_002dpoint"></a>
+
+<p>The following commands display Maple procedures:
+</p>
+<dl compact="compact">
+<dt><kbd>M-?</kbd></dt>
+<dd><p>Query for a procedure name, using the word at point as the default.
+Read the procedure from the Maple library and display it in a buffer
+(<code>maplev-view-at-point</code>).
+</p>
+</dd>
+<dt><kbd>M-S-mouse-2</kbd></dt>
+<dd><p>Read the procedure at the click from the library and display it in a
+buffer (<code>maplev-view-follow-point</code>).
+</p>
+</dd>
+</dl>
+
+<p>Procedures are displayed in a buffer with major mode
+<code>maplev-view-mode</code>.
+</p>
+
+<hr>
+<a name="MapleV-view-mode"></a>
+<div class="header">
+<p>
+Previous: <a href="#Displaying" accesskey="p" rel="prev">Displaying</a>, Up: <a href="#Viewing" accesskey="u" rel="up">Viewing</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="MapleV-view-mode-1"></a>
+<h3 class="section">13.2 MapleV view mode</h3>
+<a name="index-MapleV-view-mode"></a>
+<a name="index-Mode_002c-view_002c-MapleV"></a>
+<a name="index-History_002c-view-mode"></a>
+
+<a name="index-maplev_002dview_002dmode"></a>
+<p>The major mode <code>maplev-view-mode</code> is active in the buffer that
+displays Maple modules and procedures read from a Maple library.  It
+font-locks the code, highlighting keywords the same as MapleV mode
+does.  Clicking on a name in the buffer displays its source
+code or opens a help page for them.  A history mechanism stores the
+previously displayed procedure.
+</p>
+<p>The following commands are available:
+</p>
+<dl compact="compact">
+<dt><kbd>s</kbd></dt>
+<dd><p>Incremental forward search (<code>isearch-forward</code>).
+</p>
+</dd>
+<dt><kbd>p</kbd></dt>
+<dd><p>Previous procedure (<code>maplev-prev-item</code>).
+</p>
+</dd>
+<dt><kbd>n</kbd></dt>
+<dd><p>Next procedure (<code>maplev-next-item</code>).
+</p>
+</dd>
+<dt><kbd>r</kbd></dt>
+<dd><p>Redraw procedure (<code>maple-redo-item</code>).
+</p>
+</dd>
+<dt><kbd>?</kbd></dt>
+<dt><kbd>C-?</kbd></dt>
+<dt><kbd><span class="key">RTN</span></kbd></dt>
+<dd><p>Query for a help topic (<code>maplev-help-at-point</code>).
+</p>
+</dd>
+<dt><kbd>M-?</kbd></dt>
+<dd><p>Query for a procedure (<code>maplev-view-at-point</code>).
+</p>
+</dd>
+<dt><kbd><span class="key">SPC</span></kbd></dt>
+<dd><p>Scroll down.
+</p>
+</dd>
+<dt><kbd><span class="key">DEL</span></kbd></dt>
+<dd><p>Scroll up.
+</p>
+</dd>
+</dl>
+
+<p>MapleV help mode keeps a history of the help topics displayed.
+Use the command <code>maplev-clear-history</code> to erase the history.
+</p>
+<p>A procedure is read from a library and displayed by using the Maple
+procedure &lsquo;<samp>maplev_print</samp>&rsquo; that is assigned when the Maple engine is
+started.  If the Maple engine is busy an error message, &lsquo;<samp>Maple
+busy</samp>&rsquo;, is displayed in the message window.
+</p>
+
+
+<hr>
+<a name="Installation"></a>
+<div class="header">
+<p>
+Next: <a href="#Evolution" accesskey="n" rel="next">Evolution</a>, Previous: <a href="#Viewing" accesskey="p" rel="prev">Viewing</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Installation-1"></a>
+<h2 class="appendix">Appendix A Installation</h2>
+
+<a name="index-Installation"></a>
+<a name="index-_002eemacs"></a>
+<a name="index-Initialization"></a>
+<a name="index-Customization"></a>
+
+<p>This section describes how to install MapleV into GNU Emacs.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Emacs-Files" accesskey="1">Emacs Files</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Installing and byte-compiling the lisp files
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Maple-Files" accesskey="2">Maple Files</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Installing the Maple archive
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Customizing" accesskey="3">Customizing</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Customizing the installation.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Info-documentation" accesskey="4">Info documentation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Installing the Info documentation.
+</td></tr>
+</table>
+
+<hr>
+<a name="Emacs-Files"></a>
+<div class="header">
+<p>
+Next: <a href="#Maple-Files" accesskey="n" rel="next">Maple Files</a>, Previous: <a href="#Installation" accesskey="p" rel="prev">Installation</a>, Up: <a href="#Installation" accesskey="u" rel="up">Installation</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Emacs-Files-1"></a>
+<h3 class="section">A.1 Emacs Files</h3>
+
+<p>Install the Emacs lisp files, those with extension <samp>.el</samp>,
+into the directory <samp>~/.emacs.d/maple</samp>.
+The tilde, <samp>~</samp>, corresponds to your home directory.
+</p>
+<p>Byte-compile them from Emacs with the command
+</p>
+<div class="example">
+<pre class="example"><kbd>C-u 0 M-x byte-recompile-directory <span class="key">RET</span> ~/emacs.d/maple <span class="key">RET</span></kbd>
+</pre></div>
+
+<p>Add the following line to your <samp>.emacs</samp> file
+</p>
+<div class="example">
+<pre class="example">(add-to-list 'load-path (concat user-emacs-directory &quot;maple&quot;))
+(autoload 'maplev-mode &quot;maplev&quot; &quot;Maple editing mode&quot; 'interactive)
+</pre></div>
+
+<p>To have Emacs auto-magically start in MapleV mode when editing Maple
+source, add the following to your <samp>.emacs</samp> file, modifying the
+regular expression as needed.
+</p>
+<div class="example">
+<pre class="example">(setq auto-mode-alist 
+      (cons `(&quot;\\.mpl\\'&quot; . maplev-mode) auto-mode-alist))
+</pre></div>
+
+<hr>
+<a name="Maple-Files"></a>
+<div class="header">
+<p>
+Next: <a href="#Customizing" accesskey="n" rel="next">Customizing</a>, Previous: <a href="#Emacs-Files" accesskey="p" rel="prev">Emacs Files</a>, Up: <a href="#Installation" accesskey="u" rel="up">Installation</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Maple-Files-1"></a>
+<h3 class="section">A.2 Maple Files</h3>
+
+<p>A Maple archive file, <samp>maplev.mla</samp>, containing code
+used by <code>maplev-view</code>, is provided with the distribution.
+If desired it can be rebuilt from source by removing the existing file
+and executing
+</p>
+<div class="example">
+<pre class="example">maple maple/maplev.mpl
+</pre></div>
+
+<p>The file <samp>maplev.mla</samp> should be installed at <samp>~/maple/toolbox/emacs/lib</samp>.
+</p>
+<hr>
+<a name="Customizing"></a>
+<div class="header">
+<p>
+Next: <a href="#Info-documentation" accesskey="n" rel="next">Info documentation</a>, Previous: <a href="#Maple-Files" accesskey="p" rel="prev">Maple Files</a>, Up: <a href="#Installation" accesskey="u" rel="up">Installation</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Customizing-2"></a>
+<h3 class="section">A.3 Customizing</h3>
+
+<p>Some of MapleV&rsquo;s default settings must be customized for your
+installation.  Most significantly, you must specify the locations of the
+executable files for <code>mint</code> and <code>maple</code>, 
+the command-line version of Maple.  
+Multiple versions of <code>mint</code> and <code>maple</code> can be assigned
+and selected.  The easiest method is to invoke <code>customize</code> 
+using the following commands:
+</p>
+<div class="example">
+<pre class="example">M-x load-library <span class="key">RET</span> maplev <span class="key">RET</span>
+M-x customize-group <span class="key">RET</span> maplev <span class="key">RET</span>
+</pre></div>
+
+<p>Select the <strong>MapleV Executables</strong> subgroup and customize
+<code>maplev-executable-alist</code>.  It is a list of sublists.
+Each sublist contains four items:
+an identifier,
+the path to the Maple tty executable,
+the path to the a Maple initialization file, and
+the path to the <code>mint</code> executable.  An example of a sublist is
+</p>
+<div class="example">
+<pre class="example">(&quot;maple17&quot; &quot;/usr/local/maple17/bin/maple&quot; nil &quot;/usr/local/maple17/bin/mint&quot;)
+</pre></div>
+
+<p>The identifier is arbitrary.
+To determine the name and path to the <code>maple</code> and <code>mint</code> executables,
+launch <code>maple</code> and execute <code>kernelopts(mapledir)</code>, that
+returns the directory in which Maple is installed.
+</p>   
+<p>On Linux or Mac, the shell commands are locate in the <samp>bin</samp>
+subdirectory of the installed directory and are named <samp>maple</samp>
+and <samp>mint</samp>.
+</p>   
+<p>On Windows the shell commands are usually in the <samp>bin.wnt</samp>
+subdirectory of the installed directory and are named
+<samp>cmapleXXXX.exe</samp> and <samp>mintXXXX.exe</samp>, where <samp>XXXX</samp> is the
+Maple release.  When entering the path to the binaries, use forward
+slashes (<samp>/</samp>) as the directory separators.
+</p>
+<p>After setting the values, click the &lsquo;<samp>Apply and Save</samp>&rsquo; button.
+</p>
+<hr>
+<a name="Info-documentation"></a>
+<div class="header">
+<p>
+Previous: <a href="#Customizing" accesskey="p" rel="prev">Customizing</a>, Up: <a href="#Installation" accesskey="u" rel="up">Installation</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Info-documentation-1"></a>
+<h3 class="section">A.4 Info documentation</h3>
+
+<p>Install the included <samp>maplev.info</samp> file to a directory
+in the Info load path and then edit the <samp>dir</samp> to point
+to it.  I add the following menu item to my <samp>dir</samp> file:
+</p>
+<div class="example">
+<pre class="example">* MapleV: (maplev).       MapleV reference manual.
+</pre></div>
+
+
+
+
+<hr>
+<a name="Evolution"></a>
+<div class="header">
+<p>
+Next: <a href="#Key-Index" accesskey="n" rel="next">Key Index</a>, Previous: <a href="#Installation" accesskey="p" rel="prev">Installation</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Evolution-1"></a>
+<h2 class="appendix">Appendix B Evolution</h2>
+
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Bugs" accesskey="1">Bugs</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Acknowledgments" accesskey="2">Acknowledgments</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr>
+<a name="Bugs"></a>
+<div class="header">
+<p>
+Next: <a href="#Acknowledgments" accesskey="n" rel="next">Acknowledgments</a>, Previous: <a href="#Evolution" accesskey="p" rel="prev">Evolution</a>, Up: <a href="#Evolution" accesskey="u" rel="up">Evolution</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Bugs-1"></a>
+<h3 class="section">B.1 Bugs</h3>
+
+<p>If you encounter a bug in this package, wish to suggest an enhancement,
+or want to make a smart remark, then send an email to me:
+</p>
+<p>Joseph S. Riel (Joe Riel) <a href="mailto:jriel@maplesoft.com">jriel@maplesoft.com</a>
+</p>
+
+<hr>
+<a name="Acknowledgments"></a>
+<div class="header">
+<p>
+Previous: <a href="#Bugs" accesskey="p" rel="prev">Bugs</a>, Up: <a href="#Evolution" accesskey="u" rel="up">Evolution</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Acknowledgements"></a>
+<h3 class="section">B.2 Acknowledgements</h3>
+<a name="index-Acknowledgements"></a>
+<a name="index-Credits"></a>
+<a name="index-Gap-mode"></a>
+
+<p>I&rsquo;d like to thank a number of people who have contributed, either
+directly or indirectly, to this package.
+</p>
+
+<dl compact="compact">
+<dt><b>Bruno Salvy</b></dt>
+<dd><p>For writing <code>maple-mode</code>, a small but useful Emacs
+mode for editing Maple code.
+</p>
+</dd>
+<dt><b>Michael Smith</b></dt>
+<dd><p>For writing <code>Gap-mode</code> and <code>Gap-process</code>.
+These gave me the idea, and showed me how, to display help pages.
+Displaying source code from the Maple libraries was a natural extension.
+<code>Gap</code> is a CAS specialized for group theory.
+</p>
+</dd>
+<dt><b>Nicholas Thi&eacute;ry</b></dt>
+<dd><p>For writing <code>Maple-mode</code>, another Emacs mode for
+editing Maple code.  It introduced the idea of using a grammar to indent
+Maple source code.
+</p>
+</dd>
+<dt><b>Bob Glickstein</b></dt>
+<dd><p>For writing <cite>Writing GNU Emacs Extensions</cite>.
+It allowed me, a novice Elisp programmer, to put it all together.
+</p>
+</dd>
+<dt><b>Christian Pomar</b></dt>
+<dd><p>For courageously agreeing to test a series of alpha
+versions of this package.  He found numerous errors and suggested many
+improvements.
+</p>
+</dd>
+<dt><b>Erik Postma</b></dt>
+<dd><p>For providing useful feedback and suggested enhancements.
+</p>
+</dd>
+</dl>
+
+
+<hr>
+<a name="Key-Index"></a>
+<div class="header">
+<p>
+Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Previous: <a href="#Evolution" accesskey="p" rel="prev">Evolution</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Key-Index-1"></a>
+<h2 class="unnumbered">Key Index</h2>
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Key-Index_ky_symbol-1"><b>?</b></a>
+ &nbsp; 
+<br>
+<a class="summary-letter" href="#Key-Index_ky_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-M"><b>M</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-N"><b>N</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-P"><b>P</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-R"><b>R</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-S"><b>S</b></a>
+ &nbsp; 
+</td></tr></table>
+<table class="index-ky" border="0">
+<tr><td></td><th align="left">Index Entry</th><td>&nbsp;</td><th align="left"> Section</th></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Key-Index_ky_symbol-1">?</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-_003f"><code>?</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Key-Index_ky_letter-C">C</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002d_003b"><code>C-;</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002d_003f"><code>C-?</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Displaying-help-pages">Displaying help pages</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-C_002dc-b"><code>C-c C-c b</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-C_002dc-g"><code>C-c C-c g</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-C_002dc-i"><code>C-c C-c i</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-C_002dc-k"><code>C-c C-c k</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-C_002dc-p"><code>C-c C-c p</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-C_002dc-r"><code>C-c C-c r</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-C_002dp"><code>C-c C-p</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-RET-b"><code>C-c <span class="key">RET</span> b</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-RET-p"><code>C-c <span class="key">RET</span> p</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-RET-r"><code>C-c <span class="key">RET</span> r</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-RET-RET"><code>C-c <span class="key">RET</span> <span class="key">RET</span></code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-TAB-b"><code>C-c <span class="key">TAB</span> b</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-TAB-p"><code>C-c <span class="key">TAB</span> p</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-TAB-r"><code>C-c <span class="key">TAB</span> r</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dc-TAB-TAB"><code>C-c <span class="key">TAB</span> <span class="key">TAB</span></code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dj"><code>C-j</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002du-_002d-C_002dx-_003b"><code>C-u - C-x ;</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-C_002dx-_003b"><code>C-x ;</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Key-Index_ky_letter-M">M</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-M_002d_003b"><code>M-;</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-M_002d_003f"><code>M-?</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Displaying">Displaying</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-M_002dq"><code>M-q</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-M_002dS_002dmouse_002d2"><code>M-S-mouse-2</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Displaying">Displaying</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Key-Index_ky_letter-N">N</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-n"><code>n</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Key-Index_ky_letter-P">P</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-p"><code>p</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-P"><code>P</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Key-Index_ky_letter-R">R</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-r"><code>r</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Key-Index_ky_letter-S">S</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-s"><code>s</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-S_002dmouse_002d2"><code>S-mouse-2</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Displaying-help-pages">Displaying help pages</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+</table>
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Key-Index_ky_symbol-1"><b>?</b></a>
+ &nbsp; 
+<br>
+<a class="summary-letter" href="#Key-Index_ky_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-M"><b>M</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-N"><b>N</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-P"><b>P</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-R"><b>R</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Key-Index_ky_letter-S"><b>S</b></a>
+ &nbsp; 
+</td></tr></table>
+
+<hr>
+<a name="Function-Index"></a>
+<div class="header">
+<p>
+Next: <a href="#Variable-Index" accesskey="n" rel="next">Variable Index</a>, Previous: <a href="#Key-Index" accesskey="p" rel="prev">Key Index</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Function-Index-1"></a>
+<h2 class="unnumbered">Function Index</h2>
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Function-Index_fn_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-F"><b>F</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-I"><b>I</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-K"><b>K</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-M"><b>M</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-S"><b>S</b></a>
+ &nbsp; 
+</td></tr></table>
+<table class="index-fn" border="0">
+<tr><td></td><th align="left">Index Entry</th><td>&nbsp;</td><th align="left"> Section</th></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Function-Index_fn_letter-C">C</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-cmaplev_002dgoto_002dbuffer"><code>cmaplev-goto-buffer</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-cmaplev_002dinterrupt"><code>cmaplev-interrupt</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-cmaplev_002dkill"><code>cmaplev-kill</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-cmaplev_002dsend_002dbuffer"><code>cmaplev-send-buffer</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-cmaplev_002dsend_002dprocedure"><code>cmaplev-send-procedure</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-cmaplev_002dsend_002dregion"><code>cmaplev-send-region</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Function-Index_fn_letter-F">F</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-fill_002dparagraph"><code>fill-paragraph</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Function-Index_fn_letter-I">I</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-indent_002dfor_002dcomment"><code>indent-for-comment</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Function-Index_fn_letter-K">K</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-kill_002dcomment"><code>kill-comment</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Function-Index_fn_letter-M">M</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dadd_002dimenu"><code>maplev-add-imenu</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Imenu-support">Imenu support</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dclear_002dhistory"><code>maplev-clear-history</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dconfig"><code>maplev-config</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Configuration-Object">Configuration Object</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002delectric_002dtab"><code>maplev-electric-tab</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dfind_002dinclude_002dfile_002dat_002dpoint"><code>maplev-find-include-file-at-point</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Include-statements">Include statements</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dget_002dtab_002dwidth_002dfunction"><code>maplev-get-tab-width-function</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dhelp_002dat_002dpoint"><code>maplev-help-at-point</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Displaying-help-pages">Displaying help pages</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dhelp_002dfollow_002dmouse"><code>maplev-help-follow-mouse</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Displaying-help-pages">Displaying help pages</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dhelp_002dmode"><code>maplev-help-mode</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002dbuffer"><code>maplev-indent-buffer</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002dnewline"><code>maplev-indent-newline</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002dprocedure"><code>maplev-indent-procedure</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002dregion"><code>maplev-indent-region</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dinsert_002dassignment_002doperator"><code>maplev-insert-assignment-operator</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dreset_002dfont_002dlock"><code>maplev-reset-font-lock</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Font-Lock">Font Lock</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dtemplate_002dproc"><code>maplev-template-proc</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dtrace_002dindent_002dbuffer"><code>maplev-trace-indent-buffer</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indent-trace-output">Indent trace output</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dtrace_002dindent_002dregion"><code>maplev-trace-indent-region</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indent-trace-output">Indent trace output</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dview_002dat_002dpoint"><code>maplev-view-at-point</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Displaying">Displaying</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dview_002dfollow_002dpoint"><code>maplev-view-follow-point</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Displaying">Displaying</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dview_002dmode"><code>maplev-view-mode</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-view-mode">MapleV view mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002dbuffer"><code>mint-buffer</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002dprocedure"><code>mint-procedure</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002dregion"><code>mint-region</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002drerun"><code>mint-rerun</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Function-Index_fn_letter-S">S</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-set_002dcomment_002dcolumn"><code>set-comment-column</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+</table>
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Function-Index_fn_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-F"><b>F</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-I"><b>I</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-K"><b>K</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-M"><b>M</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Function-Index_fn_letter-S"><b>S</b></a>
+ &nbsp; 
+</td></tr></table>
+
+<hr>
+<a name="Variable-Index"></a>
+<div class="header">
+<p>
+Next: <a href="#Concept-Index" accesskey="n" rel="next">Concept Index</a>, Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Variable-Index-1"></a>
+<h2 class="unnumbered">Variable Index</h2>
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Variable-Index_vr_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Variable-Index_vr_letter-D"><b>D</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Variable-Index_vr_letter-F"><b>F</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Variable-Index_vr_letter-M"><b>M</b></a>
+ &nbsp; 
+</td></tr></table>
+<table class="index-vr" border="0">
+<tr><td></td><th align="left">Index Entry</th><td>&nbsp;</td><th align="left"> Section</th></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Variable-Index_vr_letter-C">C</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-comment_002dcolumn"><code>comment-column</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Variable-Index_vr_letter-D">D</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-default_002ddirectory"><code>default-directory</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Configuration">Configuration</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Variable-Index_vr_letter-F">F</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-fill_002dcolumn"><code>fill-column</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-font_002dlock_002dmaximum_002ddecoration"><code>font-lock-maximum-decoration</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Font-Lock">Font Lock</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Variable-Index_vr_letter-M">M</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dassignment_002doperator"><code>maplev-assignment-operator</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dauto_002dfill_002dcomment_002dflag"><code>maplev-auto-fill-comment-flag</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dcomment_002dcolumn"><code>maplev-comment-column</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dcomment_002dend_002dflag"><code>maplev-comment-end-flag</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dcomment_002dfill_002dcolumn"><code>maplev-comment-fill-column</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dcomment_002dstring"><code>maplev-comment-string</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dconfig_002dclass"><code>maplev-config-class</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Configuration-Object">Configuration Object</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dcopyright_002downer"><code>maplev-copyright-owner</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002ddont_002dindent_002dre"><code>maplev-dont-indent-re</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dget_002dtab_002dwidth_002dfunction-1"><code>maplev-get-tab-width-function</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dinclude_002dfile_002dother_002dwindow_002dflag"><code>maplev-include-file-other-window-flag</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Include-statements">Include statements</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dinclude_002dpath"><code>maplev-include-path</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Include-statements">Include statements</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002ddeclaration"><code>maplev-indent-declaration</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002ddeclaration_002dlevel"><code>maplev-indent-declaration-level</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002dlevel"><code>maplev-indent-level</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002dlevel-1"><code>maplev-indent-level</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002dtabs_002dmode"><code>maplev-indent-tabs-mode</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dindent_002dtabs_002dmode-1"><code>maplev-indent-tabs-mode</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dinsert_002dcopyright_002dflag"><code>maplev-insert-copyright-flag</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dload_002dconfig_002dfile_002dflag"><code>maplev-load-config-file-flag</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Configuration">Configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dtab_002dwidth"><code>maplev-tab-width</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-maplev_002dtrace_002dindent"><code>maplev-trace-indent</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indent-trace-output">Indent trace output</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002dcoding_002dsystem"><code>mint-coding-system</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002derror_002dface"><code>mint-error-face</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Mint-mode">Mint mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002dinfo_002dlevel"><code>mint-info-level</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002dnote_002dface"><code>mint-note-face</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Mint-mode">Mint mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002dproc_002dface"><code>mint-proc-face</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Mint-mode">Mint mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-mint_002dwarning_002dface"><code>mint-warning-face</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Mint-mode">Mint mode</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+</table>
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Variable-Index_vr_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Variable-Index_vr_letter-D"><b>D</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Variable-Index_vr_letter-F"><b>F</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Variable-Index_vr_letter-M"><b>M</b></a>
+ &nbsp; 
+</td></tr></table>
+
+<hr>
+<a name="Concept-Index"></a>
+<div class="header">
+<p>
+Next: <a href="#GNU-Free-Documentation-License" accesskey="n" rel="next">GNU Free Documentation License</a>, Previous: <a href="#Variable-Index" accesskey="p" rel="prev">Variable Index</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Concept-Index-1"></a>
+<h2 class="unnumbered">Concept Index</h2>
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Concept-Index_cp_symbol-1"><b>.</b></a>
+ &nbsp; 
+<br>
+<a class="summary-letter" href="#Concept-Index_cp_letter-A"><b>A</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-D"><b>D</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-F"><b>F</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-G"><b>G</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-H"><b>H</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-I"><b>I</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-M"><b>M</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-P"><b>P</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-R"><b>R</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-S"><b>S</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-T"><b>T</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-V"><b>V</b></a>
+ &nbsp; 
+</td></tr></table>
+<table class="index-cp" border="0">
+<tr><td></td><th align="left">Index Entry</th><td>&nbsp;</td><th align="left"> Section</th></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_symbol-1">.</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-_002eemacs"><samp>.emacs</samp></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Installation">Installation</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-A">A</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Abbreviations">Abbreviations</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Abbreviations">Abbreviations</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Acknowledgements">Acknowledgements</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Acknowledgments">Acknowledgments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Assignment-operator_002c-template">Assignment operator, template</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-C">C</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Checking-syntax">Checking syntax</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Mint">Mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Cmaple">Cmaple</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Maple">Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Cmaple-mode">Cmaple mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Cmaple-mode">Cmaple mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Cmaple_002c-running">Cmaple, running</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Commands_002c-indentation">Commands, indentation</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Comments">Comments</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Configuration">Configuration</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Configuration">Configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Configuration-Object">Configuration Object</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Configuration-Object">Configuration Object</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Continued-expression_002c-indenting">Continued expression, indenting</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Forcing-indentation">Forcing indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Credits">Credits</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Acknowledgments">Acknowledgments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Custom-abbreviations">Custom abbreviations</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Abbreviations">Abbreviations</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Customization">Customization</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Installation">Installation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Customizing-indentation">Customizing indentation</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-D">D</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Decoration-level_002c-font-lock">Decoration level, font lock</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Font-Lock">Font Lock</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Details_002c-indentations">Details, indentations</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Details">Indentation Details</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-F">F</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Font-lock">Font lock</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Font-Lock">Font Lock</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Font-lock_002c-decoration-level">Font lock, decoration level</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Font-Lock">Font Lock</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Forcing-indentation">Forcing indentation</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Forcing-indentation">Forcing indentation</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-G">G</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Gap-mode">Gap mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Acknowledgments">Acknowledgments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Grammar_002c-indentation">Grammar, indentation</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Details">Indentation Details</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-H">H</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Help-pages_002c-Maple">Help pages, Maple</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Help-pages">Help pages</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-History_002c-help-mode">History, help mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-History_002c-view-mode">History, view mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-view-mode">MapleV view mode</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-I">I</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Imenu">Imenu</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Imenu-support">Imenu support</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Include">Include</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Include-statements">Include statements</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Indent-trace">Indent trace</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indent-trace-output">Indent trace output</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Indentation">Indentation</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation">Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Indentation-commands">Indentation commands</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Commands">Indentation Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Indentation-details">Indentation details</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Details">Indentation Details</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Indentation-grammar">Indentation grammar</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Details">Indentation Details</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Indentation_002c-customizing">Indentation, customizing</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Customizing-Indentation">Customizing Indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Indentation_002c-forcing">Indentation, forcing</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Forcing-indentation">Forcing indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Indenting-continued-expressions">Indenting continued expressions</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Forcing-indentation">Forcing indentation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Indenting_002c-speed-of">Indenting, speed of</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Details">Indentation Details</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Index_002c-procedures">Index, procedures</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Imenu-support">Imenu support</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Initialization">Initialization</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Installation">Installation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Installation">Installation</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Installation">Installation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Introduction">Introduction</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Introduction">Introduction</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-M">M</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Maple-help-pages">Maple help pages</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Help-pages">Help pages</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Maple_002c-command-line">Maple, command line</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Maple">Maple</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-MapleV-help-mode">MapleV help mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-MapleV-view-mode">MapleV view mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-view-mode">MapleV view mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Maximum-decoration_002c-font-lock">Maximum decoration, font lock</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Font-Lock">Font Lock</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Menubar">Menubar</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Basics">Basics</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Mint">Mint</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Mint">Mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Mint-mode">Mint mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Mint-mode">Mint mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Mint_002c-running">Mint, running</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Miscellaneous">Miscellaneous</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-features">Miscellaneous features</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Mode_002c-cmaple">Mode, cmaple</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Cmaple-mode">Cmaple mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Mode_002c-help_002c-MapleV">Mode, help, MapleV</a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-help-mode">MapleV help mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Mode_002c-Mint">Mode, Mint</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Mint-mode">Mint mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Mode_002c-view_002c-MapleV">Mode, view, MapleV</a>:</td><td>&nbsp;</td><td valign="top"><a href="#MapleV-view-mode">MapleV view mode</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-P">P</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Procedure-index">Procedure index</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Imenu-support">Imenu support</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Procedure-template">Procedure template</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-R">R</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Requirements-for-MapleV">Requirements for MapleV</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Requirements">Requirements</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Running-mint">Running mint</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-mint">Running mint</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Running_002c-Cmaple">Running, Cmaple</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Running-Maple">Running Maple</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-S">S</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Shortcuts">Shortcuts</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shortcuts">Shortcuts</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Speed-of_002c-indenting">Speed of, indenting</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Indentation-Details">Indentation Details</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Summary">Summary</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Summary">Summary</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Syntax-checking">Syntax checking</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Mint">Mint</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-T">T</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Template_002c-procedure">Template, procedure</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Templates">Templates</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Templates">Templates</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Top_002dlevel-procedures">Top-level procedures</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Basics">Basics</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Concept-Index_cp_letter-V">V</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Viewing_002c-Maple">Viewing, Maple</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Viewing">Viewing</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+</table>
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Concept-Index_cp_symbol-1"><b>.</b></a>
+ &nbsp; 
+<br>
+<a class="summary-letter" href="#Concept-Index_cp_letter-A"><b>A</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-D"><b>D</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-F"><b>F</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-G"><b>G</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-H"><b>H</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-I"><b>I</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-M"><b>M</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-P"><b>P</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-R"><b>R</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-S"><b>S</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-T"><b>T</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-V"><b>V</b></a>
+ &nbsp; 
+</td></tr></table>
+
+<hr>
+<a name="GNU-Free-Documentation-License"></a>
+<div class="header">
+<p>
+Previous: <a href="#Concept-Index" accesskey="p" rel="prev">Concept Index</a>, Up: <a href="#Top" accesskey="u" rel="up">top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Key-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="GNU-Free-Documentation-License-1"></a>
+<h2 class="appendix">Appendix C GNU Free Documentation License</h2>
+<div align="center">Version 1.3, 3 November 2008
+</div>
+
+<div class="display">
+<pre class="display">Copyright &copy; 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
+<a href="http://fsf.org/">http://fsf.org/</a>
+
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+</pre></div>
+
+<ol>
+<li> PREAMBLE
+
+<p>The purpose of this License is to make a manual, textbook, or other
+functional and useful document <em>free</em> in the sense of freedom: to
+assure everyone the effective freedom to copy and redistribute it,
+with or without modifying it, either commercially or noncommercially.
+Secondarily, this License preserves for the author and publisher a way
+to get credit for their work, while not being considered responsible
+for modifications made by others.
+</p>
+<p>This License is a kind of &ldquo;copyleft&rdquo;, which means that derivative
+works of the document must themselves be free in the same sense.  It
+complements the GNU General Public License, which is a copyleft
+license designed for free software.
+</p>
+<p>We have designed this License in order to use it for manuals for free
+software, because free software needs free documentation: a free
+program should come with manuals providing the same freedoms that the
+software does.  But this License is not limited to software manuals;
+it can be used for any textual work, regardless of subject matter or
+whether it is published as a printed book.  We recommend this License
+principally for works whose purpose is instruction or reference.
+</p>
+</li><li> APPLICABILITY AND DEFINITIONS
+
+<p>This License applies to any manual or other work, in any medium, that
+contains a notice placed by the copyright holder saying it can be
+distributed under the terms of this License.  Such a notice grants a
+world-wide, royalty-free license, unlimited in duration, to use that
+work under the conditions stated herein.  The &ldquo;Document&rdquo;, below,
+refers to any such manual or work.  Any member of the public is a
+licensee, and is addressed as &ldquo;you&rdquo;.  You accept the license if you
+copy, modify or distribute the work in a way requiring permission
+under copyright law.
+</p>
+<p>A &ldquo;Modified Version&rdquo; of the Document means any work containing the
+Document or a portion of it, either copied verbatim, or with
+modifications and/or translated into another language.
+</p>
+<p>A &ldquo;Secondary Section&rdquo; is a named appendix or a front-matter section
+of the Document that deals exclusively with the relationship of the
+publishers or authors of the Document to the Document&rsquo;s overall
+subject (or to related matters) and contains nothing that could fall
+directly within that overall subject.  (Thus, if the Document is in
+part a textbook of mathematics, a Secondary Section may not explain
+any mathematics.)  The relationship could be a matter of historical
+connection with the subject or with related matters, or of legal,
+commercial, philosophical, ethical or political position regarding
+them.
+</p>
+<p>The &ldquo;Invariant Sections&rdquo; are certain Secondary Sections whose titles
+are designated, as being those of Invariant Sections, in the notice
+that says that the Document is released under this License.  If a
+section does not fit the above definition of Secondary then it is not
+allowed to be designated as Invariant.  The Document may contain zero
+Invariant Sections.  If the Document does not identify any Invariant
+Sections then there are none.
+</p>
+<p>The &ldquo;Cover Texts&rdquo; are certain short passages of text that are listed,
+as Front-Cover Texts or Back-Cover Texts, in the notice that says that
+the Document is released under this License.  A Front-Cover Text may
+be at most 5 words, and a Back-Cover Text may be at most 25 words.
+</p>
+<p>A &ldquo;Transparent&rdquo; copy of the Document means a machine-readable copy,
+represented in a format whose specification is available to the
+general public, that is suitable for revising the document
+straightforwardly with generic text editors or (for images composed of
+pixels) generic paint programs or (for drawings) some widely available
+drawing editor, and that is suitable for input to text formatters or
+for automatic translation to a variety of formats suitable for input
+to text formatters.  A copy made in an otherwise Transparent file
+format whose markup, or absence of markup, has been arranged to thwart
+or discourage subsequent modification by readers is not Transparent.
+An image format is not Transparent if used for any substantial amount
+of text.  A copy that is not &ldquo;Transparent&rdquo; is called &ldquo;Opaque&rdquo;.
+</p>
+<p>Examples of suitable formats for Transparent copies include plain
+ASCII without markup, Texinfo input format, LaTeX input
+format, SGML or XML using a publicly available
+DTD, and standard-conforming simple HTML,
+PostScript or PDF designed for human modification.  Examples
+of transparent image formats include PNG, XCF and
+JPG.  Opaque formats include proprietary formats that can be
+read and edited only by proprietary word processors, SGML or
+XML for which the DTD and/or processing tools are
+not generally available, and the machine-generated HTML,
+PostScript or PDF produced by some word processors for
+output purposes only.
+</p>
+<p>The &ldquo;Title Page&rdquo; means, for a printed book, the title page itself,
+plus such following pages as are needed to hold, legibly, the material
+this License requires to appear in the title page.  For works in
+formats which do not have any title page as such, &ldquo;Title Page&rdquo; means
+the text near the most prominent appearance of the work&rsquo;s title,
+preceding the beginning of the body of the text.
+</p>
+<p>The &ldquo;publisher&rdquo; means any person or entity that distributes copies
+of the Document to the public.
+</p>
+<p>A section &ldquo;Entitled XYZ&rdquo; means a named subunit of the Document whose
+title either is precisely XYZ or contains XYZ in parentheses following
+text that translates XYZ in another language.  (Here XYZ stands for a
+specific section name mentioned below, such as &ldquo;Acknowledgements&rdquo;,
+&ldquo;Dedications&rdquo;, &ldquo;Endorsements&rdquo;, or &ldquo;History&rdquo;.)  To &ldquo;Preserve the Title&rdquo;
+of such a section when you modify the Document means that it remains a
+section &ldquo;Entitled XYZ&rdquo; according to this definition.
+</p>
+<p>The Document may include Warranty Disclaimers next to the notice which
+states that this License applies to the Document.  These Warranty
+Disclaimers are considered to be included by reference in this
+License, but only as regards disclaiming warranties: any other
+implication that these Warranty Disclaimers may have is void and has
+no effect on the meaning of this License.
+</p>
+</li><li> VERBATIM COPYING
+
+<p>You may copy and distribute the Document in any medium, either
+commercially or noncommercially, provided that this License, the
+copyright notices, and the license notice saying this License applies
+to the Document are reproduced in all copies, and that you add no other
+conditions whatsoever to those of this License.  You may not use
+technical measures to obstruct or control the reading or further
+copying of the copies you make or distribute.  However, you may accept
+compensation in exchange for copies.  If you distribute a large enough
+number of copies you must also follow the conditions in section 3.
+</p>
+<p>You may also lend copies, under the same conditions stated above, and
+you may publicly display copies.
+</p>
+</li><li> COPYING IN QUANTITY
+
+<p>If you publish printed copies (or copies in media that commonly have
+printed covers) of the Document, numbering more than 100, and the
+Document&rsquo;s license notice requires Cover Texts, you must enclose the
+copies in covers that carry, clearly and legibly, all these Cover
+Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
+the back cover.  Both covers must also clearly and legibly identify
+you as the publisher of these copies.  The front cover must present
+the full title with all words of the title equally prominent and
+visible.  You may add other material on the covers in addition.
+Copying with changes limited to the covers, as long as they preserve
+the title of the Document and satisfy these conditions, can be treated
+as verbatim copying in other respects.
+</p>
+<p>If the required texts for either cover are too voluminous to fit
+legibly, you should put the first ones listed (as many as fit
+reasonably) on the actual cover, and continue the rest onto adjacent
+pages.
+</p>
+<p>If you publish or distribute Opaque copies of the Document numbering
+more than 100, you must either include a machine-readable Transparent
+copy along with each Opaque copy, or state in or with each Opaque copy
+a computer-network location from which the general network-using
+public has access to download using public-standard network protocols
+a complete Transparent copy of the Document, free of added material.
+If you use the latter option, you must take reasonably prudent steps,
+when you begin distribution of Opaque copies in quantity, to ensure
+that this Transparent copy will remain thus accessible at the stated
+location until at least one year after the last time you distribute an
+Opaque copy (directly or through your agents or retailers) of that
+edition to the public.
+</p>
+<p>It is requested, but not required, that you contact the authors of the
+Document well before redistributing any large number of copies, to give
+them a chance to provide you with an updated version of the Document.
+</p>
+</li><li> MODIFICATIONS
+
+<p>You may copy and distribute a Modified Version of the Document under
+the conditions of sections 2 and 3 above, provided that you release
+the Modified Version under precisely this License, with the Modified
+Version filling the role of the Document, thus licensing distribution
+and modification of the Modified Version to whoever possesses a copy
+of it.  In addition, you must do these things in the Modified Version:
+</p>
+<ol>
+<li> Use in the Title Page (and on the covers, if any) a title distinct
+from that of the Document, and from those of previous versions
+(which should, if there were any, be listed in the History section
+of the Document).  You may use the same title as a previous version
+if the original publisher of that version gives permission.
+
+</li><li> List on the Title Page, as authors, one or more persons or entities
+responsible for authorship of the modifications in the Modified
+Version, together with at least five of the principal authors of the
+Document (all of its principal authors, if it has fewer than five),
+unless they release you from this requirement.
+
+</li><li> State on the Title page the name of the publisher of the
+Modified Version, as the publisher.
+
+</li><li> Preserve all the copyright notices of the Document.
+
+</li><li> Add an appropriate copyright notice for your modifications
+adjacent to the other copyright notices.
+
+</li><li> Include, immediately after the copyright notices, a license notice
+giving the public permission to use the Modified Version under the
+terms of this License, in the form shown in the Addendum below.
+
+</li><li> Preserve in that license notice the full lists of Invariant Sections
+and required Cover Texts given in the Document&rsquo;s license notice.
+
+</li><li> Include an unaltered copy of this License.
+
+</li><li> Preserve the section Entitled &ldquo;History&rdquo;, Preserve its Title, and add
+to it an item stating at least the title, year, new authors, and
+publisher of the Modified Version as given on the Title Page.  If
+there is no section Entitled &ldquo;History&rdquo; in the Document, create one
+stating the title, year, authors, and publisher of the Document as
+given on its Title Page, then add an item describing the Modified
+Version as stated in the previous sentence.
+
+</li><li> Preserve the network location, if any, given in the Document for
+public access to a Transparent copy of the Document, and likewise
+the network locations given in the Document for previous versions
+it was based on.  These may be placed in the &ldquo;History&rdquo; section.
+You may omit a network location for a work that was published at
+least four years before the Document itself, or if the original
+publisher of the version it refers to gives permission.
+
+</li><li> For any section Entitled &ldquo;Acknowledgements&rdquo; or &ldquo;Dedications&rdquo;, Preserve
+the Title of the section, and preserve in the section all the
+substance and tone of each of the contributor acknowledgements and/or
+dedications given therein.
+
+</li><li> Preserve all the Invariant Sections of the Document,
+unaltered in their text and in their titles.  Section numbers
+or the equivalent are not considered part of the section titles.
+
+</li><li> Delete any section Entitled &ldquo;Endorsements&rdquo;.  Such a section
+may not be included in the Modified Version.
+
+</li><li> Do not retitle any existing section to be Entitled &ldquo;Endorsements&rdquo; or
+to conflict in title with any Invariant Section.
+
+</li><li> Preserve any Warranty Disclaimers.
+</li></ol>
+
+<p>If the Modified Version includes new front-matter sections or
+appendices that qualify as Secondary Sections and contain no material
+copied from the Document, you may at your option designate some or all
+of these sections as invariant.  To do this, add their titles to the
+list of Invariant Sections in the Modified Version&rsquo;s license notice.
+These titles must be distinct from any other section titles.
+</p>
+<p>You may add a section Entitled &ldquo;Endorsements&rdquo;, provided it contains
+nothing but endorsements of your Modified Version by various
+parties&mdash;for example, statements of peer review or that the text has
+been approved by an organization as the authoritative definition of a
+standard.
+</p>
+<p>You may add a passage of up to five words as a Front-Cover Text, and a
+passage of up to 25 words as a Back-Cover Text, to the end of the list
+of Cover Texts in the Modified Version.  Only one passage of
+Front-Cover Text and one of Back-Cover Text may be added by (or
+through arrangements made by) any one entity.  If the Document already
+includes a cover text for the same cover, previously added by you or
+by arrangement made by the same entity you are acting on behalf of,
+you may not add another; but you may replace the old one, on explicit
+permission from the previous publisher that added the old one.
+</p>
+<p>The author(s) and publisher(s) of the Document do not by this License
+give permission to use their names for publicity for or to assert or
+imply endorsement of any Modified Version.
+</p>
+</li><li> COMBINING DOCUMENTS
+
+<p>You may combine the Document with other documents released under this
+License, under the terms defined in section 4 above for modified
+versions, provided that you include in the combination all of the
+Invariant Sections of all of the original documents, unmodified, and
+list them all as Invariant Sections of your combined work in its
+license notice, and that you preserve all their Warranty Disclaimers.
+</p>
+<p>The combined work need only contain one copy of this License, and
+multiple identical Invariant Sections may be replaced with a single
+copy.  If there are multiple Invariant Sections with the same name but
+different contents, make the title of each such section unique by
+adding at the end of it, in parentheses, the name of the original
+author or publisher of that section if known, or else a unique number.
+Make the same adjustment to the section titles in the list of
+Invariant Sections in the license notice of the combined work.
+</p>
+<p>In the combination, you must combine any sections Entitled &ldquo;History&rdquo;
+in the various original documents, forming one section Entitled
+&ldquo;History&rdquo;; likewise combine any sections Entitled &ldquo;Acknowledgements&rdquo;,
+and any sections Entitled &ldquo;Dedications&rdquo;.  You must delete all
+sections Entitled &ldquo;Endorsements.&rdquo;
+</p>
+</li><li> COLLECTIONS OF DOCUMENTS
+
+<p>You may make a collection consisting of the Document and other documents
+released under this License, and replace the individual copies of this
+License in the various documents with a single copy that is included in
+the collection, provided that you follow the rules of this License for
+verbatim copying of each of the documents in all other respects.
+</p>
+<p>You may extract a single document from such a collection, and distribute
+it individually under this License, provided you insert a copy of this
+License into the extracted document, and follow this License in all
+other respects regarding verbatim copying of that document.
+</p>
+</li><li> AGGREGATION WITH INDEPENDENT WORKS
+
+<p>A compilation of the Document or its derivatives with other separate
+and independent documents or works, in or on a volume of a storage or
+distribution medium, is called an &ldquo;aggregate&rdquo; if the copyright
+resulting from the compilation is not used to limit the legal rights
+of the compilation&rsquo;s users beyond what the individual works permit.
+When the Document is included in an aggregate, this License does not
+apply to the other works in the aggregate which are not themselves
+derivative works of the Document.
+</p>
+<p>If the Cover Text requirement of section 3 is applicable to these
+copies of the Document, then if the Document is less than one half of
+the entire aggregate, the Document&rsquo;s Cover Texts may be placed on
+covers that bracket the Document within the aggregate, or the
+electronic equivalent of covers if the Document is in electronic form.
+Otherwise they must appear on printed covers that bracket the whole
+aggregate.
+</p>
+</li><li> TRANSLATION
+
+<p>Translation is considered a kind of modification, so you may
+distribute translations of the Document under the terms of section 4.
+Replacing Invariant Sections with translations requires special
+permission from their copyright holders, but you may include
+translations of some or all Invariant Sections in addition to the
+original versions of these Invariant Sections.  You may include a
+translation of this License, and all the license notices in the
+Document, and any Warranty Disclaimers, provided that you also include
+the original English version of this License and the original versions
+of those notices and disclaimers.  In case of a disagreement between
+the translation and the original version of this License or a notice
+or disclaimer, the original version will prevail.
+</p>
+<p>If a section in the Document is Entitled &ldquo;Acknowledgements&rdquo;,
+&ldquo;Dedications&rdquo;, or &ldquo;History&rdquo;, the requirement (section 4) to Preserve
+its Title (section 1) will typically require changing the actual
+title.
+</p>
+</li><li> TERMINATION
+
+<p>You may not copy, modify, sublicense, or distribute the Document
+except as expressly provided under this License.  Any attempt
+otherwise to copy, modify, sublicense, or distribute it is void, and
+will automatically terminate your rights under this License.
+</p>
+<p>However, if you cease all violation of this License, then your license
+from a particular copyright holder is reinstated (a) provisionally,
+unless and until the copyright holder explicitly and finally
+terminates your license, and (b) permanently, if the copyright holder
+fails to notify you of the violation by some reasonable means prior to
+60 days after the cessation.
+</p>
+<p>Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+</p>
+<p>Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, receipt of a copy of some or all of the same material does
+not give you any rights to use it.
+</p>
+</li><li> FUTURE REVISIONS OF THIS LICENSE
+
+<p>The Free Software Foundation may publish new, revised versions
+of the GNU Free Documentation License from time to time.  Such new
+versions will be similar in spirit to the present version, but may
+differ in detail to address new problems or concerns.  See
+<a href="http://www.gnu.org/copyleft/">http://www.gnu.org/copyleft/</a>.
+</p>
+<p>Each version of the License is given a distinguishing version number.
+If the Document specifies that a particular numbered version of this
+License &ldquo;or any later version&rdquo; applies to it, you have the option of
+following the terms and conditions either of that specified version or
+of any later version that has been published (not as a draft) by the
+Free Software Foundation.  If the Document does not specify a version
+number of this License, you may choose any version ever published (not
+as a draft) by the Free Software Foundation.  If the Document
+specifies that a proxy can decide which future versions of this
+License can be used, that proxy&rsquo;s public statement of acceptance of a
+version permanently authorizes you to choose that version for the
+Document.
+</p>
+</li><li> RELICENSING
+
+<p>&ldquo;Massive Multiauthor Collaboration Site&rdquo; (or &ldquo;MMC Site&rdquo;) means any
+World Wide Web server that publishes copyrightable works and also
+provides prominent facilities for anybody to edit those works.  A
+public wiki that anybody can edit is an example of such a server.  A
+&ldquo;Massive Multiauthor Collaboration&rdquo; (or &ldquo;MMC&rdquo;) contained in the
+site means any set of copyrightable works thus published on the MMC
+site.
+</p>
+<p>&ldquo;CC-BY-SA&rdquo; means the Creative Commons Attribution-Share Alike 3.0
+license published by Creative Commons Corporation, a not-for-profit
+corporation with a principal place of business in San Francisco,
+California, as well as future copyleft versions of that license
+published by that same organization.
+</p>
+<p>&ldquo;Incorporate&rdquo; means to publish or republish a Document, in whole or
+in part, as part of another Document.
+</p>
+<p>An MMC is &ldquo;eligible for relicensing&rdquo; if it is licensed under this
+License, and if all works that were first published under this License
+somewhere other than this MMC, and subsequently incorporated in whole
+or in part into the MMC, (1) had no cover texts or invariant sections,
+and (2) were thus incorporated prior to November 1, 2008.
+</p>
+<p>The operator of an MMC Site may republish an MMC contained in the site
+under CC-BY-SA on the same site at any time before August 1, 2009,
+provided the MMC is eligible for relicensing.
+</p>
+</li></ol>
+
+<a name="ADDENDUM_003a-How-to-use-this-License-for-your-documents"></a>
+<h3 class="heading">ADDENDUM: How to use this License for your documents</h3>
+
+<p>To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and
+license notices just after the title page:
+</p>
+<div class="smallexample">
+<pre class="smallexample">  Copyright (C)  <var>year</var>  <var>your name</var>.
+  Permission is granted to copy, distribute and/or modify this document
+  under the terms of the GNU Free Documentation License, Version 1.3
+  or any later version published by the Free Software Foundation;
+  with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+  Texts.  A copy of the license is included in the section entitled ``GNU
+  Free Documentation License''.
+</pre></div>
+
+<p>If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+replace the &ldquo;with&hellip;Texts.&rdquo; line with this:
+</p>
+<div class="smallexample">
+<pre class="smallexample">    with the Invariant Sections being <var>list their titles</var>, with
+    the Front-Cover Texts being <var>list</var>, and with the Back-Cover Texts
+    being <var>list</var>.
+</pre></div>
+
+<p>If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+</p>
+<p>If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License,
+to permit their use in free software.
+</p>
+
+
+<a name="SEC_Overview"></a>
+<h2 class="shortcontents-heading">Short Table of Contents</h2>
+
+<div class="shortcontents">
+<ul class="no-bullet">
+<li><a name="stoc-Introduction-1" href="#toc-Introduction-1">1 Introduction</a></li>
+<li><a name="stoc-Basics-1" href="#toc-Basics-1">2 Basics</a></li>
+<li><a name="stoc-Indentation-2" href="#toc-Indentation-2">3 Indentation</a></li>
+<li><a name="stoc-Font-Lock-2" href="#toc-Font-Lock-2">4 Font Lock</a></li>
+<li><a name="stoc-Comments-2" href="#toc-Comments-2">5 Comments</a></li>
+<li><a name="stoc-Shortcuts-2" href="#toc-Shortcuts-2">6 Shortcuts</a></li>
+<li><a name="stoc-Imenu-support-1" href="#toc-Imenu-support-1">7 Imenu support</a></li>
+<li><a name="stoc-Miscellaneous-features-1" href="#toc-Miscellaneous-features-1">8 Miscellaneous features</a></li>
+<li><a name="stoc-Configuration-1" href="#toc-Configuration-1">9 Configuration</a></li>
+<li><a name="stoc-Mint-1" href="#toc-Mint-1">10 Mint</a></li>
+<li><a name="stoc-Maple-1" href="#toc-Maple-1">11 Maple</a></li>
+<li><a name="stoc-Help-pages-1" href="#toc-Help-pages-1">12 Help pages</a></li>
+<li><a name="stoc-Viewing-1" href="#toc-Viewing-1">13 Viewing</a></li>
+<li><a name="stoc-Installation-1" href="#toc-Installation-1">Appendix A Installation</a></li>
+<li><a name="stoc-Evolution-1" href="#toc-Evolution-1">Appendix B Evolution</a></li>
+<li><a name="stoc-Key-Index-1" href="#toc-Key-Index-1">Key Index</a></li>
+<li><a name="stoc-Function-Index-1" href="#toc-Function-Index-1">Function Index</a></li>
+<li><a name="stoc-Variable-Index-1" href="#toc-Variable-Index-1">Variable Index</a></li>
+<li><a name="stoc-Concept-Index-1" href="#toc-Concept-Index-1">Concept Index</a></li>
+<li><a name="stoc-GNU-Free-Documentation-License-1" href="#toc-GNU-Free-Documentation-License-1">Appendix C GNU Free Documentation License</a></li>
+</ul>
+</div>
+
+<a name="SEC_Contents"></a>
+<h2 class="contents-heading">Table of Contents</h2>
+
+<div class="contents">
+
+<ul class="no-bullet">
+  <li><a name="toc-Introduction-1" href="#Introduction">1 Introduction</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Summary-1" href="#Summary">1.1 Summary</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Indentation-1" href="#Indentation-1">1.1.1 Indentation</a></li>
+      <li><a name="toc-Font-Lock-1" href="#Font-Lock-1">1.1.2 Font Lock</a></li>
+      <li><a name="toc-Comments-1" href="#Comments-1">1.1.3 Comments</a></li>
+      <li><a name="toc-Shortcuts-1" href="#Shortcuts-1">1.1.4 Shortcuts</a></li>
+      <li><a name="toc-Mint-interface" href="#Mint-interface">1.1.5 Mint interface</a></li>
+      <li><a name="toc-Maple-interface" href="#Maple-interface">1.1.6 Maple interface</a></li>
+      <li><a name="toc-Online-help" href="#Online-help">1.1.7 Online help</a></li>
+      <li><a name="toc-Viewing-library-code" href="#Viewing-library-code">1.1.8 Viewing library code</a></li>
+    </ul></li>
+    <li><a name="toc-Requirements-1" href="#Requirements">1.2 Requirements</a></li>
+  </ul></li>
+  <li><a name="toc-Basics-1" href="#Basics">2 Basics</a></li>
+  <li><a name="toc-Indentation-2" href="#Indentation">3 Indentation</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Commands" href="#Indentation-Commands">3.1 Commands</a></li>
+    <li><a name="toc-Customizing-1" href="#Customizing-Indentation">3.2 Customizing</a></li>
+    <li><a name="toc-Indentation-Tricks-1" href="#Indentation-Tricks">3.3 Indentation Tricks</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Forcing-indentation-1" href="#Forcing-indentation">3.3.1 Forcing indentation</a></li>
+      <li><a name="toc-Preventing-indentation-1" href="#Preventing-indentation">3.3.2 Preventing indentation</a></li>
+    </ul></li>
+    <li><a name="toc-Indentation-Details-1" href="#Indentation-Details">3.4 Indentation Details</a></li>
+  </ul></li>
+  <li><a name="toc-Font-Lock-2" href="#Font-Lock">4 Font Lock</a></li>
+  <li><a name="toc-Comments-2" href="#Comments">5 Comments</a></li>
+  <li><a name="toc-Shortcuts-2" href="#Shortcuts">6 Shortcuts</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Abbreviations-1" href="#Abbreviations">6.1 Abbreviations</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Customizing-Abbreviations-1" href="#Customizing-Abbreviations">6.1.1 Customizing Abbreviations</a></li>
+    </ul></li>
+    <li><a name="toc-Templates-1" href="#Templates">6.2 Templates</a></li>
+  </ul></li>
+  <li><a name="toc-Imenu-support-1" href="#Imenu-support">7 Imenu support</a></li>
+  <li><a name="toc-Miscellaneous-features-1" href="#Miscellaneous-features">8 Miscellaneous features</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Include-statements-1" href="#Include-statements">8.1 Include statements</a></li>
+    <li><a name="toc-Indent-trace-output-1" href="#Indent-trace-output">8.2 Indent trace output</a></li>
+  </ul></li>
+  <li><a name="toc-Configuration-1" href="#Configuration">9 Configuration</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Configuration-Object-1" href="#Configuration-Object">9.1 Configuration Object</a></li>
+    <li><a name="toc-Configuration-Example-1" href="#Configuration-Example">9.2 Configuration Example</a></li>
+  </ul></li>
+  <li><a name="toc-Mint-1" href="#Mint">10 Mint</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Running-mint-1" href="#Running-mint">10.1 Running mint</a></li>
+    <li><a name="toc-Mint-mode-1" href="#Mint-mode">10.2 Mint mode</a></li>
+  </ul></li>
+  <li><a name="toc-Maple-1" href="#Maple">11 Maple</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Running-Maple-1" href="#Running-Maple">11.1 Running Maple</a></li>
+    <li><a name="toc-Cmaple-mode-1" href="#Cmaple-mode">11.2 Cmaple mode</a></li>
+  </ul></li>
+  <li><a name="toc-Help-pages-1" href="#Help-pages">12 Help pages</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Displaying-help-pages-1" href="#Displaying-help-pages">12.1 Displaying help pages</a></li>
+    <li><a name="toc-MapleV-help-mode-1" href="#MapleV-help-mode">12.2 MapleV help mode</a></li>
+  </ul></li>
+  <li><a name="toc-Viewing-1" href="#Viewing">13 Viewing</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Displaying-procedures" href="#Displaying">13.1 Displaying procedures</a></li>
+    <li><a name="toc-MapleV-view-mode-1" href="#MapleV-view-mode">13.2 MapleV view mode</a></li>
+  </ul></li>
+  <li><a name="toc-Installation-1" href="#Installation">Appendix A Installation</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Emacs-Files-1" href="#Emacs-Files">A.1 Emacs Files</a></li>
+    <li><a name="toc-Maple-Files-1" href="#Maple-Files">A.2 Maple Files</a></li>
+    <li><a name="toc-Customizing-2" href="#Customizing">A.3 Customizing</a></li>
+    <li><a name="toc-Info-documentation-1" href="#Info-documentation">A.4 Info documentation</a></li>
+  </ul></li>
+  <li><a name="toc-Evolution-1" href="#Evolution">Appendix B Evolution</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Bugs-1" href="#Bugs">B.1 Bugs</a></li>
+    <li><a name="toc-Acknowledgements" href="#Acknowledgments">B.2 Acknowledgements</a></li>
+  </ul></li>
+  <li><a name="toc-Key-Index-1" href="#Key-Index">Key Index</a></li>
+  <li><a name="toc-Function-Index-1" href="#Function-Index">Function Index</a></li>
+  <li><a name="toc-Variable-Index-1" href="#Variable-Index">Variable Index</a></li>
+  <li><a name="toc-Concept-Index-1" href="#Concept-Index">Concept Index</a></li>
+  <li><a name="toc-GNU-Free-Documentation-License-1" href="#GNU-Free-Documentation-License">Appendix C GNU Free Documentation License</a></li>
+</ul>
+</div>
+
+<hr>
+
+
+
+</body>
+</html>
