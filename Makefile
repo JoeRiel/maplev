@@ -5,6 +5,7 @@
 SHELL = /bin/bash
 
 PKG := maplev
+pkg := $(PKG)
 
 # {{{ Version
 
@@ -48,8 +49,10 @@ LISP-DIR  := $(HOME)/.emacs.d/maple
 # where info files go
 INFO-DIR = $(HOME)/share/info
 
+TOOLBOX-DIR := $(HOME)/maple/toolbox/maplev
+
 # where the Maple archive goes
-MAPLE-LIB-DIR := $(HOME)/maple/toolbox/emacs/lib
+MAPLE-LIB-DIR := $(TOOLBOX-DIR)/lib
 
 # }}}
 # {{{ Auxiliary functions (warn, shellerr)
@@ -130,12 +133,12 @@ links-install: $(EL-FILES) $(ELC-FILES)
 help: $(call print-separator)
 
 TEXI-VERSION = doc/version.texi
-INFO-FILES = doc/$(PKG).info
-PDF-FILES  = doc/$(PKG).pdf
+INFO-FILE = doc/$(PKG).info
+PDF-FILE  = doc/$(PKG).pdf
 TEXI-FILES = doc/$(PKG).texi $(TEXI-VERSION)
-HTML-FILES = doc/$(PKG).html
+HTML-FILE = doc/$(PKG).html
 
-DOC-FILES = $(TEXI-FILES) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES)
+DOC-FILES = $(TEXI-FILES) $(INFO-FILE) $(PDF-FILE) $(HTML-FILE)
 
 $(TEXI-VERSION): doc/$(PKG).texi
 	@echo "Update $@: $(MDS-VERSION) ($(GIT-VERSION))"
@@ -164,18 +167,18 @@ doc/$(PKG).html: doc/$(PKG).texi $(TEXI-VERSION)
 
 clean-doc: $(call print-help,clean-doc,Remove the auxiliary files in doc)
 clean-doc:
-	$(RM) $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILES) doc/fdl.texi, $(wildcard doc/*))
+	$(RM) $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILE) doc/fdl.texi, $(wildcard doc/*))
 
 clean-doc-all: $(call print-help,clean-doc-all,Remove all generated documentation)
 clean-doc-all: clean-doc
-	$(RM) $(INFO-FILES) $(PDF-FILES) $(HTML-FILES) $(TEXI-VERSION)
+	$(RM) $(INFO-FILE) $(PDF-FILE) $(HTML-FILE) $(TEXI-VERSION)
 
 info-install: $(call print-help,info-install,Install info files in $(INFO-DIR))
-info-install: $(INFO-FILES)
+info-install: $(INFO-FILE)
 	@$(call MKDIR,$(INFO-DIR))
-	$(CP) $(INFO-FILES) $(INFO-DIR)
+	$(CP) $(INFO-FILE) $(INFO-DIR)
 	@echo Update 'dir' node
-	@for file in $(INFO-FILES); do ginstall-info --info-dir=$(INFO-DIR) $${file}; done
+	@for file in $(INFO-FILE); do ginstall-info --info-dir=$(INFO-DIR) $${file}; done
 
 .PHONY: doc html info pdf clean-doc clean-doc-all p i h info-install
 
@@ -204,15 +207,14 @@ mla := maplev.mla
 mla: $(call print-help,mla,	Create Maple archive: $(mla))
 mla: $(mla)
 
-MAPLE-FILES = $(addprefix maple/,maplev.mpl Print.mm GetSource.mm)
+MAPLE-FILES = maple/src/maplev.mpl $(wildcard maple/src/*.mm)
 
-%.mla: maple/%.mpl maple/*.mm
+%.mla: $(MAPLE-FILES)
 	@$(RM) $@
 	@echo "Building Maple archive $@"
-	@err=$$($(MAPLE) -q -I $(PWD)/maple -D BUILD-MLA $< ) ; \
-		if [ ! -z "$$err" ]; then \
-			echo $(call warn,$$err); \
-		fi
+	mload --quiet --lineinfo --reindex --readonly \
+	  --include=$(CURDIR)/maple/src \
+	  --mla=$@ $<
 
 mla-install: $(call print-help,mla-install,Install mla in $(MAPLE-LIB-DIR))
 mla-install: $(mla)
@@ -223,6 +225,71 @@ mla-install: $(mla)
 mla-clean: $(call print-help,mla-clean,Remove $(mla))
 mla-clean:
 	$(RM) $(mla)
+
+# }}}
+# {{{ hlp
+
+help: $(call print-separator)
+
+.PHONY: hlp hlp-install remove-preview
+
+remove-preview :
+	@$(RM) maple/src/_preview_.mm
+
+hlp := $(pkg).help
+hlp: $(call print-help,hlp,	Create Maple help database: $(hlp))
+hlp: $(mla-installed) remove-preview $(pkg).help
+
+hlp-installed := $(MAPLE-LIB-DIR)/$(hlp)
+
+$(pkg).help : maple/src/$(pkg).mpl $(mms) $(mds) maple/include/mpldoc_macros.mpi
+	@echo "Creating Maple help database"
+	@$(RM) maple/src/_preview_.mm
+	@$(call showerr,mpldoc --config nightly $^ 2>&1 | sed -n '/Warning:/{p;n};/Error:/p')
+	@mhelp --replace $(pkg)
+
+hlp-install: $(call print-help,hlp-install,Install $(hlp) in $(MAPLE-INSTALL-DIR))
+hlp-install: $(hlp-installed)
+
+$(hlp-installed): $(hlp)
+	@$(MKDIR) $(MAPLE-INSTALL-DIR)
+	@$(CP) --verbose $+ $@
+
+# }}}
+# {{{ book
+
+help: $(call print-separator)
+
+.PHONY: book book-install book-uninstall intro
+
+book: $(call print-help,book,	Create ${pkg}.maple)
+
+intro: $(INTRO)
+INTRO := maple/mhelp/Intro.mw
+
+$(INTRO): maple/src/Intro.md
+	mpldoc --config nightly $<
+
+book := $(PKG).maple
+book: $(book)
+$(book): $(mla) $(hlp) $(INFO-FILE) $(INTRO) Makefile
+	$(RM) $@
+	echo '(MakeBook)("$@" \
+	                 , "$(mla)" \
+	                 , "$(hlp)" \
+	                 , "$(INFO-FILE)" \
+	                 , "$(INTRO)" \
+	                ):' \
+	     | cat maple/installer/MakeBook.mpl - \
+	     | $(MAPLE) -q
+
+book-install: $(book)
+	echo '(PackageTools:-Install)("$(book)",overwrite);' \
+	      | $(MAPLE) -q
+
+book-uninstall:
+	echo '(PackageTools:-Uninstall)("$(book)");' \
+	      | $(MAPLE) -q
 
 # }}}
 # {{{ Install/uninstall
@@ -237,7 +304,7 @@ install: $(addsuffix -install,info lisp mla)
 uninstall: $(call print-help,uninstall,Remove installed files)
 uninstall: lisp-uninstall
 	$(RM) $(addprefix $(INFO-DIR)/,$(PKG).info)
-	$(RM) $(MAPLE-LIB-DIR)/$(mla)
+	$(RM) $(MAPLE-LIB-DIR)/*
 
 .PHONY: install uninstall
 
