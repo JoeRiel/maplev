@@ -346,7 +346,7 @@ help: $(call print-separator)
 
 RELEASE-REGEX := \([0-9]\+\.\)\+[0-9]\+
 
-release: $(call print-help,release,	Create mdcs release; use RELEASE=VALUE)
+release: $(call print-help,release,	Create maple release; use RELEASE=VALUE)
 release: check-release check-branch check-clean
 	@git checkout release
 	@git merge --no-ff --message="merge branch develop into release" develop
