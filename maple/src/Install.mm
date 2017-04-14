@@ -121,7 +121,7 @@ uses FT = FileTools;
 
     printf("Copying lisp files to %s\n", dstdir);
 
-    for file in FT:-ListDirectory(extractlispdir^) do
+    for file in FT:-ListDirectory(extractlispdir) do
         src := cat(extractlispdir, "/", file);
         dst := cat(dstdir, "/", file);
         FT:-Copy(src, dst, 'force');
