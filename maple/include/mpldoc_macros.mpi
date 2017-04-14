@@ -1,0 +1,40 @@
+# This file defines the mpldoc macros for the repeated content
+# in the maplev package
+
+# General macros
+# --------------
+##DEFINE PKG maplev
+
+# Parameters macros
+# -----------------
+##DEFINE param_opts($cmd)
+##- 'opts' : (optional) equation(s) of the form `option` = `value`;
+##  specify options for the `$cmd` command
+##ENDDEFINE
+
+# Returns macros
+# --------------
+
+# Description macros
+# ------------------
+
+##DEFINE SHOWINDEXTABLE($key)
+##SUBSECTION $key
+##SHOWINDEX(table="maplev[$key]")
+##ENDSUBSECTION
+##ENDDEFINE
+
+# Options macros
+# --------------
+##DEFINE opt($nam,$typ)
+##- `$nam` = ::$typ::
+##-(lead="indent")
+##ENDDEFINE
+
+##DEFINE comma ,
+
+# Examples macros
+# ---------------
+
+# References macros
+# -----------------

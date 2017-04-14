@@ -1,5 +1,10 @@
 -*- org -*-
 
+* 2.35
+** Compile regular expression.
+** Remove maplev-find-file.  Add :mapledir to config.
+** Improve info documentation
+** Highlight Compatibility and Thread Safety sections when viewing help page
 * 2.34
 ** Add ob-maple.el: provide org-babel functions for Maple evaluation
 ** Add maplev-config.el: configure maplev for a project

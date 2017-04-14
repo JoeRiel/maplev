@@ -51,7 +51,9 @@
 ;;; Customizations
 
 (defgroup maplev-speedbar nil
-  "Customizations for Maple speedbar"
+  "Customizations for Maple speedbar.
+The speedbar extension for MapleV mode indexes the modules and
+procedures in a Maple source file."
   :group 'maplev)
 
 (defcustom maplev-sb-defined-macros nil

@@ -1,0 +1,6 @@
+(let* ((proj-root "/home/joe/emacs/maplev"))
+  (maplev-config
+   :maple-options "-B -A2 -e2"
+   :mint-options "-V"
+   :include-path (concat proj-root "/maple/src")
+   :compile (format "make -C %s mla-install" proj-root)))

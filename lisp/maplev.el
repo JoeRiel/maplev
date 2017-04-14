@@ -5,7 +5,7 @@
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    2.34
+;; Version:    2.35
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -115,7 +115,6 @@
 (require 'maplev-common)                ; common functions
 (require 'maplev-config)                ; configure maple/mint/tester 
 (require 'maplev-custom)                ; customizable variables
-(require 'maplev-find)                  ; find files
 (require 'maplev-help)                  ; maplev-help-mode (view help pages)
 (require 'maplev-indent)                ; indentation engine
 (require 'maplev-mint)                  ; maplev-mint-mode (view mint output)
@@ -1203,6 +1202,16 @@ moved to be before it."
 
 ;;}}}
 
+;;{{{ files
+
+(defun maplev-expand->file-name (>file mroot)
+  "If the string >FILE starts with >, replace it with MROOT."
+  (if (= (aref >file 0) ?>)
+      (concat (file-name-as-directory mroot)
+	      (substring >file 1))
+    >file))
+  
+;;}}}
 ;;{{{ tab-width
 
 (defvar maplev-get-tab-width-function nil

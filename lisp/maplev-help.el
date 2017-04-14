@@ -266,9 +266,11 @@ PROCESS calls this filter.  STRING is the output."
   "Display help for TOPIC in the Standard help browser.
 If successful, return t, otherwise return nil."
   (condition-case nil
-      (let ((tcp-proc (open-network-stream "tcp-proc" nil "localhost" maplev-help-port)))
-	(process-send-string tcp-proc topic)
+      (let ((tcp-proc (open-network-stream "tcp-proc" nil "localhost" maplev-help-port))
+	    (request (format "help(%s)" topic)))
+	(process-send-string tcp-proc request)
 	(delete-process tcp-proc)
+	(message "Help sent to Maple GUI")
 	t)
     (error
        (message "cannot connect to Maple help server")
@@ -286,9 +288,15 @@ use the tty help browser, in an Emacs buffer."
   (message "Standard help %s"
 	   (if maplev-help-use-standard-flag
 	       "enabled" "disabled")))
-	
-				  
 
+(defun maplev-launch-standard-gui-with-server ()
+  "Launch the Maple Standard GUI, opening a worksheet that starts the MapleServer.
+The MapleServer displays help pages and worksheets upon request."
+  (interactive)
+  (let* ((mw (expand-file-name "~/maple/toolbox/MapleServer/data/MapleServer.mw"))
+	 (cmd (format "maple -x \"%s\" &" mw)))
+    (if (file-exists-p mw)
+	(shell-command cmd))))
 
 ;;}}}
 ;;{{{ history mechanism
@@ -306,7 +314,7 @@ from the parent defined in the Maple help system."
 ;;}}}
 ;;{{{ fontify
 
-;;{{{     fonts
+;;{{{ (*) fonts
 
 (defcustom maplev-help-function-face 'font-lock-function-name-face
   "Face name for functions in title lines of Maple help pages."
@@ -368,7 +376,7 @@ The title is the phrase following the function name."
   :group 'maplev-help)
 
 ;;}}}
-;;{{{     regular expressions
+;;{{{ (*) regular expressions
 
 (defconst maplev--help-section-re
   (concat "^\\(Calling Sequences?"
@@ -382,6 +390,8 @@ The title is the phrase following the function name."
           "\\|Notes"
           "\\|Options"
           "\\|Algorithm"
+	  "\\|Compatibility"
+	  "\\|Thread Safety"
           "\\|\\(?:List of \\([][a-zA-Z_]+ \\)?\\(Package\\|Subpackage\\|Module\\) Commands\\)"
           "\\):?")
   "Regular expression for sections in a Maple help page.")
@@ -397,7 +407,7 @@ The title is the phrase following the function name."
   "Regular expression for dictionary hyperlinks.")
 
 ;;}}}
-;;{{{     functions
+;;{{{ (*) functions
 
 (defun maplev-help-fontify-node ()
   "Fontify a Maple help page buffer.  Does not use font-lock mode."
