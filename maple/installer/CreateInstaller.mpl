@@ -185,7 +185,7 @@ global Installer;
             #{{{ Install info files
 
             printf("\nInstalling info files...\n");
-            Install(MakePath(ToolboxDir, "info"), InfoDir, ["mds.info","maplev.info"]);
+            Install(MakePath(ToolboxDir, "info"), InfoDir, ["maplev.info"]);
 
             #}}}
             #{{{ Update dir node
