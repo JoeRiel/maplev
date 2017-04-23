@@ -124,6 +124,7 @@
 (require 'maplev-utils)                 ; not much here just yet
 (require 'maplev-version)               ; assign version
 (require 'maplev-view)                  ; maplev-view-mode (view procedures)
+(require 'maplev-warn)
 
 ;;}}}
 
