@@ -13,7 +13,6 @@
 (eval-when-compile
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
-  (defvar maplev-mint-info-level)
   (defvar maplev-var-declaration-symbol)
   (defvar maplev-variable-spacing))
 
@@ -567,9 +566,10 @@ Return exit code of mint."
                       0
                     (count-lines (point-min) (point-max))))
       (cond ((= lines 0)
-             ;; let's assume: no mint output means no "real" error
-             ;; This happens with maplev-mint-info-level set to 1
-             (setq status 0))
+             ;; Assume: no mint output means no "real" error.
+             ;; This happens when the mint info level is 1.
+             (setq status 0)
+	     (message "no mint warnings"))
             ((= lines 1)
              (goto-char (point-min))
              (message "%s" (buffer-substring-no-properties
