@@ -366,7 +366,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
     ("These local variables were not declared explicitly:" maplev-mint-warning-face 'undecl-local t)
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
-    ;;("These local variables were assigned a vlue, but otherwise unused:" ... )
+    ;;("These local variables were assigned a value, but otherwise unused:" ... )
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
     ("\\(on line +[0-9]+\\)" maplev-mint-link-face 'goto-line)
