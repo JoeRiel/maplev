@@ -9,12 +9,6 @@
 * MapleV: (maplev).       Emacs mode for developing Maple code.
 @end direntry
 
-
-
-@iftex
-@tolerance 10000
-@end iftex
-
 @copying
 MapleV is a GNU Emacs major mode for developing source code for Maple, 
 a computer algebra system (CAS) from @w{Waterloo Maple Inc}.  MapleV is
@@ -60,12 +54,10 @@ are preserved on all copies.
 @page
 
 
-@ifnottex
 @node top, Introduction, (dir), (dir)
 @top MapleV
 
 @insertcopying
-@end ifnottex
 
 @menu
 * Introduction::                A brief tour of MapleV's features.
