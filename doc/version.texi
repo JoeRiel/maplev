@@ -1,4 +1,0 @@
-@c version.texi --- auto-generated file, do not edit.
-@set VERSION 2.34
-@set DATE 18 February 2017
-@c mds-version.texi ends here
