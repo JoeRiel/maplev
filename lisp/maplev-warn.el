@@ -80,9 +80,7 @@ features."
   :group 'maplev-warn)
 
 (defcustom maplev-warn-font-lock-feature-keywords-alist
-  '((unequal . maplev-warn-font-lock-unequal-keywords)
-    (foo     . maplev-warn-font-lock-foo-keywords)
-    (bar     . maplev-warn-font-lock-bar-keywords))
+  '((unequal . maplev-warn-font-lock-unequal-keywords))
   "An alist mapping a MapleV-warn feature to font-lock keywords.
 The keywords can be either a font-lock keyword list or a symbol.
 If it is a symbol it is assumed to be a variable containing a font-lock
@@ -141,9 +139,9 @@ if ARG is omitted or nil."
 ;;{{{ Helper functions
 
 (defun turn-on-maplev-warn-mode-if-enabled ()
-  "Turn on MapleV-warn mode in the current buffer if applicable.
-The mode is turned if some feature is enabled for the current
-`major-mode' in `maplev-warn-configuration'."
+  "Turn on `maplev-warn-mode' in the current buffer if applicable.
+The mode is turned on if any feature in `maplev-warn-configuration'
+is enabled for the current `major-mode'."
   (when (maplev-warn-is-enabled major-mode)
     (maplev-warn-mode 1)))
 
@@ -178,55 +176,18 @@ If ADDP is non-nil, install, else remove."
 		   nil keywords)))))
 
 ;;}}}
-;;{{{ Font-lock keywords and match functions
-
-;; This section contains font-lock keywords.  A font lock keyword can
-;; either contain a regular expression or a match function.
-;;
-;; A match function should act like a normal forward search.  They
-;; should return non-nil if they found a candidate and the match data
-;; should correspond to the highlight part of the font-lock keyword.
-;; The functions should not generate errors, in that case font-lock
-;; will fail to highlight the buffer.  A match function takes one
-;; argument, LIMIT, that represent the end of area to be searched.
-;;
-;; The variable `maplev-warn-font-lock-feature-keywords-alist' contains a
-;; mapping from MapleV-warn features to the font-lock keywords defined
-;; below.
-
-(defmacro maplev-warn-font-lock-match (re &rest body)
-  "Match regular expression RE but only if BODY holds."
-  `(let ((res nil))
-     (while
-	 (progn
-	   (setq res (re-search-forward ,re limit t))
-	   (and res
-		(save-excursion
-		  (when (match-beginning 1) (goto-char (match-beginning 1)))
-		  (condition-case nil	; In case something barfs.
-		      (not (save-match-data
-			     ,@body))
-		    (error t))))))
-     res))
-
-;;{{{ (*) Inequality (!= instead of <>)
+;;{{{ Inequality (!= instead of <>)
 
 (defconst maplev-warn-font-lock-unequal-keywords
   '(("\\(!=\\)" (1 font-lock-warning-face)))
   "Match the string != in the first group.")
 
-(defconst maplev-warn-font-lock-foo-keywords
-  '(("\\(foo\\)" (1 font-lock-warning-face)))
-  "Match the string foo in the first group.")
-
-(defconst maplev-warn-font-lock-bar-keywords
-  '(("\\(bar\\)" (1 font-lock-warning-face)))
-  "Match the string bar in the first group.")
-
 ;;}}}
 
-;;}}}
-;;{{{ to be named
+;;{{{ TBD
+
+;; Code to support checking a buffer and reporting the issues,
+;; similar to what mint does.  Incomplete...
 
 (defun maplev-warn-get-regexps ()
   (let (regexps)
@@ -239,7 +200,7 @@ If ADDP is non-nil, install, else remove."
 	    (setq regexps (cons (caar keywords) regexps)))))))
 
 (defun maplev-warn-check-region (beg end)
-  "Check current region \(from BEG to END\)."
+  "Check current region, from BEG to END."
   (interactive "r")
   ;; Get list of regular expressions
   (let ((regexs (maplev-warn-get-regexps))
