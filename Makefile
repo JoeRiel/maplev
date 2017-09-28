@@ -32,7 +32,8 @@ EMACS := emacs
 # cmaple is better for production release
 MAPLE := maple
 TEXI2HTML := $(MAKEINFO) --html --number-sections
-TEXI2PDF := texi2pdf
+# TEXI2PDF := texi2pdf
+TEXI2PDF := $(MAKEINFO) --pdf
 
 BROWSER := x-www-browser
 CP := cp --archive --verbose
@@ -132,20 +133,14 @@ links-install: $(EL-FILES) $(ELC-FILES)
 
 help: $(call print-separator)
 
-TEXI-VERSION = doc/version.texi
+phony: TEXI-VERSION
+
 INFO-FILE = doc/$(PKG).info
 PDF-FILE  = doc/$(PKG).pdf
 TEXI-FILES = doc/$(PKG).texi $(TEXI-VERSION)
 HTML-FILE = doc/$(PKG).html
 
 DOC-FILES = $(TEXI-FILES) $(INFO-FILE) $(PDF-FILE) $(HTML-FILE)
-
-$(TEXI-VERSION): doc/$(PKG).texi
-	@echo "Update $@: $(MDS-VERSION) ($(GIT-VERSION))"
-	@echo "@c version.texi --- auto-generated file, do not edit." > $@
-	@echo "@set VERSION $(VERSION)" >> $@
-	@echo "@set DATE $(DATE)" >> $@
-	@echo "@c mds-version.texi ends here" >> $@
 
 doc: $(call print-help,doc,	Create the info and html documentation)
 doc:  info html
@@ -156,13 +151,18 @@ pdf:  doc/$(PKG).pdf
 html:  $(call print-help,html,	Create html documentation)
 html: doc/$(PKG).html
 
-doc/$(PKG).pdf: doc/$(PKG).texi $(TEXI-VERSION)
+TEXI-VERSION:
+	echo -e @set VERSION $(VERSION)\\n@set DATE $(DATE) > doc/version.texi
+
+doc/$(PKG).pdf: doc/$(PKG).texi TEXI-VERSION
 	(cd doc; $(TEXI2PDF) $(PKG).texi)
 
-doc/$(PKG).info: doc/$(PKG).texi $(TEXI-VERSION)
-	(cd doc; $(MAKEINFO) --no-split $(PKG).texi --output=$(PKG).info)
+doc/$(PKG).info: doc/$(PKG).texi TEXI-VERSION
+	(cd doc; $(MAKEINFO) \
+	  --no-split $(PKG).texi \
+	  --output=$(PKG).info)
 
-doc/$(PKG).html: doc/$(PKG).texi $(TEXI-VERSION)
+doc/$(PKG).html: doc/$(PKG).texi TEXI-VERSION
 	(cd doc; $(TEXI2HTML) --no-split -o $(PKG).html $(PKG).texi)
 
 clean-doc: $(call print-help,clean-doc,Remove the auxiliary files in doc)
@@ -171,7 +171,7 @@ clean-doc:
 
 clean-doc-all: $(call print-help,clean-doc-all,Remove all generated documentation)
 clean-doc-all: clean-doc
-	$(RM) $(INFO-FILE) $(PDF-FILE) $(HTML-FILE) $(TEXI-VERSION)
+	$(RM) $(INFO-FILE) $(PDF-FILE) $(HTML-FILE)
 
 info-install: $(call print-help,info-install,Install info files in $(INFO-DIR))
 info-install: $(INFO-FILE)
