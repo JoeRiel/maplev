@@ -184,41 +184,6 @@ If ADDP is non-nil, install, else remove."
 
 ;;}}}
 
-;;{{{ TBD
-
-;; Code to support checking a buffer and reporting the issues,
-;; similar to what mint does.  Incomplete...
-
-(defun maplev-warn-get-regexps ()
-  (let (regexps)
-    (dolist (pair maplev-warn-font-lock-feature-keywords-alist regexps)
-      (let ((feature (car pair))
-	    (keywords (cdr pair)))
-	(if (not (listp keywords))
-	    (setq keywords (symbol-value keywords)))
-	(if (maplev-warn-is-enabled major-mode feature)
-	    (setq regexps (cons (caar keywords) regexps)))))))
-
-(defun maplev-warn-check-region (beg end)
-  "Check current region, from BEG to END."
-  (interactive "r")
-  ;; Get list of regular expressions
-  (let ((regexs (maplev-warn-get-regexps))
-	action)
-  (save-excursion
-    (save-restriction
-      (widen)
-      (dolist (regex regexs)
-	(when (setq func (assoc regex maplev-warn-feature-functions-alist))
-	  (setq func (car func))
-	  (goto-char beg)
-	  (while (re-search-forward regex end t)
-	    ;; write the line to a warning buffer
-	    ;; 
-	    )))))))
-
-;;}}}
-
 ;;{{{ The end
 
 (provide 'maplev-warn)
