@@ -28,14 +28,24 @@
 (require 'ob-comint)
 (require 'ob-eval)
 (require 'maplev)
+
 (add-to-list 'org-src-lang-modes '("maple" . maplev))
 (add-to-list 'org-babel-tangle-lang-exts '("maple" . "mpl"))
+
+;; FIXME:  this does not belong here (nor does it work)
+;; (org-babel-do-load-languages 
+;;  'org-babel-load-languages
+;;  '((maple . t)
+;;    (shell . t)
+;;    (emacs-lisp . t)))
+
 (defcustom org-babel-maple-command
   "maplemain -q -c 'interface(prettyprint=0)'"
   "String used to execute Maple code."
   :group 'org-babel
   :group 'maplev
   :type 'string)
+
 (defcustom org-babel-maple-mode 'maplev-mode
   "Mode for use in running maple interactively."
   :group 'org-babel
@@ -59,10 +69,16 @@ PARAMS is a list of cons-cells of the form \(:key . \"value\"\)."
                "\n" body "\n")))
     (if (eq 'value (cdr (assoc :result-type params)))
         (setq body (concat
-                    "writeto(\"/dev/null\"):\n"
+		    "try\n"
+                    "    writeto(\"babel.out\"):\n"
                     body
-                    "writeto('terminal'):\n"
-                    "%;")))
+		    "_val := %:\n"
+		    "catch:\n"
+		    "    _val := StringTools:-FormatMessage(lastexception[2..-1]);\n"
+		    "finally\n"
+                    "    writeto('terminal'):\n"
+		    "end try;\n"
+                    "_val;")))
     body))
 
 (defun org-babel-maple-var-to-maple (var)
@@ -73,13 +89,14 @@ PARAMS is a list of cons-cells of the form \(:key . \"value\"\)."
 
 (defun org-babel-variable-assignments:maple (params)
   "Return a string of Maple statements assigning the header variables."
-  (mapconcat
-   (lambda (param)
-     (format "%s := %s;"
-             (cadr param)
-             (org-babel-maple-var-to-maple (cddr param))))
-   (org-babel-get-header params :var)
-   "\n"))
+  "\n")
+  ;; (mapconcat
+  ;;  (lambda (param)
+  ;;    (format "%s := %s;"
+  ;;            (cadr param)
+  ;;            (org-babel-maple-var-to-maple (cddr param))))
+  ;;  (org-babel-get-header params :var)
+  ;;  "\n"))
 
 (provide 'ob-maple)
 ;;; ob-maple.el ends here

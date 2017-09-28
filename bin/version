@@ -51,7 +51,7 @@ version="$1"
 if [ "$version" ]; then
     [ -z "$version" ] && echo "no version number specified" && exit 101
     [[ ! "$version" =~ ^$bash_regex$ ]] && echo "Illegal version number: ${version}. See $script -h." &&  exit 1
-    sed_opt=-i
+    sed_opt="--in-place"
     sed_cmd="s/$sed_regex/$version/"
 else
     sed_opt="--quiet"
@@ -84,6 +84,12 @@ sed $sed_opt "
 file="README.md"
 [ -z "$version" ] && echo -ne "$file:\t"
 sed $sed_opt "/^\*\*\Version /$sed_cmd" "$file"
+
+#}}}
+#{{{ * README-installer
+file="README-installer"
+[ -z "$version" ] && echo -ne "$file:\t"
+sed $sed_opt "/^VERSION/$sed_cmd" "$file"
 
 #}}}
 #{{{ * run-installer

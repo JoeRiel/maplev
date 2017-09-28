@@ -5,7 +5,7 @@
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    2.35
+;; Version:    2.36
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -124,6 +124,7 @@
 (require 'maplev-utils)                 ; not much here just yet
 (require 'maplev-version)               ; assign version
 (require 'maplev-view)                  ; maplev-view-mode (view procedures)
+(require 'maplev-warn)
 
 ;;}}}
 
@@ -1256,7 +1257,7 @@ otherwise use `maplev-tab-width'."
     "module" "next" "not" "od" "option" 
     "options" "or" "proc" "quit" "read" 
     "return" "save" "stop" "subset" "then" 
-    "to" "try" "union" "use" "uses" 
+    "to" "try" "union" "until" "use" "uses" 
     "while" "xor")
   "List of reserved words in Maple.")
 

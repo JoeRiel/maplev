@@ -1,5 +1,8 @@
 -*- org -*-
 
+* 2.36
+** Handle 'until' keyword in indentation algorithm.
+** Add maplev-warn-mode.
 * 2.35
 ** Compile regular expression.
 ** Remove maplev-find-file.  Add :mapledir to config.
