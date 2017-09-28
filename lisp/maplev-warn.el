@@ -8,8 +8,6 @@
 
 ;;{{{ License
 
-;;{{{ License
-
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation; either version 2 of the
@@ -23,16 +21,16 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;}}}
-
+;;{{{ Intro
 ;;; Commentary:
 ;;
-;; This package provides a minor mode, warning about suspicious
+;; This package provides a minor mode warning about suspicious
 ;; syntax in Maple files.  It is inspired by Emacs' CWarn mode.
 ;;
-;; Currently, it warns about the use of != for comparisons:
-;; You probably meant to write <> instead, which means ``unequal''
-;; in most sane programming languages ever invented. Maple however
-;; assumes you ask for ``factorial (LHS) equals RHS''.
+;; Currently, it warns about the use of != for comparisons: you
+;; probably meant to write <> instead, which means ``unequal'' in many
+;; programming languages but which Maple interprets as two operators,
+;; ``factorial (LHS) equals RHS''.
 
 ;; Usage:
 ;;
@@ -46,6 +44,7 @@
 ;;    (global-maplev-warn-mode 1)
 ;;
 ;; Also, `font-lock-mode' or `global-font-lock-mode' must be enabled.
+;;}}}
 
 ;;; Code:
 
@@ -53,27 +52,27 @@
 
 (require 'custom)
 (require 'font-lock)
-(require 'maplev)
-(require 'maplev-mode)
+(require 'maplev-custom)
 
 ;;}}}
-;;{{{ Variables
+;;{{{ Custom Variables
 
 (defgroup maplev-warn nil
   "Highlight suspicious Maple constructions."
   :version "1.0"
-  :group 'faces)
+  :group 'maplev)
 
 (defcustom maplev-warn-configuration
-  '((maplev-mode t))
-  "List of items each describing which features are enable for a mode.
-Each item is on the form (mode featurelist), where featurelist can be
-on one of three forms:
+  '((maplev-mode t)
+    (mpldoc-mode (not bar)))
+  "List of items each describing which features are enabled for a mode.
+Each item is of the form \(mode featurelist\), where featurelist can be
+one of three forms:
 
 * A list of enabled features.
 * A list starting with the atom `not' followed by the features
   which are not enabled.
-* The atom t, that represent that all features are enabled.
+* The atom t, which represents that all features are enabled.
 
 See variable `maplev-warn-font-lock-feature-keywords-alist' for available
 features."
@@ -81,9 +80,11 @@ features."
   :group 'maplev-warn)
 
 (defcustom maplev-warn-font-lock-feature-keywords-alist
-  '((unequal . maplev-warn-font-lock-unequal-keywords))
+  '((unequal . maplev-warn-font-lock-unequal-keywords)
+    (foo     . maplev-warn-font-lock-foo-keywords)
+    (bar     . maplev-warn-font-lock-bar-keywords))
   "An alist mapping a MapleV-warn feature to font-lock keywords.
-The keywords could either a font-lock keyword list or a symbol.
+The keywords can be either a font-lock keyword list or a symbol.
 If it is a symbol it is assumed to be a variable containing a font-lock
 keyword list."
   :type '(alist :key-type (choice (const unequal))
@@ -113,7 +114,7 @@ deactivated."
   :type 'hook)
 
 ;;}}}
-;;{{{ The modes
+;;{{{ Modes
 
 ;;;###autoload
 (define-minor-mode maplev-warn-mode
@@ -132,17 +133,29 @@ if ARG is omitted or nil."
   (maplev-warn-font-lock-keywords maplev-warn-mode)
   (if font-lock-mode (font-lock-fontify-buffer)))
 
+;;;###autoload
+(define-globalized-minor-mode global-maplev-warn-mode
+  maplev-warn-mode turn-on-maplev-warn-mode-if-enabled)
+
 ;;}}}
-;;{{{ Help functions
+;;{{{ Helper functions
+
+(defun turn-on-maplev-warn-mode-if-enabled ()
+  "Turn on MapleV-warn mode in the current buffer if applicable.
+The mode is turned if some feature is enabled for the current
+`major-mode' in `maplev-warn-configuration'."
+  (when (maplev-warn-is-enabled major-mode)
+    (maplev-warn-mode 1)))
 
 (defun maplev-warn-is-enabled (mode &optional feature)
-  "Non-nil if MapleV-warn FEATURE is enabled for MODE.
+  "Return non-nil if MODE has FEATURE enabled.
 FEATURE is an atom representing one construction to highlight.
 
-Check if any feature is enabled for MODE if no feature is specified.
+If FEATURE is nil, check whether any is enabled for MODE.
 
 The valid features are described by the variable
 `maplev-warn-font-lock-feature-keywords-alist'."
+
   (let ((mode-configuration (assq mode maplev-warn-configuration)))
     (and mode-configuration
 	 (or (null feature)
@@ -154,7 +167,7 @@ The valid features are described by the variable
 
 (defun maplev-warn-font-lock-keywords (addp)
   "Install/remove keywords into current buffer.
-If ADDP is non-nil, install else remove."
+If ADDP is non-nil, install, else remove."
   (dolist (pair maplev-warn-font-lock-feature-keywords-alist)
     (let ((feature (car pair))
 	  (keywords (cdr pair)))
@@ -182,7 +195,7 @@ If ADDP is non-nil, install else remove."
 ;; below.
 
 (defmacro maplev-warn-font-lock-match (re &rest body)
-  "Match RE but only if BODY holds."
+  "Match regular expression RE but only if BODY holds."
   `(let ((res nil))
      (while
 	 (progn
@@ -196,25 +209,56 @@ If ADDP is non-nil, install else remove."
 		    (error t))))))
      res))
 
-;;{{{ Unequality (!= instead of <>)
+;;{{{ (*) Inequality (!= instead of <>)
 
 (defconst maplev-warn-font-lock-unequal-keywords
-  '(("\\(!=\\)" (1 font-lock-warning-face))))
+  '(("\\(!=\\)" (1 font-lock-warning-face)))
+  "Match the string != in the first group.")
+
+(defconst maplev-warn-font-lock-foo-keywords
+  '(("\\(foo\\)" (1 font-lock-warning-face)))
+  "Match the string foo in the first group.")
+
+(defconst maplev-warn-font-lock-bar-keywords
+  '(("\\(bar\\)" (1 font-lock-warning-face)))
+  "Match the string bar in the first group.")
 
 ;;}}}
 
 ;;}}}
-;;{{{ the end
+;;{{{ to be named
 
-(defun turn-on-maplev-warn-mode-if-enabled ()
-  "Turn on MapleV-warn mode in the current buffer if applicable.
-The mode is turned if some feature is enabled for the current
-`major-mode' in `maplev-warn-configuration'."
-  (when (maplev-warn-is-enabled major-mode) (maplev-warn-mode 1)))
+(defun maplev-warn-get-regexps ()
+  (let (regexps)
+    (dolist (pair maplev-warn-font-lock-feature-keywords-alist regexps)
+      (let ((feature (car pair))
+	    (keywords (cdr pair)))
+	(if (not (listp keywords))
+	    (setq keywords (symbol-value keywords)))
+	(if (maplev-warn-is-enabled major-mode feature)
+	    (setq regexps (cons (caar keywords) regexps)))))))
 
-;;;###autoload
-(define-globalized-minor-mode global-maplev-warn-mode
-  maplev-warn-mode turn-on-maplev-warn-mode-if-enabled)
+(defun maplev-warn-check-region (beg end)
+  "Check current region \(from BEG to END\)."
+  (interactive "r")
+  ;; Get list of regular expressions
+  (let ((regexs (maplev-warn-get-regexps))
+	action)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (dolist (regex regexs)
+	(when (setq func (assoc regex maplev-warn-feature-functions-alist))
+	  (setq func (car func))
+	  (goto-char beg)
+	  (while (re-search-forward regex end t)
+	    ;; write the line to a warning buffer
+	    ;; 
+	    )))))))
+
+;;}}}
+
+;;{{{ The end
 
 (provide 'maplev-warn)
 
