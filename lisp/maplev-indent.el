@@ -156,8 +156,9 @@ character position of the beginning of the change.  UNUSED is not used."
      (list "to"   . ((maplev--list-to-word-re '("by" "while" "do")) t 0))
      (list "by"   . ((maplev--list-to-word-re '("from" "to" "while" "do")) t 0))
      (list "while" . ((maplev--list-to-word-re '("from" "to" "by" "do")) t 0))
-     (list "do"   . ((maplev--list-to-word-re '("od" "end")) t indent))
+     (list "do"   . ((maplev--list-to-word-re '("od" "end" "until")) t indent))
      (list "od"   . (nil nil 0))
+     (list "until" . (nil nil 0))
      
      (list "if"   . ("\\<then\\>" t 0))
      (list "elif" . ("\\<then\\>" nil 0))
@@ -190,13 +191,12 @@ to the position from where the indent is computed.  POST-FUNC is
 optional, if non-nil it is a function that is called after the keyword
 is handled.  Currently it is only used by the keyword `end'.")
 
-
 (defconst maplev-indent-grammar-keyword-re
   (eval-when-compile
     (concat
      (maplev--list-to-word-re
       '("proc" "module" "end"
-        "for" "from" "to" "by" "while" "do" "od"
+        "for" "from" "to" "by" "while" "do" "od" "until"
         "if" "elif" "else" "then" "fi"
         "use" "try" "catch" "finally"))
      "\\|\\("

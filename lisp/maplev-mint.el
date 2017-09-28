@@ -13,7 +13,6 @@
 (eval-when-compile
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
-  (defvar maplev-mint-info-level)
   (defvar maplev-var-declaration-symbol)
   (defvar maplev-variable-spacing))
 
@@ -367,7 +366,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
     ("These local variables were not declared explicitly:" maplev-mint-warning-face 'undecl-local t)
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
-    ;;("These local variables were assigned a vlue, but otherwise unused:" ... )
+    ;;("These local variables were assigned a value, but otherwise unused:" ... )
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
     ("\\(on line +[0-9]+\\)" maplev-mint-link-face 'goto-line)
@@ -567,9 +566,10 @@ Return exit code of mint."
                       0
                     (count-lines (point-min) (point-max))))
       (cond ((= lines 0)
-             ;; let's assume: no mint output means no "real" error
-             ;; This happens with maplev-mint-info-level set to 1
-             (setq status 0))
+             ;; Assume: no mint output means no "real" error.
+             ;; This happens when the mint info level is 1.
+             (setq status 0)
+	     (message "no mint warnings"))
             ((= lines 1)
              (goto-char (point-min))
              (message "%s" (buffer-substring-no-properties
