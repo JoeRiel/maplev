@@ -1,0 +1,27 @@
+#!/bin/bash
+
+VERSION_FILE=$1
+VERSION=${2:-N/A}
+GIT_VERSION="$(git describe --match release\* --abbrev=6 HEAD)"
+GIT_STATUS="$(git status -uno --porcelain)"
+if [[ ! -z "${GIT_STATUS}" ]]; then
+    GIT_VERSION=${GIT_VERSION}.dirty
+fi
+DATE=$(date "+%d %B %Y")
+
+FILENAME=$(basename "$VERSION_FILE")
+PKG="${FILENAME%.*}"
+
+echo "Update ${VERSION_FILE}: ${VERSION}"
+
+cat > ${VERSION_FILE} <<EOF
+;;; ${FILENAME} --- auto-generated file, do not edit.
+(defun maplev-release () "Return maplev-release." "${VERSION}")
+(defun maplev-git-version () "Return maplev-git-version." "${GIT_VERSION}")
+(provide '${PKG})
+;; Local Variables:
+;; version-control: never
+;; coding: utf-8
+;; End:
+;;; ${FILENAME} ends here.
+EOF
