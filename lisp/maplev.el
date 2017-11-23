@@ -1790,8 +1790,8 @@ window, depending on the exclusive-or of
       (unless (looking-at maplev--link-re)
 	(error "Not at a link statement"))
       (let* ((link-file (match-string-no-properties 1))
-	     (file (and (file-exists-p link-file) (expand-file-name link-file))))
-	(unless file
+	     (file (expand-file-name link-file)))
+	(unless (file-exists-p file)
 	  (error "Cannot find link file %s" link-file))
 	(if (if maplev-include-file-other-window-flag
 		(not toggle)
