@@ -1779,7 +1779,7 @@ nil."
 
 
 (defun maplev-find-link-file-at-point (toggle)
-  "Open the maplev link file at point.
+  "Open the maplev link file at point, expanding any environment variables.
 If found, the file is opened in the current window, or the other
 window, depending on the exclusive-or of
 `maplev-include-file-other-window-flag' and TOGGLE."
@@ -1790,7 +1790,7 @@ window, depending on the exclusive-or of
       (unless (looking-at maplev--link-re)
 	(error "Not at a link statement"))
       (let* ((link-file (match-string-no-properties 1))
-	     (file (expand-file-name link-file)))
+	     (file (expand-file-name (substitute-in-file-name link-file))))
 	(unless (file-exists-p file)
 	  (error "Cannot find link file %s" link-file))
 	(if (if maplev-include-file-other-window-flag
