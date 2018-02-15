@@ -1704,11 +1704,11 @@ create the file."
 		      (not (setq file (maplev-find-include-file inc-dir inc-first path)))))
 	  (if (not file)
 	      (error "Include file %s does not exist " inc-file)
-	    (if (yes-or-no-p (format "Create include file %s "
-				     (setq file (concat file base))))
-		(if other-window-flag
-		    (find-file-other-window file)
-		  (find-file file)))))))))
+	    (when (yes-or-no-p (format "Create include file %s "
+				       (setq file (concat file base))))
+	      (if other-window-flag
+		  (find-file-other-window file)
+		(find-file file)))))))))
 
 (defun maplev-find-include-file (inc-file &optional inc-first inc-path)
   "Find the Maple include file INC-FILE and return as an absolute path.
