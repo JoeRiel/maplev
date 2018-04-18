@@ -1732,7 +1732,7 @@ of `default-directory'.  Return nil if the file is not found."
 If found, return the absolute path to FILE, otherwise return nil."
   (let (dir abs-file)
     (while (not (progn
-		  (setq dir (car paths)
+		  (setq dir (file-name-as-directory (car paths))
 			paths (cdr paths)
 			abs-file (concat dir file))
 		  (or (file-exists-p abs-file)
