@@ -210,11 +210,11 @@ PROCESS calls this filter.  STRING is the output."
       (save-excursion
         (goto-char (point-min))
         ;; remove the echoed 'interface(screenheight=...) and ?topic lines
-        (when (looking-at "interface")
+        (when (re-search-forward "^interface('screenheight=infinity'):$")
           (forward-line)
           (delete-region (point-min) (point)))
-        (if (re-search-forward "\\`\\?.+\n" nil t)
-            (delete-region (match-beginning 0) (match-end 0)))))
+        (if (re-search-forward "^\\?.+\n" nil t)
+            (delete-region (point-min) (point)))))
   (maplev-help-fontify-node)
   (set-buffer-modified-p nil))
 
