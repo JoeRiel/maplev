@@ -118,7 +118,7 @@ Its default is `maplev-config' or `maple-config-default', in that order."
   (unless (eq major-mode 'maplev-help-mode)
     (maplev-help-mode))
   (setq maplev-config (or config maplev-config maplev-config-default)
-	mode-name (format "Maple-Help: %s" (oref maplev-config :maple))))
+	mode-name (format "Maple-Help: %s" (slot-value maplev-config 'maple))))
   
 
 ;;}}}
@@ -126,7 +126,7 @@ Its default is `maplev-config' or `maple-config-default', in that order."
 
 (defun maplev--help-buffer ()
   "Return the name of the Maple help buffer."
-  (format "Maple help (%s)" (oref maplev-config :maple)))
+  (format "Maple help (%s)" (slot-value maplev-config 'maple)))
 
 (defun maplev-help-follow-mouse (click)
   "Display the Maple help page of the topic at the mouse CLICK."

@@ -1685,7 +1685,7 @@ create the file."
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
     (let* ((inc-file (match-string-no-properties 2))
-	   (path (oref maplev-config :include-path))
+	   (path (slot-value maplev-config 'include-path))
 	   (inc-first (string= "<" (match-string-no-properties 1)))
 	   (other-window-flag (if maplev-include-file-other-window-flag
 				  (not toggle)
