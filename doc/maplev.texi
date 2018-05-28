@@ -872,7 +872,7 @@ The following fields are defined.
 @item :compile
 Shell command to build and install a Maple archive.
 If assigned, the string is assigned to the Emacs lisp
-variable @var{compile-command}, which is then made buffer-local.
+variable @code{compile-command}, which is then made buffer-local.
 Executing the Emacs function @code{compile} in a MapleV buffer
 that uses this configuration runs the assigned shell command.
 Typically assigned to a @command{make} command.
@@ -941,8 +941,9 @@ for a Maple package/project named @code{Bark}.
 @example
 (let ((proj-root (concat (getenv "HOME") "/maple/Bark")))
   (maplev-config
-   :mint-options "-l -v"
-   :include-path proj-root
+   :maple-options "-B -A2 -e2"  ; configure libname and error/warning levels of Maple 
+   :mint-options "-l"           ; ignore leading underscore
+   :include-path proj-root      ; add proj-root to the include path for Maple and Mint
    :compile (format "make -C %s mla-install" proj-root)))
 @end example
 
