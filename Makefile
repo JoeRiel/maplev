@@ -133,7 +133,7 @@ links-install: $(EL-FILES) $(ELC-FILES)
 
 help: $(call print-separator)
 
-phony: TEXI-VERSION
+TEXI-VERSION = doc/version.texi
 
 INFO-FILE = doc/$(PKG).info
 PDF-FILE  = doc/$(PKG).pdf
@@ -151,18 +151,16 @@ pdf:  doc/$(PKG).pdf
 html:  $(call print-help,html,	Create html documentation)
 html: doc/$(PKG).html
 
-TEXI-VERSION:
-	echo -e @set VERSION $(VERSION)\\n@set DATE $(DATE) > doc/version.texi
 
-doc/$(PKG).pdf: doc/$(PKG).texi TEXI-VERSION
+doc/$(PKG).pdf: doc/$(PKG).texi $(TEXI-VERSION)
 	(cd doc; $(TEXI2PDF) $(PKG).texi)
 
-doc/$(PKG).info: doc/$(PKG).texi TEXI-VERSION
+doc/$(PKG).info: doc/$(PKG).texi $(TEXI-VERSION)
 	(cd doc; $(MAKEINFO) \
 	  --no-split $(PKG).texi \
 	  --output=$(PKG).info)
 
-doc/$(PKG).html: doc/$(PKG).texi TEXI-VERSION
+doc/$(PKG).html: doc/$(PKG).texi $(TEXI-VERSION)
 	(cd doc; $(TEXI2HTML) --no-split -o $(PKG).html $(PKG).texi)
 
 doc-clean: $(call print-help,doc-clean,Remove the auxiliary files in doc)
