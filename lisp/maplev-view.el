@@ -165,7 +165,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
     )
   (maplev-indent-buffer)
   (set-buffer-modified-p nil)
-  (font-lock-fontify-buffer))
+  (font-lock-ensure))
 
 ;;}}}
 

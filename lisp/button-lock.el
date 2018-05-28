@@ -796,7 +796,7 @@ such property around the point."
   "This is to avoid turning on font-lock if we are currently in the process of disabling button-lock."
   (when (and (boundp 'font-lock-fontified)
              font-lock-fontified)
-    (font-lock-fontify-buffer)))
+    (font-lock-ensure)))
 
 (defun button-lock-called-interactively-p ()
   (with-no-warnings

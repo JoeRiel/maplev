@@ -1613,7 +1613,7 @@ If nil then `font-lock-maximum-decoration' selects the level."
                              ((?_ . "w")) ; make underscore a word constituent
                              maplev--syntax-begin))
   (font-lock-set-defaults)
-  (font-lock-fontify-buffer))
+  (font-lock-ensure))
 
 ;;}}}
 ;;{{{ Tags
