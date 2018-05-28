@@ -376,8 +376,12 @@ ifneq ($(GIT-BRANCH),develop)
 	$(error "must be on develop branch")
 endif
 
-# }}}
 
+maplev-built.zip: maplev.mla doc/maplev.html doc/maplev.info doc/maplev.pdf
+	zip $@ $^
+
+
+# }}}
 # {{{ Distribution
 
 help: $(call print-separator)
