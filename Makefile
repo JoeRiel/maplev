@@ -107,8 +107,8 @@ $(LISP-RELEASE): $(filter-out $(LISP-RELEASE) $(LISP-VERSION),$(EL-FILES))
 byte-compile: $(call print-help,byte-compile,Byte-compile $$(EL-FILES))
 byte-compile: $(EL-FILES) $(ELC-FILES)
 
-clean-elisp: $(call print-help,clean-elisp,Remove byte-compiled files)
-clean-elisp:
+lisp-clean: $(call print-help,lisp-clean,Remove byte-compiled files)
+lisp-clean:
 	$(RM) $(ELC-FILES)
 
 lisp-install: $(call print-help,lisp-install,Install lisp in $(LISP-DIR))
@@ -126,7 +126,7 @@ links-install: $(EL-FILES) $(ELC-FILES)
 	@$(call MKDIR,$(LISP-DIR))
 	@ln -nfst $(LISP-DIR) $(realpath $^)
 
-.PHONY: byte-compile clean-elisp links-install lisp-install lisp-uninstall
+.PHONY: byte-compile lisp-clean links-install lisp-install lisp-uninstall
 
 # }}}
 # {{{ Documentation
@@ -165,12 +165,12 @@ doc/$(PKG).info: doc/$(PKG).texi TEXI-VERSION
 doc/$(PKG).html: doc/$(PKG).texi TEXI-VERSION
 	(cd doc; $(TEXI2HTML) --no-split -o $(PKG).html $(PKG).texi)
 
-clean-doc: $(call print-help,clean-doc,Remove the auxiliary files in doc)
-clean-doc:
+doc-clean: $(call print-help,doc-clean,Remove the auxiliary files in doc)
+doc-clean:
 	$(RM) $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILE) doc/fdl.texi, $(wildcard doc/*))
 
-clean-doc-all: $(call print-help,clean-doc-all,Remove all generated documentation)
-clean-doc-all: clean-doc
+doc-clean-all: $(call print-help,doc-clean-all,Remove all generated documentation)
+doc-clean-all: doc-clean
 	$(RM) $(INFO-FILE) $(PDF-FILE) $(HTML-FILE)
 
 info-install: $(call print-help,info-install,Install info files in $(INFO-DIR))
@@ -180,7 +180,7 @@ info-install: $(INFO-FILE)
 	@echo Update 'dir' node
 	@for file in $(INFO-FILE); do ginstall-info --info-dir=$(INFO-DIR) $${file}; done
 
-.PHONY: doc html info pdf clean-doc clean-doc-all p i h info-install
+.PHONY: doc html info pdf doc-clean doc-clean-all p i h info-install
 
 # preview pdf
 p: $(call print-help,p,	Preview the pdf)
@@ -424,7 +424,7 @@ p4get:
 help: $(call print-separator)
 
 clean: $(call print-help,clean,	Remove created and aux files)
-clean: clean-elisp clean-doc mla-clean
+clean: lisp-clean doc-clean mla-clean
 
 .PHONY: clean
 

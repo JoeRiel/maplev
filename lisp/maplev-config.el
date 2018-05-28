@@ -78,7 +78,7 @@ See the Maple help page for maple.")
    
    (mint-options
     :initarg            :mint-options
-    :initform           "-i2 -q -v -w 100"
+    :initform           "-i2 -q -w 100 -v"
     :type               string
     :custom             string
     :documentation      "Options to pass to Mint.
