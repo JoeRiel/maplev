@@ -79,7 +79,7 @@ Optional CONFIG is an object of type `maplev-config-class'."
   (unless (eq major-mode 'maplev-view-mode)
     (maplev-view-mode))
   (setq maplev-config (or config maplev-config maplev-config-default)
-	mode-name (format "Maple-View: %s" (oref maplev-config :maple))))
+	mode-name (format "Maple-View: %s" (slot-value maplev-config 'maple))))
 
 ;;}}}
 ;;{{{ mode functions
@@ -87,7 +87,7 @@ Optional CONFIG is an object of type `maplev-config-class'."
 
 (defun maplev--proc-buffer ()
   "Return the name of the Maple procedure listing buffer."
-  (format "Maple proc (%s)" (oref maplev-config :maple)))
+  (format "Maple proc (%s)" (slot-value maplev-config 'maple)))
 
 
 ;;; Define functions for displaying a Maple procedure from the Maple
@@ -165,7 +165,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
     )
   (maplev-indent-buffer)
   (set-buffer-modified-p nil)
-  (font-lock-fontify-buffer))
+  (font-lock-ensure))
 
 ;;}}}
 

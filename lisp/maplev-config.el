@@ -121,28 +121,28 @@ If the slot `:mapledir' is nil, assign its value by calling Maple.
 
 Return the object."
   (setq maplev-config (apply #'clone maplev-config-default fields))
-  (let ((compile (oref maplev-config :compile)))
+  (let ((compile (slot-value maplev-config 'compile)))
     (when compile
       (set (make-local-variable 'compile-command) compile)))
-  (let ((path (oref maplev-config :include-path)))
+  (let ((path (slot-value maplev-config 'include-path)))
     (when (stringp path)
       (oset maplev-config :include-path (list path))))
-  (unless (oref maplev-config :mapledir)
+  (unless (slot-value maplev-config 'mapledir)
     ;; Assign the :mapledir slot
     (oset maplev-config :mapledir (shell-command-to-string
 				   (format "%s -q -c 'printf(kernelopts(mapledir))' -c done"
-					   (oref maplev-config :maple)))))
+					   (slot-value maplev-config 'maple)))))
   maplev-config)
 
 
-(defmethod maplev-get-option-with-include ((config maplev-config-class) option)
+(cl-defmethod maplev-get-option-with-include ((config maplev-config-class) option)
   "Catenate the OPTION slot of CONFIG, an object of type `maplev-config-class',
 with an include-path option, prepended with \" -I \", unless the
 `:include-path' slot of CONFIG is nil or the empty string.  If
 the `:include-path' slot is a list of strings, join them with
 commas separating each string."
     (concat (slot-value config option)
-	    (let ((path (oref config :include-path)))
+	    (let ((path (slot-value config 'include-path)))
 	      (when path
 		(concat " -I " (mapconcat 'identity path ","))))))
 

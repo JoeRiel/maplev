@@ -53,7 +53,7 @@
 (defun maplev--cmaple-buffer ()
   "Return the name of the Maple cmaple buffer associated with the current buffer.
 Use the buffer-local `maplev-config' object."
-  (format "Maple (%s)" (oref maplev-config :maple)))
+  (format "Maple (%s)" (slot-value maplev-config 'maple)))
 
 (defun maplev--cmaple-process ()
   "Return the cmaple process associated with the current buffer.
@@ -68,7 +68,7 @@ Start one, if necessary."
 Return the process.  If such a process already exists, kill it and
 restart it."
   (let* ((config maplev-config)
-	 (cmaple (oref config :maple))
+	 (cmaple (slot-value config 'maple))
 	 (maple-options (maplev-get-option-with-include config :maple-options))
          (buffer (get-buffer-create (maplev--cmaple-buffer)))
          (process (get-buffer-process buffer))

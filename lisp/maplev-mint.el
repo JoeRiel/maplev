@@ -248,7 +248,7 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
     (when (looking-at ".*$")
       (let ((file (maplev-find-include-file 
 		   (match-string-no-properties 0) 
-		   'inc-first (oref maplev-config :include-path))))
+		   'inc-first (slot-value maplev-config 'include-path))))
 	(when file
 	  (find-file-other-window file))))))
   
@@ -302,8 +302,8 @@ The line number begins at character position POS."
 (defun maplev-mint-get-source-file ()
   "Return the absolute path to the source file starting at current position."
   (when (looking-at "\\s-+\\(to\\s-+[0-9]+\\s-+\\)?of\\s-+\\(.*\\)")
-    (let ((file (maplev-expand->file-name (match-string-no-properties 2) (oref maplev-config :mapledir))))
-      (maplev-find-include-file file 'inc-first (oref maplev-config :include-path)))))
+    (let ((file (maplev-expand->file-name (match-string-no-properties 2) (slot-value maplev-config 'mapledir))))
+      (maplev-find-include-file file 'inc-first (slot-value maplev-config 'include-path)))))
 
 (defun maplev--replace-string (string replace)
   "In STRING replace as specified by REPLACE.
@@ -550,7 +550,7 @@ Return exit code of mint."
       ;; Run Mint
       (setq status (funcall #'call-process-region
 			    (point-min) (point-max)
-			    (oref config :mint) 
+			    (slot-value config 'mint) 
 			    nil ; do not delete
 			    mint-buffer
 			    nil  ; do not redisplay

@@ -129,7 +129,7 @@ and disable it otherwise.  If called from Lisp, enable the mode
 if ARG is omitted or nil."
   :group 'maplev-warn :lighter maplev-warn-mode-text
   (maplev-warn-font-lock-keywords maplev-warn-mode)
-  (if font-lock-mode (font-lock-fontify-buffer)))
+  (if font-lock-mode (font-lock-ensure)))
 
 ;;;###autoload
 (define-globalized-minor-mode global-maplev-warn-mode

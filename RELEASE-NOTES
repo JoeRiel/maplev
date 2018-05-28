@@ -1,7 +1,7 @@
 -*- org -*-
 
 * 2.37
-** Minor changes.  Will distribute build files.
+** Minor changes.  Purge emacs byte-compile nags.  Will distribute build files.
 * 2.36
 ** Handle 'until' keyword in indentation algorithm.
 ** Add maplev-warn-mode.
