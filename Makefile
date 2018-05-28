@@ -165,7 +165,7 @@ doc/$(PKG).html: doc/$(PKG).texi $(TEXI-VERSION)
 
 doc-clean: $(call print-help,doc-clean,Remove the auxiliary files in doc)
 doc-clean:
-	$(RM) $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILE) doc/fdl.texi, $(wildcard doc/*))
+	$(RM) $(filter-out $(TEXI-FILES) $(DOC-FILES) $(INFO-FILE) doc/MakeVersion doc/fdl.texi, $(wildcard doc/*))
 
 doc-clean-all: $(call print-help,doc-clean-all,Remove all generated documentation)
 doc-clean-all: doc-clean
