@@ -1704,11 +1704,11 @@ create the file."
 		      (not (setq file (maplev-find-include-file inc-dir inc-first path)))))
 	  (if (not file)
 	      (error "Include file %s does not exist " inc-file)
-	    (if (yes-or-no-p (format "Create include file %s "
-				     (setq file (concat file base))))
-		(if other-window-flag
-		    (find-file-other-window file)
-		  (find-file file)))))))))
+	    (when (yes-or-no-p (format "Create include file %s "
+				       (setq file (concat file base))))
+	      (if other-window-flag
+		  (find-file-other-window file)
+		(find-file file)))))))))
 
 (defun maplev-find-include-file (inc-file &optional inc-first inc-path)
   "Find the Maple include file INC-FILE and return as an absolute path.
@@ -1732,7 +1732,7 @@ of `default-directory'.  Return nil if the file is not found."
 If found, return the absolute path to FILE, otherwise return nil."
   (let (dir abs-file)
     (while (not (progn
-		  (setq dir (car paths)
+		  (setq dir (file-name-as-directory (car paths))
 			paths (cdr paths)
 			abs-file (concat dir file))
 		  (or (file-exists-p abs-file)
@@ -1779,7 +1779,7 @@ nil."
 
 
 (defun maplev-find-link-file-at-point (toggle)
-  "Open the maplev link file at point.
+  "Open the maplev link file at point, expanding any environment variables.
 If found, the file is opened in the current window, or the other
 window, depending on the exclusive-or of
 `maplev-include-file-other-window-flag' and TOGGLE."
@@ -1790,8 +1790,8 @@ window, depending on the exclusive-or of
       (unless (looking-at maplev--link-re)
 	(error "Not at a link statement"))
       (let* ((link-file (match-string-no-properties 1))
-	     (file (and (file-exists-p link-file) (expand-file-name link-file))))
-	(unless file
+	     (file (expand-file-name (substitute-in-file-name link-file))))
+	(unless (file-exists-p file)
 	  (error "Cannot find link file %s" link-file))
 	(if (if maplev-include-file-other-window-flag
 		(not toggle)
