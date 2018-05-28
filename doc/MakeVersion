@@ -1,0 +1,22 @@
+#!/bin/bash
+
+VERSION_FILE=$1
+VERSION=${2:-N/A}
+GIT_VERSION="$(git describe --match release\* --abbrev=6 HEAD)"
+GIT_STATUS="$(git status -uno --porcelain)"
+if [[ ! -z "${GIT_STATUS}" ]]; then
+    GIT_VERSION=${GIT_VERSION}.dirty
+fi
+DATE=$(date "+%d %B %Y")
+
+FILENAME=$(basename "$VERSION_FILE")
+PKG="${FILENAME%.*}"
+
+echo "Update ${VERSION_FILE}: ${VERSION}"
+
+cat > ${VERSION_FILE} <<EOF
+@comment ${FILENAME} --- auto-generated file, do not edit.
+@set VERSION ${VERSION}
+@set DATE ${DATE}
+@comment ${FILENAME} ends here.
+EOF
