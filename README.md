@@ -25,6 +25,13 @@ Installation
 
 Download and unpack the latest [zip file](https://github.com/JoeRiel/maplev/archive/master.zip).
 
+For convenience, the maplev-built.zip contains a pre-built Maple
+archive file (maplev.mla) and documentation: doc/maplev.info,
+doc/maplev.html, and doc/maplev.pdf.  The doc files contain the same
+information but in different formats.  The maplev.info is the most
+useful as it can be accessed from Emacs if properly installed.  These
+files can be built from the source.
+
 Instructions for installing MapleV are given in its info manual, `maplev.info`,
 of which there is an html version, `maplev.html`.
 
@@ -45,7 +52,7 @@ given by the value of user-init-file.
 	(add-to-list 'load-path (concat user-emacs-directory "maple"))
 	(autoload 'maplev-mode "maplev" "Maple editing mode" 'interactive)
 	(add-to-list 'auto-mode-alist '("\\.mpl\\'" . maplev-mode))
-								 
+
 Use the Emacs custom group `maplev-group` to access MapleV's many customizations.
 
 Usage
