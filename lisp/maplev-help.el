@@ -126,7 +126,9 @@ Its default is `maplev-config' or `maple-config-default', in that order."
 
 (defun maplev--help-buffer ()
   "Return the name of the Maple help buffer."
-  (format "Maple help (%s)" (slot-value maplev-config 'maple)))
+  (if maplev-config
+      (format "Maple help (%s)" (slot-value maplev-config 'maple)))
+  "Maple help")
 
 (defun maplev-help-follow-mouse (click)
   "Display the Maple help page of the topic at the mouse CLICK."
