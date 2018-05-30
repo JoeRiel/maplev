@@ -1404,7 +1404,10 @@ Byte-compile them from Emacs with the command
 @kbd{C-u 0 M-x byte-recompile-directory @key{RET} ~/emacs.d/maple @key{RET}}
 @end example
 
-Add the following line to your @file{.emacs} file
+Add the following line to your @file{.emacs} file@footnote{Be careful
+copying and pasting any of the elisp code in this section from a PDF document,
+the forward quotes may be rendered incorrectly.}
+
 
 @example
 (add-to-list 'load-path (concat user-emacs-directory "maple"))
