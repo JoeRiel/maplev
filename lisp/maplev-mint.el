@@ -548,17 +548,22 @@ Return exit code of mint."
       ;; remember end-of-input
       (setq eoi (point-max))
       ;; Run Mint
-      (setq status (funcall #'call-process-region
-			    (point-min) (point-max)
-			    (slot-value config 'mint) 
-			    nil ; do not delete
-			    mint-buffer
-			    nil  ; do not redisplay
-			    (mapconcat 'identity
-				       (list "-q"
-					     (if syntax-only "-S")
-					     (maplev-get-option-with-include config :mint-options))
-				       " ")))
+      (let ((mint (slot-value config :mint))
+ 	    (mint-args (mapconcat 'identity
+	    			       (list "-q"
+	    				     (if syntax-only "-S")
+	    				     (maplev-get-option-with-include config :mint-options))
+	    			       " ")))
+	;; echo mint call to *Messages*
+	(message "%s %s ..." mint mint-args)
+	(setq status (funcall #'call-process-region
+			      (point-min) (point-max)
+			      mint
+			      nil ; do not delete
+			      mint-buffer
+			      nil  ; do not redisplay
+			      mint-args
+			      )))
       (delete-region (point-min) eoi)
       ;; Display Mint output
       (maplev-mint-setup code-buffer config)
