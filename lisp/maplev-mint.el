@@ -548,11 +548,11 @@ Return exit code of mint."
       ;; remember end-of-input
       (setq eoi (point-max))
       ;; Run Mint
-      (let ((mint (slot-value config :mint))
+      (let ((mint (slot-value config 'mint))
  	    (mint-args (mapconcat 'identity
 	    			       (list "-q"
 	    				     (if syntax-only "-S")
-	    				     (maplev-get-option-with-include config :mint-options))
+	    				     (maplev-get-option-with-include config 'mint-options))
 	    			       " ")))
 	;; echo mint call to *Messages*
 	(message "%s %s ..." mint mint-args)
