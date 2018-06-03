@@ -80,11 +80,11 @@ restart it."
       (if maplev-startup-directory
           (cd (expand-file-name maplev-startup-directory)))
       (set-process-filter
-       (setq process (funcall #'start-process
+       (setq process (apply #'start-process
                             "Maple"
                             buffer
                             cmaple
-			    "-q --historyfile=none -c maplev:-Setup()"
+			    "-q" "--historyfile=none" "-c maplev:-Setup()"
 			    maple-options))
        'maplev--cmaple-filter)
       (maplev-cmaple-setup config)

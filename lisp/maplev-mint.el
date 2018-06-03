@@ -556,7 +556,7 @@ Return exit code of mint."
       ;; works on both platforms.
       
       (let ((mint (slot-value config 'mint))
-	    (mint-args (maplev-get-option-with-include config 'mint-options t)))
+	    (mint-args (maplev-get-option-with-include config 'mint-options)))
 	(when (and syntax-only (not (member "-S" mint-args)))
 	  (setq mint-args (cons "-S" mint-args)))
 	(unless (member "-q" mint-args)

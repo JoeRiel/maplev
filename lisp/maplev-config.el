@@ -137,19 +137,16 @@ Return the object."
   maplev-config)
 
 
-(cl-defmethod maplev-get-option-with-include ((config maplev-config-class) option &optional aslist)
-  "Catenate the OPTION slot of CONFIG, an object of type `maplev-config-class',
-with an include-path option, prepended with \" -I \", unless the
-`:include-path' slot of CONFIG is empty.  If the `:include-path'
-slot is a list of strings, join them with commas separating each
-string."
-  (let ((opt (concat (slot-value config option)
-		     (let ((path (remove "" (slot-value config 'include-path))))
-		       (when path
-			 (concat " -I " (mapconcat 'identity path ",")))))))
-    (if aslist
-	(maplev-split-shell-option-string opt)
-      opt)))
+(cl-defmethod maplev-get-option-with-include ((config maplev-config-class) option)
+  "Return a list of options obtained from the OPTION and `:include-path` slots of CONFIG.
+Convert the option string in the OPTION slot of config, an object of type `maplev-config-class',
+to a list of strings and append the include path from the `:include-path` slot.
+Do the right thing if the option or include path is empty."
+  (maplev-split-shell-option-string
+   (concat (slot-value config option)
+	   (let ((path (remove "" (slot-value config 'include-path))))
+	     (when path
+	       (concat " -I " (mapconcat 'identity path ",")))))))
 
 
 
