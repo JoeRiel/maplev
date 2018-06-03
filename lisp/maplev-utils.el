@@ -9,6 +9,7 @@
 
 (require 'maplev-re)
 (require 'compile)
+(require 'subr-x)
 
 (eval-when-compile
   (defvar mouse-selection-click-count)
@@ -63,6 +64,12 @@ build Maple libraries.  Requires customizing `compile-command'."
   (unless (member 'maple compilation-error-regexp-alist)
     (add-to-list 'compilation-error-regexp-alist 'maple)
     (add-to-list 'compilation-error-regexp-alist-alist `(maple ,maplev--compile-error-re 2 1 nil))))
+
+(defun maplev-split-shell-option-string (opt)
+  "Convert OPT, a string of command-line options, into a list of options.
+For example, \"-a -b 123\" becomes \(\"-a\" \"-b 123\"\)."
+  (let ((opts (split-string (string-trim opt) "\\(^\\| +\\)-" t)))
+    (mapcar (lambda (s) (concat "-" s)) opts)))
 
 
 (provide 'maplev-utils)
