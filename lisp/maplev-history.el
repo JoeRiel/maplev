@@ -116,7 +116,7 @@ Do not change the pointer."
         (setcar maplev-history--stack (setq pos (1- pos))))
       (if (>= pos 0)
           (maplev--process-item-func (maplev-history--stack-current))
-        (kill-buffer nil)))))
+        (kill-buffer)))))
 
 (defun maplev-history-clear ()
   "Assign `maplev-history--stack' an empty stack."

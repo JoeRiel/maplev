@@ -243,7 +243,7 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
 (defun maplev-mint--goto-include-file (pos)
   "Open include file corresponding to link at POS in mint buffer."
   (goto-char pos)
-  (when (re-search-backward "included: ")
+  (when (search-backward "included: ")
     (goto-char (match-end 0))
     (when (looking-at ".*$")
       (let ((file (maplev-find-include-file 

@@ -503,7 +503,7 @@ Check whether `folding-mode' is active."
       (save-restriction
         (widen)
         (goto-char (point-min))
-        (while (re-search-forward "[ \t]+$" (point-max) t)
+        (while (re-search-forward "[ \t]+$" nil t)
           (replace-match "" nil nil))))))
 
 
@@ -1061,13 +1061,13 @@ index/package help pages.  If it already exists, do nothing."
               (narrow-to-region
                (re-search-forward "^    ")
                (save-excursion (goto-char (point-max))
-                               (re-search-backward "See Also")))
+                               (search-backward "See Also")))
               (goto-char (point-max))
-              (while (forward-word -1)
+              (while (backward-word)
                 (setq completions
                       (cons (cons (buffer-substring-no-properties
                                    (point)
-                                   (save-excursion (forward-word 1) (point)))
+                                   (save-excursion (forward-word) (point)))
                                   nil)
                             completions))))
 

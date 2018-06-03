@@ -243,7 +243,7 @@ Remove `maplev-cmaple-end-notice' from the current buffer.
 Reset the filter for PROCESS \(cmaple\) and unlock access."
   (let (case-fold-search)
     (save-excursion
-      (when (re-search-backward
+      (when (search-backward
              (concat maplev-cmaple-end-notice "\n") nil t)
         (delete-region (match-beginning 0) (match-end 0))
         (when (and maplev-cmaple-echoes-flag
