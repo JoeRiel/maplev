@@ -548,22 +548,26 @@ Return exit code of mint."
       ;; remember end-of-input
       (setq eoi (point-max))
       ;; Run Mint
+      ;; To get this to work on Windows, the mint options passed to
+      ;; call-process-region must be a sequence of strings, one string
+      ;; for each option (including an option argument).  Linux works
+      ;; with that format, or with the options catenated into a single string
+      ;; (separated by spaces, of course).  So am using the format that
+      ;; works on both platforms.
+      
       (let ((mint (slot-value config 'mint))
- 	    (mint-args (mapconcat 'identity
-	    			       (list "-q"
-	    				     (if syntax-only "-S")
-	    				     (maplev-get-option-with-include config 'mint-options))
-	    			       " ")))
-	;; echo mint call to *Messages*
-	(message "%s %s ..." mint mint-args)
-	(setq status (funcall #'call-process-region
+	    (mint-args (maplev-get-option-with-include config 'mint-options t)))
+	(when (and syntax-only (not (member "-S" mint-args)))
+	  (setq mint-args (cons "-S" mint-args)))
+	(unless (member "-q" mint-args)
+	  (setq mint-args (cons "-q" mint-args)))
+	(setq status (apply #'call-process-region
 			      (point-min) (point-max)
 			      mint
 			      nil ; do not delete
 			      mint-buffer
 			      nil  ; do not redisplay
-			      mint-args
-			      )))
+			      mint-args)))
       (delete-region (point-min) eoi)
       ;; Display Mint output
       (maplev-mint-setup code-buffer config)
