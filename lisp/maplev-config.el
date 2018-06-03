@@ -27,6 +27,8 @@
 
 (require 'eieio)
 (require 'eieio-custom)
+(require 'maplev-utils)
+	 
 (eval-when-compile
   (defvar maplev-config-default)) ; see maplev-custom.el
 
@@ -78,7 +80,7 @@ See the Maple help page for maple.")
    
    (mint-options
     :initarg            :mint-options
-    :initform           "-i2 -q -w 100 -v"
+    :initform           "-i2 -q -w 100"
     :type               string
     :custom             string
     :documentation      "Options to pass to Mint.
@@ -135,15 +137,20 @@ Return the object."
   maplev-config)
 
 
-(cl-defmethod maplev-get-option-with-include ((config maplev-config-class) option)
+(cl-defmethod maplev-get-option-with-include ((config maplev-config-class) option &optional aslist)
   "Catenate the OPTION slot of CONFIG, an object of type `maplev-config-class',
 with an include-path option, prepended with \" -I \", unless the
-`:include-path' slot of CONFIG is nil or the empty string.  If
-the `:include-path' slot is a list of strings, join them with
-commas separating each string."
-    (concat (slot-value config option)
-	    (let ((path (slot-value config 'include-path)))
-	      (when path
-		(concat " -I " (mapconcat 'identity path ","))))))
+`:include-path' slot of CONFIG is empty.  If the `:include-path'
+slot is a list of strings, join them with commas separating each
+string."
+  (let ((opt (concat (slot-value config option)
+		     (let ((path (remove "" (slot-value config 'include-path))))
+		       (when path
+			 (concat " -I " (mapconcat 'identity path ",")))))))
+    (if aslist
+	(maplev-split-shell-option-string opt)
+      opt)))
+
+
 
 (provide 'maplev-config)
