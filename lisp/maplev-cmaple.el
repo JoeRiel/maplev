@@ -270,8 +270,10 @@ Reset the filter for PROCESS \(cmaple\) and unlock access."
   "Kill Maple."
   (interactive)
   (let ((process (get-buffer-process (maplev--cmaple-buffer))))
-    (message "Kill process %s" (process-name process))
-    (kill-process process)))
+    (if (null process)
+	(message "No maple process")
+      (message "Kill process %s" (process-name process))
+      (kill-process process))))
 
 (defun maplev-cmaple--clear-buffer ()
   "Clear the contents of the cmaple buffer."
