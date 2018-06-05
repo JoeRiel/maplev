@@ -84,83 +84,21 @@ restart it."
                             "Maple"
                             buffer
                             cmaple
-			    "-q" "--historyfile=none" "-c maplev:-Setup()"
-			    maple-options))
+			    ;;"-q" "--historyfile=none" "-c maplev:-Setup()"
+			    ;;maple-options
+			    nil
+			    ))
        'maplev--cmaple-filter)
       (maplev-cmaple-setup config)
-      (maplev-cmaple--lock-access t)
       ;; (comint-simple-send process init-code
-      (maplev-cmaple--send-end-notice process)
+      ;; (maplev-cmaple--send-end-notice process)
       ;; Wait until cmaple is unlocked, that is, it has responded.
       ;; The time step, 100 milliseconds, should be customizable, some OSs
       ;; do not support fractions of seconds.
       ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-      (maplev-cmaple--wait)
       (message "Maple started")
       process)))
 
-;;{{{ (*) Access control
-
-;; JR: Are the lines marked "hieida" the original or his suggested
-;; correction?  I don't see the point of using a fixed symbol,
-;; maplev-release as the property in which to store the lock status.
-;; Using the value of maplev-release makes sense.  Alas, I no longer
-;; have his email.  A better way to handle this might be to attach the
-;; property to a buffer local variable.  However, I don't think that
-;; that is possible.  Possibly the correct technique is to create a
-;; flag variable that is local to the Maple output buffer and assign
-;; to it.
-
-(defvar maplev-cmaple--locked-flag nil
-  "Non-nil means the associated cmaple process is locked.
-This is a buffer-local variable.")
-
-(make-variable-buffer-local 'maplev-cmaple--locked-flag)
-
-(defun maplev-cmaple--lock-access (&optional no-error)
-  "Lock access to cmaple.
-If access is already locked, generate an error
-unless optional arg NO-ERROR is non-nil."
-  (if (and (not no-error) (maplev-cmaple--locked-p))
-      (error "Maple busy")
-    (setq maplev-cmaple--locked-flag t)))
-
-(defun maplev-cmaple--unlock-access ()
-  "Unlock access to cmaple.
-Interactively use \\[maplev-cmaple-interrupt]."
-  (setq maplev-cmaple--locked-flag nil))
-
-(defun maplev-cmaple--locked-p ()
-  "Return non-nil if the Maple process is locked."
-  maplev-cmaple--locked-flag)
-
-(defun maplev-cmaple-status ()
-  "Status of Maple process."
-  (interactive)
-  (message "Maple %s" (if (maplev-cmaple--locked-p)
-			  "locked"
-			"unlocked")))
-
-(defun maplev-cmaple--wait (&optional max-cnt no-err)
-  "Wait for cmaple to become available.  
-If optional argument MAX-CNT is non-nil, wait at most that many
-seconds; otherwise wait indefinitely.  If optional argument NO-ERR is
-non-nil do not generate an error if time-out occurs."
-  (with-temp-message "Maple busy, waiting..."
-    (let ((cnt (* 10 (or max-cnt 0))))
-      (while (and (maplev-cmaple--locked-p)
-                  (or (null max-cnt)
-                      (< 0 (setq cnt (1- cnt)))))
-        ;; Should sit-for be used instead?  It permits interrupting
-        ;; via user input (keystrokes).
-        (sleep-for 0.1))
-      (and (not no-err)
-           (maplev-cmaple--locked-p)
-           (error "Maple busy")))))
-
-;;}}}
-
-;; Functions that send stuff to cmaple
 
 (defun maplev-cmaple-send ()
   "Send input to Maple."
@@ -177,10 +115,11 @@ non-nil do not generate an error if time-out occurs."
 
 (defun maplev-cmaple--send-string (process string)
   "Send STRING to the cmaple process PROCESS."
-  (maplev-cmaple--lock-access)
+  (with-current-buffer (process-buffer process)
+    (goto-char (point-max))
+    (insert string ?\n))
   (set-process-filter process 'maplev--cmaple-filter)
-  (comint-simple-send process string)
-  (maplev-cmaple--send-end-notice process))
+  (comint-simple-send process string))
 
 (defun maplev-cmaple-send-region (beg end)
   "Send the region from BEG to END to cmaple.
@@ -188,8 +127,9 @@ If called interactively use the marked region.
 If called with a prefix the cmaple buffer is first cleared.
 Use mint to syntax check the region before sending to cmaple."
   (interactive "r")
-  (when (equal 0 (maplev-mint-region beg end 'syntax-only))
-    (and current-prefix-arg (maplev-cmaple--clear-buffer))
+  (when (equal 0 0) ;; (maplev-mint-region beg end 'syntax-only))
+    (when current-prefix-arg 
+      (maplev-cmaple--clear-buffer))
     (maplev-cmaple--send-string (maplev--cmaple-process)
 				(buffer-substring-no-properties beg end))))
 
@@ -216,15 +156,11 @@ that the input consists of one line and the output is on the following line."
   ;; This may not work on a Windows box; there, the input is not echoed
   ;; to the output buffer.
   (interactive)
-  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-  (maplev-cmaple--wait)
   (let ((proc (maplev--cmaple-process))) ; ensure Maple is started
     (with-current-buffer (maplev--cmaple-buffer)
       (save-restriction
         (narrow-to-region (point-max) (point-max))
         (maplev-cmaple--send-string proc input)
-        ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-        (maplev-cmaple--wait)
         (goto-char (point-min))
         (forward-line)
         (let ((output (buffer-substring-no-properties
@@ -247,13 +183,12 @@ Reset the filter for PROCESS \(cmaple\) and unlock access."
              (concat maplev-cmaple-end-notice "\n") nil t)
         (delete-region (match-beginning 0) (match-end 0))
         (when (and maplev-cmaple-echoes-flag
-                   (re-search-backward
+                   (search-backward
                     (concat "lprint(" maplev-cmaple-end-notice ");\n")
                     nil t))
           (delete-region (match-beginning 0) (match-end 0)))
         (maplev--cleanup-buffer)
         (set-process-filter process 'maplev--cmaple-filter)
-        (maplev-cmaple--unlock-access)
         t))))
 
 (defun maplev-cmaple-interrupt ()
@@ -263,8 +198,7 @@ Reset the filter for PROCESS \(cmaple\) and unlock access."
     (if (null process)
 	(error "The buffer has no process")
       (message "Interrupt process %s" (process-name process))
-      (interrupt-process process)
-      (maplev-cmaple--unlock-access))))
+      (interrupt-process process))))
 
 (defun maplev-cmaple-kill ()
   "Kill Maple."
@@ -294,19 +228,8 @@ Reset the filter for PROCESS \(cmaple\) and unlock access."
   "Send the Maple output to the Maple buffer.
 PROCESS is the Maple process, STRING its output."
   (with-current-buffer (process-buffer process)
-    (let ((pmark (process-mark process)))
-      (save-excursion
-        (save-restriction
-          (goto-char pmark)
-          (narrow-to-region (point) (point))
-          (insert string)
-          (maplev--cleanup-buffer)
-          (goto-char (point-max))
-          (set-marker pmark (point)))
-        (when (maplev-cmaple--ready process)
-          (insert maplev-cmaple-prompt)
-          (set-marker pmark (point))))
-      (goto-char pmark))))
+    (goto-char (point-max))
+    (insert string)))
 
 (defun maplev--cleanup-buffer ()
   "Remove over-striking and underlining from the current buffer."

@@ -22,7 +22,6 @@
 (declare-function maplev--cleanup-buffer "maplev-cmaple")
 (declare-function maplev--cmaple-process "maplev-cmaple")
 (declare-function maplev--ident-around-point "maplev-common")
-(declare-function maplev-cmaple--lock-access "maplev-cmaple")
 (declare-function maplev-cmaple--ready "maplev-cmaple")
 (declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
 (declare-function maplev-history--stack-current "maplev-history")
@@ -122,7 +121,6 @@ If optional arg HIDE is non-nil do not display buffer."
 (defun maplev--proc-process (proc)
   "Display the Maple procedure PROC \(a string\) in `maplev--proc-buffer'."
   (let ((process (maplev--cmaple-process)))
-    (maplev-cmaple--lock-access)
     (set-process-filter process 'maplev-view-filter)
     (set-buffer (maplev--proc-buffer))
     (setq mode-line-buffer-identification (format "%-12s" proc))
@@ -150,18 +148,13 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 (defun maplev-view-cleanup-buffer ()
   "Cleanup Maple procedure listings."
   (save-excursion
-    (when maplev-cmaple-echoes-flag
-      (goto-char (point-min))
-      (if (re-search-forward "maplev:-Print(.+):\n" nil t)
-          (delete-region (match-beginning 0) (match-end 0))))
     ;; Delete multiple spaces.
     (goto-char (point-min))
     (while (re-search-forward "[ \t][ \t]+" nil t)
       (replace-match " "))
     ;; terminate with `;'
     (goto-char (point-max))
-    (skip-chars-backward " \t\n")
-;;    (insert ";")
+    (delete-region (line-beginning-position) (point-max))
     )
   (maplev-indent-buffer)
   (set-buffer-modified-p nil)

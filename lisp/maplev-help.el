@@ -119,7 +119,6 @@ Its default is `maplev-config' or `maple-config-default', in that order."
     (maplev-help-mode))
   (setq maplev-config (or config maplev-config maplev-config-default)
 	mode-name (format "Maple-Help: %s" (slot-value maplev-config 'maple))))
-  
 
 ;;}}}
 ;;{{{ mode functions
@@ -173,23 +172,19 @@ If HIDE is non-nil, do not bring buffer to front."
 	  ;; Push TOPIC onto history stack
 	  (maplev-history--stack-process topic hide)))))
 
-
 (defun maplev--help-process (topic)
   "Display Maple help for TOPIC in `maplev--help-buffer'."
   (let ((process (maplev--cmaple-process)))
-    (maplev-cmaple--lock-access)
+    ;; (maplev-cmaple--lock-access)
     (set-process-filter process 'maplev--help-filter)
     (set-buffer (maplev--help-buffer))
     (setq mode-line-buffer-identification (format "%-12s" topic))
     (let (buffer-read-only)
       (delete-region (point-min) (point-max)))
-;;    (comint-simple-send process (concat "?" topic))
-    (comint-simple-send process (format "interface('screenheight=infinity'):\n?%s" topic))
-    (maplev-cmaple--send-end-notice process)))
-;;    ;; TODO this doesn't quite work, it echos in the cmaple buffer
-;;     (maplev-cmaple-direct (concat "interface('screenheight'="
-;;                                (number-to-string maplev-cmaple-screenheight)
-;;                                "):"))))
+    (comint-simple-send process (concat
+				 "interface('screenheight=infinity'):"
+				 "kernelopts('printbytes'=false):"
+				 "help(\"" topic "\");"))))
 
 (defun maplev--help-filter (process string)
   "Pipe the output of a help command into `maplev--help-buffer'.
@@ -202,21 +197,19 @@ PROCESS calls this filter.  STRING is the output."
           (narrow-to-region (point) (point))
           (insert string)
           (maplev--cleanup-buffer))
-        (goto-char (point-max))
-        (if (maplev-cmaple--ready process)
-            (maplev-help--cleanup-buffer))))))
+	(goto-char (point-max))
+	(save-excursion
+	  (beginning-of-line)
+	  (when (looking-at "(\\*\\*) ")
+	    (delete-region (point) (point-max))
+	    (maplev-help--cleanup-buffer)))))))
 
 (defun maplev-help--cleanup-buffer ()
   "Cleanup Maple help pages."
-  (if maplev-cmaple-echoes-flag
-      (save-excursion
-        (goto-char (point-min))
-        ;; remove the echoed 'interface(screenheight=...) and ?topic lines
-        (when (re-search-forward "^interface('screenheight=infinity'):$")
-          (forward-line)
-          (delete-region (point-min) (point)))
-        (if (re-search-forward "^\\?.+\n" nil t)
-            (delete-region (point-min) (point)))))
+  (save-excursion
+    (goto-char (point-min))
+    (when (looking-at "(\\*\\*) ")
+      (delete-region (point) (match-end 0))))
   (maplev-help-fontify-node)
   (set-buffer-modified-p nil))
 
