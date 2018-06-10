@@ -13,7 +13,6 @@
   (defvar maplev-config-default)
   (defvar maplev--process-item)
   (defvar maplev-builtin-functions)
-  (defvar maplev-cmaple-echoes-flag)
   (defvar maplev-help-mode-map)
   (defvar maplev-mode-syntax-table))
 
@@ -127,7 +126,7 @@ If optional arg HIDE is non-nil do not display buffer."
     (let (buffer-read-only)
       (delete-region (point-min) (point-max))
       (goto-char (point-min)))
-    (comint-simple-send process (format "maplev:-Print(\"%s\"):" proc))
+    (comint-simple-send process (format "maplev:-Print(\"%s\"):%c" proc 0))
     (maplev-cmaple--send-end-notice process)))
 
 (defun maplev-view-filter (process string)

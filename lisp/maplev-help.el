@@ -184,8 +184,9 @@ If HIDE is non-nil, do not bring buffer to front."
       (delete-region (point-min) (point-max)))
     (comint-simple-send process (concat
 				 "interface('screenheight=infinity'):"
-				 "kernelopts('printbytes'=false):"
-				 "help(\"" topic "\");"))))
+				 ;; "kernelopts('printbytes'=false):"
+				 "help(\"" topic "\");"
+				 (string ?\0)))))
 
 (defun maplev--help-filter (process string)
   "Pipe the output of a help command into `maplev--help-buffer'.
