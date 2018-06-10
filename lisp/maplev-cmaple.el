@@ -145,17 +145,18 @@ restart it."
 	    (zerop (maplev-mint-region pmark (line-end-position) 'syntax-only)))
         (comint-send-input))))
 
-(defun maplev-cmaple--send-string (process maple)
-  "Send MAPLE to the cmaple process PROCESS."
+(defun maplev-cmaple--send-string (process maple-input)
+  "Send MAPLE-INPUT to the cmaple PROCESS."
   (with-current-buffer (process-buffer process)
     (goto-char (point-max))
-    (insert maple ?\n))
-  (set-process-filter process 'maplev--cmaple-filter)
+    (insert maple-input ?\n))
+  (set-process-filter process #'maplev--cmaple-filter)
   (comint-simple-send process
-		      ;; trim white-space at end of MAPLE and append a null character
-		      (concat (if (string-match "\\s-+$" maple)
-				  (replace-match "" nil nil maple)
-				maple)
+		      ;; trim white-space at end of MAPLE and append a null character;
+		      ;; the null character is the delimiter used by pmaple.
+		      (concat (if (string-match "\\s-+$" maple-input)
+				  (replace-match "" nil nil maple-input)
+				maple-input)
 			      (string ?\0))))
 
 (defun maplev-cmaple-send-region (beg end)
