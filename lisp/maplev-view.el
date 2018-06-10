@@ -21,8 +21,6 @@
 (declare-function maplev--cleanup-buffer "maplev-cmaple")
 (declare-function maplev--cmaple-process "maplev-cmaple")
 (declare-function maplev--ident-around-point "maplev-common")
-(declare-function maplev-cmaple--ready "maplev-cmaple")
-(declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
 (declare-function maplev-history--stack-current "maplev-history")
 (declare-function maplev-history--stack-process "maplev-history")
 (declare-function maplev-history-clear "maplev-history")
@@ -126,8 +124,7 @@ If optional arg HIDE is non-nil do not display buffer."
     (let (buffer-read-only)
       (delete-region (point-min) (point-max))
       (goto-char (point-min)))
-    (comint-simple-send process (format "maplev:-Print(\"%s\"):%c" proc 0))
-    (maplev-cmaple--send-end-notice process)))
+    (comint-simple-send process (format "maplev:-Print(\"%s\"):%c" proc 0))))
 
 (defun maplev-view-filter (process string)
   "Pipe a Maple procedure listing into `maplev--proc-buffer'.
@@ -140,9 +137,9 @@ PROCESS calls this filter.  STRING is the Maple procedure."
           (narrow-to-region (point) (point))
           (insert string)
           (maplev--cleanup-buffer))
-        (goto-char (point-max))
-        (if (maplev-cmaple--ready process)
-            (maplev-view-cleanup-buffer))))))
+        (goto-char (point-max))))))
+        ;; (if (maplev-cmaple--ready process)
+        ;;     (maplev-view-cleanup-buffer))))))
 
 (defun maplev-view-cleanup-buffer ()
   "Cleanup Maple procedure listings."

@@ -17,9 +17,6 @@
 (declare-function maplev--cmaple-buffer "maplev-cmaple")
 (declare-function maplev--cmaple-process "maplev-cmaple")
 (declare-function maplev--proc-buffer "maplev-view")
-(declare-function maplev-cmaple--lock-access "maplev-cmaple")
-(declare-function maplev-cmaple--ready "maplev-cmaple")
-(declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
 (declare-function maplev-cmaple-direct "maplev-cmaple")
 
 ;;{{{ mode map
