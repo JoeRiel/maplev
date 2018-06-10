@@ -53,7 +53,8 @@
 (defun maplev--cmaple-buffer ()
   "Return the name of the Maple cmaple buffer associated with the current buffer.
 Use the buffer-local `maplev-config' object."
-  (format "Maple (%s)" (slot-value maplev-config 'maple)))
+  (concat "Maple" (and maplev-config
+		       (format " (%s)" (slot-value maplev-config 'maple)))))
 
 (defun maplev--cmaple-process ()
   "Return the cmaple process associated with the current buffer.
@@ -65,6 +66,8 @@ Start one, if necessary."
 
 (defun maplev-cmaple--process-environment ()
   "Return a list of strings of equations that ..."
+  (unless maplev-config
+    (error "No maplev-config object is associated with this buffer"))
   (let ((bindir (slot-value maplev-config 'bindir)))
     (cond
      ((null bindir)
