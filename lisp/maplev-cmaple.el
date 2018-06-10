@@ -39,7 +39,6 @@
 (require 'maplev-custom)
 
 (eval-when-compile
-  (defvar maplev-executable-alist)
   (defvar maplev-mint-error-level)
   (defvar maplev-startup-directory))
 
