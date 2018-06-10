@@ -39,8 +39,6 @@
 (require 'maplev-custom)
 
 (eval-when-compile
-  (defvar maplev-cmaple-echoes-flag)
-  (defvar maplev-cmaple-end-notice)
   (defvar maplev-executable-alist)
   (defvar maplev-mint-error-level)
   (defvar maplev-startup-directory))
@@ -67,7 +65,7 @@ Start one, if necessary."
 (defun maplev-cmaple--process-environment ()
   "Return a list of strings of equations that ..."
   (unless maplev-config
-    (error "No maplev-config object is associated with this buffer"))
+    (maplev-config))
   (let ((bindir (slot-value maplev-config 'bindir)))
     (cond
      ((null bindir)
@@ -122,12 +120,6 @@ restart it."
                             pmaple-and-opts))
        'maplev--cmaple-filter)
       (maplev-cmaple-setup config)
-      ;; (comint-simple-send process init-code
-      ;; (maplev-cmaple--send-end-notice process)
-      ;; Wait until cmaple is unlocked, that is, it has responded.
-      ;; The time step, 100 milliseconds, should be customizable, some OSs
-      ;; do not support fractions of seconds.
-      ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
       (message "Maple started")
       process)))
 
@@ -209,28 +201,6 @@ that the input consists of one line and the output is on the following line."
               (delete-region (point-min) (point-max)))
           output)))))
       
-(defun maplev-cmaple--send-end-notice (process)
-  "Send a command to PROCESS \(cmaple\) to print `maplev-cmaple-end-notice'."
-  (comint-simple-send process (concat "lprint(" maplev-cmaple-end-notice ");")))
-
-(defun maplev-cmaple--ready (process)
-  "Return t if PROCESS \(cmaple\) is ready for new input, nil otherwise.
-Remove `maplev-cmaple-end-notice' from the current buffer.
-Reset the filter for PROCESS \(cmaple\) and unlock access."
-  (let (case-fold-search)
-    (save-excursion
-      (when (search-backward
-             (concat maplev-cmaple-end-notice "\n") nil t)
-        (delete-region (match-beginning 0) (match-end 0))
-        (when (and maplev-cmaple-echoes-flag
-                   (search-backward
-                    (concat "lprint(" maplev-cmaple-end-notice ");\n")
-                    nil t))
-          (delete-region (match-beginning 0) (match-end 0)))
-        (maplev--cleanup-buffer)
-        (set-process-filter process 'maplev--cmaple-filter)
-        t))))
-
 (defun maplev-cmaple-interrupt ()
   "Interrupt Maple."
   (interactive)
@@ -342,8 +312,7 @@ additional commands for interacting with cmaple.
 
   (set (make-local-variable 'font-lock-defaults)
        '(maplev-input-line-keyword))
-  (set (make-local-variable 'comint-process-echoes)
-       maplev-cmaple-echoes-flag)
+  (set (make-local-variable 'comint-process-echoes) t)
   (make-local-variable 'maplev-cmaple-prompt)
   (font-lock-mode 1))
 
