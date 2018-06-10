@@ -23,7 +23,7 @@ local bindir, platform, pmaple, template;
                       "REM This script launches the pmaple executable, which\n"
                       "REM uses OpenMaple to access the Maple engine.\n\n"
                       "set PATH=\"%s;%%PATH%%\"\n"
-                      "%s %%*"
+                      "%s %%*\n"
                     );
         pmaple := FileTools:-JoinPath([kernelopts(':-homedir'), ".emacs.d", "maple", "bin", "pmaple.exe"]);
 
