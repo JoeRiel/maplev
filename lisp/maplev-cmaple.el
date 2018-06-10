@@ -136,11 +136,13 @@ restart it."
 	    (zerop (maplev-mint-region pmark (line-end-position) 'syntax-only)))
         (comint-send-input))))
 
-(defun maplev-cmaple--send-string (process maple-input)
-  "Send MAPLE-INPUT to the cmaple PROCESS."
+(defun maplev-cmaple--send-string (process maple-input &optional echo)
+  "Send MAPLE-INPUT to the cmaple PROCESS.
+If ECHO is non-nil, print MAPLE-INPUT to the output buffer."
   (with-current-buffer (process-buffer process)
     (goto-char (point-max))
-    (insert maple-input ?\n))
+    (when echo
+      (insert-before-markers maple-input ?\n)))
   (set-process-filter process #'maplev--cmaple-filter)
   (comint-simple-send process
 		      ;; trim white-space at end of MAPLE and append a null character;
@@ -160,7 +162,8 @@ Use mint to syntax check the region before sending to cmaple."
     (when current-prefix-arg 
       (maplev-cmaple--clear-buffer))
     (maplev-cmaple--send-string (maplev--cmaple-process)
-				(buffer-substring-no-properties beg end))))
+				(buffer-substring-no-properties beg end)
+				'echo)))
 
 (defun maplev-cmaple-send-line ()
   "Send the current line to cmaple."
