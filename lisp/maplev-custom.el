@@ -335,17 +335,6 @@ See the documentation for `align-exclude-rules-list' for more info."
   :type 'boolean
   :group 'maplev-misc)
 
-(defcustom maplev-cmaple-end-notice "END_OF_OUTPUT"
-  "Message used to indicate the end of Maple output."
-  :type 'string
-  :group 'maplev-misc)
-
-(defcustom maplev-cmaple-echoes-flag
-  (not (string-match "windows-nt\\|ms-dos" (symbol-name system-type)))
-  "Non-nil means the process echoes."
-  :type 'boolean
-  :group 'maplev-buffer)
-
 ;;}}}
 ;;{{{ (*) maple setup
 
