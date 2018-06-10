@@ -169,6 +169,8 @@ If HIDE is non-nil, do not bring buffer to front."
 	(with-current-buffer (get-buffer-create (maplev--help-buffer))
 	  (maplev-help-setup config)
 	  ;; Push TOPIC onto history stack
+	  ;; The magic is done by 'maplev--process-item, which
+	  ;; is buffer-local and assigned maplev--help-process.
 	  (maplev-history--stack-process topic hide)))))
 
 (defun maplev--help-process (topic)
