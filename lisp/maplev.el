@@ -1004,8 +1004,6 @@ The real work is done by `maplev-complete-on-module-exports'."
       (maplev-cmaple--send-string
        (maplev--cmaple-process)
        (concat "seq(lprint(e),e=exports(" module "));"))
-      (maplev-cmaple--wait 3)
-      ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
       ;; Delete the input line.
       (delete-region
        (goto-char (point-min))
@@ -1052,10 +1050,8 @@ index/package help pages.  If it already exists, do nothing."
       (unwind-protect
           (with-current-buffer (get-buffer-create (maplev--help-buffer))
             ;; Process help node "index/function".
-            (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (maplev-help-show-topic "index/function" 'hide)
-            (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (save-restriction
               (narrow-to-region
@@ -1073,10 +1069,8 @@ index/package help pages.  If it already exists, do nothing."
 
             ;; Process help node "index/package".
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-cmaple--wait 3)
             (maplev-help-show-topic "index/package" 'hide)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-cmaple--wait 3)
             (save-restriction
               (narrow-to-region
                (progn (re-search-forward "^    \\w" nil t)
@@ -1098,7 +1092,6 @@ index/package help pages.  If it already exists, do nothing."
             ;; Delete both help pages.
             (maplev-history-delete-item)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-cmaple--wait 3)
             (maplev-history-delete-item))
 
         ;; Assign `maplev-completions'.  Sort the completions.
