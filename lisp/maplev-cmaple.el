@@ -63,13 +63,46 @@ Start one, if necessary."
         process
       (maplev-cmaple--start-process))))
 
+(defun maplev-cmaple--process-environment ()
+  "Return a list of strings of equations that ..."
+  (let ((bindir (slot-value maplev-config 'bindir)))
+    (cond
+     ((null bindir)
+      (error "The :bindir slot of maplev-config is not assigned"))
+     ((not (file-directory-p bindir))
+      (error "The :bindir slot of maplev-config, `%s', does not exist" bindir)))
+    (cons
+     (cond
+      ((or (eq system-type 'gnu/linux)
+	   (eq system-type 'darwin))
+       (concat "LD_LIBRARY_PATH=" (mapconcat 'identity (list bindir (getenv "LD_LIBRARY_PATH")) ":")))
+      ((or (eq system-type 'windows-nt)
+	   (eq system-type 'cygwin)
+	   (eq system-type 'ms-dos))
+       (format "set PATH=\"%s;%%PATH%%\"" bindir))
+      (t (error "unexpected system-type")))
+     process-environment)))
+
+(defun maplev-cmaple--get-pmaple-and-options ()
+  "Return a list of strings consisting of the pmaple executable and its options."
+  (let ((pmaple (slot-value maplev-config 'pmaple)))
+    (unless pmaple
+      (setq pmaple (concat user-emacs-directory "/maple/bin/pmaple")))
+    (cond
+     ((not (file-exists-p pmaple))
+      (error "The pmaple file, '%s', does not exist" pmaple))
+     ((not (file-exists-p pmaple))
+      (error "The pmaple file, '%s', is not executable" pmaple))
+     (t
+      (cons pmaple (maplev-get-option-with-include maplev-config :maple-options "-q"))))))
+
 (defun maplev-cmaple--start-process ()
   "Start a cmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it."
   (let* ((config maplev-config)
-	 (cmaple (slot-value config 'maple))
-	 (maple-options (maplev-get-option-with-include config :maple-options))
+	 (process-environment (maplev-cmaple--process-environment))
+	 (pmaple-and-opts (maplev-cmaple--get-pmaple-and-options))
          (buffer (get-buffer-create (maplev--cmaple-buffer)))
          (process (get-buffer-process buffer))
          ;; Just testing this.  Is there an advantage to a PTY process?
@@ -82,12 +115,8 @@ restart it."
       (set-process-filter
        (setq process (apply #'start-process
                             "Maple"
-                            buffer
-                            cmaple
-			    ;;"-q" "--historyfile=none" "-c maplev:-Setup()"
-			    ;;maple-options
-			    nil
-			    ))
+			    buffer
+                            pmaple-and-opts))
        'maplev--cmaple-filter)
       (maplev-cmaple-setup config)
       ;; (comint-simple-send process init-code
@@ -113,13 +142,18 @@ restart it."
 	    (zerop (maplev-mint-region pmark (line-end-position) 'syntax-only)))
         (comint-send-input))))
 
-(defun maplev-cmaple--send-string (process string)
-  "Send STRING to the cmaple process PROCESS."
+(defun maplev-cmaple--send-string (process maple)
+  "Send MAPLE to the cmaple process PROCESS."
   (with-current-buffer (process-buffer process)
     (goto-char (point-max))
-    (insert string ?\n))
+    (insert maple ?\n))
   (set-process-filter process 'maplev--cmaple-filter)
-  (comint-simple-send process string))
+  (comint-simple-send process
+		      ;; trim white-space at end of MAPLE and append a null character
+		      (concat (if (string-match "\\s-+$" maple)
+				  (replace-match "" nil nil maple)
+				maple)
+			      (string ?\0))))
 
 (defun maplev-cmaple-send-region (beg end)
   "Send the region from BEG to END to cmaple.
@@ -127,7 +161,7 @@ If called interactively use the marked region.
 If called with a prefix the cmaple buffer is first cleared.
 Use mint to syntax check the region before sending to cmaple."
   (interactive "r")
-  (when (equal 0 0) ;; (maplev-mint-region beg end 'syntax-only))
+  (when (equal 0 (maplev-mint-region beg end 'syntax-only))
     (when current-prefix-arg 
       (maplev-cmaple--clear-buffer))
     (maplev-cmaple--send-string (maplev--cmaple-process)
@@ -136,7 +170,9 @@ Use mint to syntax check the region before sending to cmaple."
 (defun maplev-cmaple-send-line ()
   "Send the current line to cmaple."
   (interactive)
-  (maplev-cmaple-send-region (line-beginning-position) (line-end-position)))
+  (save-excursion
+    (back-to-indentation)
+    (maplev-cmaple-send-region (point) (line-end-position))))
 
 (defun maplev-cmaple-send-buffer ()
   "Send the buffer to cmaple."
