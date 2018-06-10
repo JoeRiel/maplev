@@ -107,9 +107,9 @@ See the Maple help page for mint.")
 
    (tester
     :initarg            :tester
-    :initform           "tester"
-    :type               string
-    :custom             string
+    :initform           nil
+    :type               (or null string)
+    :custom             (choice (const nil) string)
     :documentation      "Command to execute Maple tester.
 This is used with `mpldoc-mode', specifically, `mpldoc-test-run-tester'.")
 
