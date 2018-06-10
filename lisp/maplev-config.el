@@ -127,7 +127,8 @@ Used by `mpldoc-test-run-tester'."))
 
 (defvar maplev-config nil
   "Buffer-local variable that stores the MapleV configuration settings.
-It is an instance of `maplev-config-class'.")
+It is an instance of `maplev-config-class' and, if not explicity assigned,
+is inherited from `maplev-config-default'.")
 
 (make-variable-buffer-local 'maplev-config)
 
