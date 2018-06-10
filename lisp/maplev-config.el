@@ -44,7 +44,7 @@
     :initarg            :include-path
     :initform           nil
     :type               (or list string)
-    :custom             (repeat string)
+    :custom             (repeat directory)
     :documentation 
 "A list of strings of directories to search for files
 specified with $include statements in Maple source files.")
@@ -52,16 +52,35 @@ specified with $include statements in Maple source files.")
    (maple
     :initarg            :maple
     :initform           "maple"
-    :custom             string
     :type               string
+    :custom             string
     :documentation      "Command to execute tty Maple.")
 
    (mapledir
     :initarg            :mapledir
     :initform           nil
     :type               (or null string)
+    :custom             (choice (const nil) directory)
     :documentation      "Location of Maple installation.
 Same as result of kernelopts('mapledir').")
+
+   (pmaple
+    :initarg            :pmaple
+    :initform           nil
+    :type               (or null string)
+    :custom             (choice (const nil) file)
+    :documentation "Absolute filename for pmaple executable,
+which is used to communicate with Maple.  This should be
+installed in `user-emacs-directory'/maple/bin; on linux machines
+it is pmaple, on Windows it is pmaple.exe.")
+
+   (bindir
+    :initarg            :bindir
+    :initform           nil
+    :type               (or null string)
+    :custom             (choice (const nil) directory)
+    :documentation      "Location of Maple bin directory.
+Same as result of kernelopts('bindir').")
 
    (maple-options
     :initarg            :maple-options
@@ -91,8 +110,8 @@ See the Maple help page for mint.")
     :initform           "tester"
     :type               string
     :custom             string
-    :documentation      "Command to execute Maple tester.  
-Used by `mpldoc-test-run-tester'.")
+    :documentation      "Command to execute Maple tester.
+This is used with `mpldoc-mode', specifically, `mpldoc-test-run-tester'.")
 
    (tester-options
     :initarg            :tester-options
