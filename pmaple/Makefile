@@ -37,7 +37,7 @@ pdf: pmaple.pdf
 	pdflatex $<
 
 # }}}
-# {{{ binaries
+# {{{ pmaple
 
 .PHONY: linux windows
 
@@ -63,22 +63,13 @@ windows: pmaple.exe
 linux: $(call print-help,linux,	Create pmaple binary)
 windows: $(call print-help,windows,	Create pmaple.exe binary)
 
-%: %.c
+pmaple: pmaple.c getdelim.c
 	@echo "compiling and linking $< ..."
-	$(ENV) $(CC) $^ -o $@ $(INCLUDE) $(CFLAGS) $(LIBS) -l maplec
+	$(ENV) $(CC) $< -o $@ $(INCLUDE) $(CFLAGS) $(LIBS) -l maplec
 
-pmaple.exe: pmaple.c $(MAPLEC-DLL)
+pmaple.exe: pmaple.c getdelim.c $(MAPLEC-DLL) 
 	@echo "compiling and linking $< ..."
-	$(ENV) $(MINGW) $^ -o $@ $(INCLUDE) $(CFLAGS) -L . -lmaplec
-
-
-# }}}
-# {{{ emaple
-
-emaple: $(call print-help,emaple,	Create the emaple bash script)
-
-emaple: emaple.mpl
-	$(MAPLE) -q $< > $@
+	$(ENV) $(MINGW) $< -o $@ $(INCLUDE) $(CFLAGS) -L . -lmaplec
 
 # }}}
 # {{{ install
