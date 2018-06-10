@@ -264,12 +264,12 @@ Reset the filter for PROCESS \(cmaple\) and unlock access."
 
 (defalias 'cmaple 'maplev-cmaple-pop-to-buffer)
 
-(defun maplev--cmaple-filter (process string)
-  "Send the Maple output to the Maple buffer.
-PROCESS is the Maple process, STRING its output."
+(defun maplev--cmaple-filter (process maple-output)
+  "Send the string MAPLE-OUTPUT to the Maple buffer.
+PROCESS is the Maple process."
   (with-current-buffer (process-buffer process)
     (goto-char (point-max))
-    (insert string)))
+    (insert-before-markers maple-output)))
 
 (defun maplev--cleanup-buffer ()
   "Remove over-striking and underlining from the current buffer."
