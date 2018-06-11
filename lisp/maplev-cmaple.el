@@ -249,6 +249,11 @@ PROCESS is the Maple process."
   (goto-char (point-min))
   (while (re-search-forward "\r+" nil t) (replace-match "\n")))
 
+(defun maplev-cmaple-newline ()
+  "Insert a newline but do not send input to pmaple."
+  (interactive)
+  (insert ?\n maplev-cmaple-prompt))
+
 ;;}}}
 ;;{{{ mode map
 
@@ -280,15 +285,15 @@ PROCESS is the Maple process."
     (define-key map [(control c) (control s)]     nil)
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
-    (define-key map [(shift return)]             'newline)
+    (define-key map [(shift return)]             'maplev-cmaple-newline)
     (setq maplev-cmaple-mode-map map)))
 
 ;;}}}
 ;;{{{ mode definition
 
 (defconst maplev-input-line-keyword
-  `((,(concat "^" maplev-cmaple-prompt ".*$") . maplev-input-face))
-  "Keyword for font locking input lines in cmaple mode.")
+  `((,(concat "^" (regexp-quote maplev-cmaple-prompt) ".*$") maplev-input-face))
+  "Keyword for font locking input lines in `maplev-cmaple-mode'.")
 
 (define-derived-mode maplev-cmaple-mode comint-mode
   "Major mode for interacting with cmaple.
