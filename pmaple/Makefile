@@ -78,7 +78,7 @@ pmaple.exe: pmaple.c getdelim.c $(MAPLEC-DLL)
 
 install: $(call print-help,install,	Install the binaries and executables into $(BIN-DIR))
 
-install: emaple pmaple 
+install: pmaple
 	install -D --target-directory=$(BIN-DIR) $+
 
 # }}}
