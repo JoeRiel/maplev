@@ -307,10 +307,8 @@ additional commands for interacting with cmaple.
         comint-eol-on-send t
         mode-name "Maple")
 
-  (if (< emacs-major-version 22)
-      (with-no-warnings
-	(setq comint-use-prompt-regexp-instead-of-fields t))
-    (setq comint-use-prompt-regexp t))
+  (with-no-warnings
+    (setq comint-use-prompt-regexp-instead-of-fields t))
 
   ;; Mint support
   (make-local-variable 'maplev-mint--code-beginning)
