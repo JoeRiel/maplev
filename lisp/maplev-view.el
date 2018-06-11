@@ -137,9 +137,12 @@ PROCESS calls this filter.  STRING is the Maple procedure."
           (narrow-to-region (point) (point))
           (insert string)
           (maplev--cleanup-buffer))
-        (goto-char (point-max))))))
-        ;; (if (maplev-cmaple--ready process)
-        ;;     (maplev-view-cleanup-buffer))))))
+        (goto-char (point-max))
+	(beginning-of-line)
+	(if (not (looking-at "(\\*\\*) $"))
+	    (goto-char (point-max))
+	  (delete-region (point) (point-max))
+	  (maplev-view-cleanup-buffer))))))
 
 (defun maplev-view-cleanup-buffer ()
   "Cleanup Maple procedure listings."
