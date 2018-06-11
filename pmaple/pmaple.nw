@@ -40,8 +40,11 @@
 \label{sec:purpose}
 
 This is the documented source code for \pmaple,
-which provides pipe-line communication with the Maple engine.
-It exists because tty Maple, also known as \cmaple, when used in non-interactive mode,
+which provides pipe-line communication with the Maple engine,
+and is intended to be used with [[maplev]]-mode, an Emacs
+mode for editing Maple scripts.
+It exists because \cmaple, also known as tty Maple,
+when used in non-interactive mode,
 does not flush prompts to standard output until new input arrives;
 that makes it difficult to determine when a computation is complete.
 
