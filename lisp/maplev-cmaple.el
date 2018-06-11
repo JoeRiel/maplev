@@ -298,7 +298,7 @@ This mode has the same commands as `comint-mode' plus some
 additional commands for interacting with cmaple.
 
 \\{maplev-cmaple-map}"
-  (setq comint-prompt-regexp (concat "^\\(" maplev-cmaple-prompt "\\)+ *")
+  (setq comint-prompt-regexp (concat "^\\(" (regexp-quote maplev-cmaple-prompt) "\\)+ *")
         ;; GNU Emacs 21
         comint-eol-on-send t
         mode-name "Maple")
