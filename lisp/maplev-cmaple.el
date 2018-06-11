@@ -1,4 +1,3 @@
-
 ;;; maplev-cmaple.el --- Communicate with Maple process
 
 ;;; Commentary:
