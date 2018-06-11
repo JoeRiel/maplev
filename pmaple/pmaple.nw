@@ -91,6 +91,7 @@ int main( int argc, char *argv[] ) {
   <<process options>>
   <<initialize Maple>>
   <<print splash screen>>
+  <<configure Maple>>
   <<main loop>>
   <<finish up>>
 }
@@ -138,16 +139,26 @@ ALGEB dag;  /* eval result (Maple data-structure) */
 \subsubsection{Process Options}
 \label{sec:process-options}
 
-Search for a [[-q]] (quiet) option; if found reassign [[quiet]] to true.
 
 <<main: vars>>=
 int quiet = FALSE;   /* flag, when nonzero suppress the "splash screen" */
+int num;             /* used to extract error/warn level from option */
+int errlev = 1;      /* default error level */
+int warnlev = 3;     /* default warn level */
 @
+
+Search for a [[-q]] (quiet) option; if found reassign [[quiet]] to true.
+Reassign [[errlev]] and [[warnlev]] from the [[-e]] and [[-w]] options,
+respectively.
 
 <<process options>>=
 for ( size_t i=1; i < argc ; i++ ) {
   if( !strcmp(argv[i], "-q") ) {
     quiet = TRUE;
+  } else if( (sscanf(argv[i], "-e%d", &num) == 1) ) {
+    errlev = num;
+  } else if( (sscanf(argv[i], "-w%d", &num) == 1) ) {
+    warnlev =  num;
   }
 }
 @
@@ -169,6 +180,35 @@ if( (kv == NULL )) {
   printf("Fatal error, %s\n",err);
   return( 1 );
 }
+@
+
+\subsubsection{Configure Maple}
+\label{sec:configmaple}
+
+<<main: vars>>=
+char cmd[120];
+@
+
+Assign Maple commands that set
+  the screen height to infinity, so pagination is disabled,
+  the screen width to eighty characters,
+  disables garbage collection notices,
+  and assigns the error and warning levels.
+
+<<configure Maple>>=
+sprintf(cmd, 
+        "interface("
+        "'screenheight'=infinity,"
+        "'screenwidth'=80,"
+        "'errorbreak'=%d,"
+        "'warnlevel'=%d):"
+        "kernelopts('printbytes'=false):"
+        , errlev, warnlev );
+@          
+
+
+<<configure Maple>>=
+EvalMapleStatement(kv, cmd);
 @
 
 
