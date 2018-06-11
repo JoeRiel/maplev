@@ -200,8 +200,8 @@ sprintf(cmd,
         "interface("
         "'screenheight'=infinity,"
         "'screenwidth'=80,"
-        "'errorbreak'=%d,"
-        "'warnlevel'=%d):"
+        "'errorbreak'=%1d,"
+        "'warnlevel'=%1d):"
         "kernelopts('printbytes'=false):"
         , errlev, warnlev );
 @          
