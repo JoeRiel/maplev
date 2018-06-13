@@ -395,6 +395,7 @@ When MESSAGE is non-nil, display a message with the version."
       ["Quit"      quit-window t]
       "---"
       ["Info"  maplev-goto-info-node t]
+      ["Info in Browser" maplev-browse-info]
       ["About" maplev-about t])))
 
 ;;}}}
@@ -606,6 +607,17 @@ Prefix JUSTIFY means justify as well."
   (interactive)
   (require 'info)
   (info "maplev"))
+
+(defun maplev-browse-info ()
+  "Open the html version of the maplev documentation in a browser."
+  (interactive)
+  (let ((home (getenv "HOME")))
+    (when home 
+      (let ((html (concat (file-name-as-directory home) 
+			  "maple/toolbox/maplev/info/maplev.html")))
+	(if (file-exists-p html)
+	    (browse-url (concat "file://" html))
+	  (error "html file not found: %s" html))))))
 
 ;;}}}
 
