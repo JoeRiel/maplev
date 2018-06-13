@@ -7,7 +7,7 @@
 ##CALLINGSEQUENCE
 ##- Install('opts')
 ##DESCRIPTION
-##- The `Install` command installs the "Emacs" lisp and info files for MapleV.
+##- The `Install` command installs the lisp, info, and binary files for MapleV.
 ##  It also byte compiles the lisp files.
 ##
 ##- The lisp files are extracted from the Maple workbook to ~$HOME/maple/toolbox/maplev/lisp/~,
@@ -16,8 +16,8 @@
 ##- The info file is extracted from the Maple workbook to ~$HOME/maple/toolbox/maplev/info/~,
 ##  then copied to `infodir`.
 ##
-##- If the final installation fails, you can always manually
-##  copy the files from their extracted locations to where
+##- If the final installation fails,
+##  manually copy the files from their extracted locations to where
 ##  they need to be.
 ##
 ##OPTIONS
@@ -58,18 +58,28 @@ Install := proc( { bytecompile :: truefalse := true }
                  , { lispdir :: string := FileTools:-JoinPath([kernelopts("homedir"), ".emacs.d", "maple"]) }
                  , $
                )
-local book, cmd, dir, dst, dstdir, elfiles, extractlispdir, file, result, src, srcdir, tboxdir;
+local bindir, binfile, book, cmd, dir, dst, dstdir, elfiles, extractlispdir, file
+    , platform, result, src, srcdir, status, tboxdir
+    ;
 uses FT = FileTools;
 
     tboxdir := kernelopts('toolboxdir' = 'maplev');
 
-    book := sprintf("maple://%s/lib/maplev.maple", tboxdir);
+    book := FileTools:-JoinPath([tboxdir, "lib", "maplev.maple"]);
+    if not FT:-Exists(book) then
+        error "Maple book %1 does not exist", book;
+    end if;
+
+    book := sprintf("maple://%s", book);
 
     #{{{ Lisp Files
 
     #{{{ (*) extract lisp files
 
+    printf("extracting lisp files\n");
+
     srcdir := cat(book, "/lisp");
+
     elfiles := FT:-ListDirectory(srcdir, 'returnonly' = "*.el");
 
     extractlispdir := cat(tboxdir, "/lisp");
@@ -81,7 +91,7 @@ uses FT = FileTools;
     for file in elfiles do
         src := cat(srcdir, "/", file);
         dst := cat(extractlispdir, "/", file);
-        FT:-Copy(src, dst, 'force');
+        Copy(src, dst, 'force', 'verbose');
     end do;
 
     #}}}
@@ -89,8 +99,10 @@ uses FT = FileTools;
 
     if bytecompile then
 
+        printf("\nbyte compiling\n");
+
         # Use elisp symbol-name to avoid having to quote the directory
-        dir := sprintf("(symbol-name '%A)", lispdir);
+        dir := sprintf("(symbol-name '%A)", extractlispdir);
 
         cmd := sprintf("%s --batch --no-site-file --no-init-file "
                        "--eval \"(push %s load-path)\" "
@@ -106,25 +118,24 @@ uses FT = FileTools;
                     , result[2]
                    );
         end if;
-
     end if;
 
     #}}}
     #{{{ (*) copy to destination
 
-    dstdir := FT:-JoinPath([kernelopts("homedir"), ".emacs.d", "maple"]);
+    printf("installing lisp files\n");
+
+    dstdir := lispdir;
 
     # ensure destination directory exists
     if not FT:-Exists(lispdir) then
         FT:-MakeDirectory(lispdir, 'recurse');
     end if;
 
-    printf("Copying lisp files to %s\n", dstdir);
-
     for file in FT:-ListDirectory(extractlispdir) do
         src := cat(extractlispdir, "/", file);
         dst := cat(dstdir, "/", file);
-        FT:-Copy(src, dst, 'force');
+        Copy(src, dst, 'force', 'verbose', NULL);
     end do;
 
     #}}}
@@ -132,7 +143,9 @@ uses FT = FileTools;
     #}}}
     #{{{ Info File
 
-    #{{{ (*) extract info file
+    #{{{ (*) extract info, html, and pdf files
+
+    printf("\nunpacking info file\n");
 
     dstdir := cat(tboxdir, "/info");
 
@@ -140,17 +153,21 @@ uses FT = FileTools;
         FT:-MakeDirectory(dstdir, 'recurse');
     end if;
 
-    FT:-Copy(cat(book, "/maplev.info"), cat(dstdir, "/maplev.info"));
+    Copy(cat(book, "/maplev.info"), cat(dstdir, "/maplev.info"), 'force', 'verbose');
+    Copy(cat(book, "/maplev.html"), cat(dstdir, "/maplev.html"), 'force', 'verbose');
+    Copy(cat(book, "/maplev.pdf"),  cat(dstdir, "/maplev.pdf"),  'force', 'verbose');
 
     #}}}
     #{{{ (*) install info file
+
+    printf("\ninstalling info file\n");
 
     if not FT:-Exists(infodir) then
         FT:-MakeDirectory(infodir, 'recurse');
     end if;
     src := cat(tboxdir, "/info/maplev.info");
     dst := FT:-JoinPath([infodir, "maplev.info"]);
-    FT:-Copy(src, dst, 'force');
+    Copy(src, dst, 'force', 'verbose',NULL,NULL);
 
     #}}}
     #{{{ (*) update dir file
@@ -185,5 +202,63 @@ uses FT = FileTools;
 
     #}}}
     #}}}
+    #{{{ Binary Files
+
+    #{{{ (*) extract pmaple binary
+
+    printf("\nunpacking binary\n");
+
+    dstdir := FileTools:-JoinPath([tboxdir, "bin"]);
+
+    if not FT:-Exists(dstdir) then
+        FT:-MakeDirectory(dstdir, 'recurse');
+    end if;
+
+    platform := kernelopts('platform');
+
+    if   platform = "unix"    then binfile := "pmaple";
+    elif platform = "windows" then binfile := "pmaple.exe";
+    else
+    end if;
+
+    src := cat(book, "/", binfile);
+    dst := FT:-JoinPath([dstdir, binfile], 'force');
+
+    Copy(src, dst, 'force', 'verbose',NULL,NULL,NULL);
+
+    if platform = "unix" then
+        status := ssystem(sprintf("chmod +x %s", dst));
+        if not status[1] = 0 then
+            WARNING("could not make binary file %1 executable", dst);
+        end if;
+    end if;
+
+    #}}}
+    #{{{ (*) install pmaple binary
+
+    printf("\ninstalling binary\n");
+
+    bindir := FT:-JoinPath([lispdir, "bin"]);
+    if not FT:-Exists(bindir) then
+        FT:-MakeDirectory(bindir, 'recurse');
+    end if;
+
+    src := dst;  # reuse last dst
+    dst := FT:-JoinPath([bindir, binfile]);
+    Copy(src, dst, 'force', 'verbose',NULL,NULL,NULL,NULL);
+
+    if platform = "unix" then
+        status := ssystem(sprintf("chmod +x %s", dst));
+        if not status[1] = 0 then
+            WARNING("could not make binary file %1 executable", dst);
+        end if;
+    end if;
+
+    #}}}
+
+
+    #}}}
+
+    return NULL;
 
 end proc:

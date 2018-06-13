@@ -16,7 +16,7 @@
 ##- First, install the Maple-side of this package.
 ##  Use either the MapleCloud install command, or execute the following command.
 ##>(noexecute) PackageTools:-Install("this://",'overwrite'):
-##- Next, execute the following command to install the Emacs files.
+##- Next, execute the following command to install the Emacs, info, and binary files.
 ##  See "maplev[Install]" for options and details about this command.
 ##>(noexecute) maplev:-Install();
 ##
