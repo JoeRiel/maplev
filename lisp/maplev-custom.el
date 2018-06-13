@@ -61,6 +61,13 @@
   :group 'maplev
   :type 'object)
 
+(defcustom maplev-config-auto-assign t
+  "Non-nil means attempt to assign the :mapledir, :bindir, and :mint slots
+of the buffer-local variable `maplev-config' from the function `maplev-config',
+assuming that the :maple slot is properly assigned and usable."
+  :type 'boolean
+  :group 'maplev)
+
 ;;{{{ (*) comments
 
 (defcustom maplev-comment-column 40
@@ -342,11 +349,6 @@ See the documentation for `align-exclude-rules-list' for more info."
   "If non-nil, change to this directory before running Maple.
 Otherwise use the default directory of `maplev-cmaple-buffer'."
   :type '(choice string (const :tag "default" nil))
-  :group 'maplev-executables)
-
-(defcustom maplev-cmaple-prompt "(**) "
-  "String inserted as prompt in Maple buffer."
-  :type 'string
   :group 'maplev-executables)
 
 ;;}}}

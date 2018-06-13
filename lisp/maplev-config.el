@@ -1,6 +1,6 @@
 ;;; maplev-config.el -- Assign class to configure Maple
 ;;
-;; Copyright (C) 2016
+;; Copyright (C) 2016 Josephs S. Riel
 ;; Author: Joseph S. Riel <jriel@maplesoft.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
@@ -25,12 +25,15 @@
 ;; necessary to build a Maple archive (.mla file), run mint, 
 ;; and execute mpldoc tests from within a Maple source file.
 
+;;; Code:
+
 (require 'eieio)
 (require 'eieio-custom)
 (require 'maplev-utils)
 	 
 (eval-when-compile
-  (defvar maplev-config-default)) ; see maplev-custom.el
+  (defvar maplev-config-default)      ; see maplev-custom.el
+  (defvar maplev-config-auto-assign)) ; ibid
 
 (defclass maplev-config-class ()
 
@@ -46,14 +49,14 @@
     :type               (or list string)
     :custom             (repeat directory)
     :documentation 
-"A list of strings of directories to search for files
-specified with $include statements in Maple source files.")
+"A list of directories to search for files specified with
+$include statements in Maple source files.")
 
    (maple
     :initarg            :maple
-    :initform           "maple"
-    :type               string
-    :custom             string
+    :initform           nil
+    :type               (or null string)
+    :custom             (choice (const nil) string)
     :documentation      "Command to execute tty Maple.")
 
    (mapledir
@@ -62,14 +65,16 @@ specified with $include statements in Maple source files.")
     :type               (or null string)
     :custom             (choice (const nil) directory)
     :documentation      "Location of Maple installation.
-Same as result of kernelopts('mapledir').")
+Same as result of kernelopts('mapledir').   If nil, this field is
+auto-assigned by the function `maplev-config' if `:maple'
+is properly assigned and `maplev-config-auto-assign' is non-nil.")
 
    (pmaple
     :initarg            :pmaple
     :initform           nil
     :type               (or null string)
     :custom             (choice (const nil) file)
-    :documentation "Absolute filename for pmaple executable,
+    :documentation "Absolute path to pmaple executable,
 which is used to communicate with Maple.  This should be
 installed in `user-emacs-directory'/maple/bin; on linux machines
 it is pmaple, on Windows it is pmaple.exe.")
@@ -80,7 +85,9 @@ it is pmaple, on Windows it is pmaple.exe.")
     :type               (or null string)
     :custom             (choice (const nil) directory)
     :documentation      "Location of Maple bin directory.
-Same as result of kernelopts('bindir').")
+Same as result of kernelopts('bindir').  If nil, this field is
+auto-assigned by the function `maplev-config' if `:maple'
+is properly assigned and `maplev-config-auto-assign' is non-nil.")
 
    (maple-options
     :initarg            :maple-options
@@ -92,9 +99,9 @@ See the Maple help page for maple.")
 
    (mint
     :initarg            :mint
-    :initform           "mint"
-    :type               string
-    :custom             string
+    :initform           nil
+    :type               (or null string)
+    :custom             (choice (const nil) string)
     :documentation      "Command to execute Mint.")
    
    (mint-options
@@ -103,7 +110,9 @@ See the Maple help page for maple.")
     :type               string
     :custom             string
     :documentation      "Options to pass to Mint.
-See the Maple help page for mint.")
+See the Maple help page for mint.   If nil, this field is
+auto-assigned by the function `maplev-config' if `:bindir'
+is properly assigned and `maplev-config-auto-assign' is non-nil.")
 
    (tester
     :initarg            :tester
@@ -132,28 +141,47 @@ is inherited from `maplev-config-default'.")
 
 (make-variable-buffer-local 'maplev-config)
 
+
 (defun maplev-config (&rest fields)
   "Assign the buffer-local variable `maplev-config' by passing
-FIELDS to the object constructor for `maplev-config-class'. 
+FIELDS to the object constructor for `maplev-config-class'.
+The `maplev-config-default' object is used to assign the defaults.
 
  If the slot `:compile' is non-nil, assign its value to
 `compile-command' which is made buffer-local.  
 
-If the slot `:mapledir' is nil, assign its value by calling Maple.
+If `maplev-config-auto-assign' is non-nil, the following slots
+are automatically assigned if nil.  The `:bindir' and `:mapledir'
+slots are assigned by querying the Maple engine, if the `:maple'
+slot is assigned and usable.  The `:mint' slot is assigned from
+`:bindir' if a usable file is found.
 
 Return the object."
   (setq maplev-config (apply #'clone maplev-config-default fields))
-  (let ((compile (slot-value maplev-config 'compile)))
-    (when compile
-      (set (make-local-variable 'compile-command) compile)))
-  (let ((path (slot-value maplev-config 'include-path)))
-    (when (stringp path)
-      (oset maplev-config :include-path (list path))))
-  (unless (slot-value maplev-config 'mapledir)
-    ;; Assign the :mapledir slot
-    (oset maplev-config :mapledir (shell-command-to-string
-				   (format "%s -q -c 'printf(kernelopts(mapledir))' -c done"
-					   (slot-value maplev-config 'maple)))))
+  (let ((ext (if (or (string= system-type "windows-nt")
+		     (string= system-type "cygwin"))
+		 ".exe"))
+	file)
+    (with-slots (bindir compile include-path maple mapledir mint pmaple) maplev-config
+      (when compile
+	(set (make-local-variable 'compile-command) compile))
+      (when (stringp include-path)
+	;; convert string to list
+	(setq include-path (list include-path)))
+      (unless pmaple
+	(setq file (concat (expand-file-name user-emacs-directory) "maple/bin/pmaple" ext))
+	(if (file-exists-p file) (setq pmaple file)))
+      (when maplev-config-auto-assign
+	(when maple
+	  (unless bindir
+	    (setq bindir (shell-command-to-string
+			  (format "%s -q -c 'printf(kernelopts(bindir))' -c done" maple))))
+	  (unless mapledir
+	    (setq mapledir (shell-command-to-string
+			    (format "%s -q -c 'printf(kernelopts(mapledir))' -c done" maple)))))
+	(unless (or mint (not bindir))
+	  (setq file (concat (file-name-as-directory (slot-value maplev-config 'bindir)) "mint" ext))
+	  (if (file-exists-p file) (setq mint file))))))
   maplev-config)
 
 
@@ -173,3 +201,5 @@ Do the right thing if the option or include path is empty."
 
 
 (provide 'maplev-config)
+
+;;; maplev-config ends here
