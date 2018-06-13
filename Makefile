@@ -275,8 +275,12 @@ $(book): $(mla) $(hlp) $(INFO-FILE) $(INTRO) Makefile
 	echo '(MakeBook)("$@" \
 	                 , "$(mla)" \
 	                 , "$(hlp)" \
+	                 , "$(HTML-FILE)" \
 	                 , "$(INFO-FILE)" \
+	                 , "$(PDF-FILE)" \
 	                 , "$(INTRO)" \
+	                 , "lisp" = "lisp/*.el" \
+                         , "bin" = ["pmaple/pmaple","pmaple/pmaple.exe"] \
 	                ):' \
 	     | cat maple/installer/MakeBook.mpl - \
 	     | $(MAPLE) -q
