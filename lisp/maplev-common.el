@@ -180,7 +180,7 @@ The defun marked is the one that contains point."
 
 (defun maplev-current-defun ()
   "Return a list with buffer positions of begin and end of current defun."
-  (save-excursion
+  (save-mark-and-excursion
     (maplev-mark-defun)
     (list (point) (mark))))
 
