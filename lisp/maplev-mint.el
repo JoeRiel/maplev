@@ -551,6 +551,8 @@ Return exit code of mint."
       
       (let ((mint (slot-value config 'mint))
 	    (mint-args (maplev-get-option-with-include config 'mint-options)))
+	(unless mint
+	  (error "The slot-value of :mint in maplev-config is not assigned"))
 	(when (and syntax-only (not (member "-S" mint-args)))
 	  (setq mint-args (cons "-S" mint-args)))
 	(unless (member "-q" mint-args)
