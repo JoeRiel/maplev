@@ -26,6 +26,7 @@ local dest, eqs, files, i, spec, src;
 
 end proc:
 
+# Expand any file specs that have wildcards.
 
 GetFiles := proc(spec :: {string,list})
 local dir, file;
@@ -40,4 +41,5 @@ local dir, file;
         FileTools:-AbsolutePath(spec);
     end if;
 end proc;
+
 
