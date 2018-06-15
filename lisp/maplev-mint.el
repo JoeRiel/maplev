@@ -30,12 +30,6 @@
 
 ;;{{{ customizable variables
 
-(defcustom maplev-mint-coding-system 'undecided-dos
-  "Coding system used by Mint.  See `coding-system-for-read' for details."
-  ;; TBD: why is this customizable?
-  :type '(choice (const undecided-dos) (const raw-text-unix) (symbol :tag "other"))
-  :group 'maplev-mint)
-
 (defcustom maplev-mint-query t
   "Non-nil means query before correcting."
   :type 'boolean
@@ -526,7 +520,7 @@ Return exit code of mint."
   (interactive "r")
   (let ((code-buffer (current-buffer))
         (code-window (get-buffer-window (current-buffer)))
-        (coding-system-for-read maplev-mint-coding-system)
+        (coding-system-for-read 'undecided-unix)
         (mint-buffer "*Mint*")
 	(config maplev-config)
         status eoi lines errpos)

@@ -348,13 +348,7 @@ When MESSAGE is non-nil, display a message with the version."
        ["Buffer"    maplev-mint-buffer t]
        ["Procedure" maplev-mint-procedure t]
        ["Region"    maplev-mint-region t]
-       ["Rerun"     maplev-mint-rerun :active maplev-mint--code-beginning]
-       "---"
-       ("Mint level"
-        ["severe errors"    (setq maplev-mint-info-level 1) :style radio :selected (= maplev-mint-info-level 1)]
-        ["+ serious errors" (setq maplev-mint-info-level 2) :style radio :selected (= maplev-mint-info-level 2)]
-        ["+ warnings"       (setq maplev-mint-info-level 3) :style radio :selected (= maplev-mint-info-level 3)]
-        ["full report"      (setq maplev-mint-info-level 4) :style radio :selected (= maplev-mint-info-level 4)]))
+       ["Rerun"     maplev-mint-rerun :active maplev-mint--code-beginning])
       ("Maple"
        ["Goto buffer"    maplev-cmaple-pop-to-buffer t]
        ["Send buffer"    maplev-cmaple-send-buffer t]

@@ -1013,20 +1013,6 @@ Rerun the previous @command{mint} command (@code{mint-rerun}).
 @end table
 
 These commands are available through the menubar, @kbd{MapleV -> Mint}.
-The following variables affect the output of @command{mint}:
-
-@vtable @code
-@item mint-info-level
-An integer from 0 to 4 that selects the amount of information displayed
-by @command{mint}.  0 displays no information, 4 displays the most.  The default
-value is 3.  This value can be set through the menubar,
-@kbd{Maplev -> Mint -> Mint level}.
-
-@item mint-coding-system
-Symbol that defines the coding system used by @command{mint}.  The default value
-is @code{undecided-dos}.
-
-@end vtable
 
 
 @node Mint mode,  , Running mint, Mint
