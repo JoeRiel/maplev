@@ -37,7 +37,17 @@
 
 (defclass maplev-config-class ()
 
-  ((compile
+  ((bindir
+    :initarg            :bindir
+    :initform           nil
+    :type               (or null string)
+    :custom             (choice (const nil) directory)
+    :documentation      "Location of Maple bin directory.
+Same as result of kernelopts('bindir').  If nil, this field is
+auto-assigned by the function `maplev-config' if `:maple'
+is properly assigned and `maplev-config-auto-assign' is non-nil.")
+
+   (compile
     :initarg            :compile
     :initform           nil
     :type               (or null string)
@@ -78,16 +88,6 @@ is properly assigned and `maplev-config-auto-assign' is non-nil.")
 which is used to communicate with Maple.  This should be
 installed in `user-emacs-directory'/maple/bin; on linux machines
 it is pmaple, on Windows it is pmaple.exe.")
-
-   (bindir
-    :initarg            :bindir
-    :initform           nil
-    :type               (or null string)
-    :custom             (choice (const nil) directory)
-    :documentation      "Location of Maple bin directory.
-Same as result of kernelopts('bindir').  If nil, this field is
-auto-assigned by the function `maplev-config' if `:maple'
-is properly assigned and `maplev-config-auto-assign' is non-nil.")
 
    (maple-options
     :initarg            :maple-options
