@@ -617,6 +617,7 @@ Prefix JUSTIFY means justify as well."
 
 ;;{{{ MapleV mode 
 
+;;;###autoload
 (define-derived-mode maplev-mode fundamental-mode "MapleV"
   "Major mode for editing Maple code.
 
