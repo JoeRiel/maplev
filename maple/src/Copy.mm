@@ -19,7 +19,7 @@ Copy := proc(src :: string
 
     FileTools:-Copy(src, dst, _options['force']);
     if verbose then
-        printf("copied %s to %s\n", src, dst);
+        printf("  %s --> %s\n", src, dst);
     end if;
     NULL;
 end proc;
