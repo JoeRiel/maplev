@@ -40,6 +40,6 @@ local dir, file;
     else
         FileTools:-AbsolutePath(spec);
     end if;
-end proc;
+end proc:
 
 
