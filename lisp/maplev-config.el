@@ -33,7 +33,8 @@
 	 
 (eval-when-compile
   (defvar maplev-config-default)      ; see maplev-custom.el
-  (defvar maplev-config-auto-assign)) ; ibid
+  (defvar maplev-config-auto-assign)  ; ibid
+  (declare-function maplev-cmaple-default-pmaple "maplev-cmaple.el"))
 
 (defclass maplev-config-class ()
 
@@ -141,7 +142,6 @@ is inherited from `maplev-config-default'.")
 
 (make-variable-buffer-local 'maplev-config)
 
-
 (defun maplev-config (&rest fields)
   "Assign the buffer-local variable `maplev-config' by passing
 FIELDS to the object constructor for `maplev-config-class'.
@@ -157,7 +157,10 @@ slot is assigned and usable.  The `:mint' slot is assigned from
 `:bindir' if a usable file is found.
 
 Return the object."
-  (setq maplev-config (apply #'clone maplev-config-default fields))
+  (setq maplev-config
+	(if maplev-config-default
+	    (apply #'clone maplev-config-default fields)
+	  (apply #'make-instance 'maplev-config-class fields)))
   (let ((ext (if (or (string= system-type "windows-nt")
 		     (string= system-type "cygwin"))
 		 ".exe"))
@@ -169,7 +172,7 @@ Return the object."
 	;; convert string to list
 	(setq include-path (list include-path)))
       (unless pmaple
-	(setq file (concat (expand-file-name user-emacs-directory) "maple/bin/pmaple" ext))
+	(setq file (maplev-cmaple-default-pmaple))
 	(if (file-exists-p file) (setq pmaple file)))
       (when maplev-config-auto-assign
 	(when maple
@@ -198,6 +201,17 @@ Do the right thing if the option or include path is empty."
 		(concat " -I " (mapconcat 'identity path ","))))))
    options))
 
+(defcustom maplev-config-default (maplev-config-class "maplev-config")
+  "This `maplev-config-class' object holds default values for the variable `maplev-config'."
+  :group 'maplev
+  :type 'object)
+
+(defcustom maplev-config-auto-assign t
+  "Non-nil means attempt to assign the :mapledir, :bindir, and :mint slots
+of the buffer-local variable `maplev-config' from the function `maplev-config',
+assuming that the :maple slot is properly assigned and usable."
+  :type 'boolean
+  :group 'maplev)
 
 
 (provide 'maplev-config)
