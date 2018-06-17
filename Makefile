@@ -254,6 +254,26 @@ $(hlp-installed): $(hlp)
 	@$(CP) --verbose $+ $@
 
 # }}}
+# {{{ package
+
+.PHONY: package
+
+PKG-VER := $(PKG)-$(VERSION)
+PKG-DIR := /tmp/$(PKG-VER)
+TAR-FILE := $(PKG-VER).tar
+
+package: $(PKG-DIR)
+	tar --verbose --create --file $(TAR-FILE) --directory=/tmp $(PKG-VER)
+
+$(PKG-DIR): dir README lisp/*.el doc/maplev.info
+	$(RM) -r $@
+	mkdir $@
+	$(CP) $^ $@
+
+README: README.md
+	pandoc --from=markdown --to=plain --columns=78 --out=$@ $<
+
+# }}}
 # {{{ book
 
 help: $(call print-separator)
@@ -262,24 +282,18 @@ help: $(call print-separator)
 
 book: $(call print-help,book,	Create ${pkg}.maple)
 
-intro: $(INTRO)
 INTRO := maple/mhelp/Intro.mw
+
+intro: $(INTRO)
 
 $(INTRO): maple/src/Intro.md
 	mpldoc --config nightly $<
 
 book := $(PKG).maple
 book: $(book)
-$(book): $(mla) $(hlp) $(INFO-FILE) $(INTRO) Makefile
+$(book): $(mla) $(hlp) $(HTML-FILE) $(PDF-FILE) $(INTRO) $(TAR-FILE)
 	$(RM) $@
-	echo '(MakeBook)("$@" \
-	                 , "$(mla)" \
-	                 , "$(hlp)" \
-	                 , "$(HTML-FILE)" \
-	                 , "$(INFO-FILE)" \
-	                 , "$(PDF-FILE)" \
-	                 , "$(INTRO)" \
-	                 , "lisp" = "lisp/*.el" \
+	echo '(MakeBook)("$@" $(foreach file,$^,,"$(file)") \
                          , "bin" = ["pmaple/pmaple","pmaple/pmaple.exe"] \
 	                ):' \
 	     | cat maple/installer/MakeBook.mpl - \
@@ -309,8 +323,6 @@ uninstall: lisp-uninstall
 	$(RM) $(MAPLE-LIB-DIR)/*
 
 .PHONY: install uninstall
-
-
 
 # }}}
 # {{{ Installer
