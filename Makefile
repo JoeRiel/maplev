@@ -265,7 +265,7 @@ TAR-FILE := $(PKG-VER).tar
 package: $(PKG-DIR)
 	tar --verbose --create --file $(TAR-FILE) --directory=/tmp $(PKG-VER)
 
-$(PKG-DIR): dir README lisp/*.el maplev-pkg.el doc/maplev.info
+$(PKG-DIR): dir README lisp/*.el doc/maplev.info
 	$(RM) -r $@
 	mkdir $@
 	$(CP) $^ $@
@@ -366,7 +366,7 @@ release: check-release check-branch check-clean
 	@git merge --no-ff --message="merge branch develop into release" develop
 	@sed --in-place "/^\*\*\Version /s/$(RELEASE-REGEX)/$(RELEASE)/" README.md
 	@sed --in-place "/VERSION=/s/$(RELEASE-REGEX)/$(RELEASE)/" run-installer
-	@sed --in-place "3s/$(RELEASE-REGEX)/$(RELEASE)/" maplev-pkg.el
+	@sed --in-place "3s/$(RELEASE-REGEX)/$(RELEASE)/" lisp/maplev-pkg.el
 	@doc/MakeVersion $(TEXI-VERSION) $(RELEASE)
 	@lisp/MakeVersion $(LISP-VERSION) $(RELEASE)
 	@git commit --quiet --message="prepare release" --all
