@@ -31,14 +31,20 @@
 
 Unpack := proc( )
 
-local bindir, binfile, book, cmaple, dst, dstdir, elisp
+local bindir, binfile, book, cmaple, dst, dstdir, elisp, join
     , mapledir, mint, platform, pmaple, src, status, tboxdir;
 
 uses FT = FileTools;
 
+    join := proc()
+        FileTools:-JoinPath([_passed]);
+    end proc;
+
+
     tboxdir := kernelopts('toolboxdir' = 'maplev');
 
-    book := FileTools:-JoinPath([tboxdir, "lib", "maplev.maple"]);
+    book := join(tboxdir, "lib", "maplev.maple");
+
     if not FT:-Exists(book) then
         error "Maple book %1 does not exist", book;
     end if;
@@ -49,21 +55,21 @@ uses FT = FileTools;
 
     printf("\nextracting doc files\n");
 
-    dstdir := cat(tboxdir, "/doc");
+    dstdir := join(tboxdir, "doc");
 
     if not FT:-Exists(dstdir) then
         FT:-MakeDirectory(dstdir, 'recurse');
     end if;
 
-    Copy(cat(book, "/maplev.html"), cat(dstdir, "/maplev.html"), 'force', 'verbose');
-    Copy(cat(book, "/maplev.pdf"),  cat(dstdir, "/maplev.pdf"),  'force', 'verbose');
+    Copy(join(book, "maplev.html"), join(dstdir, "maplev.html"), 'force', 'verbose');
+    Copy(join(book, "maplev.pdf"),  join(dstdir, "maplev.pdf"),  'force', 'verbose');
 
     #}}}
     #{{{ Binary file
 
     printf("\nextracting pmaple binary file\n");
 
-    dstdir := FileTools:-JoinPath([tboxdir, "bin"]);
+    dstdir := join(tboxdir, "bin");
 
     if not FT:-Exists(dstdir) then
         FT:-MakeDirectory(dstdir, 'recurse');
@@ -76,8 +82,8 @@ uses FT = FileTools;
     else
     end if;
 
-    src := cat(book, "/", binfile);
-    dst := FT:-JoinPath([dstdir, binfile], 'force');
+    src := join(book, binfile);
+    dst := join(dstdir, binfile);
 
     Copy(src, dst, 'force', 'verbose',NULL);
 
@@ -97,7 +103,8 @@ uses FT = FileTools;
 
     src := FT:-ListDirectory(book, 'returnonly' = "*.tar")[1];
 
-    dst := cat(tboxdir, "/", src);
+    dst := join(tboxdir, src);
+    src := join(book, src);
     Copy(src, dst, 'force', 'verbose');
 
     #}}}
@@ -106,8 +113,8 @@ uses FT = FileTools;
     # Print elisp code that can be used in the user's Emacs initialization file.
 
     (bindir,mapledir) := kernelopts(':-bindir',':-mapledir');
-    mint   := FileTools:-JoinPath([bindir, "mint"]);
-    cmaple := FileTools:-JoinPath([bindir, "cmaple"]);
+    mint   := join(bindir, "mint");
+    cmaple := join(bindir, "cmaple");
     if platform = "windows" then
         mint := cat(mint,".exe");
         cmaple := cat(cmaple,".exe");
