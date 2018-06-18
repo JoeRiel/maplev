@@ -44,6 +44,13 @@
 (declare-function maplev-mint-region "maplev-mint")
 (declare-function maplev-current-defun "maplev-common")
 
+;;{{{ constants and variables
+
+(defconst maplev-cmaple-prompt "(**) "
+  "String inserted as prompt in Maple buffer.")
+
+
+;;}}}
 ;;{{{ mode functions
 
 (defun maplev--cmaple-buffer ()
@@ -82,11 +89,21 @@ Start one, if necessary."
       (t (error "unexpected system-type")))
      process-environment)))
 
+(defun maplev-cmaple-default-pmaple ()
+  "Return the default path to the pmaple executable."
+  (expand-file-name 
+   (concat "~/maple/toolbox/maplev/bin/pmaple"
+	   (if (or (eq system-type 'windows-nt)
+		   (eq system-type 'cygwin)
+		   (eq system-type 'ms-dos))
+	       "exe"
+	     ""))))
+
 (defun maplev-cmaple--get-pmaple-and-options ()
   "Return a list of strings consisting of the pmaple executable and its options."
   (let ((pmaple (slot-value maplev-config 'pmaple)))
     (unless pmaple
-      (setq pmaple (concat user-emacs-directory "/maple/bin/pmaple")))
+      (setq pmaple (maplev-cmaple-default-pmaple)))
     (cond
      ((not (file-exists-p pmaple))
       (error "The pmaple file, '%s', does not exist" pmaple))
@@ -292,7 +309,7 @@ PROCESS is the Maple process."
 ;;{{{ mode definition
 
 (defconst maplev-input-line-keyword
-  `((,(concat "^" (regexp-quote maplev-cmaple-prompt) ".*$") maplev-input-face))
+  `((,(concat "^" (regexp-quote maplev-cmaple-prompt)) . maplev-input-face))
   "Keyword for font locking input lines in `maplev-cmaple-mode'.")
 
 (define-derived-mode maplev-cmaple-mode comint-mode
@@ -302,22 +319,20 @@ This mode has the same commands as `comint-mode' plus some
 additional commands for interacting with cmaple.
 
 \\{maplev-cmaple-map}"
+  
   (setq comint-prompt-regexp (concat "^\\(" (regexp-quote maplev-cmaple-prompt) "\\)+ *")
-        ;; GNU Emacs 21
-        comint-eol-on-send t
-        mode-name "Maple")
-
-  (with-no-warnings
-    (setq comint-use-prompt-regexp-instead-of-fields t))
+        comint-eol-on-send t  ; goto end of line before sending
+        mode-name "Maple"
+	comint-use-prompt-regexp t)
 
   ;; Mint support
   (make-local-variable 'maplev-mint--code-beginning)
   (make-local-variable 'maplev-mint--code-end)
 
-  (set (make-local-variable 'font-lock-defaults)
-       '(maplev-input-line-keyword))
+  ;; font lock support
+  ;; (set (make-local-variable 'font-lock-defaults)
+  ;;      '(maplev-input-line-keyword))
   (set (make-local-variable 'comint-process-echoes) t)
-  (make-local-variable 'maplev-cmaple-prompt)
   (font-lock-mode 1))
 
 (defun maplev-cmaple-setup (config)
