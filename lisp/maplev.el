@@ -143,9 +143,9 @@
 
 (let* ((maplev-dir (file-name-directory (or (locate-library "maplev") "")))
        (maplev-release.el (concat maplev-dir "maplev-release.el")))
-  (when (require 'maplev-release maplev-release.el 'noerror)
-    (autoload 'maplev-release     maplev-release.el)
-    (autoload 'maplev-git-release maplev-release.el)))
+  (when (require 'maplev-release  "maplev-release" 'noerror)
+    (autoload 'maplev-release     "maplev-release")
+    (autoload 'maplev-git-release "maplev-release")))
 
 ;;;###autoload
 (defun maplev-version (&optional here full message)
