@@ -837,18 +837,35 @@ The default is four spaces.
 @vindex maplev-load-config-file-flag
 @vindex default-directory
 
-When Maplev-mode is called,
-  a search is made for a @file{.maplev} file
+For MapleV-mode
+ to access Maple,
+  display Maple help pages,
+  and use Mint@footnote{Mint is the Maple syntax checker.},
+it needs to be told where to find the Maple binaries and libraries.
+This information is stored in an @code{eieio} object
+of class @code{maplev-config-class}.
+For details about objects, see @ref{Top,,, eieio, The EIEIO Manual}.
+
+The global variable @code{maplev-config-default} stores the default settings.
+It can be configured by executing @kbd{M-x customize-group @key{RET} maplev}.
+Select @emph{MapleV Config Default} and fill in the fields,
+which are described in the following sections.
+@vindex maplev-config-default
+
+To assign a project-specific include-path,
+or to use a release of Maple different from the default,
+put appropriate lisp code in a @file{.maplev} file.
+When Maplev-mode is applied to a buffer
+  it searches for a @file{.maplev} file
   if the flag @code{maplev-load-config-file-flag} is non-nil.
 The search begins in @code{default-directory},
 which is typically the directory associated with the current buffer,
   and moves upward through the file hierarchy, 
   stopping when the file is found or root is reached.
 If the file is found, it is loaded as an Emacs lisp file.
-
-The @code{maplev-config} function can be used in the @file{.maplev} file
-to create an object that configures MapleV on a per-project basis.
-
+@cindex .maplev
+@vindex maplev-load-config-file-flag
+@vindex default-directory
 
 @menu
 * Configuration Object::        Configuring MapleV executables and their options.
@@ -869,6 +886,14 @@ The following fields are defined.
 
 @table @kbd
 
+@item :bindir
+Location of the installed Maple binary directory.
+Can be obtained in Maple from @code{kernelopts('bindir')}.
+This is needed to access the library used by @command{pmaple}.
+If left as @code{nil}, the default, this field is automatically
+assigned by the function @code{maplev-config}
+provided the @code{:maple} slot is properly assigned.
+
 @item :compile
 Shell command to build and install a Maple archive.
 If assigned, the string is assigned to the Emacs lisp
@@ -881,11 +906,10 @@ Typically assigned to a @command{make} command.
 @item :include-path
 A string or list of strings of directories to search for files
 specified with @code{$include} statements in Maple source files.
-Used by @command{mint}, Maple's syntax checker,
+Used by @command{mint},
 by hyperlinked @code{$include} statements,
-and by the @code{mpldoc} tester,
+and by the @code{mpldoc} tester;
 see the @code{:tester} entry, below.
-
 
 @item :maple
 Shell command to execute tty (command-line) Maple.
@@ -893,8 +917,10 @@ The default is @samp{maple}.  @xref{Maple}.
 
 @item :mapledir
 The path to the installation of Maple.
-If left nil, the default, this field is automatically
-assigned by the function @code{maplev-config}.
+Should be the same as that returned by @code{kernelopts('mapledir')}.
+If left as @code{nil}, the default, this field is automatically
+assigned by the function @code{maplev-config}
+provided the @code{:maple} slot is properly assigned.
 
 @item :maple-options
 A string of options to pass to @command{maple}.
@@ -907,7 +933,8 @@ Shell command to execute Mint, the Maple syntax-checker.
 The default is @samp{mint}.  @xref{Mint}.
 
 @item :mint-options
-A string of options to pass to @command{mint}.
+A string of options to pass to @command{mint},
+the Maple syntax checker.
 The default is @samp{-i2 -q -v -w 100}.
 The use of the verbose option, @samp{-v},
 is necessary so that @command{mint} output for include files
@@ -918,6 +945,14 @@ use @samp{-V} for the verbose option.
 See the Maple help page for @command{mint}
 for a description of the available options.
 
+@item :pmaple
+Absolute path to pmaple executable.
+This is used to display Maple help pages, procedures,
+and to directly communicate with Maple.
+The executable should in @file{user-emacs-directory/maple/bin},
+where @code{user-emacs-directory} is the value of that
+variable and typically @file{$HOME/.emacs.d}.
+
 @item :tester
 Shell command to execute Maplesoft @command{tester}.
 Used by @code{mpldoc-test-run-tester}, 
@@ -927,7 +962,7 @@ Use of this requires access to Maplesoft's @code{tester} facility.
 
 @item :tester-options
 A string of options to pass to @command{tester}.  See above.
-The default is the empty string.
+The default is nil.
 
 @end table
 
@@ -941,17 +976,18 @@ for a Maple package/project named @code{Bark}.
 @example
 (let ((proj-root (concat (getenv "HOME") "/maple/Bark")))
   (maplev-config
-   :maple-options "-B -A2 -e2"  ; configure libname and error/warning levels of Maple 
+   :maple-options "-B -A2 -e2"  ; setup libname and error/assert levels
    :mint-options "-l"           ; ignore leading underscore
-   :include-path proj-root      ; add proj-root to the include path for Maple and Mint
-   :compile (format "make -C %s mla-install" proj-root)))
+   :include-path proj-root      ; used by maple and mint
+   :compile (format "make -C %s mla-install" proj-root))) ; 
 @end example
+@cindex .maplev
 
 The @code{:compile} value in this example is a shell command
 that passes the @code{mla-install} target
 to a project-specific @file{Makefile}.  
 The associated rule in the @file{Makefile}
-presumably builds and installs the Maple library archive, @file{Bark.mla}.
+builds and installs the Maple library archive, @file{Bark.mla}.
 
 
 
@@ -970,8 +1006,8 @@ that provides a convenient means for locating and correcting syntax
 errors.
 
 To allow Emacs to run @command{mint},
-the @code{:mint} and @code{:mint-options} fields
-of @code{maplev-config} must be properly configured.
+the @code{:mint}, @code{:mint-options}, and @code{include-path}
+slots of @code{maplev-config} must be properly configured.
 @xref{Configuration}.
 
 @menu
@@ -1287,13 +1323,11 @@ The following commands display Maple procedures:
 
 @table @kbd
 @item M-?
-Query for a procedure name, using the word at point as the default.
-Read the procedure from the Maple library and display it in a buffer
-(@code{maplev-view-at-point}).
+Query for a module or procedure name, using the word at point as the default.
+Display the code in a buffer (@code{maplev-view-at-point}).
 
 @item M-S-mouse-2
-Read the procedure at the click from the library and display it in a
-buffer (@code{maplev-view-follow-point}).
+Display the module or procedure at the click in a buffer (@code{maplev-view-follow-point}).
 
 @end table
 
