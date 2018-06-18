@@ -23,6 +23,12 @@
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
+;;; Commentary:
+
+;; This file provides some basic hooks to ... 
+
+;;; Code:
+
 (require 'ob)
 (require 'ob-ref)
 (require 'ob-comint)
