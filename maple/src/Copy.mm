@@ -17,10 +17,10 @@ Copy := proc(src :: string
              , $
             )
 
-    FileTools:-Copy(src, dst, _options['force']);
     if verbose then
         printf("  %s --> %s\n", src, dst);
     end if;
+    FileTools:-Copy(src, dst, _options['force']);
     NULL;
 end proc;
 
