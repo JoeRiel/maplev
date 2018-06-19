@@ -59,7 +59,8 @@
 (defcustom maplev-config-default (maplev-config-class "maplev-config")
   "This `maplev-config-class' object holds default values for the variable `maplev-config'."
   :type 'object
-  :group 'maplev)
+  :group 'maplev
+  :link '(custom-manual "(maplev)Configuration"))
 
 (defcustom maplev-config-auto-assign t
   "Non-nil means attempt to assign the :mapledir, :bindir, and :mint slots
