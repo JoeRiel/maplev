@@ -198,7 +198,7 @@ Do the right thing if the option or include path is empty."
     (concat (slot-value config slot)
 	    (let ((path (remove "" (slot-value config 'include-path))))
 	      (when path
-		(concat " -I " (mapconcat 'identity path ","))))))
+		(concat " -I" (mapconcat 'identity path ","))))))
    options))
 
 
