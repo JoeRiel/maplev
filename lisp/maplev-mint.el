@@ -8,6 +8,7 @@
 
 (require 'eieio)
 (require 'maplev-config)
+(require 'maplev-custom)
 (require 'maplev-re)
 
 (eval-when-compile
@@ -550,7 +551,10 @@ Return exit code of mint."
       ;; works on both platforms.
       
       (let ((mint (slot-value config 'mint))
-	    (mint-args (maplev-get-option-with-include config 'mint-options)))
+	    (mint-args (maplev-get-option-with-include config 'mint-options))
+	    (process-environment (if maplev-use-new-language-features
+				     (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
+				   process-environment)))
 	(unless mint
 	  (error "The slot-value of :mint in maplev-config is not assigned"))
 	(when (and syntax-only (not (member "-S" mint-args)))

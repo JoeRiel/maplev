@@ -68,7 +68,7 @@ Start one, if necessary."
       (maplev-cmaple--start-process))))
 
 (defun maplev-cmaple--process-environment ()
-  "Return a list of strings of equations that ..."
+  "Return a list of strings of equations that define the process environment."
   (unless maplev-config
     (maplev-config))
   (let ((bindir (slot-value maplev-config 'bindir)))
@@ -87,7 +87,9 @@ Start one, if necessary."
 	   (eq system-type 'ms-dos))
        (format "set PATH=\"%s;%%PATH%%\"" bindir))
       (t (error "unexpected system-type")))
-     process-environment)))
+     (if maplev-use-new-language-features
+	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
+       process-environment))))
 
 (defun maplev-cmaple-default-pmaple ()
   "Return the default path to the pmaple executable."

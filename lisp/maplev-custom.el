@@ -352,16 +352,23 @@ Otherwise use the default directory of `maplev-cmaple-buffer'."
   :type '(choice string (const :tag "default" nil))
   :group 'maplev-executables)
 
+(defcustom maplev-use-new-language-features nil
+  "If non-nil, use the new language features of Maple.
+The particular features enabled are release dependent."
+  :type 'boolean
+  :group 'maplev-executables)
+
 ;;}}}
 ;;{{{ (*) help
 
 (defcustom maplev-help-port 3141
-  "Port number used to communicate to a Maple help server."
+  "Port number used to communicate to a Maple help server.
+Only used if `maplev-help-use-standard-flag' is non-nil."
   :type 'integer
   :group 'maplev-help)
 
 (defcustom maplev-help-use-standard-flag nil
-  "True means use standard help, if available.
+  "Non-nil means use standard help, if available.
 For this to work, Standard Maple must be running Help:-Server,
 which is an export of the Help package."
   :type 'boolean
