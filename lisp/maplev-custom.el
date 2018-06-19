@@ -349,7 +349,7 @@ See the documentation for `align-exclude-rules-list' for more info."
 (defcustom maplev-startup-directory nil
   "If non-nil, change to this directory before running Maple.
 Otherwise use the default directory of `maplev-cmaple-buffer'."
-  :type '(choice string (const :tag "default" nil))
+  :type '(choice string (const :tag "Use default" nil))
   :group 'maplev-executables)
 
 (defcustom maplev-use-new-language-features nil

@@ -42,7 +42,7 @@
     :initarg            :bindir
     :initform           nil
     :type               (or null string)
-    :custom             (choice (const nil) directory)
+    :custom             (choice (const :tag "Auto assign") directory)
     :documentation      "Location of Maple bin directory.
 Same as result of kernelopts('bindir').  If nil, this field is
 auto-assigned by the function `maplev-config' if `:maple'
@@ -74,7 +74,7 @@ $include statements in Maple source files.")
     :initarg            :mapledir
     :initform           nil
     :type               (or null string)
-    :custom             (choice (const nil) directory)
+    :custom             (choice (const :tag "Auto assign" nil) directory)
     :documentation      "Location of Maple installation.
 Same as result of kernelopts('mapledir').   If nil, this field is
 auto-assigned by the function `maplev-config' if `:maple'
@@ -102,8 +102,10 @@ See the Maple help page for maple.")
     :initarg            :mint
     :initform           nil
     :type               (or null string)
-    :custom             (choice (const nil) string)
-    :documentation      "Command to execute Mint.")
+    :custom             (choice (const :tag "Auto assign" nil) string)
+    :documentation "Command to execute Mint.  If nil, this field
+is auto-assigned by the function `maplev-config' if `:maple' is
+properly assigned and `maplev-config-auto-assign' is non-nil.")
    
    (mint-options
     :initarg            :mint-options
