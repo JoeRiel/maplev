@@ -200,17 +200,6 @@ double quote.  Procbody, alas, does not handle a double quote."
   :group 'maplev-templates)
 
 ;;}}}
-;;{{{ (*) completion
-
-(defcustom maplev-completion-longdelim-p nil
-  "If non-nil use the long delimiter when completing a Maple control structure.
-For example, if non-nil, a `do' loop is completed with `end do',
-otherwise it is completed with `od'.  If the maple release is less than 6
-than the long delimiter is never used."
-  :type 'boolean
-  :group 'maplev-completions)
-
-;;}}}
 ;;{{{ (*) miscellaneous
 
 ;; Leading commas
