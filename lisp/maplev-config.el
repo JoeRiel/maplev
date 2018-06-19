@@ -22,7 +22,7 @@
 ;;
 ;; Provide the function `maplev-config' and buffer-local class
 ;; variable `maplev-config' to record the Maple configuration
-;; necessary to build a Maple archive (.mla file), run mint, 
+;; necessary to build a Maple archive (.mla file), run mint,
 ;; and execute mpldoc tests from within a Maple source file.
 
 ;;; Code:
@@ -59,7 +59,7 @@ is properly assigned and `maplev-config-auto-assign' is non-nil.")
     :initform           nil
     :type               (or list string)
     :custom             (repeat directory)
-    :documentation 
+    :documentation
 "A list of directories to search for files specified with
 $include statements in Maple source files.")
 
@@ -150,7 +150,7 @@ FIELDS to the object constructor for `maplev-config-class'.
 The `maplev-config-default' object is used to assign the defaults.
 
  If the slot `:compile' is non-nil, assign its value to
-`compile-command' which is made buffer-local.  
+`compile-command' which is made buffer-local.
 
 If `maplev-config-auto-assign' is non-nil, the following slots
 are automatically assigned if nil.  The `:bindir' and `:mapledir'

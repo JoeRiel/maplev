@@ -57,14 +57,17 @@
 ;;{{{ Configurable options
 
 (defcustom maplev-config-default (maplev-config-class "maplev-config")
-  "This `maplev-config-class' object holds default values for the variable `maplev-config'."
+  "This variable holds default values for the variable `maplev-config';
+both are objects of class `maplev-config-class'."
   :type 'object
   :group 'maplev
   :link '(custom-manual "(maplev)Configuration"))
 
 (defcustom maplev-config-auto-assign t
-  "Non-nil means attempt to assign the :mapledir, :bindir, and :mint slots
-of the buffer-local variable `maplev-config' from the function `maplev-config',
+  "Non-nil auto-assigns some slots of the variable `maplev-config'.
+When this variable is non-nil, nil values in slots :mapledir,
+:bindir, and :mint of the buffer-local variable `maplev-config'
+are automatically assigned by the function `maplev-config',
 assuming that the :maple slot is properly assigned and usable."
   :type 'boolean
   :group 'maplev)
@@ -343,7 +346,7 @@ Otherwise use the default directory of `maplev-cmaple-buffer'."
 
 (defcustom maplev-use-new-language-features nil
   "If non-nil, use the new language features of Maple.
-The particular features enabled are release dependent."
+The features enabled are release dependent."
   :type 'boolean
   :group 'maplev-executables)
 

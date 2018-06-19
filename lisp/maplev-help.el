@@ -110,8 +110,9 @@
 
 (defun maplev-help-setup (&optional config)
   "Unless already assigned, set `major-mode' to `maplev-help-mode'.
-The optional CONFIG argument is an object of type `maplev-config-class.
-Its default is `maplev-config' or `maple-config-default', in that order."
+The optional CONFIG argument is an object of type
+`maplev-config-class'.  Its default is the variable
+`maplev-config' or `maple-config-default', in that order."
   (unless (eq major-mode 'maplev-help-mode)
     (maplev-help-mode))
   (setq maplev-config (or config maplev-config maplev-config-default)
@@ -272,7 +273,7 @@ If successful, return t, otherwise return nil."
 
 (defun maplev-help-toggle-standard-help (&optional arg)
   "Toggle whether to use the standard Maple help browser.
-With prefix argument ARG, use it if ARG is positive, otherwise 
+With prefix argument ARG, use it if ARG is positive, otherwise
 use the tty help browser, in an Emacs buffer."
   (interactive "P")
   (setq maplev-help-use-standard-flag
@@ -486,7 +487,7 @@ The title is the phrase following the function name."
 	    (goto-char end))
 	  (goto-char end)
 	  (when (re-search-backward "^See Also:?" nil 'move)
-	     (maplev--activate-hyperlinks (match-end 0) end))) 
+	     (maplev--activate-hyperlinks (match-end 0) end)))
 
 
 	;; Highlight section titles

@@ -9,7 +9,7 @@
 ;; A useful feature is having independent Maple processes associated
 ;; with particular (source) buffers.  Doing so will require rewriting
 ;; the access control, however, it should result in a more robust
-;; design.  Is it worth it? 
+;; design.  Is it worth it?
 ;;
 ;; One method to accomplish this is the following:
 ;;
@@ -29,7 +29,7 @@
 ;; depend on the state of Maple, its buffer must be associated with a
 ;; specific Maple process.  The straightforward solution is to have a
 ;; separate help or proc buffer associated with each independent Maple
-;; process.  It leads to more buffers than I'd like.  
+;; process.  It leads to more buffers than I'd like.
 
 ;;; Code:
 
@@ -54,8 +54,8 @@
 ;;{{{ mode functions
 
 (defun maplev--cmaple-buffer ()
-  "Return the name of the Maple cmaple buffer associated with the current buffer.
-Use the buffer-local `maplev-config' object."
+  "Return the name of the cmaple buffer associated with the current buffer.
+Use the buffer-local variable `maplev-config'."
   (concat "Maple" (and maplev-config
 		       (format " (%s)" (slot-value maplev-config 'maple)))))
 
@@ -86,14 +86,14 @@ Start one, if necessary."
 	   (eq system-type 'cygwin)
 	   (eq system-type 'ms-dos))
        (format "set PATH=\"%s;%%PATH%%\"" bindir))
-      (t (error "unexpected system-type")))
+      (t (error "Unexpected system-type")))
      (if maplev-use-new-language-features
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
        process-environment))))
 
 (defun maplev-cmaple-default-pmaple ()
   "Return the default path to the pmaple executable."
-  (expand-file-name 
+  (expand-file-name
    (concat "~/maple/toolbox/maplev/bin/pmaple"
 	   (if (or (eq system-type 'windows-nt)
 		   (eq system-type 'cygwin)
@@ -177,7 +177,7 @@ If called with a prefix the cmaple buffer is first cleared.
 Use mint to syntax check the region before sending to cmaple."
   (interactive "r")
   (when (equal 0 (maplev-mint-region beg end 'syntax-only))
-    (when current-prefix-arg 
+    (when current-prefix-arg
       (maplev-cmaple--clear-buffer))
     (maplev-cmaple--send-string (maplev--cmaple-process)
 				(buffer-substring-no-properties beg end)
