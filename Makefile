@@ -262,7 +262,9 @@ PKG-VER := $(PKG)-$(VERSION)
 PKG-DIR := /tmp/$(PKG-VER)
 TAR-FILE := $(PKG-VER).tar
 
-package: $(PKG-DIR)
+package: $(PKG-DIR) $(TAR-FILE)
+
+$(TAR-FILE): $(PKG-DIR) $(EL-FILES)
 	tar --verbose --create --file $(TAR-FILE) --directory=/tmp $(PKG-VER)
 
 $(PKG-DIR): dir README lisp/*.el doc/maplev.info
