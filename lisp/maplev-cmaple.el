@@ -81,7 +81,7 @@ Start one, if necessary."
      (cond
       ((or (eq system-type 'gnu/linux)
 	   (eq system-type 'darwin))
-       (concat "LD_LIBRARY_PATH=" (mapconcat 'identity (list bindir (getenv "LD_LIBRARY_PATH")) ":")))
+       (concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
       ((or (eq system-type 'windows-nt)
 	   (eq system-type 'cygwin)
 	   (eq system-type 'ms-dos))
