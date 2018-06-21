@@ -4,32 +4,11 @@
 ;; 
 
 ;; Define the functions used for communicating with the command line
-;; Maple process.
-;;
-;; A useful feature is having independent Maple processes associated
-;; with particular (source) buffers.  Doing so will require rewriting
-;; the access control, however, it should result in a more robust
-;; design.  Is it worth it?
-;;
-;; One method to accomplish this is the following:
-;;
-;;  - Create a (source) buffer-local variable that stores the process.
-;;  - Create an (output) buffer-local flag variable that stores the lock status.
-;;
-;; To check whether the process is locked, make the output buffer the
-;; current buffer and check its flag variable.  When a second source
-;; buffer (first) requires a Maple process, the user should be queried
-;; (dependent on a configuration variation)  whether it should use an
-;; existing Maple process, provided it is of the proper release.
-;; Independent Maple output buffers should be numbered sequentially.
-;;
-;; A difficulty, or at least a nusiance, is handling the help and proc
-;; modes.  Ideally all source buffers that have the same Maple release
-;; would use a common help or proc buffer.  However, because proc may
-;; depend on the state of Maple, its buffer must be associated with a
-;; specific Maple process.  The straightforward solution is to have a
-;; separate help or proc buffer associated with each independent Maple
-;; process.  It leads to more buffers than I'd like.
+;; Maple process.  A change has been made for the 3.0 release;
+;; communication is now done through pmaple, a binary executable
+;; provided with this package.  Previously the cmaple command that
+;; is part of Maple was used, however, it required handshaking to
+;; communicate with Emacs and the result was never ideal.
 
 ;;; Code:
 
