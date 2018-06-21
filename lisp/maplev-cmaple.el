@@ -98,7 +98,7 @@ Start one, if necessary."
 	   (if (or (eq system-type 'windows-nt)
 		   (eq system-type 'cygwin)
 		   (eq system-type 'ms-dos))
-	       "exe"
+	       ".exe"
 	     ""))))
 
 (defun maplev-cmaple--get-pmaple-and-options ()
