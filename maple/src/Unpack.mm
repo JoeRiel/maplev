@@ -26,12 +26,11 @@
 ##SEEALSO
 ##- "maplev"
 
-
 #LINK maplev.mpl
 
 Unpack := proc( )
 
-local bindir, binfile, book, cmaple, dst, dstdir, elisp, join
+local bindir, binfile, book, cmaple, dst, dstdir, file, join
     , mapledir, mint, platform, pmaple, src, status, tboxdir;
 
 uses FT = FileTools;
@@ -108,43 +107,6 @@ uses FT = FileTools;
     Copy(src, dst, 'force', 'verbose');
 
     #}}}
-    #{{{ Emacs initialization
-
-    # Print elisp code that can be used in the user's Emacs initialization file.
-
-    (bindir,mapledir) := kernelopts(':-bindir',':-mapledir');
-    mint   := join(bindir, "mint");
-    cmaple := join(bindir, "cmaple");
-    if platform = "windows" then
-        mint := cat(mint,".exe");
-        cmaple := cat(cmaple,".exe");
-    end if;
-
-    if not FileTools:-Exists(mint)   then mint := 'nil'; end if;
-    if not FileTools:-Exists(cmaple) then cmaple := 'nil'; end if;
-
-    printf("\n\nUse the following lisp code in your Emacs initialization file:\n\n"
-           ";; Open files with extension .mpl with maplev-mode\n"
-           "(setq auto-mode-alist (cons `(\"\\\\.mpl\\\\'\" . maplev-mode) auto-mode-alist))\n"
-           "\n"
-           ";; Assign maplev-config-default; it can also be customized with M-x customize-group RET maplev\n"
-           "(eval-after-load 'maplev-config\n"
-           "  '(setq maplev-config-default\n"
-           "       (make-instance 'maplev-config-class\n"
-           "                      :bindir   %a\n"
-           "                      :mapledir %a\n"
-           "                      :maple    %a\n"
-           "                      :mint     %a\n"
-           "                      :pmaple   %a)))\n"
-           , bindir
-           , mapledir
-           , cmaple
-           , mint
-           , pmaple
-          );
-
-    #}}}
-
 
     return NULL;
 

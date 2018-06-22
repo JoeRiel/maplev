@@ -37,13 +37,16 @@
 ##ENDSUBSECTION
 ##SUBSECTION Emacs
 ##- To install the lisp and info files,
-##  open Emacs and execute the following command:
-##  ~M-x package-install-file~ and then enter the path to the tar file,
+##  open Emacs, execute the command  ~M-x package-install-file~,
+##  and then enter the path to the tar file,
 ##  which is printed by the ~maplev:-Unpack~ command.
 ##  ~M-x~ means hold down the alt/meta key and press ~x~.
 ##
-##- Add the lines indicated in the above output of ~maple:-Unpack~
-##  to your Emacs initialization file.
+##- Execute the following command to print
+##  elisp code that can be added to your Emacs
+##  initialization file to configure MapleV.
+##
+##>(noexecute) maplev:-EmacsInitialization();
 ##
 ##
 ##ENDSUBSECTION
