@@ -4,6 +4,13 @@
 
 SHELL = /bin/bash
 
+CLOUD-ID := 5079594903273472
+CLOUD-DESCRIPTION := An Emacs mode for Maple developers
+AUTHOR-ID := 60042
+PKG-DATE := $(shell date '+%B %Y')
+
+include version.mak
+
 PKG := maplev
 pkg := $(PKG)
 
@@ -297,7 +304,25 @@ $(book): $(mla) $(hlp) $(HTML-FILE) $(PDF-FILE) $(INTRO) $(TAR-FILE)
 	$(RM) $@
 	echo '(MakeBook)("$@" $(foreach file,$^,,"$(file)") \
                          , "bin" = ["pmaple/pmaple","pmaple/pmaple.exe"] \
-	                ):' \
+	                ): \
+	     for eq in [NULL \
+	                 , "X-CloudId"        = "$(CLOUD-ID)" \
+	                 , "X-CloudXId"	      = "$(AUTHOR-ID)" \
+	                 , "X-CloudGroup"     = "private" \
+	                 , "X-CloudURL"       = "https://maple.cloud" \
+	                 , "X-CloudVersion"   = "$(CLOUD-VERSION)" \
+	                 , "application_type" = "MaplePackage" \
+	                 , "authors"          = "Joe Riel" \
+	                 , "description"      = "$(CLOUD-DESCRIPTION)" \
+	                 , "language"         = "en" \
+	                 , "screenshots"      = "" \
+	                 , "tags"             = "" \
+	                 , "title"            = "$(pkg)" \
+	                 (*, "thumbnail"      = "$(HOME)/Pictures/Sydney5.jpg" *) \
+	                ] \
+	     do \
+	         PackageTools:-SetProperty("$@", op(eq));\
+	     end do:' \
 	     | cat maple/installer/MakeBook.mpl - \
 	     | $(MAPLE) -q
 
