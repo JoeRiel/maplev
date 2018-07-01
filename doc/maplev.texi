@@ -776,10 +776,11 @@ Only the first macro in a @code{macro} assignment is indexed.
 
 @menu
 * Include statements::          Active include statements.
+* LINK::                        Hyperlink to a file.
 * Indent trace output::         Hierarchically indent Maple trace output.
 @end menu
 
-@node Include statements, Indent trace output, Miscellaneous features, Miscellaneous features
+@node Include statements, LINK, Miscellaneous features, Miscellaneous features
 @section Include statements
 @cindex Include
 
@@ -793,8 +794,9 @@ If the path exists, but the file does not, the user is
 asked whether to create the file.  
 
 @vindex maplev-include-path
-The include path can be
-assigned, as a list of strings, to the variable @kbd{maplev-include-path}.
+The include path can be assigned, as a list of strings,
+to the @code{:include-path} slot of @code{maplev-config};
+see @ref{Configuration Object}.
 The paths are searched in the order of occurrence in the list.
 
 @vindex maplev-include-file-other-window-flag
@@ -802,7 +804,19 @@ The customizable variable @kbd{maplev-include-file-other-window-flag}
 determines whether the file is opened in the current window or 
 another window.
 
-@node Indent trace output,  , Include statements, Miscellaneous features
+@node LINK, Indent trace output, Include statements, Miscellaneous features
+@section Link
+@cindex LINK
+
+A flush-left Maple comment @code{#LINK @file{filename}}
+inserts a hyper link to the filename.  For example,
+
+@example
+#LINK Bark.mpl
+@end example
+
+
+@node Indent trace output,  , LINK, Miscellaneous features
 @section Indent trace output
 @cindex Indent trace
 
