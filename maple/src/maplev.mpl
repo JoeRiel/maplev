@@ -20,7 +20,7 @@ $include <Copy.mm>
 $include <EmacsInitialization.mm>
 $include <GetSource.mm>
 $include <Print.mm>
-$include <Setup.mm>>
+$include <Setup.mm>
 $include <Unpack.mm>
 
 ##
