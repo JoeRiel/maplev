@@ -30,8 +30,7 @@
 
 Unpack := proc( )
 
-local bindir, binfile, book, cmaple, dst, dstdir, file, join
-    , mapledir, mint, platform, pmaple, src, status, tboxdir;
+local binfile, book, dst, dstdir, join, platform, src, status, tboxdir;
 
 uses FT = FileTools;
 
@@ -92,8 +91,6 @@ uses FT = FileTools;
             WARNING("could not make binary file %1 executable", dst);
         end if;
     end if;
-
-    pmaple := dst;
 
     #}}}
     #{{{ Tar file
