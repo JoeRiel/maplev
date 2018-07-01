@@ -214,20 +214,6 @@ is activated when `maplev-mode' is executed."
   :type 'boolean
   :group 'maplev-misc)
 
-;; Abbrev mode
-
-(defcustom maplev-initial-abbrev-mode-flag nil
-  "Non-nil means initially enable function `abbrev-mode' in a Maple buffer."
-  :type 'boolean
-  :group 'maplev-misc)
-
-(defcustom maplev-expand-abbrevs-in-comments-and-strings-flag nil
-  "Non-nil means expand Maple abbreviations in comments and strings.
-Nil means do not expand in either."
-  :type 'boolean
-  :group 'maplev-misc
-  :group 'maplev-comments)
-
 (defcustom maplev-include-file-other-window-flag t
   "Non-nil means open an include file in the other window.
 See `maplev-find-include-file'."

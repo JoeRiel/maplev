@@ -363,10 +363,6 @@ When MESSAGE is non-nil, display a message with the version."
        ["Highlighted" maplev-help-region t])
       "---"
       ("Setup"
-       ("Abbrevs"
-        ["Enable abbrevs" abbrev-mode
-         :style toggle :selected abbrev-mode]
-        ["List abbrevs" maplev-abbrev-help t])
        ["Enable auto-fill comments" (setq maplev-auto-fill-comment-flag (not maplev-auto-fill-comment-flag))
 	:style toggle :selected maplev-auto-fill-comment-flag]
        ["Enable auto-string break" (setq maplev-auto-break-strings-flag (not maplev-auto-break-strings-flag))
@@ -391,61 +387,6 @@ When MESSAGE is non-nil, display a message with the version."
       ["Info"  maplev-goto-info-node t]
       ["Info in Browser" maplev-browse-info]
       ["About" maplev-about t])))
-
-;;}}}
-;;{{{ Abbreviations
-
-(defun maplev--abbrev-hook ()
-  "Unexpand an abbreviation in a string or a comment.
-The variable `maplev-expand-abbrevs-in-comments-and-strings-flag'
-controls the expansion."
-  (unless maplev-expand-abbrevs-in-comments-and-strings-flag
-    ;; Searching can be expensive:
-    ;; We assume that strings do not span more than one line
-    (let ((state (parse-partial-sexp (maplev-safe-position) (point))))
-      (if (or (nth 4 state) (nth 3 state))
-          (unexpand-abbrev)))))
-
-(defvar maplev-mode-abbrev-table nil
-  "Abbrev table used in MapleV mode buffers.")
-
-(unless maplev-mode-abbrev-table
-  (let ((ac abbrevs-changed))
-    (define-abbrev-table
-      'maplev-mode-abbrev-table
-      '(("ar"    "array"      maplev--abbrev-hook 0)
-        ("ass"   "assigned"   maplev--abbrev-hook 0)
-        ("co"    "convert"    maplev--abbrev-hook 0)
-        ("err"   "ERROR"      maplev--abbrev-hook 0)
-        ("fail"  "FAIL"       maplev--abbrev-hook 0)
-        ("fr"    "from"       maplev--abbrev-hook 0)
-        ("gl"    "global"     maplev--abbrev-hook 0)
-        ("inf"   "infinity"   maplev--abbrev-hook 0)
-        ("lib"   "libname"    maplev--abbrev-hook 0)
-        ("lo"    "local"      maplev--abbrev-hook 0)
-        ("ma"    "matrix"     maplev--abbrev-hook 0)
-        ("npf"   "nprintf"    maplev--abbrev-hook 0)
-        ("null"  "NULL"       maplev--abbrev-hook 0)
-        ("pi"    "Pi"         maplev--abbrev-hook 0)
-        ("pnam"  "procname"   maplev--abbrev-hook 0)
-        ("pf"    "printf"     maplev--abbrev-hook 0)
-        ("remem" "remember"   maplev--abbrev-hook 0)
-        ("ret"   "RETURN"     maplev--abbrev-hook 0)
-        ("rlib"  "readlib"    maplev--abbrev-hook 0)
-        ("stext" "searchtext" maplev--abbrev-hook 0)
-        ("stxt"  "SearchText" maplev--abbrev-hook 0)
-        ("ta"    "table"      maplev--abbrev-hook 0)
-        ("th"    "then"       maplev--abbrev-hook 0)
-        ("trap"  "traperror"  maplev--abbrev-hook 0)
-        ("ty"    "type"       maplev--abbrev-hook 0)
-        ("user"  "userinfo"   maplev--abbrev-hook 0)
-        ("wh"    "while"      maplev--abbrev-hook 0)))
-    (setq abbrevs-changed ac)))
-
-;; (defun maplev-abbrev-help ()
-;;   "List the currently defined abbreviations."
-;;   (interactive)
-;;   (list-one-abbrev-table maplev-mode-abbrev-table "*Abbrevs*"))
 
 ;;}}}
 ;;{{{ Imenu support
@@ -637,7 +578,7 @@ Maple libraries.
 Key bindings:
 \\{maplev-mode-map}"
   :group 'maplev
-  :abbrev maplev-mode-abbrev-table
+  :abbrev-table nil
   :syntax-table maplev-mode-syntax-table
 
   ;; paragraph filling
@@ -672,9 +613,6 @@ Key bindings:
   (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
 
   (ad-activate 'fixup-whitespace)
-
-  ;; abbrev expansion
-  (abbrev-mode (if maplev-initial-abbrev-mode-flag 1 0))
 
   ;; comments
   (set (make-local-variable 'comment-start)            maplev-comment-start)

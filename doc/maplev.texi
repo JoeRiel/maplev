@@ -68,7 +68,7 @@ Editing
 * Indentation::                 Indenting Maple code.
 * Font Lock::                   Syntactic highlighting of Maple code.
 * Comments::                    Commands for adding and aligning comments.
-* Shortcuts::                   Abbreviations and templates.
+* Shortcuts::                   Templates.
 * Imenu support::               Creating a procedure index.
 * Miscellaneous features::      Useful editing features
 
@@ -116,16 +116,12 @@ Indentation Tricks
 
 Shortcuts
 
-* Abbreviations::               Abbreviations for common Maple functions.
 * Templates::                   Inserting procedures and assignments.
-
-Abbreviations
-
-* Customizing Abbreviations::
 
 Miscellaneous features
 
 * Include statements::          Active include statements.
+* LINK::                        Hyperlink to a file.
 * Indent trace output::         Hierarchically indent Maple trace output.
 
 Configuration
@@ -212,10 +208,9 @@ Auto-filling can be enabled so that comments automatically wrap.
 
 @subsection Shortcuts
 
-Abbreviations for common Maple words are defined and automatically
-expanded, if enabled.  A blank procedure template, including your
-copyright statement, can be inserted into the source.  It queries for
-the name of the procedure, optional arguments, and a description.
+A blank procedure template, including your copyright statement,
+can be inserted into the source.  It queries for the name of the procedure,
+optional arguments, and a description.
 
 @subsection Mint interface
 
@@ -639,69 +634,12 @@ effects.  @xref{Preventing indentation}, for an example.
 @cindex Shortcuts
 
 @menu
-* Abbreviations::               Abbreviations for common Maple functions.
 * Templates::                   Inserting procedures and assignments.
 @end menu
 
 
-@node Abbreviations, Templates, Shortcuts, Shortcuts
-@section Abbreviations
-@cindex Abbreviations
-@cindex Custom abbreviations
 
-Abbreviations are available for common or lengthy Maple keywords. They
-are expanded whenever @code{abbrev-mode} is active.
-@inforef{Abbrevs,,emacs}. The command @code{maplev-abbrev-help} displays
-a list of the available abbreviations.
-
-The following variables affect the expansion of abbreviations:
-
-@table @code
-@item maplev-initial-abbrev-mode-flag
-If non-nil @code{abbrev-mode} is activated when MapleV is started.  The
-default is @samp{t}.
-
-@item maplev-expand-abbrevs-in-comments-and-strings-flag
-If non-nil then the Maple abbreviations are expanded in comments and
-strings. The default is @samp{nil}.
-
-@end table
-
-@menu
-* Customizing Abbreviations::
-@end menu
-
-
-
-
-@node Customizing Abbreviations,  , Abbreviations, Abbreviations
-@subsection Customizing Abbreviations
-
-The predefined MapleV abbreviations are stored in the abbreviation table
-@code{maplev-mode-abbrev-table}.  The following code may be added to
-your @file{.emacs} file to assign @samp{simp} as an abbreviation for
-@samp{simplify}.
-
-@example
-(define-abbrev maplev-mode-abbrev-table 
-        "simp" "simplify" 'maplev--abbrev-hook)
-@end example
-
-The function @samp{'maplev--abbrev-hook} prevents the abbreviation from
-being expanded inside a comment or quote.
-
-To remove an abbreviation from the table assign it @code{nil}.  For
-example, to prevent @samp{lib} from expanding to @samp{libname}, add the
-following to @file{emacs}:
-
-@example
-(define-abbrev maplev-mode-abbrev-table "lib" nil nil)
-@end example
-
-
-
-
-@node Templates,  , Abbreviations, Shortcuts
+@node Templates,  , Shortcuts, Shortcuts
 @section Templates
 @cindex Templates
 @cindex Procedure template
