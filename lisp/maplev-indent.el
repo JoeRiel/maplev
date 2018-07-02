@@ -299,7 +299,6 @@ beyond \(point\)."
           (stack (maplev-indent-info-stack))
           (state (maplev-indent-info-state))
           (end (point))
-          (previous-syntax-table (syntax-table))
 
           keyword keyword-beginning key-list indent indent-close
           adjust-func post-func top-stack old-keyword match-re
@@ -309,105 +308,103 @@ beyond \(point\)."
           (save-restriction
             (widen)
 
-            ;; Change the buffer syntax table to maplev--symbol-syntax-table
-            ;; so that the underscore is considered a word constituent.
+	    ;; Change the buffer syntax table to maplev--symbol-syntax-table
+	    ;; so that the underscore is considered a word constituent.
+	    (with-syntax-table maplev--symbol-syntax-table
+	      
+	      (goto-char point)
+	      (while (re-search-forward maplev-indent-grammar-keyword-re end 'move)
+		
+		;; Assign loop variables.  KEY-POINT is assigned the position
+		;; after the next keyword.  If no keyword exists in the line,
+		;; KEY-POINT is nil.
+		
+		(setq keyword (match-string-no-properties 0)
+		      key-list (cdr (assoc keyword maplev-indent-grammar-alist))
+		      indent (nth 2 key-list)
+		      adjust-func (nth 3 key-list)
+		      post-func (nth 4 key-list)
+		      top-stack (car stack)
+		      indent-close (nth 1 top-stack)
+		      old-keyword (car top-stack) ; Don't set to (old) KEYWORD, it might have been matched
+		      match-re (and old-keyword
+				    (car (cdr (assoc old-keyword maplev-indent-grammar-alist))))
+		      keyword-beginning (match-beginning 0)
+		      state (parse-partial-sexp point (point) nil nil state)
+		      point (point))
+		(cond
+		 
+		 ;; If KEYWORD is in a comment or a quote, do nothing.
+		 ((or (nth 4 state) (nth 3 state) (string= keyword "*)"))) ; comments are more frequent, so check first
+		 
+		 ;; Does KEYWORD pair with the top one on STACK?
+		 ((and match-re (string-match match-re keyword))
+		  ;; Should more keywords follow KEYWORD?
+		  (if (nth 0 key-list)
+		      ;; If so, replace the top of STACK with a new list.  The
+		      ;; new list has the new KEYWORD, the INDENT-CLOSE from
+		      ;; the old list, and
+		      (setcar stack (list keyword
+					  indent-close
+					  (+ indent-close indent)))
+		    ;; otherwise pop the top of STACK.
+		    (and post-func (funcall post-func))
+		    (setq stack (cdr stack))))
 
-            (set-syntax-table maplev--symbol-syntax-table)
-            (goto-char point)
-            (while (re-search-forward maplev-indent-grammar-keyword-re end 'move)
+		 ;; Is KEYWORD an opening keyword?  Push a new item onto
+		 ;; STACK.
 
-              ;; Assign loop variables.  KEY-POINT is assigned the position
-              ;; after the next keyword.  If no keyword exists in the line,
-              ;; KEY-POINT is nil.
-              
-              (setq keyword (match-string-no-properties 0)
-                    key-list (cdr (assoc keyword maplev-indent-grammar-alist))
-                    indent (nth 2 key-list)
-                    adjust-func (nth 3 key-list)
-                    post-func (nth 4 key-list)
-                    top-stack (car stack)
-                    indent-close (nth 1 top-stack)
-                    old-keyword (car top-stack) ; Don't set to (old) KEYWORD, it might have been matched
-                    match-re (and old-keyword
-                                  (car (cdr (assoc old-keyword maplev-indent-grammar-alist))))
-                    keyword-beginning (match-beginning 0)
-                    state (parse-partial-sexp point (point) nil nil state)
-                    point (point))
-              (cond
-               
-               ;; If KEYWORD is in a comment or a quote, do nothing.
-               ((or (nth 4 state) (nth 3 state) (string= keyword "*)"))) ; comments are more frequent, so check first
-               
-               ;; Does KEYWORD pair with the top one on STACK?
-               ((and match-re (string-match match-re keyword))
-                ;; Should more keywords follow KEYWORD?
-                (if (nth 0 key-list)
-                    ;; If so, replace the top of STACK with a new list.  The
-                    ;; new list has the new KEYWORD, the INDENT-CLOSE from
-                    ;; the old list, and
-                    (setcar stack (list keyword
-                                        indent-close
-                                        (+ indent-close indent)))
-                  ;; otherwise pop the top of STACK.
-                  (and post-func (funcall post-func))
-                  (setq stack (cdr stack))))
+		 ((nth 1 key-list)
+		  ;; If keyword is an opening parenthesis, find the matching closing parenthesis,
+		  ;; if it occurs before 'end', jump to it and skip all intermediate matches.
+		  (unless (and (memq (aref keyword 0) '(?\[ ?{ ?\())    ; check first character
+			       (let ((pt (condition-case nil ; get position of closing parenthesis
+					     (scan-lists (1- point) 1 0)
+					   (error nil))))
+				 (and pt (< pt end)
+				      (goto-char pt))))
+		    (setq stack
+			  (cons
+			   (cons
+			    keyword
+			    ;; Handle keywords and parentheses appropriately.
+			    ;; Indentation for keywords that
+			    ;; start a Maple statement is from
+			    ;; `keyword-beginning'; however, if the
+			    ;; keyword is an assigned proc then the actual
+			    ;; beginning of the keyword is the start of
+			    ;; the assigned name.
+			    (if indent
+				(save-excursion
+				  (goto-char keyword-beginning)
+				  (and adjust-func (funcall adjust-func))
+				  (list (current-column) ; alignment for closing keyword
+					(+ (current-column) indent))) ; alignment for subblock
 
-               ;; Is KEYWORD an opening keyword?  Push a new item onto
-               ;; STACK.
+			      ;; Handle an open parenthesis.  INDENT-CLOSE is
+			      ;; set to the same column as the parerenthesis so
+			      ;; that the closing parenthesis is aligned.  If
+			      ;; space or a a comment follows the parenthesis,
+			      ;; then the following block of code is indented
+			      ;; from the current indentation.  Otherwise
+			      ;; following code indents to first character
+			      ;; following the parenthesis.
+			      (list
+			       (1- (current-column)) ; INDENT-CLOSE
+			       (progn
+				 (skip-chars-forward " \t")
+				 (if (looking-at "#\\|$") ; no code on remainder of line
+				     (+ (current-indentation) maplev-indent-level)
+				   (current-column))))))
+			   stack))))
 
-               ((nth 1 key-list)
-		;; If keyword is an opening parenthesis, find the matching closing parenthesis,
-		;; if it occurs before 'end', jump to it and skip all intermediate matches.
-		(unless (and (memq (aref keyword 0) '(?\[ ?{ ?\())    ; check first character
-			     (let ((pt (condition-case nil ; get position of closing parenthesis
-					   (scan-lists (1- point) 1 0)
-					 (error nil))))
-			       (and pt (< pt end)
-				    (goto-char pt))))
-		  (setq stack
-			(cons
-			 (cons
-			  keyword
-			  ;; Handle keywords and parentheses appropriately.
-			  ;; Indentation for keywords that
-			  ;; start a Maple statement is from
-			  ;; `keyword-beginning'; however, if the
-			  ;; keyword is an assigned proc then the actual
-			  ;; beginning of the keyword is the start of
-			  ;; the assigned name.
-			  (if indent
-			      (save-excursion
-				(goto-char keyword-beginning)
-				(and adjust-func (funcall adjust-func))
-				(list (current-column) ; alignment for closing keyword
-				      (+ (current-column) indent))) ; alignment for subblock
-
-			    ;; Handle an open parenthesis.  INDENT-CLOSE is
-			    ;; set to the same column as the parerenthesis so
-			    ;; that the closing parenthesis is aligned.  If
-			    ;; space or a a comment follows the parenthesis,
-			    ;; then the following block of code is indented
-			    ;; from the current indentation.  Otherwise
-			    ;; following code indents to first character
-			    ;; following the parenthesis.
-			    (list
-			     (1- (current-column)) ; INDENT-CLOSE
-			     (progn
-			       (skip-chars-forward " \t")
-			       (if (looking-at "#\\|$") ; no code on remainder of line
-				   (+ (current-indentation) maplev-indent-level)
-				 (current-column))))))
-			 stack))))
-
-               ;; KEYWORD is out of sequence.  Move point before KEYWORD and
-               ;; signal an error.
-               (t (re-search-backward keyword)
-                  (signal 'keyword-out-of-sequence (list keyword (point))))))
-            (if (< point end)
-                (setq state (parse-partial-sexp point (point) nil nil state)))
-            (maplev-indent-info-assign end state stack))
-        ;; Restore the syntax table
-        (set-syntax-table previous-syntax-table)))))
+		 ;; KEYWORD is out of sequence.  Move point before KEYWORD and
+		 ;; signal an error.
+		 (t (re-search-backward keyword)
+		    (signal 'keyword-out-of-sequence (list keyword (point))))))
+	      (if (< point end)
+		  (setq state (parse-partial-sexp point (point) nil nil state)))
+	      (maplev-indent-info-assign end state stack)))))))
 
 ;;}}}
 ;;{{{ commands
