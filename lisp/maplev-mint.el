@@ -15,7 +15,8 @@
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
   (defvar maplev-var-declaration-symbol)
-  (defvar maplev-variable-spacing))
+  (defvar maplev-variable-spacing)
+  (defvar maplev--symbol-syntax-table))
 
 (declare-function event-point "maplev-common")
 (declare-function event-window "maplev-common")
@@ -695,7 +696,7 @@ If optional arg BACK is non-nil, delete whitespace characters before point."
           (delete-region (match-beginning 0) (match-end 0))))))
 
 (defun maplev--statement-terminator ()
-  "Goto the just after the next statement terminator."
+  "Return position after the next statement terminator."
   (save-excursion
     (maplev--re-search-forward "[^:]\\(;\\|:[^-:=]\\)" nil t)
     (+ 1 (match-beginning 1))))
@@ -714,205 +715,104 @@ the closing parenthesis in the formal parameter list."
            (concat "\\<" keyword "\\>") bound t))
         (goto-char (match-beginning 0)))))
 
+(defun maplev-mint-forward-declaration-symbol ()
+  "Move forward to the start of the next symbol in a declaration statement.
+Skip over comments and types."
+  (interactive)
+  (with-syntax-table maplev--symbol-syntax-table
+    (when (looking-at "`")
+      (forward-char)
+      (search-forward "`"))
+    (re-search-forward "\\W\\b\\|#\\|(\\*\\|::\\|:=\\|`" nil t)
+    (let ((match (match-string-no-properties 0)))
+      (cond
+       ((equal "#" match)
+	(forward-line)
+	(maplev-mint-forward-declaration-symbol))
+       ((equal "(*" match)
+	(search-forward "*)")
+	(maplev-mint-forward-declaration-symbol))
+       ((or (equal "::" match)
+	    (equal ":=" match))
+	;; Crude attempt to jump over an expression
+	(if (looking-at "\\s-*\\s(")
+	    (forward-list)
+	  (forward-word))
+	(maplev-mint-forward-declaration-symbol))
+       ((equal "`" match)
+	(backward-char)
+	t)
+       (t)))))
 
-(defun maplev-add-declaration-one-line (keyword var)
+       
+(defun maplev-add-declaration (keyword var &optional type)
   "To the current procedure's KEYWORD declaration add VAR.
 If necessary, add a KEYWORD statement.  Point must be after the closing
 parenthesis of the procedure's argument list."
   (save-excursion
-    (if (maplev--goto-declaration keyword)
-        (let ((end (maplev--statement-terminator)))
-          (if maplev-alphabetize-declarations-p
-              (progn
-                (forward-word)
-                (while (and (< (point) end)
-                            (looking-at (concat "\\s-*\\(" maplev--symbol-re "\\) *,?"))
-                            (string< (match-string-no-properties 1) var))
-                  ;; Move over symbol and, if there, comma.  For now
-                  ;; assume that the symbols do not have
-                  ;; types---including types in-line seems bad form.
-                  ;; Moving across a type is fairly tricky.
-                  (goto-char (match-end 0)))
-                (if (looking-at " *;")
-                    (insert (format ", %s" var))
-                  (insert (format " %s," var))))
-            (goto-char end)
-            (backward-char)
-            (insert "," (make-string maplev-variable-spacing ?\ ) var)))
-      (let (stay)
-        ;; Declarations are ordered: local, global, export
-        (if (maplev--goto-declaration "local")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        (if (maplev--goto-declaration "global")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        ;; Position point and text in preparation for inserting a
-        ;; declaration statement.
-        (if (not (looking-at "[ \t]*\\(#.*\\)?$")) ; More code on line?
-            (just-one-space)      ; Then insert declaration inbetween.
-          (forward-line)            ; Else move to the next code line.
-          (unless stay                 ; Keep moving if we not already
-            (while (looking-at "[ \t]*#") ; have a declaration.
-              (forward-line)))))
-      ;; Insert the declaration statement KEYWORD VAR ; at point.
-      ;; If point is at beginning of line, insert a newline at end.
-      ;; NOTE: It might be better to look whether there is any following text.
-      (let ((new-line (bolp)))
-        (insert keyword " " var "; ")
-        (when new-line
-          (newline)
-          (forward-line -1)))
-      (maplev-indent-line))))
-
-(defun maplev-add-declaration-leading-comma (keyword var)
-  "To the current procedure's KEYWORD declaration add VAR.
-If necessary, add a KEYWORD statement.  Point must be after the
-closing parenthesis of the procedure's argument list.  Optional
-TYPE specifies the declared type of VAR.  The string
-`maplev-var-declaration-symbol' is used as the declaration
-symbol; it is inserted between VAR and TYPE.
-
-If `maplev-alphabetize-declarations-p' is non-nil, VAR is
-inserted alphabetically into the sequence of existing
-declarations, otherwise it is inserted at the end."
-  (save-excursion
-    (if (maplev--goto-declaration keyword)
-        (let ((end (maplev--statement-terminator)))
-          (if maplev-alphabetize-declarations-p
-              (progn
-                (forward-word)
-                (while (and (< (point) end)
-                            (looking-at (concat "\\s-*\\(?:, \\)?\\(" maplev--symbol-re "\\)"))
-                            (string< (match-string-no-properties 1) var))
-                  (forward-line))
-                (if (looking-at "\\s-*[,;]")
-                    (progn
-                      (insert (format ", %s" var))
-                      (maplev-indent-newline))
-                  (insert (format " %s" var))
-                  (maplev-indent-newline)
-                  (insert ", ")))
-            ;; Insert `, VAR' before terminator.
-            (goto-char end)
-            (forward-line 0)
-            (insert (format ", %s" var))
-            (maplev-indent-newline)))
-      (let (stay)
-        ;; Declarations are ordered: local, global, export
-        (if (maplev--goto-declaration "local")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        (if (maplev--goto-declaration "global")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        ;; Position point and text in preparation for inserting a
-        ;; declaration statement.
-        (if (not (looking-at "[ \t]*\\(#.*\\)?$")) ; More code on line?
-            (just-one-space)      ; Then insert declaration inbetween.
-          (forward-line)          ; Else move to the next code line.
-          (unless stay            ; Keep moving if we not already
-            (while (looking-at "[ \t]*#") ; have a declaration.
-              (forward-line)))))
-      ;; Insert the declaration statement KEYWORD VAR\n; at point.
-      (insert (format " %s %s" keyword var))
-      (maplev-indent-newline)
-      (insert ";")
-      (maplev-indent-newline))))
-
-(defun maplev-add-declaration-trailing-comma (keyword var)
-  "To the current procedure's KEYWORD declaration add VAR.
-If necessary, add a KEYWORD statement.  Point must be after the
-closing parenthesis of the procedure's argument list.  Optional
-TYPE specifies the declared type of VAR.  The string
-`maplev-var-declaration-symbol' is used as the declaration
-symbol; it is inserted between VAR and TYPE.
-
-If `maplev-alphabetize-declarations-p' is non-nil, VAR is
-inserted alphabetically into the sequence of existing
-declarations, otherwise it is inserted at the end."
-  (save-excursion
-    (if (maplev--goto-declaration keyword)
-        (let ((end (maplev--statement-terminator)))
-          (if maplev-alphabetize-declarations-p
-              (progn
-                (forward-line)
-                (while (and (< (point) end)
-                            (looking-at (concat "\\s-*\\(" maplev--symbol-re "\\)"))
-                            (string< (match-string-no-properties 1) var))
-                  (forward-line))
-                (if (< (point) end)
-                    (insert (format "%s," var))
-                  (forward-line -1)
-                  (search-forward ";" (line-end-position))
-                  (replace-match ",")
-                  (forward-line)
-                  (insert (format "%s;" var)))
-                (maplev-indent-newline))
-            ;; Replace terminator with comma.
-            ;; Preserve comments following terminator.
-            (goto-char end)
-            (delete-char -1)
-            (insert ",")
-            (end-of-line)
-            ;; Insert VAR with terminator.
-            (newline)
-            (insert (format "%s;" var))
-            (maplev-indent-line)))
-      (let (stay)
-        ;; Declarations are ordered: local, global, export
-        (if (maplev--goto-declaration "local")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        (if (maplev--goto-declaration "global")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        ;; Position point and text in preparation for inserting a
-        ;; declaration statement.
-        (if (not (looking-at "[ \t]*\\(#.*\\)?$")) ; More code on line?
-            (just-one-space)      ; Then insert declaration inbetween.
-          (forward-line)          ; Else move to the next code line.
-          (unless stay            ; Keep moving if we not already
-            (while (looking-at "[ \t]*#") ; have a declaration.
-              (forward-line)))))
-      ;; Insert the declaration statement KEYWORD VAR ; at point.
-      ;; If point is at beginning of line, insert a newline at end.
-      ;; NOTE: It might be better to look whether there is any following text.
-      (if (bolp)
-          (progn
-            (insert keyword)
-            (maplev-indent-line)
-            (newline)
-            (insert (format "%s;" var))
-            (newline)
-            (forward-line -1))
-        (insert (format " %s %s;" keyword var) ))
-      (maplev-indent-line))))
-
-(defun maplev-add-declaration (keyword var &optional type)
-  "To the KEYWORD declaration of current procedure, add VAR.
-If non-nil, optional TYPE is catenated to VAR and
-`maplev-var-declaration-symbol'.  The function assigned to
-`maplev-add-declaration-function' does the work."
-  (funcall maplev-add-declaration-function keyword
-           (if type
-               (concat var maplev-var-declaration-symbol type)
-             var)))
-
+    (let ((decl (if type (format "%s%s%s" var maplev-var-declaration-symbol type) var)))
+      (if (maplev--goto-declaration keyword)
+	  (let ((end (maplev--statement-terminator))
+		(regex (concat "\\s-*\\(" maplev--symbol-re "\\) *,?")))
+	    (if maplev-alphabetize-declarations-p
+		(progn
+		  (forward-word)
+		  (while (and (< (point) end)
+			      (maplev-mint-forward-declaration-symbol)
+			      (looking-at regex)
+			      (string< (match-string-no-properties 1) var))
+		    (goto-char (match-end 0)))
+		  (if (< end (point))
+		      (goto-char (1- end)))
+		  (unless (looking-at (regexp-quote var))
+		    (let ((space (make-string maplev-variable-spacing ?\ )))
+		      (if (looking-at " *;")
+			  (insert (format ",%s%s" space decl))
+			(insert (format "%s," decl) space)))))
+	      ;; non-alphabetic, insert VAR at end.
+	      (goto-char end)
+	      (backward-char)
+	      (insert "," (make-string maplev-variable-spacing ?\ ) decl)))
+	;; The declaration KEYWORD does not exist; insert it.
+	(let (stay)
+	  ;; Declarations are ordered: local, global, export
+	  (if (maplev--goto-declaration "local")
+	      (setq stay (goto-char (maplev--statement-terminator))))
+	  (if (maplev--goto-declaration "global")
+	      (setq stay (goto-char (maplev--statement-terminator))))
+	  ;; Position point and text in preparation for inserting a
+	  ;; declaration statement.
+	  (if (not (looking-at "[ \t]*\\(#.*\\)?$")) ; More code on line?
+	      (just-one-space)      ; Then insert declaration inbetween.
+	    (forward-line)            ; Else move to the next code line.
+	    (unless stay                 ; Keep moving if we not already
+	      (while (looking-at "[ \t]*#") ; have a declaration.
+		(forward-line)))))
+	;; Insert the declaration statement KEYWORD DECL ; at point.
+	;; If point is at beginning of line, insert a newline at end.
+	;; NOTE: It might be better to look whether there is any following text.
+	(let ((new-line (bolp)))
+	  (insert keyword " " decl "; ")
+	  (when new-line
+	    (newline)
+	    (forward-line -1)))
+	(maplev-indent-line)))))
+	
 (defun maplev-add-local-variable (var &optional type)
   "Add VAR to the current procedure's local statement.
 If TYPE is non-nil, add a type declaration.  Interactively, VAR
 defaults to the identifier point is on."
   (interactive (list (maplev-ident-around-point-interactive
                       "Local variable")
-                     ;; Query type unless all declarations go on one line.
-                     ;; It seems bad from to use types one one-line; regardless,
-                     ;; `maplev-add-declaration-one-line' currently does not
-                     ;; handle types.
-                     (unless (eq maplev-add-declaration-function 'maplev-add-declaration-one-line)
-                       (let ((type (read-string
-                                    "Type (empty for no type): "
-                                    nil
-                                    maplev--declaration-history)))
-                         (if (equal "" type)
-                             nil
-                           type)))))
+                     ;; Query type
+		     (let ((type (read-string
+				  "Type (empty for no type): "
+				  nil
+				  maplev--declaration-history)))
+		       (if (equal "" type)
+			   nil
+			 type))))
   (maplev-add-variable "local" var type))
-                                 
 
 (defun maplev-add-global-variable (var)
   "Add VAR to the current procedure's local statement.

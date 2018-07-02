@@ -112,15 +112,6 @@ either `maplev-add-declaration-leading-comma' or
   :type 'boolean
   :group 'maplev-declarations)
 
-(defcustom maplev-add-declaration-function 'maplev-add-declaration-trailing-comma
-  "Selects the function that adds variables to a declaration."
-  :type '(radio
-          (function-item :doc "declarations on one line" maplev-add-declaration-one-line)
-          (function-item :doc "declarations on separate lines, with leading comma" maplev-add-declaration-leading-comma)
-          (function-item :doc "declarations on separate lines, with trailing comma" maplev-add-declaration-trailing-comma))
-  :group 'maplev-declarations)
-
-
 ;;}}}
 ;;{{{ (*) indentation
 
