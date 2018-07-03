@@ -38,7 +38,6 @@ uses FT = FileTools;
         FileTools:-JoinPath([_passed]);
     end proc;
 
-
     tboxdir := kernelopts('toolboxdir' = 'maplev');
 
     book := join(tboxdir, "lib", "maplev.maple");
