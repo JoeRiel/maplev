@@ -109,13 +109,14 @@ properly assigned and `maplev-config-auto-assign' is non-nil.")
    
    (mint-options
     :initarg            :mint-options
-    :initform           "-i2 -q -w 100"
+    :initform           "-i2 -q -w100 -v"
     :type               string
     :custom             string
-    :documentation      "Options to pass to Mint.
-See the Maple help page for mint.   If nil, this field is
-auto-assigned by the function `maplev-config' if `:bindir'
-is properly assigned and `maplev-config-auto-assign' is non-nil.")
+    :documentation "Options to pass to mint; see the Maple help
+page for mint.  The verbose option (normally -v), is necessary
+for mint-mode to properly display and use the path to included
+files, however, note that smint (a variation of mint) uses -V for
+the verbose option.")
 
    (tester
     :initarg            :tester
