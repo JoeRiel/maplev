@@ -851,51 +851,25 @@ The entire statement is deleted if it is left with no variables."
           (delete-region (match-beginning 0) (match-end 0))
           (maplev-delete-whitespace t))))))
 
-(defun maplev-delete-vars-old (start end vars &optional leave-one)
-  "In region between START and END delete occurrences of VARS.
-VARS must be either a string or a list of strings.  If optional
-argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
-  (let (case-fold-search lo)
-    (save-excursion
-      (save-restriction
-        (narrow-to-region start end)
-        (if (stringp vars) (setq vars (list vars)))
-        (while vars
-          (setq lo leave-one)
-          (goto-char (point-min))
-          (while (maplev--re-search-forward
-                  (concat "\\<" (car vars) "\\>"
-                          ;; Add optional type declarations.  I don't know
-                          ;; how to make this robust, a type
-                          ;; declaration can have commas and closing
-                          ;; parentheses.
-                          "\\(\\s-*::\\s-*[^,:;)]+\\)?")
-                  nil t)
-            (if lo
-                (setq lo nil)
-              (delete-region (match-beginning 0) (match-end 0))
-              (maplev-delete-whitespace)
-              (when (or (maplev--re-search-forward  "," nil t)
-                        (maplev--re-search-backward "," nil t))
-                (delete-region (match-beginning 0) (match-end 0))
-                (maplev-delete-whitespace))))
-          (setq vars (cdr vars)))))))
-
 (defun maplev-delete-vars (start end vars &optional leave-one)
   "In region between START and END delete occurrences of VARS.
 VARS must be either a string or a list of strings.  If optional
 argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
   (let ((parse-sexp-ignore-comments)
-        case-fold-search lo )
+        case-fold-search lo var)
     (save-excursion
       (save-restriction
         (narrow-to-region start end)
         (if (stringp vars) (setq vars (list vars)))
         (while vars
           (setq lo leave-one)
+	  (setq var (car vars))
           (goto-char (point-min))
           (while (maplev--re-search-forward
-                  (concat "\\<" (car vars) "\\>")
+		  ;; hack to handle backquoted symbols
+		  (if (= (aref var 0) ?`)
+		      (regexp-quote var)
+		    (concat "\\<" (regexp-quote var) "\\>"))
                   nil t)
             (if lo
                 (setq lo nil)
@@ -915,7 +889,7 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
                                  ;; parenthesis, or at end of buffer, move
                                  ;; forward over a balanced expression.
                                  ;;
-                                 ;; This nees modification to handle comments,
+                                 ;; This needs modification to handle comments,
                                  ;; esp. with leading commas.
                                  (while (and (not (looking-at "[ \t\f\n]*[,;:#)]"))
                                              (/= (point) (point-max)))
