@@ -362,6 +362,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
     ("These local variables were not declared explicitly:" maplev-mint-warning-face 'undecl-local t)
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
+    ("These exported variables were never used:" maplev-mint-warning-face 'unused-export t)
     ;;("These local variables were assigned a value, but otherwise unused:" ... )
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
@@ -483,6 +484,12 @@ When called interactively, POS is position where point is."
             (when (maplev-mint-query "Delete `%s' from local statement? " string)
               (maplev-mint--goto-source-proc pos)
               (maplev-delete-declaration "local" vars)))
+	   ;;
+           ;; Remove unused exported variables from export declaration.
+           ((eq prop 'unused-export)
+            (when (maplev-mint-query "Delete `%s' from export statement? " string)
+              (maplev-mint--goto-source-proc pos)
+              (maplev-delete-declaration "export" vars)))
            ;;
            ;; Remove repeated args from argument list.
            ((eq prop 'repeat-arg)
