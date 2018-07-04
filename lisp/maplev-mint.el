@@ -438,87 +438,87 @@ FORM and VARS are used for `y-or-n-p' query."
 When called interactively, POS is position where point is."
   (interactive "d")
   (let ((prop (get-text-property pos 'maplev-mint)))
-    (if prop
-        (let (string vars)
-          (if maplev-mint-process-all-vars
-              (let ((str (buffer-substring-no-properties
-                          (next-single-property-change pos 'maplev-mint)
-                          (previous-single-property-change (1+ pos) 'maplev-mint))))
-                ;; string is like str, but with maplev-variable-spacing
-                ;; vars is a comma separated list of names extracted from str
-                (while (and (not (string= str ""))
-                            (string-match "\\<\\w+\\>" str))
-                  (setq vars (cons (match-string 0 str) vars)
-                        string (if string
-                                   (concat string ","
-                                           (make-string maplev-variable-spacing ?\ )
-                                           (match-string 0 str))
-                                 (match-string 0 str))
-                        str (substring str (match-end 0)))))
-            (setq string (save-excursion
-                           (goto-char pos)
-                           (maplev--ident-around-point))
-                  vars (list string)))
-          ;;
-          (cond
-	   ;; Jump to an included file
-	   ((eq prop 'include-file)
-	    (maplev-mint--goto-include-file pos))
-	   ;;
-           ;; Jump to the start of a procedure in the source.
-           ((eq prop 'proc)
-            (maplev-mint--goto-source-proc pos))
-           ;;
-           ;; Jump to the location of an error in the source code.
-           ((eq prop 'error)
-            (maplev-mint--goto-error pos))
-           ;;
-           ;; Remove unused args from argument list.
-           ((eq prop 'unused-arg)
-            (when (maplev-mint-query "Delete `%s' from argument list? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-delete-vars (maplev--scan-lists -1) (point) vars)))
-           ;;
-           ;; Remove unused local variables from local declaration.
-           ((eq prop 'unused-local)
-            (when (maplev-mint-query "Delete `%s' from local statement? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-delete-declaration "local" vars)))
-	   ;;
-           ;; Remove unused exported variables from export declaration.
-           ((eq prop 'unused-export)
-            (when (maplev-mint-query "Delete `%s' from export statement? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-delete-declaration "export" vars)))
-           ;;
-           ;; Remove repeated args from argument list.
-           ((eq prop 'repeat-arg)
-            (when (maplev-mint-query "Remove duplicate `%s' from parameters? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-delete-vars (maplev--scan-lists -1) (point) vars 1)))
-           ;;
-           ;; Remove repeated local variables from local declaration.
-           ((eq prop 'repeat-local)
-            (when (maplev-mint-query "Remove duplicate `%s' from local statement? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-delete-declaration "local" vars 1)))
-           ;;
-           ;; Declaration of undeclared locals variables.
-           ((eq prop 'undecl-local)
-            (when (maplev-mint-query "Add `%s' to local statement? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-add-declaration "local" string)))
-           ;;
-           ;; Declaration of undeclared global variables.
-           ((eq prop 'undecl-global)
-            (when (maplev-mint-query "Add `%s' to global statement? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-add-declaration "global" string)))
-           ;;
-           ;; Goto line
-           ((eq prop 'goto-line)
-            (maplev-mint--goto-source-line pos))
-           )))))
+    (when prop
+      (let (string vars)
+	(if maplev-mint-process-all-vars
+	    (let ((str (buffer-substring-no-properties
+			(next-single-property-change pos 'maplev-mint)
+			(previous-single-property-change (1+ pos) 'maplev-mint))))
+	      ;; string is like str, but with maplev-variable-spacing
+	      ;; vars is a comma separated list of names extracted from str
+	      (while (and (not (string= str ""))
+			  (string-match "\\<\\w+\\>" str))
+		(setq vars (cons (match-string 0 str) vars)
+		      string (if string
+				 (concat string ","
+					 (make-string maplev-variable-spacing ?\ )
+					 (match-string 0 str))
+			       (match-string 0 str))
+		      str (substring str (match-end 0)))))
+	  (setq string (save-excursion
+			 (goto-char pos)
+			 (maplev--ident-around-point))
+		vars (list string)))
+	;;
+	(cond
+	 ;; Jump to an included file
+	 ((eq prop 'include-file)
+	  (maplev-mint--goto-include-file pos))
+	 ;;
+	 ;; Jump to the start of a procedure in the source.
+	 ((eq prop 'proc)
+	  (maplev-mint--goto-source-proc pos))
+	 ;;
+	 ;; Jump to the location of an error in the source code.
+	 ((eq prop 'error)
+	  (maplev-mint--goto-error pos))
+	 ;;
+	 ;; Remove unused args from argument list.
+	 ((eq prop 'unused-arg)
+	  (when (maplev-mint-query "Delete `%s' from argument list? " string)
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-delete-vars (maplev--scan-lists -1) (point) vars)))
+	 ;;
+	 ;; Remove unused local variables from local declaration.
+	 ((eq prop 'unused-local)
+	  (when (maplev-mint-query "Delete `%s' from local statement? " string)
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-delete-declaration "local" vars)))
+	 ;;
+	 ;; Remove unused exported variables from export declaration.
+	 ((eq prop 'unused-export)
+	  (when (maplev-mint-query "Delete `%s' from export statement? " string)
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-delete-declaration "export" vars)))
+	 ;;
+	 ;; Remove repeated args from argument list.
+	 ((eq prop 'repeat-arg)
+	  (when (maplev-mint-query "Remove duplicate `%s' from parameters? " string)
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-delete-vars (maplev--scan-lists -1) (point) vars 1)))
+	 ;;
+	 ;; Remove repeated local variables from local declaration.
+	 ((eq prop 'repeat-local)
+	  (when (maplev-mint-query "Remove duplicate `%s' from local statement? " string)
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-delete-declaration "local" vars 1)))
+	 ;;
+	 ;; Declaration of undeclared locals variables.
+	 ((eq prop 'undecl-local)
+	  (when (maplev-mint-query "Add `%s' to local statement? " string)
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-add-declaration "local" string)))
+	 ;;
+	 ;; Declaration of undeclared global variables.
+	 ((eq prop 'undecl-global)
+	  (when (maplev-mint-query "Add `%s' to global statement? " string)
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-add-declaration "global" string)))
+	 ;;
+	 ;; Goto line
+	 ((eq prop 'goto-line)
+	  (maplev-mint--goto-source-line pos))
+	 )))))
 
 ;;}}}
 ;;{{{ regions
