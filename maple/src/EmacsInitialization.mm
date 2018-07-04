@@ -6,10 +6,14 @@
 ##DATE     Feb 2017
 ##CALLINGSEQUENCE
 ##- maplev:-EmacsInitialization()
+##RETURNS
+##- `NULL`
+##DESCRIPTION
+##- Print elisp code that can be used to configure the **maplev** emacs package.
 
 #LINK maplev.mpl
 
-EmacsInitialization := proc( )
+EmacsInitialization := proc()
 
 local bindir, cmaple, file, join, mapledir, mint, platform, pmaple;
 
@@ -35,13 +39,6 @@ local bindir, cmaple, file, join, mapledir, mint, platform, pmaple;
             file := join(mapledir, "bin", file);
             if FileTools:-Exists(file) then
                 cmaple := file;
-                break;
-            end if;
-        end do;
-        for file in ["mint", "smint"] do
-            file := join(mapledir, "bin", file);
-            if FileTools:-Exists(file) then
-                mint := file;
                 break;
             end if;
         end do;
