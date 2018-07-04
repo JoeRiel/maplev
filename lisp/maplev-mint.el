@@ -256,14 +256,15 @@ This position is after the formal parameter list of the operator,
 procedure, or module."
 
   ;; find the line number of the source buffer at which the defun starts
-  (goto-char pos)
   (let (line file class)
-    (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
-    ;; Assign class Procedure, Operator, or Module
-    (setq class (match-string-no-properties 3))
-    (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
-    (setq line (1- (string-to-number (match-string-no-properties 1)))
-	  file (maplev-mint-get-source-file))
+    (save-excursion
+      (goto-char pos)
+      (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
+      ;; Assign class Procedure, Operator, or Module
+      (setq class (match-string-no-properties 3))
+      (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
+      (setq line (1- (string-to-number (match-string-no-properties 1)))
+	    file (maplev-mint-get-source-file)))
     ;; move point to the beginning of that line in the source
     (maplev-mint--goto-source-pos line 0 file)
     ;; Use class to position point after formal parameter list
