@@ -42,6 +42,10 @@
 ##  which is printed by the ~maplev:-Unpack~ command.
 ##  ~M-x~ means hold down the alt/meta key and press ~x~.
 ##
+##- At this point you should be able to read the info pages
+##  for MapleV from inside Emacs by executing ~C-h i~
+##  and selecting the **maplev** entry.
+##
 ##- Execute the following command to print
 ##  elisp code that can be added to your Emacs
 ##  initialization file to configure MapleV.
