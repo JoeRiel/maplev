@@ -111,7 +111,8 @@
   (setq mode-name "Mint"
 	buffer-read-only t)
   (make-local-variable 'maplev-mint--code-buffer)
-  (maplev-mint-fontify-buffer))
+  (maplev-mint-fontify-buffer)
+  (setq truncate-lines nil))
 
 (defun maplev-mint-setup (code-buffer config)
   "Unless already assigned, set `major-mode' to `maplev-mint-mode'.
