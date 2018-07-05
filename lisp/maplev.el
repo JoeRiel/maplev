@@ -785,7 +785,7 @@ The name of the procedure is inserted into the title of the fold."
   )
 
 (defconst maplev--number-re
-  "\\=[+-]?\\(?:[0-9]+\\(\\.[0-9]*\\)?\\|\\.[0-9]+\\)\\(?:[Ee][+-]?[0-9]*\\)?"
+  "[+-]?\\(?:[0-9]+\\(\\.[0-9]*\\)?\\|\\.[0-9]+\\)\\(?:[Ee][+-]?[0-9]*\\)?"
   "Regular expression matching a number.
 This is slightly too aggressive, it incorrectly matches, d.Ed, which is invalid.")
 
