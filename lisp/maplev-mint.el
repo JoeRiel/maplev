@@ -32,7 +32,7 @@
 
 ;;{{{ customizable variables
 
-(defcustom maplev-mint-query t
+(defcustom maplev-mint-query-flag t
   "Non-nil means query before correcting."
   :type 'boolean
   :group 'maplev-mint)
@@ -425,8 +425,9 @@ and text property PROP.")
 
 (defun maplev-mint-query (form &rest vars)
   "Return t if correction suggested by mint should be made.
-FORM and VARS are used for `y-or-n-p' query."
-  (or (not maplev-mint-query)
+FORM and VARS are used for `y-or-n-p' query.  Return t if
+`maplev-mint-query-flag' is nil."
+  (or (not maplev-mint-query-flag)
       (y-or-n-p (apply 'format form vars))))
 
 (defun maplev-mint-click (click)
