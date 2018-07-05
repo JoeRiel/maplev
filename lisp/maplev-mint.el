@@ -132,7 +132,7 @@ contains the source code.  Set buffer-local variable
 If FILE is nil, use buffer `maplev-mint--code-buffer'.
 Pop up the buffer, move to either `point-min', if FILE is non-nil,
 or `maplev-mint--code-beginning' otherwise,
-and move forward L lines and C columns."
+and move forward LINE lines and CHAR columns."
   (switch-to-buffer-other-window (if file (find-file-noselect file)
                    maplev-mint--code-buffer))
   (goto-char (if file (point-min)  maplev-mint--code-beginning))
@@ -528,9 +528,15 @@ When called interactively, POS is position where point is."
 	 ;;
 	 ;; Declaration of undeclared global variables.
 	 ((eq prop 'undecl-global)
-	  (when (maplev-mint-query "Add `%s' to global statement? " string)
-	    (maplev-mint--goto-source-proc pos)
-	    (maplev-add-declaration "global" string)))
+	  (let ((action (x-popup-dialog t `(,(format "Undeclared global: %s" string)
+					    ("Quote" . "quote")
+					    ("Declare global" . "global")
+					    ("Declare local" . "local")))))
+	    (if (string= action "quote")
+		(let ((region (maplev-mint--goto-source-and-get-region pos)))
+		  (maplev-mint-quote-vars string (car region) (cadr region)))
+	      (maplev-mint--goto-source-proc pos)
+	      (maplev-add-declaration action string))))
 	 ;;
 	 ;; Goto line
 	 ((eq prop 'goto-line)
@@ -922,6 +928,20 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
                 (delete-region (match-beginning 0) (match-end 0))
                 (maplev-delete-whitespace))))
           (setq vars (cdr vars)))))))
+
+(defun maplev-mint-quote-vars (var beg end)
+  "Query to quote occurrences of VAR in the region between BEG and END.
+Only unquoted occurrences, as a symbol, are quoted."
+  (let ((quoted (concat "'" var "'"))
+	(regexp (concat "\\_<" (regexp-quote var) "\\_>"))
+	case-fold-search)
+    (save-excursion
+      (goto-char beg)
+      (while (maplev--re-search-forward regexp end 'noerror)
+	(setq beg (match-beginning 0))
+	(unless (looking-at "'")
+	  (query-replace var quoted nil beg (point)))))))
+
 
 ;;}}}
 
