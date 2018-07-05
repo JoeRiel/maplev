@@ -80,7 +80,6 @@ The [[maplec.h]] file lies in [[$MAPLE_ROOT/extern/internal]].
 
 
 <<macros>>= 
-#define EMAIL "<<email>>"
 #define PROMPT "(**) "
 #define VERSION "0.1.0"
 @
@@ -127,7 +126,7 @@ MCallBackVectorDesc cb = { textCallBack,
                            0,   /* statusCallBack */
                            0,   /* readLineCallBack */
                            0,   /* redirectCallBack */
-                           streamCallBack,
+                           0,   /* streamCallBack, */
                            0,   /* queryInterrupt */
                            0    /* callBackCallBack */
   };
@@ -192,11 +191,12 @@ if( (kv == NULL )) {
 char cmd[120];
 @
 
-Assign Maple commands that set
-  the screen height to infinity, so pagination is disabled,
-  the screen width to eighty characters,
-  disables garbage collection notices,
-  and assigns the error and warning levels.
+Assign Maple commands that
+  set the screen height to infinity, so pagination is disabled;
+  set the screen width to eighty characters;
+  disable garbage collection notices;
+  assign the error and warning levels;
+  and reassign the version.
 
 <<configure Maple>>=
 sprintf(cmd, 
@@ -291,20 +291,6 @@ static void M_DECL textCallBack( void *data, int tag, const char *output )
 }
 @
 
-\subsubsection{Stream Callback}
-\label{sec:stream-callback}
-
-<<functions>>=
-static char* M_DECL streamCallBack( void *data, const char *stream,
-				     int nargs, char **args )
-{
-  if( strcmp(stream,"pmaple_version") == 0 ) {
-    return( "3 + 4;" );
-  }
-  return( NULL );
-}
-@
-
 \subsection{Header}
 \label{sec:header}
 
@@ -313,18 +299,16 @@ static char* M_DECL streamCallBack( void *data, const char *stream,
  * pmaple.c --- source file for pmaple
  *
  * Author:     Joseph S. Riel <<email>>
- * Created:    May 2009
+ * Created:    July 2018
  * Keywords:   maple
- * Repository: //wmi/groups/scripts/share/emacs/emaple/pmaple.c
  *
  * This is the source code for pmaple, which enhances the pipe-line
- * communication with the Maple engine.  The enhancement is trivial
- * (and really should be incorporated into cmaple); it ensures that
- * prompts are flushed to standard output when they are generated.
- * This makes it possible to communicate with the Maple engine in a
- * reasonable way.  With cmaple, the prompts are not flushed until new
- * input arrives, which makes it difficult to determine when a
- * computation is complete.
+ * communication with the Maple engine.  The enhancement is trivial;
+ * it ensures that prompts are flushed to standard output when they 
+ * are generated.  This makes it possible to communicate with the 
+ * Maple engine in a reasonable manner.  With cmaple, the prompts 
+ * are not flushed until new input arrives, which makes it difficult
+ * to determine when a computation is complete.
  *
  *********************************************************************** */
   
