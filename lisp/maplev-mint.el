@@ -255,9 +255,14 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
   "Move to position in source buffer corresponding to link at POS in mint buffer.
 This position is after the formal parameter list of the operator,
 procedure, or module."
+  (maplev-mint--goto-source-and-get-region pos))
 
-  ;; find the line number of the source buffer at which the defun starts
-  (let (line file class)
+(defun maplev-mint--goto-source-and-get-region (pos)
+  "Move to the source buffer and return a list of that specifies
+the region corresponding to the element referenced at POS in the
+mint buffer.  Point in the source buffer is set to just after the
+formal parameter list."
+  (let (beg class end file line toline)
     (save-excursion
       (goto-char pos)
       (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
@@ -265,22 +270,31 @@ procedure, or module."
       (setq class (match-string-no-properties 3))
       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
       (setq line (1- (string-to-number (match-string-no-properties 1)))
-	    file (maplev-mint-get-source-file)))
+	    file (maplev-mint-get-source-file))
+      (re-search-forward "to\\s-*\\([0-9]+\\)")
+      (setq toline (string-to-number (match-string-no-properties 1))))
     ;; move point to the beginning of that line in the source
     (maplev-mint--goto-source-pos line 0 file)
+    (save-excursion
+      (forward-line (- toline line))
+      (setq end (point)))
     ;; Use class to position point after formal parameter list
     (cond 
      ((string= class "Procedure")
       (when (re-search-forward "\\<proc *(" (line-end-position) t)
 	(backward-char)
+	(setq beg (point))
 	(goto-char (maplev--scan-lists 1))))
      ((string= class "Module")
       (when (re-search-forward "\\<module *(" (line-end-position) t)
 	(backward-char)
+	(setq beg (point))
 	(goto-char (maplev--scan-lists 1))))
      ((string= class "Operator")
       (when (re-search-forward " *->" (line-end-position) t)
-	(goto-char (match-beginning 0)))))))
+	(goto-char (match-beginning 0))
+	(setq beg (point))))) ; not quite, should be before formal parameters.
+    (list beg end)))
 
 (defun maplev-mint--goto-source-line (pos)
   "Goto the location in source specified by the line number in the Mint buffer.
