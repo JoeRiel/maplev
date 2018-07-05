@@ -758,10 +758,7 @@ Skip over comments and types."
 	(maplev-mint-forward-declaration-symbol))
        ((or (equal "::" match)
 	    (equal ":=" match))
-	;; Crude attempt to jump over an expression
-	(if (looking-at "\\s-*\\s(")
-	    (forward-list)
-	  (forward-word))
+	(maplev-forward-expr) 
 	(maplev-mint-forward-declaration-symbol))
        ((equal "`" match)
 	(backward-char)
