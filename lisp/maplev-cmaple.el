@@ -58,14 +58,15 @@ Start one, if necessary."
       (error "The :bindir slot of maplev-config, `%s', does not exist" bindir)))
     (cons
      (cond
-      ((or (eq system-type 'gnu/linux)
-	   (eq system-type 'darwin))
+      ((eq system-type 'gnu/linux)
        (concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
       ((or (eq system-type 'windows-nt)
 	   (eq system-type 'cygwin)
 	   (eq system-type 'ms-dos))
        (format "set PATH=\"%s;%%PATH%%\"" bindir))
-      (t (error "Unexpected system-type")))
+      ((eq system-type 'darwin)
+       (concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
+      (t (error "Unexpected system-type '%s'", system-type)))
      (if maplev-use-new-language-features
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
        process-environment))))
