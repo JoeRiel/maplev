@@ -659,7 +659,7 @@ If no region has been selected, run Mint on the buffer."
 
 (defun maplev--re-search-forward (regexp &optional bound noerror count)
   "Search forward from point for regular expression REGEXP.
-This function is like `re-search-forward', but comments are ignored.
+This function is like `re-search-forward', but strings and comments are ignored.
 Optional arguments BOUND, NOERROR, and COUNT have the same meaning
 as in `re-search-forward'."
   ;; This approach gets confused by a comment inside the match
@@ -669,27 +669,31 @@ as in `re-search-forward'."
   (if (not count) (setq count 1))
   (let ((dir (if (< count 0) -1 1))
         (pos (point))
+	ppsexp
         case-fold-search)
     (while (and (not (zerop count)) pos)
-      (setq pos (re-search-forward regexp bound noerror dir))
-      (while (and (nth 4 (parse-partial-sexp (maplev-safe-position) (point)))
+      (setq pos (re-search-forward regexp bound noerror dir)
+	    ppsexp (parse-partial-sexp (maplev-safe-position) (point)))
+      (while (and (or (nth 3 ppsexp) (nth 4 ppsexp))
                   (setq pos (re-search-forward regexp bound noerror dir))))
       (setq count (- count dir)))
     pos))
       
 (defun maplev--re-search-backward (regexp &optional bound noerror count)
   "Search backward from point for regular expression REGEXP.
-This function is like `re-search-backward', but comments are ignored.
+This function is like `re-search-backward', but strings and comments are ignored.
 Optional arguments BOUND, NOERROR, and COUNT have the same meaning
 as in `re-search-backward'."
   ;; See maplev--re-search-forward.
   (if (not count) (setq count 1))
   (let ((dir (if (< count 0) -1 1))
         (pos (point))
+	ppsexp
         case-fold-search)
     (while (and (not (zerop count)) pos)
-      (setq pos (re-search-backward regexp bound noerror dir))
-      (while (and (nth 4 (parse-partial-sexp (maplev-safe-position) (point)))
+      (setq pos (re-search-backward regexp bound noerror dir)
+	    ppsexp (parse-partial-sexp (maplev-safe-position) (point)))
+      (while (and (or (nth 3 ppsexp) (nth 4 ppsexp))
                   (setq pos (re-search-backward regexp bound noerror dir))))
       (setq count (- count dir)))
     pos))
