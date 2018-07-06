@@ -629,9 +629,8 @@ Return exit code of mint."
 (defun maplev-mint-buffer ()
   "Run Mint on the current buffer."
   (interactive)
-  (save-restriction
-    (widen)
-    (maplev-mint-region (point-min) (point-max))))
+  (widen)
+  (maplev-mint-region (point-min) (point-max)))
 
 (defun maplev-mint-procedure ()
   "Run Mint on the current procedure."
