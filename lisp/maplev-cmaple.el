@@ -66,7 +66,7 @@ Start one, if necessary."
        (format "set PATH=\"%s;%%PATH%%\"" bindir))
       ((eq system-type 'darwin)
        (concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
-      (t (error "Unexpected system-type '%s'", system-type)))
+      (t (error "Unexpected system-type '%s'" system-type)))
      (if maplev-use-new-language-features
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
        process-environment))))
