@@ -67,9 +67,14 @@ build Maple libraries.  Requires customizing `compile-command'."
 
 (defun maplev-split-shell-option-string (opt)
   "Convert OPT, a string of command line options, into a list of options.
-For example, \"-a -b 123\" becomes \(\"-a\" \"-b 123\"\)."
+Close up space between option and argument.  
+For example, \"-a -w 100\" becomes \(\"-a\" \"-w100\"\)."
   (let ((opts (split-string (string-trim opt) "\\(^\\| +\\)-" t)))
-    (mapcar (lambda (s) (concat "-" s)) opts)))
+    (mapcar (lambda (s) 
+	      (concat "-" (if (string-match "^.\\( +\\)[^ ]" s)
+			      (replace-match "" t t s 1)
+			    s)))
+	    opts)))
 
 
 (provide 'maplev-utils)
