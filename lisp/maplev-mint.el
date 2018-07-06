@@ -25,6 +25,7 @@
 (declare-function maplev-beginning-of-defun "maplev-common")
 (declare-function maplev-current-defun "maplev-common")
 (declare-function maplev-find-include-file "maplev")
+(declare-function maplev-forward-expr "maplev")
 (declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-indent-line "maplev-indent")
 (declare-function maplev-indent-newline "maplev")
@@ -34,11 +35,6 @@
 
 (defcustom maplev-mint-query-flag t
   "Non-nil means query before correcting."
-  :type 'boolean
-  :group 'maplev-mint)
-
-(defcustom maplev-mint-process-all-vars nil
-  "Non-nil means process all variables in one step."
   :type 'boolean
   :group 'maplev-mint)
 
@@ -87,6 +83,7 @@
     (define-key map [?s]                          'isearch-forward)
     (define-key map [?r]                          'isearch-backward)
     (define-key map [(mouse-1)]                   'maplev-mint-click)
+    (define-key map [(mouse-3)]                   'maplev-mint-right-click)
     (define-key map [(control c) (control c)]     'maplev-mint-handler)
     (setq maplev-mint-mode-map map)))
 
@@ -384,18 +381,14 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
     ("\\(on line +[0-9]+\\)" maplev-mint-link-face 'goto-line)
    ; ("\\(on lines +[0-9]+\\s-+to\\s-++[0-9]+\\s-+of\\s-+.*\\)" maplev-mint-note-face 'goto-line)
-    ;; Could we make the following optional?
-    ;; ("Global names used in this procedure:"
-    ;;  1 maplev-mint-warning-face 'undecl-global t)
     )
   "Alist for fontification in a Mint buffer.
-Each element is a list of the form \(REGEXP FACE PROP VAR\),
-where REGEXP is to be matched and FACE is a face.  Optional third
-element PROP is a symbol used for marking the category of SUBEXP.
-Optional fourth element VAR is non-nil if REGEXP is catenated
-with `maplev-mint-variables-re'.  The text that matches the first
-group of the full regular expression is given face property face
-and text property PROP.")
+Each element is a list of the form \(REGEXP FACE PROP VAR\):
+- REGEXP is to be matched;
+- FACE is a face applied to the first regexp group;
+- PROP is a symbol applied as a text property to the first regexp group.
+- VAR is optional, if non-nil REGEXP is catenated with `maplev-mint-variables-re';
+  doing so causes the following variables to be in a regexp group.")
 
 (defun maplev-mint-fontify-buffer ()
   "Fontify the mint buffer.  Does not use font-lock mode."
@@ -417,8 +410,7 @@ and text property PROP.")
             ;; We use a text property `maplev-mint' to store in the text
             ;; what kind of info we have from Mint.
             (put-text-property beg end 'maplev-mint (eval (nth 2 mel)))
-            (if (and (nth 3 mel)
-                     (not maplev-mint-process-all-vars)) ; then we do highlighting word-wise
+            (if (nth 3 mel)
                 (save-excursion
                   (goto-char beg)
                   ;; Slightly simpler algorithm than the one used by
@@ -450,28 +442,25 @@ FORM and VARS are used for `y-or-n-p' query.  Return t if
   (set-buffer (window-buffer (select-window (event-window click))))
   (maplev-mint-handler (event-point click)))
 
-(defun maplev-mint-handler (pos)
+(defun maplev-mint-right-click (click)
+  "Move point to CLICK."
+  (interactive "e")
+  (set-buffer (window-buffer (select-window (event-window click))))
+  (maplev-mint-handler (event-point click) t))
+
+(defun maplev-mint-handler (pos &optional all-vars)
   "Handle mint output at position POS.
-When called interactively, POS is position where point is."
+When called interactively, POS is position where point is.
+ALL-VARS non-nil means handle all variables, not just the one clicked on."
   (interactive "d")
   (let ((prop (get-text-property pos 'maplev-mint)))
     (when prop
       (let (string vars)
-	(if maplev-mint-process-all-vars
+	(if all-vars
 	    (let ((str (buffer-substring-no-properties
 			(next-single-property-change pos 'maplev-mint)
 			(previous-single-property-change (1+ pos) 'maplev-mint))))
-	      ;; string is like str, but with maplev-variable-spacing
-	      ;; vars is a comma separated list of names extracted from str
-	      (while (and (not (string= str ""))
-			  (string-match "\\<\\w+\\>" str))
-		(setq vars (cons (match-string 0 str) vars)
-		      string (if string
-				 (concat string ","
-					 (make-string maplev-variable-spacing ?\ )
-					 (match-string 0 str))
-			       (match-string 0 str))
-		      str (substring str (match-end 0)))))
+	      (setq vars (split-string str ", " t " +")))
 	  (setq string (save-excursion
 			 (goto-char pos)
 			 (maplev--ident-around-point))
@@ -528,13 +517,15 @@ When called interactively, POS is position where point is."
 	 ;;
 	 ;; Declaration of undeclared global variables.
 	 ((eq prop 'undecl-global)
-	  (let ((action (x-popup-dialog t `(,(format "Undeclared global: %s" string)
+	  (let ((action (x-popup-dialog t `(,(if all-vars
+						 "All undeclared globals"
+					       (format "Undeclared global: %s" string))
 					    ("Quote" . "quote")
-					    ("Declare global" . "global")
-					    ("Declare local" . "local")))))
+					    ("Declare as global" . "global")
+					    ("Declare as local" . "local")))))
 	    (if (string= action "quote")
 		(let ((region (maplev-mint--goto-source-and-get-region pos)))
-		  (maplev-mint-quote-vars string (car region) (cadr region)))
+		  (maplev-mint-quote-vars vars (car region) (cadr region)))
 	      (maplev-mint--goto-source-proc pos)
 	      (maplev-add-declaration action string))))
 	 ;;
@@ -933,18 +924,20 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
                 (maplev-delete-whitespace))))
           (setq vars (cdr vars)))))))
 
-(defun maplev-mint-quote-vars (var beg end)
-  "Query to quote occurrences of VAR in the region between BEG and END.
+(defun maplev-mint-quote-vars (vars beg end)
+  "Query to quote occurrences of VARs in the region between BEG and END.
 Only unquoted occurrences, as a symbol, are quoted."
-  (let ((regexp (concat "\\(?:\\_<\\|:-\\)" (regexp-quote var) "\\_>"))
-	case-fold-search)
+  (let (case-fold-search regexp reply start var)
     (save-excursion
-      (goto-char beg)
-      (while (maplev--re-search-forward regexp end 'noerror)
-	(setq beg (match-beginning 0))
-	(unless (looking-at "'") ; this can fail if the match is part of a protected expression
-	  (query-replace-regexp regexp "'\\&'" nil beg (point)))))))
-
+      (while vars
+	(setq var (car vars)
+	      vars (cdr vars)
+	      regexp (concat "\\(?:\\_<\\|:-\\)" (regexp-quote var) "\\_>"))
+	(goto-char beg)
+	(while (maplev--re-search-forward regexp end 'noerror)
+	  (setq start (match-beginning 0))
+	  (unless (looking-at "'") ; this can fail if the match is part of a protected expression
+	    (setq reply (query-replace-regexp regexp "'\\&'" nil start (point)))))))))
 
 ;;}}}
 
