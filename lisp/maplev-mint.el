@@ -932,15 +932,14 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
 (defun maplev-mint-quote-vars (var beg end)
   "Query to quote occurrences of VAR in the region between BEG and END.
 Only unquoted occurrences, as a symbol, are quoted."
-  (let ((quoted (concat "'" var "'"))
-	(regexp (concat "\\_<" (regexp-quote var) "\\_>"))
+  (let ((regexp (concat "\\(?:\\_<\\|:-\\)" (regexp-quote var) "\\_>"))
 	case-fold-search)
     (save-excursion
       (goto-char beg)
       (while (maplev--re-search-forward regexp end 'noerror)
 	(setq beg (match-beginning 0))
-	(unless (looking-at "'")
-	  (query-replace var quoted nil beg (point)))))))
+	(unless (looking-at "'") ; this can fail if the match is part of a protected expression
+	  (query-replace-regexp regexp "'\\&'" nil beg (point)))))))
 
 
 ;;}}}
