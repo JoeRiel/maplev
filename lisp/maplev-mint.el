@@ -56,16 +56,23 @@
 ;;}}}
 ;;{{{ syntax table
 
-(defvar maplev-mint-mode-syntax-table nil
-  "Syntax table used in Maple mint buffer.")
-(unless maplev-mint-mode-syntax-table
+(defvar maplev-mint-mode-syntax-table
   (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?[  "w"  table)
-                         (modify-syntax-entry ?]  "w"  table)
+    (modify-syntax-entry ?\[ "w"  table)
+    (modify-syntax-entry ?\] "w"  table)
     (modify-syntax-entry ?_  "w"  table)
     (modify-syntax-entry ?/  "w"  table)
     (modify-syntax-entry ?\` "\"" table) ; string quotes
-    (setq maplev-mint-mode-syntax-table table)))
+    table)
+  "Syntax table used in Maple mint buffer.")
+
+(defvar maplev-quote-not-string-syntax-table
+  (let ((table (make-syntax-table maplev-mode-syntax-table)))
+    (modify-syntax-entry ?\' "." table)
+    (modify-syntax-entry ?\` "_" table)
+    table)
+  "Syntax table used by `maplev--re-search-forward'.")
+  
 
 ;;}}}
 ;;{{{ mode map
@@ -662,13 +669,15 @@ as in `re-search-forward'."
         (pos (point))
 	ppsexp
         case-fold-search)
-    (while (and (not (zerop count)) pos)
-      (setq pos (re-search-forward regexp bound noerror dir)
-	    ppsexp (parse-partial-sexp (maplev-safe-position) (point)))
-      (while (and (or (nth 3 ppsexp) (nth 4 ppsexp))
-                  (setq pos (re-search-forward regexp bound noerror dir))))
-      (setq count (- count dir)))
-    pos))
+    (with-syntax-table maplev-quote-not-string-syntax-table
+      (while (and (not (zerop count)) pos)
+	(setq pos (re-search-forward regexp bound noerror dir))
+	(while (progn
+		 (setq ppsexp (parse-partial-sexp (maplev-safe-position) (point)))
+		 (and (or (nth 3 ppsexp) (nth 4 ppsexp))
+		      (setq pos (re-search-forward regexp bound noerror dir)))))
+	(setq count (- count dir)))
+      pos)))
       
 (defun maplev--re-search-backward (regexp &optional bound noerror count)
   "Search backward from point for regular expression REGEXP.
@@ -681,17 +690,20 @@ as in `re-search-backward'."
         (pos (point))
 	ppsexp
         case-fold-search)
-    (while (and (not (zerop count)) pos)
-      (setq pos (re-search-backward regexp bound noerror dir)
-	    ppsexp (parse-partial-sexp (maplev-safe-position) (point)))
-      (while (and (or (nth 3 ppsexp) (nth 4 ppsexp))
-                  (setq pos (re-search-backward regexp bound noerror dir))))
-      (setq count (- count dir)))
-    pos))
+    (with-syntax-table maplev-quote-not-string-syntax-table
+      (while (and (not (zerop count)) pos)
+	(setq pos (re-search-backward regexp bound noerror dir))
+	(while (progn
+		 (setq ppsexp (parse-partial-sexp (maplev-safe-position) (point)))
+		 (and (or (nth 3 ppsexp) (nth 4 ppsexp))
+		      (setq pos (re-search-backward regexp bound noerror dir)))))
+	(setq count (- count dir)))
+      pos)))
 
 (defun maplev-safe-position (&optional to)
   "Search for safe buffer position before point \(a position not in a comment\).
-Optional arg TO initializes the search.  It defaults to point"
+Optional arg TO initializes the search.  It defaults to point.
+THIS IS NOT ROBUST."
   (unless to (setq to (point)))
   (save-excursion
     (save-match-data
