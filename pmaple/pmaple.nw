@@ -147,6 +147,7 @@ int quiet = FALSE;   /* flag, when nonzero suppress the "splash screen" */
 int num;             /* used to extract error/warn level from option */
 int errlev = 1;      /* default error level */
 int warnlev = 3;     /* default warn level */
+int i;               /* argument index */
 @
 
 Search for a [[-q]] (quiet) option; if found reassign [[quiet]] to true.
@@ -154,7 +155,7 @@ Reassign [[errlev]] and [[warnlev]] from the [[-e]] and [[-w]] options,
 respectively.
 
 <<process options>>=
-for ( size_t i=1; i < argc ; i++ ) {
+for ( i=1; i < argc ; i++ ) {
   if( !strcmp(argv[i], "-q") ) {
     quiet = TRUE;
   } else if( (sscanf(argv[i], "-e%d", &num) == 1) ) {
