@@ -192,9 +192,9 @@ Return the object."
 
 
 (cl-defmethod maplev-get-option-with-include ((config maplev-config-class) slot &rest options)
-  "Return a list of options obtained from the SLOT and `:include-path` slots of CONFIG, with OPTIONS appended.
-Convert the option string in the OPTION slot of config, an object of type `maplev-config-class,
-to a list of strings and append the include path from the `:include-path` slot.
+  "Return a list of options obtained from the SLOT and `:include-path' slots of CONFIG, with OPTIONS appended.
+Convert the option string in the OPTION slot of CONFIG, an object of type `maplev-config-class',
+to a list of strings and append the include path from the `:include-path' slot.
 Do the right thing if the option or include path is empty."
   (append
    (maplev-split-shell-option-string
