@@ -734,7 +734,7 @@ asked whether to create the file.
 @vindex maplev-include-path
 The include path can be assigned, as a list of strings,
 to the @code{:include-path} slot of @code{maplev-config};
-see @ref{Configuration Object}.
+see @ref{Configuration}.
 The paths are searched in the order of occurrence in the list.
 
 @vindex maplev-include-file-other-window-flag
@@ -958,7 +958,7 @@ that provides a convenient means for locating and correcting syntax
 errors.
 
 To allow Emacs to run @command{mint},
-the @code{:mint}, @code{:mint-options}, and @code{include-path}
+the @code{:mint}, @code{:mint-options}, and @code{:include-path}
 slots of @code{maplev-config} must be properly configured.
 @xref{Configuration}.
 
