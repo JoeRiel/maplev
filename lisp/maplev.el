@@ -1,3 +1,4 @@
+
 ;; maplev.el --- Maple mode for GNU Emacs
 ;;
 ;; Copyright (C) 2001,2003,2008,2009,2015 Joseph S. Riel
@@ -184,10 +185,7 @@ When MESSAGE is non-nil, display a message with the version."
 ;;}}}
 ;;{{{ Syntax table
 
-(defvar maplev-mode-syntax-table nil
-  "Syntax table used in MapleV mode buffers.")
-
-(unless maplev-mode-syntax-table
+(defvar maplev-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?_  "_"  table) ; symbol constituent
     (modify-syntax-entry ?~  "_"  table) ; symbol constituent
@@ -227,35 +225,34 @@ When MESSAGE is non-nil, display a message with the version."
     (modify-syntax-entry ?%  "."  table)
     (modify-syntax-entry ?\" "\"" table)
 
-    ;; Entries for R12 and later.
-    ;; Define the multiline comment delimiters `(*' and `*)'.
+    table)
+  "Syntax table used in MapleV mode buffers.")
 
-    (setq maplev-mode-syntax-table table)))
-
-(defvar maplev-mode-4-syntax-table nil
+(defvar maplev-mode-4-syntax-table
+  (let ((table (make-syntax-table maplev-mode-syntax-table)))
+    (modify-syntax-entry ?\" "." table)
+    table)
   "Syntax table used in MapleV mode buffers for R4.")
 
-;; In R4 the ditto operator is `"'
-
-(unless maplev-mode-4-syntax-table
-  (setq maplev-mode-4-syntax-table
-        (copy-syntax-table maplev-mode-syntax-table))
-  (modify-syntax-entry ?\" "." maplev-mode-4-syntax-table))
-
-(defvar maplev--symbol-syntax-table nil
+(defvar maplev--symbol-syntax-table
+  (let ((table (make-syntax-table maplev-mode-syntax-table)))
+    (modify-syntax-entry ?_  "w"  table)
+    table)
   "Syntax table for Maple, where `_' is a word constituent.")
 
-(unless maplev--symbol-syntax-table
-  (setq maplev--symbol-syntax-table (copy-syntax-table maplev-mode-syntax-table))
-  (modify-syntax-entry ?_  "w"  maplev--symbol-syntax-table))
-
-(defvar maplev-help-mode-syntax-table nil
-  "Syntax table used in Maple help buffer.")
-
-(unless maplev-help-mode-syntax-table
+(defvar maplev-help-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?_ "w" table)
-    (setq maplev-help-mode-syntax-table table)))
+    table)
+  "Syntax table used in Maple help buffer.")
+
+(defvar maplev-quote-not-string-syntax-table
+  (let ((table (make-syntax-table maplev-mode-syntax-table)))
+    (modify-syntax-entry ?\' "." table)
+    (modify-syntax-entry ?\` "_" table)
+    table)
+  "Syntax table used by `maplev--re-search-forward'.")
+  
 
 ;;}}}
 
@@ -805,17 +802,18 @@ This is slightly too aggressive, it incorrectly matches, d.Ed, which is invalid.
   "Regular expression to match a partial expression.")
 
 (defun maplev-forward-expr ()
-  "Move point forward over a complete expression."
+  "Move point forward over a complete expression.
+This is a hack and is hardly robust."
   (interactive)
-  (if
-      (cond
+  (if (cond
        ((looking-at "\\s-*\\s(")
-        (forward-sexp)
-        t)
+	(forward-sexp)
+	t)
        ((looking-at maplev--expr-re)
-        (goto-char (match-end 0)))
-       ((looking-at "\\s-*\\(?:#.*\\)?$")
-        (forward-line)))
+	(goto-char (match-end 0)))
+       ((looking-at "\\s-*\\(?:#.*\\)?$") ; inline-comment
+	(forward-line)
+	(not (eobp))))
       (maplev-forward-expr)))
 
 ;;}}}
