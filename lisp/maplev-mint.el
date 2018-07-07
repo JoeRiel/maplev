@@ -16,6 +16,8 @@
   (defvar maplev-alphabetize-declarations-p)
   (defvar maplev-var-declaration-symbol)
   (defvar maplev-variable-spacing)
+  (defvar maplev-mode-syntax-table)
+  (defvar maplev-quote-not-string-syntax-table)
   (defvar maplev--symbol-syntax-table))
 
 (declare-function event-point "maplev-common")
@@ -65,14 +67,6 @@
     (modify-syntax-entry ?\` "\"" table) ; string quotes
     table)
   "Syntax table used in Maple mint buffer.")
-
-(defvar maplev-quote-not-string-syntax-table
-  (let ((table (make-syntax-table maplev-mode-syntax-table)))
-    (modify-syntax-entry ?\' "." table)
-    (modify-syntax-entry ?\` "_" table)
-    table)
-  "Syntax table used by `maplev--re-search-forward'.")
-  
 
 ;;}}}
 ;;{{{ mode map
@@ -462,17 +456,14 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
   (interactive "d")
   (let ((prop (get-text-property pos 'maplev-mint)))
     (when prop
-      (let (string vars)
-	(if all-vars
-	    (let ((str (buffer-substring-no-properties
-			(next-single-property-change pos 'maplev-mint)
-			(previous-single-property-change (1+ pos) 'maplev-mint))))
-	      (setq vars (split-string str ", " t " +")))
-	  (setq string (save-excursion
-			 (goto-char pos)
-			 (maplev--ident-around-point))
-		vars (list string)))
-	;;
+      (let ((vars (if all-vars
+		      (split-string (buffer-substring-no-properties
+				     (next-single-property-change pos 'maplev-mint)
+				     (previous-single-property-change (1+ pos) 'maplev-mint))
+				    ", " t " +")
+		    (list (save-excursion
+			    (goto-char pos)
+			    (maplev--ident-around-point))))))
 	(cond
 	 ;; Jump to an included file
 	 ((eq prop 'include-file)
@@ -488,31 +479,31 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Remove unused args from argument list.
 	 ((eq prop 'unused-arg)
-	  (when (maplev-mint-query "Delete `%s' from argument list? " string)
+	  (when (maplev-mint-query "Delete `%s' from argument list? " vars)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-vars (maplev--scan-lists -1) (point) vars)))
 	 ;;
 	 ;; Remove unused local variables from local declaration.
 	 ((eq prop 'unused-local)
-	  (when (maplev-mint-query "Delete `%s' from local statement? " string)
+	  (when (maplev-mint-query "Delete `%s' from local statement? " vars)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-declaration "local" vars)))
 	 ;;
 	 ;; Remove unused exported variables from export declaration.
 	 ((eq prop 'unused-export)
-	  (when (maplev-mint-query "Delete `%s' from export statement? " string)
+	  (when (maplev-mint-query "Delete `%s' from export statement? " vars)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-declaration "export" vars)))
 	 ;;
 	 ;; Remove repeated args from argument list.
 	 ((eq prop 'repeat-arg)
-	  (when (maplev-mint-query "Remove duplicate `%s' from parameters? " string)
+	  (when (maplev-mint-query "Remove duplicates of `%s' from parameters? " vars)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-vars (maplev--scan-lists -1) (point) vars 1)))
 	 ;;
 	 ;; Remove repeated local variables from local declaration.
 	 ((eq prop 'repeat-local)
-	  (when (maplev-mint-query "Remove duplicate `%s' from local statement? " string)
+	  (when (maplev-mint-query "Remove duplicates of `%s' from local statement? " vars)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-declaration "local" vars 1)))
 	 ;;
@@ -526,7 +517,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ((eq prop 'undecl-global)
 	  (let ((action (x-popup-dialog t `(,(if all-vars
 						 "All undeclared globals"
-					       (format "Undeclared global: %s" string))
+					       (format "Undeclared global: %s" (car vars)))
 					    ("Quote" . "quote")
 					    ("Declare as global" . "global")
 					    ("Declare as local" . "local")))))
@@ -534,7 +525,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 		(let ((region (maplev-mint--goto-source-and-get-region pos)))
 		  (maplev-mint-quote-vars vars (car region) (cadr region)))
 	      (maplev-mint--goto-source-proc pos)
-	      (maplev-add-declaration action string))))
+	      (maplev-add-declaration action vars))))
 	 ;;
 	 ;; Goto line
 	 ((eq prop 'goto-line)
@@ -806,7 +797,7 @@ parenthesis of the procedure's argument list."
 	;; look whether there is any following text.
 	(let ((new-line (bolp)))
 	  (insert keyword " " (car vars) ";")
-	  (setq var (cdr vars))
+	  (setq vars (cdr vars)) 
 	  (when new-line
 	    (newline)
 	    (forward-line -1)))
@@ -840,23 +831,14 @@ parenthesis of the procedure's argument list."
 	      ;; non-alphabetic, insert VAR at end.
 	      (goto-char end)
 	      (backward-char)
-	      (insert "," (make-string maplev-variable-spacing ?\ ) decl))))))))
+	      (insert "," (make-string maplev-variable-spacing ?\ ) var))))))))
 	
-(defun maplev-add-local-variable (var &optional type)
+(defun maplev-add-local-variable (var)
   "Add VAR to the current procedure's local statement.
-If TYPE is non-nil, add a type declaration.  Interactively, VAR
-defaults to the identifier point is on."
+Interactively, VAR defaults to the identifier at point."
   (interactive (list (maplev-ident-around-point-interactive
-                      "Local variable")
-                     ;; Query type
-		     (let ((type (read-string
-				  "Type (empty for no type): "
-				  nil
-				  maplev--declaration-history)))
-		       (if (equal "" type)
-			   nil
-			 type))))
-  (maplev-add-variable "local" var type))
+                      "Local variable")))
+  (maplev-add-variable "local" var))
 
 (defun maplev-add-global-variable (var)
   "Add VAR to the current procedure's local statement.
@@ -872,13 +854,12 @@ Interactively, VAR defaults to identifier point is on."
                       "Exported variable")))
   (maplev-add-variable "export" var))
 
-(defun maplev-add-variable (keyword var &optional type)
-  "To the current procedure's KEYWORD declaration add VAR.
-If TYPE is non-nil, append a type declaration."
+(defun maplev-add-variable (keyword var)
+  "To the current procedure's KEYWORD declaration add VAR."
   (save-excursion
     (maplev-beginning-of-defun)
     (goto-char (maplev--scan-lists 1))
-    (maplev-add-declaration keyword var type)))
+    (maplev-add-declaration keyword var))) 
 
 (defun maplev-delete-declaration (keyword vars &optional leave-one)
   "From the KEYWORD declaration delete occurrences of VARS.
