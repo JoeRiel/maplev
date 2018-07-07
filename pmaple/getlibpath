@@ -9,7 +9,7 @@
 
 MAPLE=${MAPLE_ROOT}
 
-SYSTYPE="$(maple.system.type)"
+SYSTYPE="$(./maple.system.type)"
 MAPLE_BIN=${MAPLE}/internal/${SYSTYPE}
 
 # Check whether MAPLE_BIN has subdirectories, 
