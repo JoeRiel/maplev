@@ -69,12 +69,17 @@ build Maple libraries.  Requires customizing `compile-command'."
   "Convert OPT, a string of command line options, into a list of options.
 Close up space between option and argument.  
 For example, \"-a -w 100\" becomes \(\"-a\" \"-w100\"\)."
-  (let ((opts (split-string (string-trim opt) "\\(^\\| +\\)-" t)))
-    (mapcar (lambda (s) 
-	      (concat "-" (if (string-match "^.\\( +\\)[^ ]" s)
-			      (replace-match "" t t s 1)
-			    s)))
-	    opts)))
+  (let ((opt (string-trim opt)))
+    (if (and 
+	 (> (length opt) 0)
+	 (/= (aref opt 0) ?-))
+	(error "option string does not have leading hypen: %s" opt))
+    (let ((opts (split-string (string-trim opt) "\\(^\\| +\\)-" t)))
+      (mapcar (lambda (s) 
+		(concat "-" (if (string-match "^.\\( +\\)[^ ]" s)
+				(replace-match "" t t s 1)
+			      s)))
+	      opts))))
 
 
 (provide 'maplev-utils)
