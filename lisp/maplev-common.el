@@ -17,7 +17,8 @@
   (defvar maplev-help-mode-syntax-table)
   (defvar maplev-history-list)
   (defvar maplev-mode-4-syntax-table)
-  (defvar maplev-mode-syntax-table))
+  (defvar maplev-mode-syntax-table)
+  (defvar maplev-quote-not-string-syntax-table))
 
 (declare-function maplev-reset-font-lock "maplev")
 (declare-function maplev--re-search-backward "maplev-mint")
@@ -220,18 +221,31 @@ If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
   (let* ((state (parse-partial-sexp (maplev-safe-position)
                                     (point)))
          (choice (if (equal ?` (nth 3 state))
-                     ;; inside a string
+                     ;; inside a backquoted symbol
                      (buffer-substring-no-properties
                       (nth 8 state)
-                      (save-excursion (goto-char (nth 8 state))
-                                      (forward-sexp 1) (point)))
-                   (current-word))))
-    (if (string-equal choice "")
-        (cond ((stringp default)
-               default)
-              (default "")
-              ((error "Empty choice")))
-      choice)))
+                      (save-excursion (goto-char (nth 8 state)) ; goto start of string
+				      (condition-case nil
+					  (forward-sexp 1)
+					(error (error "unterminated quoted symbol")))
+				      (point)))
+		   (with-syntax-table maplev-quote-not-string-syntax-table
+		     (current-word)))))
+    (cond
+     ((and choice (string-match "^`.*[^`]$" choice))
+      (save-excursion
+	(setq choice (and (looking-at (concat " *\\(" maplev--quoted-name-re "\\)"))
+			  (match-string-no-properties 1)))))
+     ((and choice (string-match "^[^`].*`$" choice))
+      (save-excursion
+	(setq choice (and (looking-back (concat "\\(" maplev--quoted-name-re "\\) *") 
+					(line-beginning-position))
+			  (match-string-no-properties 1))))))
+    (cond
+     (choice choice)
+     ((stringp default) default)
+     (default "")
+     ((error "Empty choice")))))
 
 (defun maplev-ident-around-point-interactive (prompt &optional default complete)
   "Request Maple identifier in minibuffer, using PROMPT.
