@@ -30,7 +30,8 @@
 
 Unpack := proc( )
 
-local binfile, book, dst, dstdir, join, platform, src, status, tboxdir;
+local binfile, book, dst, dstdir, join, platform, src, status, systype, tboxdir;
+
 
 uses FT = FileTools;
 
@@ -66,25 +67,25 @@ uses FT = FileTools;
 
     printf("\nextracting pmaple binary file\n");
 
-    dstdir := join(tboxdir, "bin");
+    platform := kernelopts('platform');
+    systype  := FileTools:-Filename(kernelopts('bindir'));
+
+    if platform = "windows" then binfile := "pmaple.exe";
+    else                         binfile := "pmaple";
+    end if;
+
+    dstdir := join(tboxdir, systype);
 
     if not FT:-Exists(dstdir) then
         FT:-MakeDirectory(dstdir, 'recurse');
     end if;
 
-    platform := kernelopts('platform');
-
-    if   platform = "unix"    then binfile := "pmaple";
-    elif platform = "windows" then binfile := "pmaple.exe";
-    else
-    end if;
-
-    src := join(book, binfile);
+    src := join(book, systype, binfile);
     dst := join(dstdir, binfile);
 
     Copy(src, dst, 'force', 'verbose',NULL);
 
-    if platform = "unix" then
+    if platform = "unix" or platform = "mac" then
         status := ssystem(sprintf("chmod +x %s", dst));
         if not status[1] = 0 then
             WARNING("could not make binary file %1 executable", dst);

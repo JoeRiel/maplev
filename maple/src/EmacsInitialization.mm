@@ -15,7 +15,7 @@
 
 EmacsInitialization := proc()
 
-local bindir, cmaple, file, join, mapledir, mint, platform, pmaple;
+local bindir, cmaple, file, join, mapledir, mint, platform, pmaple, systype;
 
     join := proc()
         FileTools:-JoinPath([_passed]);
@@ -25,9 +25,11 @@ local bindir, cmaple, file, join, mapledir, mint, platform, pmaple;
 
     (bindir,mapledir,platform) := kernelopts(':-bindir',':-mapledir',':-platform');
 
+    systype := FileTools:-Filename(kernelopts('bindir'));
+
     cmaple := join(bindir, "cmaple");
     mint   := join(bindir, "mint");
-    pmaple := join(kernelopts('toolboxdir' = 'maplev'), "bin", "pmaple");
+    pmaple := join(kernelopts('toolboxdir' = 'maplev'), systype, "pmaple");
 
     if platform = "windows" then
         cmaple := cat(cmaple , ".exe");

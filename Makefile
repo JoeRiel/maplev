@@ -303,7 +303,9 @@ book: $(book)
 $(book): $(mla) $(hlp) $(HTML-FILE) $(PDF-FILE) $(INTRO) $(TAR-FILE)
 	$(RM) $@
 	echo '(MakeBook)("$@" $(foreach file,$^,,"$(file)") \
-                         , "bin" = ["pmaple/pmaple","pmaple/pmaple.exe"] \
+	                 , "bin.X86_64_LINUX"        = "pmaple/bin.X86_64_LINUX/pmaple" \
+	                 , "bin.X86_64_WINDOWS"      = "pmaple/bin.X86_64_WINDOWS/pmaple.exe" \
+	                 , "bin.APPLE_UNIVERSAL_OSX" = "pmaple/bin.APPLE_UNIVERSAL_OSX/pmaple" \
 	                ): \
 	     for eq in [NULL \
 	                 , "X-CloudId"        = "$(CLOUD-ID)" \
