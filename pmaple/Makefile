@@ -62,6 +62,9 @@ endif
 ENV     := $(LIB-PATH-VAR)=$(shell ./getlibpath)
 CFLAGS  := -g -D_GNU_SOURCE -pedantic-errors
 
+C-FILES := pmaple.c getdelim.c
+H-FILES := getdelim.h
+
 linux:   $(SYSTYPE)/pmaple
 mac:     $(SYSTYPE)/pmaple
 windows: bin.X86_64_WINDOWS/pmaple.exe
@@ -70,14 +73,16 @@ linux: $(call print-help,linux,	Create pmaple binary)
 mac:   $(call print-help,mac,	Create pmaple binary)
 windows: $(call print-help,windows,	Create pmaple.exe binary)
 
-$(SYSTYPE)/pmaple: pmaple.c getdelim.c
+$(SYSTYPE)/pmaple: $(C-FILES) $(H-FILES)
 	mkdir -p $(SYSTYPE)
-	@echo "compiling and linking $< ..."
-	$(ENV) $(CC) $< -o $@ $(INCLUDE) $(CFLAGS) $(LIBS) -l maplec
+	@echo "compiling and linking $(C-FILES)"
+	$(ENV) $(CC) $(C-FILES) -o $@ $(INCLUDE) $(CFLAGS) $(LIBS) -l maplec
 
-bin.X86_64_WINDOWS/pmaple.exe: pmaple.c getdelim.c $(MAPLEC-DLL) 
-	@echo "compiling and linking $< ..."
-	$(ENV) $(MINGW) $< -o $@ $(INCLUDE) $(CFLAGS) -L . -lmaplec
+bin.X86_64_WINDOWS/pmaple.exe: $(C-FILES) $(H-FILES) $(MAPLEC-DLL) 
+	mkdir -p $(dir $(@))
+	@echo "compiling and linking $(C-FILES)"
+	$(ENV) $(MINGW) $(C-FILES) -o $@ $(INCLUDE) $(CFLAGS) -L . -lmaplec
+
 
 # }}}
 # {{{ install

@@ -19,16 +19,18 @@
 
 /* Don't use __attribute__ __nonnull__ in this compilation unit.  Otherwise gcc
    optimizes away the lineptr == NULL || n == NULL || fp == NULL tests below.  */
+
 #define _GL_ARG_NONNULL(params)
 
 // #include <config.h>
 
 #include <stdio.h>
-
 #include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
+
+#include "getdelim.h"
 
 #ifndef SSIZE_MAX
 # define SSIZE_MAX ((ssize_t) (SIZE_MAX / 2))

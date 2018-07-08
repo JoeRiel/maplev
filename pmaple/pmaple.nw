@@ -65,7 +65,6 @@ that makes it difficult to determine when a computation is complete.
 The [[maplec.h]] file lies in [[$MAPLE_ROOT/extern/internal]].
 
 <<includes>>=
-#include "maplec.h"
 #include <ctype.h>  
 #include <signal.h>
 #include <stdbool.h>
@@ -73,6 +72,8 @@ The [[maplec.h]] file lies in [[$MAPLE_ROOT/extern/internal]].
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <maplec.h>
+#include "getdelim.h"  
 @
 
 \subsection{Macros}
