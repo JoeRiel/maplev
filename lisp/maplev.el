@@ -234,7 +234,7 @@ When MESSAGE is non-nil, display a message with the version."
     table)
   "Syntax table used in MapleV mode buffers for R4.")
 
-(defvar maplev--symbol-syntax-table
+(defvar maplev-symbol-syntax-table
   (let ((table (make-syntax-table maplev-mode-syntax-table)))
     (modify-syntax-entry ?_  "w"  table)
     table)

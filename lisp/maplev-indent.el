@@ -29,7 +29,7 @@
 (require 'maplev-common)
 
 (eval-when-compile
-  (defvar maplev--symbol-syntax-table))
+  (defvar maplev-symbol-syntax-table))
 
 
 ;;{{{ module
@@ -308,9 +308,9 @@ beyond \(point\)."
           (save-restriction
             (widen)
 
-	    ;; Change the buffer syntax table to maplev--symbol-syntax-table
+	    ;; Change the buffer syntax table to maplev-symbol-syntax-table
 	    ;; so that the underscore is considered a word constituent.
-	    (with-syntax-table maplev--symbol-syntax-table
+	    (with-syntax-table maplev-symbol-syntax-table
 	      
 	      (goto-char point)
 	      (while (re-search-forward maplev-indent-grammar-keyword-re end 'move)
@@ -423,7 +423,7 @@ is returned.  Point must be at current indentation."
         (cond
          ;; Handle declarations in procedures (and modules)
          ((and (string-match maplev--defun-re (car indent-info))
-               (with-syntax-table maplev--symbol-syntax-table
+               (with-syntax-table maplev-symbol-syntax-table
                  (looking-at maplev--declaration-re)))
           (+  maplev-indent-declaration
               (nth 1 indent-info)))

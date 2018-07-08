@@ -18,7 +18,7 @@
   (defvar maplev-variable-spacing)
   (defvar maplev-mode-syntax-table)
   (defvar maplev-quote-not-string-syntax-table)
-  (defvar maplev--symbol-syntax-table))
+  (defvar maplev-symbol-syntax-table))
 
 (declare-function event-point "maplev-common")
 (declare-function event-window "maplev-common")
@@ -746,7 +746,7 @@ the closing parenthesis in the formal parameter list."
   "Move forward to the start of the next symbol in a declaration statement.
 Skip over comments and types."
   (interactive)
-  (with-syntax-table maplev--symbol-syntax-table
+  (with-syntax-table maplev-symbol-syntax-table
     (when (looking-at "`")
       (forward-char)
       (search-forward "`"))
