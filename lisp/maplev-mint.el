@@ -451,6 +451,12 @@ FORM and VARS are used for `y-or-n-p' query.  Return t if
   (set-buffer (window-buffer (select-window (event-window click))))
   (maplev-mint-handler (event-point click) t))
 
+(defun maplev-unpack-list-of-one (lst)
+  "Return the contents of LST if it has one element, otherwise return LST."
+  (if (= 1 (length lst))
+      (car lst)
+    lst))
+
 (defun maplev-mint-handler (pos &optional all-vars)
   "Handle mint output at position POS.
 When called interactively, POS is position where point is.
@@ -458,14 +464,15 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
   (interactive "d")
   (let ((prop (get-text-property pos 'maplev-mint)))
     (when prop
-      (let ((vars (if all-vars
+      (let* ((vars (if all-vars
 		      (split-string (buffer-substring-no-properties
 				     (next-single-property-change pos 'maplev-mint)
 				     (previous-single-property-change (1+ pos) 'maplev-mint))
 				    ", " t " +")
 		    (list (save-excursion
 			    (goto-char pos)
-			    (maplev--ident-around-point))))))
+			    (maplev--ident-around-point)))))
+	     (arg (if (= 1 (length vars)) (car vars) vars)))
 	(cond
 	 ;; Jump to an included file
 	 ((eq prop 'include-file)
@@ -481,44 +488,44 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Remove unused args from argument list.
 	 ((eq prop 'unused-arg)
-	  (when (maplev-mint-query "Delete `%s' from argument list? " vars)
+	  (when (maplev-mint-query "Delete `%s' from argument list? " arg)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-vars (maplev--scan-lists -1) (point) vars)))
 	 ;;
 	 ;; Remove unused local variables from local declaration.
 	 ((eq prop 'unused-local)
-	  (when (maplev-mint-query "Delete `%s' from local statement? " vars)
+	  (when (maplev-mint-query "Delete `%s' from local statement? " arg)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-declaration "local" vars)))
 	 ;;
 	 ;; Remove unused exported variables from export declaration.
 	 ((eq prop 'unused-export)
-	  (when (maplev-mint-query "Delete `%s' from export statement? " vars)
+	  (when (maplev-mint-query "Delete `%s' from export statement? " arg)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-declaration "export" vars)))
 	 ;;
 	 ;; Remove unused global variables from global declaration.
 	 ((eq prop 'unused-global)
-	  (when (maplev-mint-query "Delete `%s' from global statement? " vars)
+	  (when (maplev-mint-query "Delete `%s' from global statement? " arg)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-declaration "global" vars)))
 	 ;;
 	 ;; Remove repeated args from argument list.
 	 ((eq prop 'repeat-arg)
-	  (when (maplev-mint-query "Remove duplicates of `%s' from parameters? " vars)
+	  (when (maplev-mint-query "Remove duplicates of `%s' from parameters? " arg)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-vars (maplev--scan-lists -1) (point) vars 1)))
 	 ;;
 	 ;; Remove repeated local variables from local declaration.
 	 ((eq prop 'repeat-local)
-	  (when (maplev-mint-query "Remove duplicates of `%s' from local statement? " vars)
+	  (when (maplev-mint-query "Remove duplicates of `%s' from local statement? " arg)
 	    (maplev-mint--goto-source-proc pos)
 	    (maplev-delete-declaration "local" vars 1)))
 	 ;;
 	 ;; Declaration of undeclared locals variables.
 	 ((eq prop 'undecl-local)
-	  (let ((action (x-popup-dialog t `(,(if (= 1 (length vars))
-						 (format "Undeclared variable: %s" (car vars))
+	  (let ((action (x-popup-dialog t `(,(if (stringp arg)
+						 (format "Undeclared variable: %s" arg)
 					       "All undeclared variables")
 					    ("Declare as local" . "local")
 					    ("Declare as export" . "export")))))
@@ -527,9 +534,9 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Declaration of undeclared global variables.
 	 ((eq prop 'undecl-global)
-	  (let ((action (x-popup-dialog t `(,(if (= 1 (length vars))
-						 "All undeclared variables"
-					       (format "Undeclared variable: %s" (car vars)))
+	  (let ((action (x-popup-dialog t `(,(if (stringp arg)
+						 (format "Undeclared variable: %s" arg)
+					       "All undeclared variables")
 					    ("Quote" . "quote")
 					    ("Declare as global" . "global")
 					    ("Declare as local" . "local")))))
