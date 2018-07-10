@@ -109,14 +109,13 @@ properly assigned and `maplev-config-auto-assign' is non-nil.")
    
    (mint-options
     :initarg            :mint-options
-    :initform           "-i2 -q -v -w1000"
+    :initform           "-i2 -q -v"
     :type               string
     :custom             string
     :documentation "Options to pass to mint; see the Maple help
 page for mint.  The verbose option (normally -v), is necessary
 for mint-mode to properly display and use the path to included
-file.  The width option (-w) is set to 1000 to avoid breaking
-filenames.")
+file.")
 
    (tester
     :initarg            :tester
