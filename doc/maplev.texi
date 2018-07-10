@@ -1012,7 +1012,8 @@ Mint mode is applied to mint's output buffer.  Warnings and errors are
 font locked and activated.  Moving the mouse pointer over active text
 highlights it; clicking it (@kbd{mouse-1}) either moves the cursor to
 the appropriate point in the source code or queries to automatically
-correct an error.
+correct an error.  Using @kbd{mouse-3} on any of the highlighted
+variables in a mint message applies the action to all the variables.
 
 The following commands are available:
 
@@ -1034,6 +1035,9 @@ Scroll up (@code{scroll-up}).
 
 @item mouse-1
 Goto location in source, or fix error, depending on the active text.
+
+@item mouse-3
+Similar to @kbd{mouse-1} but uses all the variables in the mint message.
 
 @end table
 
