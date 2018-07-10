@@ -379,6 +379,7 @@ REPLACE is an alist with elements \(OLD . NEW\)."
     ("These exported variables were never used:" maplev-mint-warning-face 'unused-export t)
     ;;("These local variables were assigned a value, but otherwise unused:" ... )
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
+    ("These names were declared as both a local variable and a parameter:" maplev-mint-warning-face 'local-and-param t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
     ("These names were used as global names but the names don't start with _:" maplev-mint-warning-face 'undecl-global t)
     ("These global variables were declared, but never used:" maplev-mint-warning-face 'unused-global t)
@@ -545,6 +546,17 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 		  (maplev-mint-quote-vars vars (car region) (cadr region)))
 	      (maplev-mint--goto-source-proc pos)
 	      (maplev-add-declaration action vars))))
+	 ;;
+	 ;; Declared as both local variable and parameter.
+	 ((eq prop 'local-and-param)
+	  (let ((action (x-popup-dialog t `(,(format "Declared as local and parameter: %s" arg)
+					    ("Remove local declaration" . "local")
+					    ("Remove parameter" . "param")))))
+	    (maplev-mint--goto-source-proc pos)
+	    (if (string= action "local")
+		(maplev-delete-declaration "local" vars)
+	      (maplev-delete-vars (maplev--scan-lists -1) (point) vars))))
+	 ;;
 	 ;;
 	 ;; Goto line
 	 ((eq prop 'goto-line)
