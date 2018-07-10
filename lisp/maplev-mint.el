@@ -509,15 +509,19 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Declaration of undeclared locals variables.
 	 ((eq prop 'undecl-local)
-	  (when (maplev-mint-query "Add `%s' to local statement? " vars)
+	  (let ((action (x-popup-dialog t `(,(if (= 1 (length vars))
+						 (format "Undeclared variable: %s" (car vars))
+					       "All undeclared variables")
+					    ("Declare as local" . "local")
+					    ("Declare as export" . "export")))))
 	    (maplev-mint--goto-source-proc pos)
-	    (maplev-add-declaration "local" vars)))
+	    (maplev-add-declaration action vars)))
 	 ;;
 	 ;; Declaration of undeclared global variables.
 	 ((eq prop 'undecl-global)
-	  (let ((action (x-popup-dialog t `(,(if all-vars
-						 "All undeclared globals"
-					       (format "Undeclared global: %s" (car vars)))
+	  (let ((action (x-popup-dialog t `(,(if (= 1 (length vars))
+						 "All undeclared variables"
+					       (format "Undeclared variable: %s" (car vars)))
 					    ("Quote" . "quote")
 					    ("Declare as global" . "global")
 					    ("Declare as local" . "local")))))
