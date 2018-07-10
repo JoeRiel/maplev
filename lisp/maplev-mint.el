@@ -877,6 +877,7 @@ The entire statement is deleted if it is left with no variables."
                           vars leave-one)
       ;; remove entire KEYWORD statement, if empty
       (let (case-fold-search)
+	(back-to-indentation)
         (when (looking-at (concat keyword "[ \t\n]*[;:]\\([ \t#]*$\\)?"))
           (delete-region (match-beginning 0) (match-end 0))
           (maplev-delete-whitespace t))))))
