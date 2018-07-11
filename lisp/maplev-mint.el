@@ -292,7 +292,7 @@ formal parameter list."
       (when (re-search-forward " *->" (line-end-position) t)
 	(goto-char (match-beginning 0))
 	(setq beg (point))))) ; not quite, should be before formal parameters.
-    (list beg end)))
+    (cons beg end)))
 
 (defun maplev-mint--goto-source-line (pos)
   "Goto the location in source specified by the line number in the Mint buffer.
@@ -495,21 +495,18 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Remove unused local variables from local declaration.
 	 ((eq prop 'unused-local)
-	  (when (maplev-mint-query "Delete `%s' from local statement? " arg)
-	    (maplev-mint--goto-source-proc pos)
-	    (maplev-delete-declaration "local" vars)))
+	  (when (maplev-mint-query "Delete `%s' from local statements? " arg)
+	    (maplev-delete-declarations "local" vars (maplev-mint--goto-source-and-get-region pos))))
 	 ;;
 	 ;; Remove unused exported variables from export declaration.
 	 ((eq prop 'unused-export)
-	  (when (maplev-mint-query "Delete `%s' from export statement? " arg)
-	    (maplev-mint--goto-source-proc pos)
-	    (maplev-delete-declaration "export" vars)))
+	  (when (maplev-mint-query "Delete `%s' from export statements? " arg)
+	    (maplev-delete-declarations "export" vars (maplev-mint--goto-source-and-get-region pos))))
 	 ;;
 	 ;; Remove unused global variables from global declaration.
 	 ((eq prop 'unused-global)
-	  (when (maplev-mint-query "Delete `%s' from global statement? " arg)
-	    (maplev-mint--goto-source-proc pos)
-	    (maplev-delete-declaration "global" vars)))
+	  (when (maplev-mint-query "Delete `%s' from global statements? " arg)
+	    (maplev-delete-declarations "global" vars (maplev-mint--goto-source-and-get-region pos))))
 	 ;;
 	 ;; Remove repeated args from argument list.
 	 ((eq prop 'repeat-arg)
@@ -519,9 +516,9 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Remove repeated local variables from local declaration.
 	 ((eq prop 'repeat-local)
-	  (when (maplev-mint-query "Remove duplicates of `%s' from local statement? " arg)
-	    (maplev-mint--goto-source-proc pos)
-	    (maplev-delete-declaration "local" vars 1)))
+	  (when (maplev-mint-query "Remove duplicates of `%s' from local statements? " arg)
+	    (maplev-delete-declarations "local" vars (maplev-mint--goto-source-and-get-region pos))
+	    (maplev-add-declaration "local" vars)))
 	 ;;
 	 ;; Declaration of undeclared locals variables.
 	 ((eq prop 'undecl-local)
@@ -543,7 +540,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 					    ("Declare as local" . "local")))))
 	    (if (string= action "quote")
 		(let ((region (maplev-mint--goto-source-and-get-region pos)))
-		  (maplev-mint-quote-vars vars (car region) (cadr region)))
+		  (maplev-mint-quote-vars vars (car region) (cdr region)))
 	      (maplev-mint--goto-source-proc pos)
 	      (maplev-add-declaration action vars))))
 	 ;;
@@ -552,9 +549,9 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	  (let ((action (x-popup-dialog t `(,(format "Declared as local and parameter: %s" arg)
 					    ("Remove local declaration" . "local")
 					    ("Remove parameter" . "param")))))
-	    (maplev-mint--goto-source-proc pos)
 	    (if (string= action "local")
-		(maplev-delete-declaration "local" vars)
+		(maplev-delete-declarations "local" vars (maplev-mint--goto-source-and-get-region pos))
+	      (maplev-mint--goto-source-proc pos)
 	      (maplev-delete-vars (maplev--scan-lists -1) (point) vars))))
 	 ;;
 	 ;;
@@ -892,21 +889,28 @@ Interactively, VAR defaults to identifier point is on."
     (goto-char (maplev--scan-lists 1))
     (maplev-add-declaration keyword var))) 
 
-(defun maplev-delete-declaration (keyword vars &optional leave-one)
-  "From the KEYWORD declaration delete occurrences of VARS.
-VARS must be either a string or a list of strings.  If optional
-argument LEAVE-ONE is non-nil, then one occurrence of VARS is left.
-The entire statement is deleted if it is left with no variables."
+(defun maplev-delete-declarations (keyword vars region)
+  "Delete VARS from KEYWORD declarations in the specified REGION."
   (save-excursion
-    (when (maplev--goto-declaration keyword)
-      (maplev-delete-vars (point) (maplev--statement-terminator)
-                          vars leave-one)
-      ;; remove entire KEYWORD statement, if empty
-      (let (case-fold-search)
-	(back-to-indentation)
-        (when (looking-at (concat keyword "[ \t\n]*[;:]\\([ \t#]*$\\)?"))
-          (delete-region (match-beginning 0) (match-end 0))
-          (maplev-delete-whitespace t))))))
+    (save-restriction
+      (narrow-to-region (car region) (cdr region))
+      (let ((regex (concat "\\(\\<" keyword "\\>\\)"
+			   "\\|\\(" maplev--defun-begin-re "\\)"
+			   "\\|\\(?:" maplev--defun-end-re "\\)"))
+	    (cnt 0)) ; keep track whether in original procedure
+	(goto-char (point-min))
+	(while (maplev--re-search-forward regex nil 'move)
+	  (if (match-string 1)
+	      (when (zerop cnt)
+		(maplev-delete-vars (point) (maplev--statement-terminator) vars)
+		;; remove entire KEYWORD statement, if empty
+		(let (case-fold-search)
+		  (back-to-indentation)
+		  (when (looking-at (concat keyword "[ \t\n]*[;:]\\([ \t#]*$\\)?"))
+		    (delete-region (match-beginning 0) (match-end 0))
+		    (maplev-delete-whitespace t))))
+	    ;; adjust cnt up/down when entering/exiting a proc/module.
+	    (setq cnt (+ cnt (if (match-string 2) +1 -1)))))))))
 
 (defun maplev-delete-vars (start end vars &optional leave-one)
   "In region between START and END delete occurrences of VARS.
