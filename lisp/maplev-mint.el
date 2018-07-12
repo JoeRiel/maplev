@@ -491,7 +491,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ((eq prop 'unused-arg)
 	  (when (maplev-mint-query "Delete `%s' from argument list? " arg)
 	    (maplev-mint--goto-source-proc pos)
-	    (maplev-delete-vars (maplev--scan-lists -1) (point) vars)))
+	    (maplev-delete-vars vars (maplev--scan-lists -1) (point))))
 	 ;;
 	 ;; Remove unused local variables from local declaration.
 	 ((eq prop 'unused-local)
@@ -512,7 +512,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ((eq prop 'repeat-arg)
 	  (when (maplev-mint-query "Remove duplicates of `%s' from parameters? " arg)
 	    (maplev-mint--goto-source-proc pos)
-	    (maplev-delete-vars (maplev--scan-lists -1) (point) vars 1)))
+	    (maplev-delete-vars vars (maplev--scan-lists -1) (point) 1)))
 	 ;;
 	 ;; Remove repeated local variables from local declaration.
 	 ((eq prop 'repeat-local)
@@ -552,7 +552,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	    (if (string= action "local")
 		(maplev-delete-declarations "local" vars (maplev-mint--goto-source-and-get-region pos))
 	      (maplev-mint--goto-source-proc pos)
-	      (maplev-delete-vars (maplev--scan-lists -1) (point) vars))))
+	      (maplev-delete-vars vars (maplev--scan-lists -1) (point)))))
 	 ;;
 	 ;;
 	 ;; Goto line
@@ -912,10 +912,11 @@ Interactively, VAR defaults to identifier point is on."
 	    ;; adjust cnt up/down when entering/exiting a proc/module.
 	    (setq cnt (+ cnt (if (match-string 2) +1 -1)))))))))
 
-(defun maplev-delete-vars (start end vars &optional leave-one)
-  "In region between START and END delete occurrences of VARS.
+(defun maplev-delete-vars (vars start end &optional leave-one)
+  "Delete VARS in region between START and END
 VARS must be either a string or a list of strings.  If optional
-argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
+argument LEAVE-ONE is non-nil, the first occurrence of VARS is
+not deleted."
   (let ((parse-sexp-ignore-comments)
         case-fold-search lo var)
     (save-excursion
