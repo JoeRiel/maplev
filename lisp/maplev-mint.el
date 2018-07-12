@@ -897,15 +897,15 @@ Interactively, VAR defaults to identifier point is on."
       (let ((regex (concat "\\(\\<" keyword "\\>\\)"
 			   "\\|\\(" maplev--defun-begin-re "\\)"
 			   "\\|\\(?:" maplev--defun-end-re "\\)"))
-	    (cnt 0)) ; keep track whether in original procedure
-	(goto-char (point-min))
-	(while (maplev--re-search-forward regex nil 'move)
+	    (cnt 1) ; keep track whether in original procedure
+	    term) 
+	(goto-char (point-max))
+	(while (maplev--re-search-backward regex nil 'move)
 	  (if (match-string 1)
 	      (when (zerop cnt)
-		(maplev-delete-vars (point) (maplev--statement-terminator) vars)
+		(maplev-delete-vars vars (point) (maplev--statement-terminator))
 		;; remove entire KEYWORD statement, if empty
 		(let (case-fold-search)
-		  (back-to-indentation)
 		  (when (looking-at (concat keyword "[ \t\n]*[;:]\\([ \t#]*$\\)?"))
 		    (delete-region (match-beginning 0) (match-end 0))
 		    (maplev-delete-whitespace t))))
