@@ -256,10 +256,10 @@ procedure, or module."
   (maplev-mint--goto-source-and-get-region pos))
 
 (defun maplev-mint--goto-source-and-get-region (pos)
-  "Move to the source buffer and return a list of that specifies
-the region corresponding to the element referenced at POS in the
-mint buffer.  Point in the source buffer is set to just after the
-formal parameter list."
+  "Move to the source buffer and return a cons-pair of character
+positions for the region corresponding to the proc/module
+referenced at POS in the mint buffer.  Point in the source buffer
+is set to just after the formal parameter list."
   (let (beg class end file line toline)
     (save-excursion
       (goto-char pos)
