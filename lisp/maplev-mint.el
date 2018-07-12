@@ -969,15 +969,17 @@ not deleted."
 Only unquoted occurrences, as a symbol, are quoted."
   (let (case-fold-search regexp reply start var)
     (save-excursion
-      (while vars
-	(setq var (car vars)
-	      vars (cdr vars)
-	      regexp (concat "\\(?:\\_<\\|:-\\)" (regexp-quote var) "\\_>"))
-	(goto-char beg)
-	(while (maplev--re-search-forward regexp end 'noerror)
-	  (setq start (match-beginning 0))
-	  (unless (looking-at "'") ; this can fail if the match is part of a protected expression
-	    (setq reply (query-replace-regexp regexp "'\\&'" nil start (point)))))))))
+      (save-restriction
+	(narrow-to-region beg end)
+	(while vars
+	  (setq var (car vars)
+		vars (cdr vars)
+		regexp (concat "\\(?:\\_<\\|:-\\)" (regexp-quote var) "\\_>"))
+	  (goto-char beg)
+	  (while (maplev--re-search-forward regexp nil 'noerror)
+	    (setq start (match-beginning 0))
+	    (unless (looking-at "'") ; this can fail if the match is part of a protected expression
+	      (setq reply (query-replace-regexp regexp "'\\&'" nil start (point))))))))))
 
 ;;}}}
 
