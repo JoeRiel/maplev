@@ -931,7 +931,7 @@ not deleted."
 		  ;; hack to handle backquoted symbols
 		  (if (= (aref var 0) ?`)
 		      (regexp-quote var)
-		    (concat "\\<" (regexp-quote var) "\\>"))
+		    (concat "\\_<" (regexp-quote var) "\\_>"))
                   nil t)
             (if lo
                 (setq lo nil)
