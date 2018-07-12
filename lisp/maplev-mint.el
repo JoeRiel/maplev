@@ -971,15 +971,16 @@ Only unquoted occurrences, as a symbol, are quoted."
     (save-excursion
       (save-restriction
 	(narrow-to-region beg end)
-	(while vars
-	  (setq var (car vars)
-		vars (cdr vars)
-		regexp (concat "\\(?:\\_<\\|:-\\)" (regexp-quote var) "\\_>"))
-	  (goto-char beg)
+	(let ((regexp (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)"))
+	      (syntax-table maplev-quote-not-string-syntax-table)
+	      match)
 	  (while (maplev--re-search-forward regexp nil 'noerror)
-	    (setq start (match-beginning 0))
-	    (unless (looking-at "'") ; this can fail if the match is part of a protected expression
-	      (setq reply (query-replace-regexp regexp "'\\&'" nil start (point))))))))))
+	    (unless (or (match-string 1) (match-string 3)) ; skip :- fields (left or right)
+	      (setq match (match-string-no-properties 0)
+		    noquotes (match-string-no-properties 2)
+		    start (match-beginning 0))
+	      (unless (looking-at "'") ; this can fail if the match is part of a protected expression
+		(setq reply (query-replace match (concat  "'" noquotes "'") nil start (point)))))))))))
 
 ;;}}}
 
