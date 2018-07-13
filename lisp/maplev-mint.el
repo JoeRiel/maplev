@@ -971,7 +971,7 @@ Only unquoted occurrences, as a symbol, are quoted."
     (save-excursion
       (save-restriction
 	(narrow-to-region beg end)
-	(let ((regexp (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)"))
+	(let ((regexp (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)?"))
 	      (syntax-table maplev-quote-not-string-syntax-table)
 	      match noquotes)
 	  (while (maplev--re-search-forward regexp nil 'noerror)
