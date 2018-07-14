@@ -255,28 +255,26 @@ If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
      (choice choice)
      ((stringp default) default)
      (default "")
-     ((error "Empty choice")))))
+     (t (error "Empty choice")))))
 
 (defun maplev-ident-around-point-interactive (prompt &optional default complete)
   "Request Maple identifier in minibuffer, using PROMPT.
 Default is identifier around point.  If it is empty use DEFAULT.
 Minibuffer completion is used if COMPLETE is non-nil."
   ;; Suppress error message
-  (if (not default) (setq default t))
-  (let ((enable-recursive-minibuffers t)
-        (ident (maplev--ident-around-point default))
-        choice)
-    (setq prompt (concat prompt (unless (string-equal ident "")
+  (let* ((enable-recursive-minibuffers t)
+        (ident (maplev--ident-around-point (or default t)))
+	(prompt (concat prompt (unless (string-equal ident "")
                                   (concat " (default " ident ")"))
-                         ": ")
-          choice (if complete
-                     (completing-read prompt 'maplev--completion
-                                      nil nil nil maplev-history-list ident)
-                   (read-string prompt nil maplev-history-list ident)))
+                         ": "))
+	(choice (if complete
+		    (completing-read prompt 'maplev--completion
+				     nil nil nil maplev-history-list ident)
+		  (read-string prompt nil maplev-history-list ident))))
     ;; Are there situations where we want to suppress the error message??
     (if (string-equal choice "")
-        (error "Empty choice"))
-    (maplev--string-to-name choice)))
+        (error "Empty choice")
+      choice)))
 
 ;;}}}
 
