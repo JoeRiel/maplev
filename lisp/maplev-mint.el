@@ -775,9 +775,12 @@ the closing parenthesis in the formal parameter list."
 Skip over comments and types."
   (interactive)
   (with-syntax-table maplev-symbol-syntax-table
-    (when (looking-at "`")
+    (cond
+     ((looking-at "`")
       (forward-char)
       (search-forward "`"))
+     ((looking-at "%")
+      (maplev-forward-expr)))
     (re-search-forward "\\W\\b\\|#\\|(\\*\\|::\\|:=\\|`" nil t)
     (let ((match (match-string-no-properties 0)))
       (cond
