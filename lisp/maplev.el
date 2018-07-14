@@ -191,7 +191,7 @@ When MESSAGE is non-nil, display a message with the version."
     (modify-syntax-entry ?~  "_"  table) ; symbol constituent
     (modify-syntax-entry ??  "_"  table) ; symbol constituent
     (modify-syntax-entry ?&  "w"  table) ; word constituent
-    (modify-syntax-entry ?%  "w"  table) ; word constituent
+    (modify-syntax-entry ?%  "w"  table) ; word constituent (questionable; symbol?)
 
     (modify-syntax-entry ?\\ "\\" table) ; escape
     (modify-syntax-entry ?#  "<"  table) ; comment starter
@@ -222,7 +222,6 @@ When MESSAGE is non-nil, display a message with the version."
     (modify-syntax-entry ?\) ")(4n" table)
 
     ;; Entries for R5 and later
-    (modify-syntax-entry ?%  "."  table)
     (modify-syntax-entry ?\" "\"" table)
 
     table)
