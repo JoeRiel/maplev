@@ -890,7 +890,7 @@ Interactively, VAR defaults to identifier point is on."
   (save-excursion
     (maplev-beginning-of-defun)
     (goto-char (maplev--scan-lists 1))
-    (maplev-add-declaration keyword var))) 
+    (maplev-add-declaration keyword (list var))))
 
 (defun maplev-delete-declarations (keyword vars region)
   "Delete VARS from KEYWORD declarations in the specified REGION."
