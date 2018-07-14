@@ -801,7 +801,7 @@ Skip over comments and types."
 
        
 (defun maplev-add-declaration (keyword vars)
-  "To the current procedure's KEYWORD declaration add VAR.
+  "To the current procedure's KEYWORD declaration add VARS, a list of variables.
 If necessary, add a KEYWORD statement.  Point must be after the closing
 parenthesis of the procedure's argument list."
   (when vars
@@ -854,9 +854,9 @@ parenthesis of the procedure's argument list."
 		    (goto-char (match-end 0)))
 		  (if (< end (point))
 		      (goto-char (1- end)))
-		  (unless (looking-at (regexp-quote var))
+		  (unless (looking-at (concat (regexp-quote var) "\\_>"))
 		    (let ((space (make-string maplev-variable-spacing ?\ )))
-		      (if (looking-at " *;")
+		      (if (looking-at "\\s-*[:;]")
 			  (insert (format ",%s%s" space var))
 			(insert (format "%s," var) space)))))
 	      ;; non-alphabetic, insert VAR at end.
