@@ -902,19 +902,19 @@ Interactively, VAR defaults to identifier point is on."
   "Delete VARS from KEYWORD declarations in the specified REGION."
   (save-excursion
     (save-restriction
-      (narrow-to-region (car region) (cdr region))
+      (narrow-to-region (point) (cdr region))
       (let ((regex (concat "\\(\\<" keyword "\\>\\)"
 			   "\\|\\(" maplev--defun-re "\\)"
 			   "\\|\\(?:" maplev--defun-end-re "\\)"))
-	    (cnt 1) ; keep track whether in original procedure
+	    (cnt 0) ; keep track whether in original procedure
 	    term) 
-	(goto-char (point-max))
-	(while (maplev--re-search-backward regex nil 'move)
+	(while (maplev--re-search-forward regex nil 'move)
 	  (if (match-string 1)
 	      (when (zerop cnt)
-		(maplev-delete-vars vars (point) (maplev--statement-terminator))
-		;; remove entire KEYWORD statement, if empty
-		(let (case-fold-search)
+		(let ((beg (match-beginning 0)))
+		  (maplev-delete-vars vars (point) (maplev--statement-terminator))
+		  ;; remove entire KEYWORD statement, if empty
+		  (goto-char beg) ; move before KEYWORD
 		  (when (looking-at (concat keyword "[ \t\n]*[;:]\\([ \t#]*$\\)?"))
 		    (delete-region (match-beginning 0) (match-end 0))
 		    (maplev-delete-whitespace t))))
