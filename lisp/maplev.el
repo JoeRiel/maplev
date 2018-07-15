@@ -770,7 +770,7 @@ The name of the procedure is inserted into the title of the fold."
              "$"
              "->"
              ;; ","
-             ;; ":="
+             ":="
              ))
           ;; neutral operators
           "\\|&\\(?:[~!@$^*-+=\"<>,./?]+\\|[a-zA-Z_][a-zA-Z_0-9]*\\)"
