@@ -539,7 +539,15 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 					    ("Declare as global" . "global")
 					    ("Declare as local" . "local")))))
 	    (if (string= action "quote")
-		(let ((region (maplev-mint--goto-source-and-get-region pos)))
+		(let* ((region (maplev-mint--goto-source-and-get-region pos))
+		       (window (get-buffer-window maplev-mint--code-buffer)) 
+		       (edges (window-absolute-body-pixel-edges window))
+		       (position (pos-visible-in-window-p nil window t)))
+		  ;; move mouse into source-buffer window so that 
+		  ;; the subsequent keyboard input is into that buffer
+		  (set-mouse-absolute-pixel-position
+		   (+ (nth 0 edges) (nth 0 position))
+		   (+ (nth 1 edges) (nth 1 position)))
 		  (maplev-mint-quote-vars vars (car region) (cdr region)))
 	      (maplev-mint--goto-source-proc pos)
 	      (maplev-add-declaration action vars))))
