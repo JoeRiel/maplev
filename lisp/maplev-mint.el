@@ -922,10 +922,10 @@ Interactively, VAR defaults to identifier point is on."
 	    (setq cnt (+ cnt (if (match-string 2) +1 -1)))))))))
 
 (defun maplev-delete-vars (vars start end &optional leave-one)
-  "Delete VARS in region between START and END
-VARS must be either a string or a list of strings.  If optional
-argument LEAVE-ONE is non-nil, the first occurrence of VARS is
-not deleted."
+  "Delete VARS in region between START and END; VARS must be
+either a string or a list of strings.  If optional argument
+LEAVE-ONE is non-nil, the first occurrence of VARS is not
+deleted."
   (let ((parse-sexp-ignore-comments)
         case-fold-search lo var)
     (save-excursion
@@ -944,28 +944,11 @@ not deleted."
                   nil t)
             (if lo
                 (setq lo nil)
-              (delete-region (match-beginning 0) (match-end 0))
-              (maplev-delete-whitespace)
-
-              ;; Remove optional type declaration
-              
-              (when (looking-at "::\\s-*")
-                ;; Skip past type declaration operator (::)
-                ;; so looking-at won't match them.
-                (goto-char (match-end 0))
-                (delete-region (match-beginning 0)
-                               (progn
-                                 ;; Unless looking at an argument separator,
-                                 ;; statement terminator, or closing
-                                 ;; parenthesis, or at end of buffer, move
-                                 ;; forward over a balanced expression.
-                                 ;;
-                                 ;; This needs modification to handle comments,
-                                 ;; esp. with leading commas.
-                                 (while (and (not (looking-at "[ \t\f\n]*[,;:#)]"))
-                                             (/= (point) (point-max)))
-                                   (forward-sexp))
-                                 (point))))
+	      (delete-region (match-beginning 0)
+			     (progn 
+			       (maplev-delete-whitespace)
+			       (maplev-forward-expr)
+			       (point)))
               ;; Remove separating comma
               (when (or (maplev--re-search-backward "," nil t)
                         (maplev--re-search-forward  "," nil t))
