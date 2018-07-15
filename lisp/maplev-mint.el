@@ -906,7 +906,7 @@ Interactively, VAR defaults to identifier point is on."
     (save-restriction
       (narrow-to-region (car region) (cdr region))
       (let ((regex (concat "\\(\\<" keyword "\\>\\)"
-			   "\\|\\(" maplev--defun-begin-re "\\)"
+			   "\\|\\(" maplev--defun-re "\\)"
 			   "\\|\\(?:" maplev--defun-end-re "\\)"))
 	    (cnt 1) ; keep track whether in original procedure
 	    term) 
@@ -983,7 +983,7 @@ Only unquoted occurrences, as a symbol, are quoted."
       (save-restriction
 	(narrow-to-region beg end)
 	(let ((regex (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)?"
-			     "\\|\\(" maplev--defun-begin-re "\\)"
+			     "\\|\\(" maplev--defun-re "\\)"
 			     "\\|\\(?:" maplev--defun-end-re "\\)"))
 	      (syntax-table maplev-quote-not-string-syntax-table)
 	      (cnt 0)
