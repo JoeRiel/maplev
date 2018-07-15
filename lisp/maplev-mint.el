@@ -965,7 +965,7 @@ Only unquoted occurrences, as a symbol, are quoted."
       (save-restriction
 	(narrow-to-region beg end)
 	(let ((regex (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)?"
-			     "\\|\\(" maplev--defun-re "\\)"
+			     "\\|\\(" maplev--defun-re "\\)\\(`\\)?"
 			     "\\|\\(?:" maplev--defun-end-re "\\)"))
 	      (syntax-table maplev-quote-not-string-syntax-table)
 	      (cnt -1)
@@ -973,7 +973,7 @@ Only unquoted occurrences, as a symbol, are quoted."
 	  (goto-char beg)
 	  (while (maplev--re-search-forward regex nil 'move)
 	    (cond
-	     ((or (match-string 1) (match-string 3))) ; skip :- fields (left or right)
+	     ((or (match-string 1) (match-string 3) (match-string 5))) ; skip :- fields (left or right)
 	     ((match-string 2)
 	      (when (zerop cnt)
 		(setq match (match-string-no-properties 0)
