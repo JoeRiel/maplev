@@ -256,10 +256,10 @@ procedure, or module."
   (maplev-mint--goto-source-and-get-region pos))
 
 (defun maplev-mint--goto-source-and-get-region (pos)
-  "Move to the source buffer and return a cons-pair of character
-positions for the region corresponding to the proc/module
-referenced at POS in the mint buffer.  Point in the source buffer
-is set to just after the formal parameter list."
+  "Move to the source buffer and return a cons cell of the region
+in the source buffer of the proc/module referenced at POS in the
+mint buffer.  Point in the source buffer is set to just after the
+formal parameter list."
   (let (beg class end file line toline)
     (save-excursion
       (goto-char pos)
@@ -274,6 +274,7 @@ is set to just after the formal parameter list."
     ;; move point to the beginning of that line in the source
     (maplev-mint--goto-source-pos line 0 file)
     (save-excursion
+      (setq beg (point))
       (forward-line (- toline line))
       (setq end (point)))
     ;; Use class to position point after formal parameter list
@@ -281,17 +282,14 @@ is set to just after the formal parameter list."
      ((string= class "Procedure")
       (when (re-search-forward "\\<proc *(" (line-end-position) t)
 	(backward-char)
-	(setq beg (point))
 	(goto-char (maplev--scan-lists 1))))
      ((string= class "Module")
       (when (re-search-forward "\\<module *(" (line-end-position) t)
 	(backward-char)
-	(setq beg (point))
 	(goto-char (maplev--scan-lists 1))))
      ((string= class "Operator")
       (when (re-search-forward " *->" (line-end-position) t)
-	(goto-char (match-beginning 0))
-	(setq beg (point))))) ; not quite, should be before formal parameters.
+	(goto-char (match-beginning 0)))))
     (cons beg end)))
 
 (defun maplev-mint--goto-source-line (pos)
@@ -565,8 +563,8 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Goto line
 	 ((eq prop 'goto-line)
-	  (maplev-mint--goto-source-line pos))
-	 )))))
+	  (maplev-mint--goto-source-line pos)))
+	(maplev-mint-rerun)))))
 
 ;;}}}
 ;;{{{ regions
@@ -986,8 +984,9 @@ Only unquoted occurrences, as a symbol, are quoted."
 			     "\\|\\(" maplev--defun-re "\\)"
 			     "\\|\\(?:" maplev--defun-end-re "\\)"))
 	      (syntax-table maplev-quote-not-string-syntax-table)
-	      (cnt 0)
+	      (cnt -1)
 	      match noquotes)
+	  (goto-char beg)
 	  (while (maplev--re-search-forward regex nil 'move)
 	    (cond
 	     ((or (match-string 1) (match-string 3))) ; skip :- fields (left or right)
