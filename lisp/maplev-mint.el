@@ -982,16 +982,23 @@ Only unquoted occurrences, as a symbol, are quoted."
     (save-excursion
       (save-restriction
 	(narrow-to-region beg end)
-	(let ((regexp (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)?"))
+	(let ((regex (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)?"
+			     "\\|\\(" maplev--defun-begin-re "\\)"
+			     "\\|\\(?:" maplev--defun-end-re "\\)"))
 	      (syntax-table maplev-quote-not-string-syntax-table)
+	      (cnt 0)
 	      match noquotes)
-	  (while (maplev--re-search-forward regexp nil 'noerror)
-	    (unless (or (match-string 1) (match-string 3)) ; skip :- fields (left or right)
-	      (setq match (match-string-no-properties 0)
-		    noquotes (match-string-no-properties 2)
-		    start (match-beginning 0))
-	      (unless (looking-at "'") ; this can fail if the match is part of a protected expression
-		(setq reply (query-replace match (concat  "'" noquotes "'") nil start (point)))))))))))
+	  (while (maplev--re-search-forward regex nil 'move)
+	    (cond
+	     ((or (match-string 1) (match-string 3))) ; skip :- fields (left or right)
+	     ((match-string 2)
+	      (when (zerop cnt)
+		(setq match (match-string-no-properties 0)
+		      noquotes (match-string-no-properties 2)
+		      start (match-beginning 0))
+		(unless (looking-at "'") ; this can fail if the match is part of a protected expression
+		  (setq reply (query-replace match (concat  "'" noquotes "'") nil start (point))))))
+	     (t (setq cnt (+ cnt (if (match-string 4) +1 -1)))))))))))
 
 ;;}}}
 
