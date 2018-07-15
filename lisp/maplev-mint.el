@@ -914,10 +914,11 @@ Interactively, VAR defaults to identifier point is on."
 		(let ((beg (match-beginning 0)))
 		  (maplev-delete-vars vars (point) (maplev--statement-terminator))
 		  ;; remove entire KEYWORD statement, if empty
-		  (goto-char beg) ; move before KEYWORD
-		  (when (looking-at (concat keyword "[ \t\n]*[;:]\\([ \t#]*$\\)?"))
-		    (delete-region (match-beginning 0) (match-end 0))
-		    (maplev-delete-whitespace t))))
+		  (save-excursion
+		    (goto-char beg) ; move before KEYWORD
+		    (when (looking-at (concat keyword "[ \t\n]*[;:]\\([ \t#]*$\\)?"))
+		      (delete-region (match-beginning 0) (match-end 0))
+		      (maplev-delete-whitespace t)))))
 	    ;; adjust cnt up/down when entering/exiting a proc/module.
 	    (setq cnt (+ cnt (if (match-string 2) +1 -1)))))))))
 
