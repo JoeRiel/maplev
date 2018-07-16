@@ -978,7 +978,9 @@ Only unquoted occurrences, as a symbol, are quoted."
 	  (goto-char beg)
 	  (while (maplev--re-search-forward regex nil 'move)
 	    (cond
-	     ((or (match-string 1) (match-string 3) (match-string 5))) ; skip :- fields (left or right)
+	     ((match-string 3) ; foo:-
+	      (maplev-forward-expr))
+	     ((or (match-string 1) (match-string 5))) ; skip :- fields (left or right)
 	     ((match-string 2)
 	      (when (zerop cnt)
 		(setq match (match-string-no-properties 0)
