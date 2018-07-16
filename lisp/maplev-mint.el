@@ -40,6 +40,17 @@
   :type 'boolean
   :group 'maplev-mint)
 
+(defcustom maplev-mint-rerun-flag nil
+  "Non-nil means rerun mint after each operation."
+  :type 'boolean
+  :group 'maplev-mint)
+
+(defcustom maplev-mint-save-rerun-flag nil
+  "Non-nil means save a source buffer when using mint to modify it.
+This is only used if `maplev-mint-rerun-flag' is non-nil."
+  :type 'boolean
+  :group 'maplev-mint)
+
 ;;}}}
 ;;{{{ variables
 
@@ -461,7 +472,8 @@ FORM and VARS are used for `y-or-n-p' query.  Return t if
 When called interactively, POS is position where point is.
 ALL-VARS non-nil means handle all variables, not just the one clicked on."
   (interactive "d")
-  (let ((prop (get-text-property pos 'maplev-mint)))
+  (let ((prop (get-text-property pos 'maplev-mint))
+	(code-buffer maplev-mint--code-buffer))
     (when prop
       (let* ((vars (if all-vars
 		      (split-string (buffer-substring-no-properties
@@ -569,7 +581,16 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;; Goto line
 	 ((eq prop 'goto-line)
 	  (maplev-mint--goto-source-line pos)))
-	(maplev-mint-rerun)))))
+
+	;; rerun mint
+	(when maplev-mint-rerun-flag
+	  (unless maplev-mint--code-buffer
+	    (and maplev-mint-save-rerun-flag
+		 (buffer-modified-p)
+		 (y-or-n-p "save buffer ")
+		 (save-buffer)))
+	  (set-buffer code-buffer)
+	  (maplev-mint-rerun))))))
 
 ;;}}}
 ;;{{{ regions
