@@ -132,7 +132,7 @@ Pop up the buffer, move to either `point-min', if FILE is non-nil,
 or `maplev-mint--code-beginning' otherwise,
 and move forward LINE lines and CHAR columns."
   (switch-to-buffer-other-window (if file (find-file-noselect file)
-                   maplev-mint--code-buffer))
+				   maplev-mint--code-buffer))
   (goto-char (if file (point-min)  maplev-mint--code-beginning))
   (if (> line 0) (forward-line line))
   (forward-char char)
@@ -538,9 +538,14 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 					    ("Declare as local" . "local")))))
 	    (if (string= action "quote")
 		(let* ((region (maplev-mint--goto-source-and-get-region pos))
-		       (window (get-buffer-window maplev-mint--code-buffer)) 
+		       (window (get-buffer-window))
 		       (edges (window-absolute-body-pixel-edges window))
 		       (position (pos-visible-in-window-p nil window t)))
+		  (unless position
+		    (recenter 0)
+		    (setq position (pos-visible-in-window-p nil window t))
+		    (unless position
+		      (error "position is not visible")))
 		  ;; move mouse into source-buffer window so that 
 		  ;; the subsequent keyboard input is into that buffer
 		  (set-mouse-absolute-pixel-position
