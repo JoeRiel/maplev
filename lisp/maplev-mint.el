@@ -279,9 +279,10 @@ formal parameter list."
       (setq class (match-string-no-properties 3))
       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
       (setq line (1- (string-to-number (match-string-no-properties 1)))
-	    file (maplev-mint-get-source-file))
-      (re-search-forward "to\\s-*\\([0-9]+\\)")
-      (setq toline (string-to-number (match-string-no-properties 1))))
+	    file (maplev-mint-get-source-file)
+	    toline (if (re-search-forward "to\\s-*\\([0-9]+\\)" (line-end-position) 'move)
+		       (string-to-number (match-string-no-properties 1))
+		     (1+ line))))
     ;; move point to the beginning of that line in the source
     (maplev-mint--goto-source-pos line 0 file)
     (save-excursion
