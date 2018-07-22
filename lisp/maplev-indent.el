@@ -179,17 +179,27 @@ character position of the beginning of the change.  UNUSED is not used."
      (list ")"    . (nil nil 0))))
 
   "Assoc list defining the grammar for Maple indentation.
-Each entry has the form \(KEY . \(MATCH-RE OPEN-P INDENT ADJUST-FUNC
-POST-FUNC\)\).  KEY is a Maple keyword or parenthesis.  MATCH-RE is a
-regular expression that matches any of the keys that follow KEY; nil
-means that KEY closes a Maple statement.  OPEN-P is a boolean flag
-that is non-nil if KEY can initiate a Maple statement.  INDENT is the
-relative indentation for the block immediately following KEY; nil
-means that the indentation is handled in an ad hoc fashion.
-ADJUST-FUNC is optional, if non-nil it is a function that moves point
-to the position from where the indent is computed.  POST-FUNC is
-optional, if non-nil it is a function that is called after the keyword
-is handled.  Currently it is only used by the keyword `end'.")
+Each entry has the form \(KEY . \(MATCH-RE OPEN-P INDENT
+ADJUST-FUNC POST-FUNC\)\).
+
+KEY is a Maple keyword or parenthesis.  
+
+MATCH-RE is a regular expression that matches any of the keys
+that follow KEY; nil means that KEY closes a Maple statement.
+
+OPEN-P is a boolean flag that is non-nil if KEY can initiate a
+Maple statement.
+
+INDENT is the relative indentation for the block immediately
+following KEY; nil means that the indentation is handled in an ad
+hoc fashion.
+
+ADJUST-FUNC is optional; if non-nil it is a function that moves
+point to the position from where the indent is computed.
+
+POST-FUNC is optional; if non-nil it is a function that is called
+after the keyword is handled.  Currently it is only used by the
+keyword `end'.")
 
 (defconst maplev-indent-grammar-keyword-re
   (eval-when-compile
