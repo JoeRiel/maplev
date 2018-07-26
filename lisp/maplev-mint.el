@@ -120,6 +120,8 @@ This is only used if `maplev-mint-rerun-flag' is non-nil."
   (setq mode-name "Mint"
 	buffer-read-only t)
   (make-local-variable 'maplev-mint--code-buffer)
+  (set (make-local-variable 'paragraph-start) "[^ ]")
+  (set (make-local-variable 'paragraph-separate) paragraph-start)
   (maplev-mint-fontify-buffer)
   (setq truncate-lines nil))
 

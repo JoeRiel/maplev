@@ -813,6 +813,90 @@ This is a hack and is hardly robust."
 	(not (eobp))))
       (maplev-forward-expr)))
 
+(defconst maplev-wexp-keyword-alist
+  `(("proc"   . ("\\<end\\>"))
+    ("module" . ("\\<end\\>"))
+    ("end"    . (nil #'maplev-wexp-skip-optional-end-keyword))
+
+    ("for"    . (,(maplev--list-to-word-re '("from" "to" "by" "while" "do"))))
+    ("from"   . (,(maplev--list-to-word-re '("to" "by" "while" "do"))))
+    ("to"     . (,(maplev--list-to-word-re '("by" "while" "do"))))
+    ("while"  . (,(maplev--list-to-word-re '("from" "to" "by" "do"))))
+    ("do"     . (,(maplev--list-to-word-re '("od" "end" "until"))))
+    ("od"     . (nil))
+    ("until"  . (nil))
+
+    ("if"     . (,(maplev--list-to-word-re '("then"))))
+    ("elif"   . (,(maplev--list-to-word-re '("then"))))
+    ("else"   . (,(maplev--list-to-word-re '("fi" "end"))))
+    ("then"   . (,(maplev--list-to-word-re '("eliif" "else" "fi" "end"))))
+    ("fi"     . (nil))
+
+    ("use"    . (,(maplev--list-to-word-re '("end"))))
+    ("try"    . (,(maplev--list-to-word-re '("catch" "finally" "end"))))
+    ("catch"  . (,(maplev--list-to-word-re '("catch" "finally" "end"))))
+    ("finally". (,(maplev--list-to-word-re '("end"))))
+    )
+  "Alist defining the "
+)
+
+(defconst maplev-wexp-keyword-re
+  (let (lst)
+    (dolist (dot maplev-wexp-alist lst)
+      (setq lst (cons (car dot) lst)))
+    (maplev--list-to-word-re lst)))
+
+
+(defconst maplev-wexp-statement-start-re
+  (concat "\\<"
+	  (mapconcat 'identity (list
+				(regexp-opt '("proc" "module" "do" "if" "use" "try") t)
+				(regexp-opt '("for" "from" "to" "while") t))
+		     "\\|")
+	  "\\>"))
+
+(defconst maplev-wexp-statement-cont-re
+  (concat "\\<"
+	  (mapconcat 'identity (list
+				(regexp-opt '("proc" "module" "do" "if" "use" "try") t)
+				(regexp-opt '("fi" "od") t)
+				(regexp-opt '("end") t))
+		     "\\|")
+	  "\\>"))
+
+(defun maplev-forward-wexp ()
+  "Move forward over a well-formed Maple expression."
+  (interactive)
+  ;; assume for now point is not in string/comment
+  ;; move forward over white space
+  (re-search-forward "\\=\\(?:[ \t]+\\|\n+\\)+" nil t)
+  (cond
+   ((looking-at maplev-wexp-statement-start-re)
+    ;; move to end of statement
+    (let ((cnt (if (match-string 1) 1 0))
+	  keyword)
+      (goto-char (match-end 0))
+      (while (progn	    
+	       (maplev--re-search-forward maplev-wexp-statement-cont-re)
+	       (setq cnt (+ cnt (if (match-string 1) 1 -1)))
+	       (when (and (match-string 3) ;; matched "end"
+			  (looking-at "\\s-+\\(?:do\\|if\\|module\\|proc\\|try\\|use\\)\\>"))
+		 (goto-char (match-end 0)))
+	       (not (zerop cnt)))))
+    ;; move past whitespace
+    (re-search-forward "\\=\\(?:[ \t]+\\|\n+\\)+" nil t)
+    ;; may need to move over arguments: proc() ... end proc (x,y,z) 
+    (when (looking-at ";\\|:[^:]")
+      (goto-char (match-end 0))))))
+		   
+
+	    
+	 
+	  
+
+
+  
+  
 ;;}}}
 
 ;;{{{ Miscellaneous
