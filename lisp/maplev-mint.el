@@ -82,10 +82,7 @@ This is only used if `maplev-mint-rerun-flag' is non-nil."
 ;;}}}
 ;;{{{ mode map
 
-(defvar maplev-mint-mode-map nil
-  "Keymap used in Mint mode.")
-
-(unless maplev-mint-mode-map
+(defvar maplev-mint-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [(space)]                     'scroll-up)
     (define-key map [(backspace)]                 'scroll-down)
@@ -97,7 +94,8 @@ This is only used if `maplev-mint-rerun-flag' is non-nil."
     (define-key map [(mouse-1)]                   'maplev-mint-click)
     (define-key map [(mouse-3)]                   'maplev-mint-right-click)
     (define-key map [(control c) (control c)]     'maplev-mint-handler)
-    (setq maplev-mint-mode-map map)))
+    map)
+  "Keymap used in Mint mode.")
 
 ;;}}}
 ;;{{{ menu
