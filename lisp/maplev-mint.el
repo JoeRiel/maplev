@@ -421,7 +421,11 @@ Each element is a list of the form \(REGEXP FACE PROP VAR\):
               (end (match-end 1)))
           ;; Here we are working with variables whose values are symbols
           ;; with a face property.
-          (put-text-property beg end 'face (eval (nth 1 mel)))
+	  (let ((prop (nth 1 mel)))
+	    (put-text-property beg end 'face (eval prop))
+	    (when (eq prop 'maplev-mint-link-face)
+	      (put-text-property beg end 'mouse-face 'highlight)
+	      (put-text-property beg end 'help-echo "goto source")))
           (when (nth 2 mel)
             ;; We use a text property `maplev-mint' to store in the text
             ;; what kind of info we have from Mint.
