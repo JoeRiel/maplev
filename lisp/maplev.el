@@ -1789,6 +1789,16 @@ window, depending on the exclusive-or of
 
 ;;{{{ Config file (.maplev)
 
+(defun maplev-find-config-file ()
+  "Find and open the maple configuration file.
+The file is named .maplev and is searched for in the current
+directory and its ancestors."
+  (interactive)
+  (let ((config (maplev-include--find-file-up-path ".maplev")))
+    (if config
+	(find-file config)
+      (message "Could not find .maplev file"))))
+
 (defun maplev-load-config-file ()
   "Find and load the maplev configuration file.
 The file is named .maplev and is searched for in the current
