@@ -256,10 +256,7 @@ PROCESS is the Maple process."
 ;;}}}
 ;;{{{ mode map
 
-(defvar maplev-cmaple-mode-map nil
-  "Keymap used in Maple cmaple mode.")
-
-(unless maplev-cmaple-mode-map
+(defvar maplev-cmaple-mode-map
   (let ((map (copy-keymap comint-mode-map)))
     (define-key map [(return)]                'maplev-cmaple-send)
     (define-key map [(control c) (control c)] 'maplev-cmaple-interrupt)
@@ -285,7 +282,8 @@ PROCESS is the Maple process."
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
     (define-key map [(shift return)]             'maplev-cmaple-newline)
-    (setq maplev-cmaple-mode-map map)))
+    map)
+  "Keymap used in Maple cmaple mode.")
 
 ;;}}}
 ;;{{{ mode definition

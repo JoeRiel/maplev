@@ -257,10 +257,7 @@ When MESSAGE is non-nil, display a message with the version."
 
 ;;{{{ Mode map
 
-(defvar maplev-mode-map nil
-  "Keymap used in Maple mode.")
-
-(unless maplev-mode-map
+(defvar maplev-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [(tab)]                      'maplev-electric-tab)
     (define-key map [(meta tab)]                 'maplev-complete-symbol)
@@ -324,8 +321,8 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
     (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-cmaple)
-
-    (setq maplev-mode-map map)))
+    map)
+     "Keymap used in Maple mode.")
 
 ;;}}}
 ;;{{{ Menu

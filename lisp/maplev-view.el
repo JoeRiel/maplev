@@ -33,16 +33,14 @@
 
 ;;{{{ mode map
 
-(defvar maplev-view-mode-map nil
-  "Keymap used in `maplev-view-mode'.")
-
-(unless maplev-view-mode-map
+(defvar maplev-view-mode-map
   (let ((map (copy-keymap maplev-help-mode-map)))
     ;; remove P (parent) key-binding
     (define-key map [?P] nil)
     ;; (define-key map [?v] 'maplev-view-toggle-view)
     (define-key map [?g] 'maplev-view-goto-source)
-    (setq maplev-view-mode-map map)))
+    map)
+  "Keymap used in `maplev-view-mode'.")
 
 ;;}}}
 ;;{{{ mode definition

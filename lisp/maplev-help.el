@@ -21,10 +21,7 @@
 
 ;;{{{ mode map
 
-(defvar maplev-help-mode-map nil
-  "Keymap used in `maplev-help-mode'.")
-
-(unless maplev-help-mode-map
+(defvar maplev-help-mode-map
   (let ((map (make-sparse-keymap)))
 ;;    (define-key map [(SPC)]                      'scroll-up)
     (define-key map (read-kbd-macro "SPC")       'scroll-up)
@@ -57,8 +54,8 @@
 
     (define-key map [(meta mouse-2)]          'maplev-view-follow-mouse)
     (define-key map [(meta shift mouse-2)]    'maplev-view-follow-mouse)
-
-    (setq maplev-help-mode-map map)))
+    map)
+  "Keymap used in `maplev-help-mode'.")
 
 (defvar maplev-help-mode-menu nil)
 (unless maplev-help-mode-menu
