@@ -1,0 +1,28 @@
+#!/bin/bash
+
+
+if ! [ "${SYS}" ]; then
+    SYS_TYPE=$(uname -a | awk '{ print $1 }')
+    case $SYS_TYPE in
+	"Linux")
+	    PROCESSOR=$(uname -m)
+	    case $PROCESSOR in
+		ia64)
+		    SYS="ITANIUM_LINUX" ;;
+		x86_64)
+		    SYS="X86_64_LINUX" ;;
+		*)
+		    SYS="IBM_INTEL_LINUX" ;;
+            esac
+	    ;;
+	"Darwin")   
+            SYS="APPLE_UNIVERSAL_OSX"
+            ;;
+	*)
+        # currently do not support any other platforms
+	    echo Operating system "SYS_TYPE" is not supported 1>&2
+	    exit 1
+    esac
+fi
+echo "bin.${SYS}"
+exit 0

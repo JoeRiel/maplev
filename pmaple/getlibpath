@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Return a colon (:) separated list of Maple binary directories.
+# The environment variable MAPLE_ROOT points to the directory
+# where Maple is installed.
+#
+# If SYS is assigned, then it determines the basename of the binary directory,
+# that is, "bin.${SYS}".
+
+MAPLE=${MAPLE_ROOT}
+
+SYSTYPE="$(./maple.system.type)"
+MAPLE_BIN=${MAPLE}/internal/${SYSTYPE}
+
+# Check whether MAPLE_BIN has subdirectories, 
+# if so assign them to EXTRA_MAPLE_BIN_DIRS.
+
+if [ "$(ls -1p | sed -n '/\/$/{p;q}')" ]; then
+    EXTRA_MAPLE_BIN_DIRS="$(ls -1d ${MAPLE_BIN}/*/ | tr '
+' ':')"
+    if [ "$EXTRA_MAPLE_BIN_DIRS" = ":" ]; then
+	EXTRA_MAPLE_BIN_DIRS=""
+    fi
+else
+    EXTRA_MAPLE_BIN_DIRS=""
+fi
+
+echo ${EXTRA_MAPLE_BIN_DIRS}${MAPLE_BIN}:${MAPLE}/toolbox/MapleSim/${SYSTYPE}
+
+exit 0

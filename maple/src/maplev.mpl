@@ -14,12 +14,14 @@
 unprotect('maplev'):
 maplev := module()
 
-export GetSource, Install, Print, Setup;
+export Copy, EmacsInitialization, GetSource, Print, Setup, Unpack;
 
+$include <Copy.mm>
+$include <EmacsInitialization.mm>
 $include <GetSource.mm>
-$include <Install.mm>
 $include <Print.mm>
-$include <Setup.mm>>
+$include <Setup.mm>
+$include <Unpack.mm>
 
 ##
 end module:

@@ -42,7 +42,7 @@ Raise an error if the exit markers do not match the enter markers."
 	(when (match-string-no-properties 4)
 	  ;; exiting; font-lock the procedure we're returning to
 	  (put-text-property (match-beginning 4) (match-end 4) 'face font-lock-function-name-face)
-	  (if (match-string-no-properties 2) 
+	  (if (match-string-no-properties 2)
 	      ;; trapped an error, highlight it
 	      (put-text-property (match-beginning 2) (match-end 2) 'face font-lock-warning-face)))
 	;; indent region from point to current position
@@ -53,14 +53,14 @@ Raise an error if the exit markers do not match the enter markers."
 	    (setq col (+ col indent))
 	  ;; exit marker
 	  (if (zerop col)
-	      (error "too many exit markers")
+	      (error "Too many exit markers")
 	    (setq col (- col indent))
 	    (indent-line-to col)))
 	(end-of-line) ; move to end to skip the previous match
 	(setq point (point)))
       (set-marker end nil)  ; clear the marker
       (unless (zerop col)
-	(error "missing %d exit markers" (/ col indent))))))
+	(error "Missing %d exit markers" (/ col indent))))))
 
 (defun maplev-trace-indent-buffer ()
     "Hierarchically indent Maple trace output in the buffer.

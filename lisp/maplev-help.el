@@ -17,17 +17,11 @@
 (declare-function maplev--cmaple-buffer "maplev-cmaple")
 (declare-function maplev--cmaple-process "maplev-cmaple")
 (declare-function maplev--proc-buffer "maplev-view")
-(declare-function maplev-cmaple--lock-access "maplev-cmaple")
-(declare-function maplev-cmaple--ready "maplev-cmaple")
-(declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
 (declare-function maplev-cmaple-direct "maplev-cmaple")
 
 ;;{{{ mode map
 
-(defvar maplev-help-mode-map nil
-  "Keymap used in `maplev-help-mode'.")
-
-(unless maplev-help-mode-map
+(defvar maplev-help-mode-map
   (let ((map (make-sparse-keymap)))
 ;;    (define-key map [(SPC)]                      'scroll-up)
     (define-key map (read-kbd-macro "SPC")       'scroll-up)
@@ -60,8 +54,8 @@
 
     (define-key map [(meta mouse-2)]          'maplev-view-follow-mouse)
     (define-key map [(meta shift mouse-2)]    'maplev-view-follow-mouse)
-
-    (setq maplev-help-mode-map map)))
+    map)
+  "Keymap used in `maplev-help-mode'.")
 
 (defvar maplev-help-mode-menu nil)
 (unless maplev-help-mode-menu
@@ -113,22 +107,21 @@
 
 (defun maplev-help-setup (&optional config)
   "Unless already assigned, set `major-mode' to `maplev-help-mode'.
-The optional CONFIG argument is an object of type `maplev-config-class.
-Its default is `maplev-config' or `maple-config-default', in that order."
+The optional CONFIG argument is an object of type
+`maplev-config-class'.  Its default is the variable
+`maplev-config' or `maple-config-default', in that order."
   (unless (eq major-mode 'maplev-help-mode)
     (maplev-help-mode))
   (setq maplev-config (or config maplev-config maplev-config-default)
 	mode-name (format "Maple-Help: %s" (slot-value maplev-config 'maple))))
-  
 
 ;;}}}
 ;;{{{ mode functions
 
 (defun maplev--help-buffer ()
   "Return the name of the Maple help buffer."
-  (if maplev-config
-      (format "Maple help (%s)" (slot-value maplev-config 'maple)))
-  "Maple help")
+  (concat "Maple help" (and maplev-config
+			    (format " (%s)" (slot-value maplev-config 'maple)))))
 
 (defun maplev-help-follow-mouse (click)
   "Display the Maple help page of the topic at the mouse CLICK."
@@ -171,25 +164,24 @@ If HIDE is non-nil, do not bring buffer to front."
 	(with-current-buffer (get-buffer-create (maplev--help-buffer))
 	  (maplev-help-setup config)
 	  ;; Push TOPIC onto history stack
+	  ;; The magic is done by 'maplev--process-item, which
+	  ;; is buffer-local and assigned maplev--help-process.
 	  (maplev-history--stack-process topic hide)))))
-
 
 (defun maplev--help-process (topic)
   "Display Maple help for TOPIC in `maplev--help-buffer'."
   (let ((process (maplev--cmaple-process)))
-    (maplev-cmaple--lock-access)
+    ;; (maplev-cmaple--lock-access)
     (set-process-filter process 'maplev--help-filter)
     (set-buffer (maplev--help-buffer))
     (setq mode-line-buffer-identification (format "%-12s" topic))
     (let (buffer-read-only)
       (delete-region (point-min) (point-max)))
-;;    (comint-simple-send process (concat "?" topic))
-    (comint-simple-send process (format "interface('screenheight=infinity'):\n?%s" topic))
-    (maplev-cmaple--send-end-notice process)))
-;;    ;; TODO this doesn't quite work, it echos in the cmaple buffer
-;;     (maplev-cmaple-direct (concat "interface('screenheight'="
-;;                                (number-to-string maplev-cmaple-screenheight)
-;;                                "):"))))
+    (comint-simple-send process (concat
+				 "interface('screenheight=infinity'):"
+				 ;; "kernelopts('printbytes'=false):"
+				 "help(\"" topic "\");"
+				 (string ?\0)))))
 
 (defun maplev--help-filter (process string)
   "Pipe the output of a help command into `maplev--help-buffer'.
@@ -202,21 +194,19 @@ PROCESS calls this filter.  STRING is the output."
           (narrow-to-region (point) (point))
           (insert string)
           (maplev--cleanup-buffer))
-        (goto-char (point-max))
-        (if (maplev-cmaple--ready process)
-            (maplev-help--cleanup-buffer))))))
+	(goto-char (point-max))
+	(save-excursion
+	  (beginning-of-line)
+	  (when (looking-at "(\\*\\*) ")
+	    (delete-region (point) (point-max))
+	    (maplev-help--cleanup-buffer)))))))
 
 (defun maplev-help--cleanup-buffer ()
   "Cleanup Maple help pages."
-  (if maplev-cmaple-echoes-flag
-      (save-excursion
-        (goto-char (point-min))
-        ;; remove the echoed 'interface(screenheight=...) and ?topic lines
-        (when (re-search-forward "^interface('screenheight=infinity'):$")
-          (forward-line)
-          (delete-region (point-min) (point)))
-        (if (re-search-forward "^\\?.+\n" nil t)
-            (delete-region (point-min) (point)))))
+  (save-excursion
+    (goto-char (point-min))
+    (when (looking-at "(\\*\\*) ")
+      (delete-region (point) (match-end 0))))
   (maplev-help-fontify-node)
   (set-buffer-modified-p nil))
 
@@ -280,7 +270,7 @@ If successful, return t, otherwise return nil."
 
 (defun maplev-help-toggle-standard-help (&optional arg)
   "Toggle whether to use the standard Maple help browser.
-With prefix argument ARG, use it if ARG is positive, otherwise 
+With prefix argument ARG, use it if ARG is positive, otherwise
 use the tty help browser, in an Emacs buffer."
   (interactive "P")
   (setq maplev-help-use-standard-flag
@@ -494,7 +484,7 @@ The title is the phrase following the function name."
 	    (goto-char end))
 	  (goto-char end)
 	  (when (re-search-backward "^See Also:?" nil 'move)
-	     (maplev--activate-hyperlinks (match-end 0) end))) 
+	     (maplev--activate-hyperlinks (match-end 0) end)))
 
 
 	;; Highlight section titles

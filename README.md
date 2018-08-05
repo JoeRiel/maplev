@@ -9,16 +9,26 @@ Maple is computer algebra system sold by [Maplesoft](http://www.maplesoft.com/).
 MapleV provides several major modes:
 
  - maplev-mode : edit Maple source files
- - maplev-mint : view the output of mint, a Maple syntax checker
+ - maplev-mint : view the output of mint, the Maple syntax checker
  - maplev-help : view Maple help pages
  - maplev-view : view archived Maple modules and procedures
- - maplev-cmaple : interface with a Maple engine
+ - maplev-cmaple : interact with a Maple engine
 
 Requirements
 ------------
 
-* [GNU Emacs](https://www.gnu.org/software/emacs/) 23.1+ (earlier versions may work)
-* [Maple](https://www.maplesoft.com) 5+
+* [GNU Emacs](https://www.gnu.org/software/emacs/) 25.1+
+* [Maple](https://www.maplesoft.com) 2016+
+
+
+To interact with the Maple engine, display help pages, and view
+library procedures,the *pmaple* binary executable is required; this is
+a change from pre 3.0 versions of MapleV which used cmaple, a part of
+the Maple distribution.  The pmaple binary can be compiled from source
+using Maple's OpenMaple package; pre-compiled executables for Linux
+and Windows are available at
+[github.com/JoeRiel](https://github.com/JoeRiel).
+
 
 Installation
 ------------

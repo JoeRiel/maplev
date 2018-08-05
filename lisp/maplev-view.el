@@ -13,7 +13,6 @@
   (defvar maplev-config-default)
   (defvar maplev--process-item)
   (defvar maplev-builtin-functions)
-  (defvar maplev-cmaple-echoes-flag)
   (defvar maplev-help-mode-map)
   (defvar maplev-mode-syntax-table))
 
@@ -22,9 +21,6 @@
 (declare-function maplev--cleanup-buffer "maplev-cmaple")
 (declare-function maplev--cmaple-process "maplev-cmaple")
 (declare-function maplev--ident-around-point "maplev-common")
-(declare-function maplev-cmaple--lock-access "maplev-cmaple")
-(declare-function maplev-cmaple--ready "maplev-cmaple")
-(declare-function maplev-cmaple--send-end-notice "maplev-cmaple")
 (declare-function maplev-history--stack-current "maplev-history")
 (declare-function maplev-history--stack-process "maplev-history")
 (declare-function maplev-history-clear "maplev-history")
@@ -37,16 +33,14 @@
 
 ;;{{{ mode map
 
-(defvar maplev-view-mode-map nil
-  "Keymap used in `maplev-view-mode'.")
-
-(unless maplev-view-mode-map
+(defvar maplev-view-mode-map
   (let ((map (copy-keymap maplev-help-mode-map)))
     ;; remove P (parent) key-binding
     (define-key map [?P] nil)
     ;; (define-key map [?v] 'maplev-view-toggle-view)
     (define-key map [?g] 'maplev-view-goto-source)
-    (setq maplev-view-mode-map map)))
+    map)
+  "Keymap used in `maplev-view-mode'.")
 
 ;;}}}
 ;;{{{ mode definition
@@ -122,15 +116,13 @@ If optional arg HIDE is non-nil do not display buffer."
 (defun maplev--proc-process (proc)
   "Display the Maple procedure PROC \(a string\) in `maplev--proc-buffer'."
   (let ((process (maplev--cmaple-process)))
-    (maplev-cmaple--lock-access)
     (set-process-filter process 'maplev-view-filter)
     (set-buffer (maplev--proc-buffer))
     (setq mode-line-buffer-identification (format "%-12s" proc))
     (let (buffer-read-only)
       (delete-region (point-min) (point-max))
       (goto-char (point-min)))
-    (comint-simple-send process (format "maplev:-Print(\"%s\"):" proc))
-    (maplev-cmaple--send-end-notice process)))
+    (comint-simple-send process (format "maplev:-Print(\"%s\"):%c" proc 0))))
 
 (defun maplev-view-filter (process string)
   "Pipe a Maple procedure listing into `maplev--proc-buffer'.
@@ -144,24 +136,22 @@ PROCESS calls this filter.  STRING is the Maple procedure."
           (insert string)
           (maplev--cleanup-buffer))
         (goto-char (point-max))
-        (if (maplev-cmaple--ready process)
-            (maplev-view-cleanup-buffer))))))
+	(beginning-of-line)
+	(if (not (looking-at "(\\*\\*) $"))
+	    (goto-char (point-max))
+	  (delete-region (point) (point-max))
+	  (maplev-view-cleanup-buffer))))))
 
 (defun maplev-view-cleanup-buffer ()
   "Cleanup Maple procedure listings."
   (save-excursion
-    (when maplev-cmaple-echoes-flag
-      (goto-char (point-min))
-      (if (re-search-forward "maplev:-Print(.+):\n" nil t)
-          (delete-region (match-beginning 0) (match-end 0))))
     ;; Delete multiple spaces.
     (goto-char (point-min))
     (while (re-search-forward "[ \t][ \t]+" nil t)
       (replace-match " "))
     ;; terminate with `;'
     (goto-char (point-max))
-    (skip-chars-backward " \t\n")
-;;    (insert ";")
+    (delete-region (line-beginning-position) (point-max))
     )
   (maplev-indent-buffer)
   (set-buffer-modified-p nil)
