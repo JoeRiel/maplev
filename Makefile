@@ -18,11 +18,11 @@ pkg := $(PKG)
 
 ifneq ($(wildcard .git),)
   GIT-BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
-  ifdef RELEASE
-    VERSION = $(RELEASE)
-  else
-    VERSION = $(subst release-,,$(shell git describe --match release\* --abbrev=0 HEAD))
-  endif
+  # ifdef RELEASE
+  #   VERSION = $(RELEASE)
+  # else
+  #   VERSION = $(subst release-,,$(shell git describe --match release\* --abbrev=0 HEAD))
+  # endif
 else
   GIT-BRANCH  = N/A
   VERSION     = N/A
@@ -263,6 +263,8 @@ $(hlp-installed): $(hlp)
 # }}}
 # {{{ package
 
+# Create Emacs package
+
 .PHONY: package
 
 PKG-VER := $(PKG)-$(VERSION)
@@ -274,6 +276,7 @@ package: $(PKG-DIR) $(TAR-FILE)
 $(TAR-FILE): $(PKG-DIR) $(EL-FILES)
 	tar --verbose --create --file $(TAR-FILE) --directory=/tmp $(PKG-VER)
 
+# copy files to $(PKG-DIR)
 $(PKG-DIR): dir README lisp/*.el doc/maplev.info
 	$(RM) -r $@
 	mkdir $@

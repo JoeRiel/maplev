@@ -1,6 +1,6 @@
 -*- org -*-
 
-* 3.00
+* 3.0
 ** Use compiled binary (pmaple) to communicate with maple
 ** Add maplev-config; remove maplev-executable-alist
 ** Improve interactive capabilities of mint-mode
