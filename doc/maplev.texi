@@ -646,20 +646,29 @@ effects.  @xref{Preventing indentation}, for an example.
 @cindex Template, procedure
 @cindex Assignment operator, template
 
-@kindex C-c C-p
 @kindex C-;
 
 @findex maplev-template-proc
 @findex maplev-insert-assignment-operator
 
 @table @kbd
-@item C-c C-p
+@item C-c C-t p
+@kindex C-c C-t p
 Insert a procedure template (@code{maplev-template-proc}).  
 The user is queried for the name, arguments, and a description of the procedure.
 Any of the entries can be left blank.  If the name is blank then an
 anonymous procedure is inserted, otherwise an assignment is inserted
 with the procedure assigned to the given name.  Backquotes are added
 automatically to procedure names if required by Maple.
+
+@item C-c C-t m
+@kindex C-c C-t m
+Insert a module template (@code{maplev-template-module}).
+Similar to @code{maplev-template-proc} but inserts a module.
+
+@item C-c C-t u
+@kindex C-c C-t C-u
+Insert a @code{use} template (@code{maplev-template-use}).
 
 @item C-;
 Insert an assignment operator at the end of the current line
