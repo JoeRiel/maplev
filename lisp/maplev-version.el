@@ -1,6 +1,6 @@
 ;;; maplev-version.el --- auto-generated file, do not edit.
-(defun maplev-release () "Return maplev-release." "2.37")
-(defun maplev-git-version () "Return maplev-git-version." "release-2.36-59-g142c03")
+(defun maplev-release () "Return maplev-release." "3.00")
+(defun maplev-git-version () "Return maplev-git-version." "release-2.36-252-gba2469.dirty")
 (provide 'maplev-version)
 ;; Local Variables:
 ;; version-control: never
