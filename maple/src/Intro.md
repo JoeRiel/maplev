@@ -25,7 +25,7 @@
 ##- First, install the Maple-side of this package.
 ##  Use either the MapleCloud install command, or execute the following command.
 ##
-##>(noexecute) PackageTools:-Install(5079594903273472,'overwrite'):
+##>(noexecute) PackageTools:-Install(5156847439839232,'overwrite'):
 ##
 ##- To install the **pmaple** binary executable,
 ##  the backup doc files (the primary documentation is the info file
