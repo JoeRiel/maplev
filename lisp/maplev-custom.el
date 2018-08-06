@@ -57,9 +57,20 @@
 ;;{{{ Configurable options
 
 (defcustom maplev-config-default (maplev-config-class "maplev-config")
-  "This `maplev-config-class' object holds default values for the variable `maplev-config'."
+  "This variable holds default values for the variable `maplev-config';
+both are objects of class `maplev-config-class'."
+  :type 'object
   :group 'maplev
-  :type 'object)
+  :link '(custom-manual "(maplev)Configuration"))
+
+(defcustom maplev-config-auto-assign t
+  "Non-nil auto-assigns some slots of the variable `maplev-config'.
+When this variable is non-nil, nil values in slots :mapledir,
+:bindir, and :mint of the buffer-local variable `maplev-config'
+are automatically assigned by the function `maplev-config',
+assuming that the :maple slot is properly assigned and usable."
+  :type 'boolean
+  :group 'maplev)
 
 ;;{{{ (*) comments
 
@@ -100,15 +111,6 @@ either `maplev-add-declaration-leading-comma' or
 `maplev-add-declaration-trailing-comma'."
   :type 'boolean
   :group 'maplev-declarations)
-
-(defcustom maplev-add-declaration-function 'maplev-add-declaration-trailing-comma
-  "Selects the function that adds variables to a declaration."
-  :type '(radio
-          (function-item :doc "declarations on one line" maplev-add-declaration-one-line)
-          (function-item :doc "declarations on separate lines, with leading comma" maplev-add-declaration-leading-comma)
-          (function-item :doc "declarations on separate lines, with trailing comma" maplev-add-declaration-trailing-comma))
-  :group 'maplev-declarations)
-
 
 ;;}}}
 ;;{{{ (*) indentation
@@ -192,17 +194,6 @@ double quote.  Procbody, alas, does not handle a double quote."
   :group 'maplev-templates)
 
 ;;}}}
-;;{{{ (*) completion
-
-(defcustom maplev-completion-longdelim-p nil
-  "If non-nil use the long delimiter when completing a Maple control structure.
-For example, if non-nil, a `do' loop is completed with `end do',
-otherwise it is completed with `od'.  If the maple release is less than 6
-than the long delimiter is never used."
-  :type 'boolean
-  :group 'maplev-completions)
-
-;;}}}
 ;;{{{ (*) miscellaneous
 
 ;; Leading commas
@@ -213,20 +204,6 @@ Currently this only determines whether advice for `fixup-whitespace'
 is activated when `maplev-mode' is executed."
   :type 'boolean
   :group 'maplev-misc)
-
-;; Abbrev mode
-
-(defcustom maplev-initial-abbrev-mode-flag nil
-  "Non-nil means initially enable function `abbrev-mode' in a Maple buffer."
-  :type 'boolean
-  :group 'maplev-misc)
-
-(defcustom maplev-expand-abbrevs-in-comments-and-strings-flag nil
-  "Non-nil means expand Maple abbreviations in comments and strings.
-Nil means do not expand in either."
-  :type 'boolean
-  :group 'maplev-misc
-  :group 'maplev-comments)
 
 (defcustom maplev-include-file-other-window-flag t
   "Non-nil means open an include file in the other window.
@@ -335,41 +312,32 @@ See the documentation for `align-exclude-rules-list' for more info."
   :type 'boolean
   :group 'maplev-misc)
 
-(defcustom maplev-cmaple-end-notice "END_OF_OUTPUT"
-  "Message used to indicate the end of Maple output."
-  :type 'string
-  :group 'maplev-misc)
-
-(defcustom maplev-cmaple-echoes-flag
-  (not (string-match "windows-nt\\|ms-dos" (symbol-name system-type)))
-  "Non-nil means the process echoes."
-  :type 'boolean
-  :group 'maplev-buffer)
-
 ;;}}}
 ;;{{{ (*) maple setup
 
 (defcustom maplev-startup-directory nil
   "If non-nil, change to this directory before running Maple.
 Otherwise use the default directory of `maplev-cmaple-buffer'."
-  :type '(choice string (const :tag "default" nil))
+  :type '(choice string (const :tag "Use default" nil))
   :group 'maplev-executables)
 
-(defcustom maplev-cmaple-prompt "(**) "
-  "String inserted as prompt in Maple buffer."
-  :type 'string
+(defcustom maplev-use-new-language-features nil
+  "If non-nil, use the new language features of Maple.
+The features enabled are release dependent."
+  :type 'boolean
   :group 'maplev-executables)
 
 ;;}}}
 ;;{{{ (*) help
 
 (defcustom maplev-help-port 3141
-  "Port number used to communicate to a Maple help server."
+  "Port number used to communicate to a Maple help server.
+Only used if `maplev-help-use-standard-flag' is non-nil."
   :type 'integer
   :group 'maplev-help)
 
 (defcustom maplev-help-use-standard-flag nil
-  "True means use standard help, if available.
+  "Non-nil means use standard help, if available.
 For this to work, Standard Maple must be running Help:-Server,
 which is an export of the Help package."
   :type 'boolean

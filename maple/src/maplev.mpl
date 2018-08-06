@@ -1,5 +1,5 @@
-#LINK ../Makefile
-#LINK .maplev
+#LINK ../../Makefile
+#LINK ../.maplev
 
 ##MODULE(help) maplev
 ##HALFLINE module used with Emacs maplev-mode
@@ -14,29 +14,15 @@
 unprotect('maplev'):
 maplev := module()
 
-export GetSource, Install, Print, Setup;
+export Copy, EmacsInitialization, GetSource, Print, Setup, Unpack;
 
+$include <Copy.mm>
+$include <EmacsInitialization.mm>
 $include <GetSource.mm>
-$include <Install.mm>
 $include <Print.mm>
+$include <Setup.mm>
+$include <Unpack.mm>
 
-##PROCEDURE maplev[Setup]
-##DESCRIPTION
-##- The `Setup` command calls "kernelopts" and "interface"
-##  to assign the appropriate settings for interfacing with
-##  the Emacs **maplev-mode**.
-
-    Setup := proc()
-        kernelopts('printbytes' = false);
-        interface('prettyprint'    = 1
-                  , 'verboseproc'  = 2
-                  , 'errorbreak'   = 0
-                  , 'warnlevel'    = 2
-                  , 'errorcursor'  = false
-                  , 'screenheight' = infinity
-                 );
-        NULL;
-    end proc;
 ##
 end module:
 

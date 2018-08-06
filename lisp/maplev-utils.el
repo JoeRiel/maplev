@@ -9,6 +9,7 @@
 
 (require 'maplev-re)
 (require 'compile)
+(require 'subr-x)
 
 (eval-when-compile
   (defvar mouse-selection-click-count)
@@ -57,12 +58,28 @@ regardless of where you click."
 (defun maplev-add-maple-to-compilation ()
   "Add the symbol \`maple to `compilation-error-regexp-alist'
 and the `maplev--compile-error-re' regexp to 'compilation-error-regexp-alist'.
-This font-locks the compilation buffer when using the `compile' command to 
+This font-locks the compilation buffer when using the `compile' command to
 build Maple libraries.  Requires customizing `compile-command'."
   (interactive)
   (unless (member 'maple compilation-error-regexp-alist)
     (add-to-list 'compilation-error-regexp-alist 'maple)
     (add-to-list 'compilation-error-regexp-alist-alist `(maple ,maplev--compile-error-re 2 1 nil))))
+
+(defun maplev-split-shell-option-string (opt)
+  "Convert OPT, a string of command line options, into a list of options.
+Close up space between option and argument.  
+For example, \"-a -w 100\" becomes \(\"-a\" \"-w100\"\)."
+  (let ((opt (string-trim opt)))
+    (if (and 
+	 (> (length opt) 0)
+	 (/= (aref opt 0) ?-))
+	(error "option string does not have leading hypen: %s" opt))
+    (let ((opts (split-string (string-trim opt) "\\(^\\| +\\)-" t)))
+      (mapcar (lambda (s) 
+		(concat "-" (if (string-match "^.\\( +\\)[^ ]" s)
+				(replace-match "" t t s 1)
+			      s)))
+	      opts))))
 
 
 (provide 'maplev-utils)

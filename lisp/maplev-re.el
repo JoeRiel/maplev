@@ -20,9 +20,9 @@
 
   (defconst maplev--quoted-name-re  "`[^`\n\\\\]*\\(?:\\\\.[^`\n\\\\]*\\)*`"
     "Regular expression for a Maple quoted name.
-It correctly handles escaped back-quotes in a name, but not doubled
-back-quotes.  It intentionally fails for the exceptional case where a
-name has a newline character.")
+It correctly handles escaped back-quotes in a name, but not
+doubled back-quotes.  It intentionally fails for the exceptional
+case where a name has a newline character.")
 
   (defconst maplev--symbol-re (concat "\\(?:"
 				      maplev--simple-name-re
@@ -95,8 +95,9 @@ The second group corresponds to the name of the defun.")
     (concat "^\\(" maplev--name-re "\\)[ \t\n]*:=[ \t\n]*"
 	    "\\(?:" maplev--comment-re "\\)?"
 	    "[ \t\f\n]*" maplev--defun-re)
-    "Regular expression for top level Maple defun assignments.
-The first group corresponds to the name of the defun.")
+    "Regular expression for top-level Maple defun assignments.
+The first group corresponds to the name of the defun.
+This requires that the procedure is flush-left.")
 
 
   (defconst maplev--defun-end-re

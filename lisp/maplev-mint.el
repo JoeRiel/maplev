@@ -8,13 +8,17 @@
 
 (require 'eieio)
 (require 'maplev-config)
+(require 'maplev-custom)
 (require 'maplev-re)
 
 (eval-when-compile
   (defvar maplev-add-declaration-function)
   (defvar maplev-alphabetize-declarations-p)
   (defvar maplev-var-declaration-symbol)
-  (defvar maplev-variable-spacing))
+  (defvar maplev-variable-spacing)
+  (defvar maplev-mode-syntax-table)
+  (defvar maplev-quote-not-string-syntax-table)
+  (defvar maplev-symbol-syntax-table))
 
 (declare-function event-point "maplev-common")
 (declare-function event-window "maplev-common")
@@ -23,6 +27,7 @@
 (declare-function maplev-beginning-of-defun "maplev-common")
 (declare-function maplev-current-defun "maplev-common")
 (declare-function maplev-find-include-file "maplev")
+(declare-function maplev-forward-expr "maplev")
 (declare-function maplev-ident-around-point-interactive "maplev-common")
 (declare-function maplev-indent-line "maplev-indent")
 (declare-function maplev-indent-newline "maplev")
@@ -30,19 +35,19 @@
 
 ;;{{{ customizable variables
 
-(defcustom maplev-mint-coding-system 'undecided-dos
-  "Coding system used by Mint.  See `coding-system-for-read' for details."
-  ;; TBD: why is this customizable?
-  :type '(choice (const undecided-dos) (const raw-text-unix) (symbol :tag "other"))
-  :group 'maplev-mint)
-
-(defcustom maplev-mint-query t
+(defcustom maplev-mint-query-flag t
   "Non-nil means query before correcting."
   :type 'boolean
   :group 'maplev-mint)
 
-(defcustom maplev-mint-process-all-vars nil
-  "Non-nil means process all variables in one step."
+(defcustom maplev-mint-rerun-flag nil
+  "Non-nil means rerun mint after each operation."
+  :type 'boolean
+  :group 'maplev-mint)
+
+(defcustom maplev-mint-save-rerun-flag nil
+  "Non-nil means save a source buffer when using mint to modify it.
+This is only used if `maplev-mint-rerun-flag' is non-nil."
   :type 'boolean
   :group 'maplev-mint)
 
@@ -64,24 +69,20 @@
 ;;}}}
 ;;{{{ syntax table
 
-(defvar maplev-mint-mode-syntax-table nil
-  "Syntax table used in Maple mint buffer.")
-(unless maplev-mint-mode-syntax-table
+(defvar maplev-mint-mode-syntax-table
   (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?[  "w"  table)
-                         (modify-syntax-entry ?]  "w"  table)
+    (modify-syntax-entry ?\[ "w"  table)
+    (modify-syntax-entry ?\] "w"  table)
     (modify-syntax-entry ?_  "w"  table)
     (modify-syntax-entry ?/  "w"  table)
     (modify-syntax-entry ?\` "\"" table) ; string quotes
-    (setq maplev-mint-mode-syntax-table table)))
+    table)
+  "Syntax table used in Maple mint buffer.")
 
 ;;}}}
 ;;{{{ mode map
 
-(defvar maplev-mint-mode-map nil
-  "Keymap used in Mint mode.")
-
-(unless maplev-mint-mode-map
+(defvar maplev-mint-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [(space)]                     'scroll-up)
     (define-key map [(backspace)]                 'scroll-down)
@@ -91,8 +92,10 @@
     (define-key map [?s]                          'isearch-forward)
     (define-key map [?r]                          'isearch-backward)
     (define-key map [(mouse-1)]                   'maplev-mint-click)
+    (define-key map [(mouse-3)]                   'maplev-mint-right-click)
     (define-key map [(control c) (control c)]     'maplev-mint-handler)
-    (setq maplev-mint-mode-map map)))
+    map)
+  "Keymap used in Mint mode.")
 
 ;;}}}
 ;;{{{ menu
@@ -115,12 +118,16 @@
   (setq mode-name "Mint"
 	buffer-read-only t)
   (make-local-variable 'maplev-mint--code-buffer)
-  (maplev-mint-fontify-buffer))
+  (set (make-local-variable 'paragraph-start) "[^ ]")
+  (set (make-local-variable 'paragraph-separate) paragraph-start)
+  (maplev-mint-fontify-buffer)
+  (setq truncate-lines nil))
 
 (defun maplev-mint-setup (code-buffer config)
   "Unless already assigned, set `major-mode' to `maplev-mint-mode'.
 Set `maplev-mint--code-buffer' to CODE-BUFFER, the buffer that
-contains the source code.  Set `maplev-config' to CONFIG."
+contains the source code.  Set buffer-local variable
+`maplev-config' to CONFIG."
   (unless (eq major-mode 'maple-mint-mode)
     (maplev-mint-mode))
   (setq maplev-config config
@@ -134,9 +141,9 @@ contains the source code.  Set `maplev-config' to CONFIG."
 If FILE is nil, use buffer `maplev-mint--code-buffer'.
 Pop up the buffer, move to either `point-min', if FILE is non-nil,
 or `maplev-mint--code-beginning' otherwise,
-and move forward L lines and C columns."
+and move forward LINE lines and CHAR columns."
   (switch-to-buffer-other-window (if file (find-file-noselect file)
-                   maplev-mint--code-buffer))
+				   maplev-mint--code-buffer))
   (goto-char (if file (point-min)  maplev-mint--code-beginning))
   (if (> line 0) (forward-line line))
   (forward-char char)
@@ -243,7 +250,7 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
 (defun maplev-mint--goto-include-file (pos)
   "Open include file corresponding to link at POS in mint buffer."
   (goto-char pos)
-  (when (re-search-backward "included: ")
+  (when (search-backward "included: ")
     (goto-char (match-end 0))
     (when (looking-at ".*$")
       (let ((file (maplev-find-include-file 
@@ -257,19 +264,31 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
   "Move to position in source buffer corresponding to link at POS in mint buffer.
 This position is after the formal parameter list of the operator,
 procedure, or module."
+  (maplev-mint--goto-source-and-get-region pos))
 
-  ;; find the line number of the source buffer at which the defun starts
-  (goto-char pos)
-  (let (line file class)
+(defun maplev-mint--goto-source-and-get-region (pos)
+  "Move to the source buffer and return a cons cell of the region
+in the source buffer of the proc/module referenced at POS in the
+mint buffer.  Point in the source buffer is set to just after the
+formal parameter list."
+  (let (beg class end file line toline)
     (save-excursion
+      (goto-char pos)
       (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
       ;; Assign class Procedure, Operator, or Module
       (setq class (match-string-no-properties 3))
       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
       (setq line (1- (string-to-number (match-string-no-properties 1)))
-	    file (maplev-mint-get-source-file))
-      ;; move point to the beginning of that line in the source
-      (maplev-mint--goto-source-pos line 0 file))
+	    file (maplev-mint-get-source-file)
+	    toline (if (re-search-forward "to\\s-*\\([0-9]+\\)" (line-end-position) 'move)
+		       (string-to-number (match-string-no-properties 1))
+		     (1+ line))))
+    ;; move point to the beginning of that line in the source
+    (maplev-mint--goto-source-pos line 0 file)
+    (save-excursion
+      (setq beg (point))
+      (forward-line (- toline line))
+      (setq end (point)))
     ;; Use class to position point after formal parameter list
     (cond 
      ((string= class "Procedure")
@@ -282,7 +301,8 @@ procedure, or module."
 	(goto-char (maplev--scan-lists 1))))
      ((string= class "Operator")
       (when (re-search-forward " *->" (line-end-position) t)
-	(goto-char (match-beginning 0)))))))
+	(goto-char (match-beginning 0)))))
+    (cons beg end)))
 
 (defun maplev-mint--goto-source-line (pos)
   "Goto the location in source specified by the line number in the Mint buffer.
@@ -357,32 +377,32 @@ REPLACE is an alist with elements \(OLD . NEW\)."
   "Regexp used to match the argument list of procedures in Mint output.")
 
 (defconst maplev-mint-fontify-alist
-  '(("\\(^on line[ \t]*[0-9]+:\\)" maplev-mint-note-face)
+  '(("^\\(on line[ \t]*[0-9]+:\\)" maplev-mint-note-face)
     ("^[ \t]*\\(\\^.*$\\)" maplev-mint-error-face 'error)
     ("^\\(?:Nested \\)?\\(?:Procedure\\|Operator\\|Module\\)[ ]*\\([^(]*\\)" maplev-mint-link-face 'proc)
     ("^\\(?:Nested \\)?Anonymous \\(?:Procedure\\|Operator\\|Module\\)[ ]*\\(\\(?:proc\\|module\\) *([^)]*)\\)" maplev-mint-link-face 'proc)
     ("^This source file is included: \\(.*\\)" maplev-mint-link-face 'include-file)
-    ("These parameters were never used\\(?: explicitly\\)?:" maplev-mint-warning-face 'unused-arg t)
-    ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
-    ("These local variables were not declared explicitly:" maplev-mint-warning-face 'undecl-local t)
+    ("These exported variables were never used:" maplev-mint-warning-face 'unused-export t)
+    ("These global variables were declared, but never used:" maplev-mint-warning-face 'unused-global t)
     ("These local variables were never used:" maplev-mint-warning-face 'unused-local t)
-    ;;("These local variables were assigned a value, but otherwise unused:" ... )
+    ("These local variables were not declared explicitly:" maplev-mint-warning-face 'undecl-local t)
+    ("These names appeared more than once in the parameter list:" maplev-mint-warning-face 'repeat-arg t)
+    ("These names were declared as both a local variable and a parameter:" maplev-mint-warning-face 'local-and-param t)
     ("These names were declared more than once as a local variable:" maplev-mint-warning-face 'repeat-local t)
+    ("These names were used as global names but the names don't start with _:" maplev-mint-warning-face 'undecl-global t)
     ("These names were used as global names but were not declared:" maplev-mint-warning-face 'undecl-global t)
+    ("These parameters were never used\\(?: explicitly\\)?:" maplev-mint-warning-face 'unused-arg t)
+    ;;("These local variables were assigned a value, but otherwise unused:" ... )
     ("\\(on line +[0-9]+\\)" maplev-mint-link-face 'goto-line)
    ; ("\\(on lines +[0-9]+\\s-+to\\s-++[0-9]+\\s-+of\\s-+.*\\)" maplev-mint-note-face 'goto-line)
-    ;; Could we make the following optional?
-    ;; ("Global names used in this procedure:"
-    ;;  1 maplev-mint-warning-face 'undecl-global t)
     )
   "Alist for fontification in a Mint buffer.
-Each element is a list of the form \(REGEXP FACE PROP VAR\),
-where REGEXP is to be matched and FACE is a face.  Optional third
-element PROP is a symbol used for marking the category of SUBEXP.
-Optional fourth element VAR is non-nil if REGEXP is catenated
-with `maplev-mint-variables-re'.  The text that matches the first
-group of the full regular expression is given face property face
-and text property PROP.")
+Each element is a list of the form \(REGEXP FACE PROP VAR\):
+- REGEXP is to be matched;
+- FACE is a face applied to the first regexp group;
+- PROP is a symbol applied as a text property to the first regexp group.
+- VAR is optional, if non-nil REGEXP is catenated with `maplev-mint-variables-re';
+  doing so causes the following variables to be in a regexp group.")
 
 (defun maplev-mint-fontify-buffer ()
   "Fontify the mint buffer.  Does not use font-lock mode."
@@ -399,25 +419,20 @@ and text property PROP.")
               (end (match-end 1)))
           ;; Here we are working with variables whose values are symbols
           ;; with a face property.
-          (put-text-property beg end 'face (eval (nth 1 mel)))
+	  (let ((prop (nth 1 mel)))
+	    (put-text-property beg end 'face (eval prop))
+	    (when (eq prop 'maplev-mint-link-face)
+	      (put-text-property beg end 'mouse-face 'highlight)
+	      (put-text-property beg end 'help-echo "goto source")))
           (when (nth 2 mel)
-            ;; We use a text property `maplev-mint' to store in the text
-            ;; what kind of info we have from Mint.
+            ;; Embed mint action as value of text property `maplev-mint'
             (put-text-property beg end 'maplev-mint (eval (nth 2 mel)))
-            (if (and (nth 3 mel)
-                     (not maplev-mint-process-all-vars)) ; then we do highlighting word-wise
+            (if (nth 3 mel)
                 (save-excursion
                   (goto-char beg)
-                  ;; Slightly simpler algorithm than the one used by
-                  ;; maplev--ident-around-point to pick up the word
-                  ;; where point is.  Does it matter for highlighting?
-                  ;;                   (while (re-search-forward "\\<\\w+\\>" end t)
-                  ;;                     (put-text-property (match-beginning 0) (match-end 0)
-                  ;;                                        'mouse-face 'highlight)))
-                  (while (re-search-forward "\\<\\(\\w+\\)\\>" end t)
+                  (while (re-search-forward "\\_<\\(\\w+\\)\\_>\\(::[^ \n]+\\)?\\( := [^ \n]*\\)?" end t)
                     (put-text-property (match-beginning 1) (match-end 1)
-                                       'mouse-face 'highlight)))
-              (put-text-property beg end 'mouse-face 'highlight)))))
+                                       'mouse-face 'highlight)))))))
       (setq mlist (cdr mlist)))
     (set-buffer-modified-p nil)))
 
@@ -426,8 +441,9 @@ and text property PROP.")
 
 (defun maplev-mint-query (form &rest vars)
   "Return t if correction suggested by mint should be made.
-FORM and VARS are used for `y-or-n-p' query."
-  (or (not maplev-mint-query)
+FORM and VARS are used for `y-or-n-p' query.  Return t if
+`maplev-mint-query-flag' is nil."
+  (or (not maplev-mint-query-flag)
       (y-or-n-p (apply 'format form vars))))
 
 (defun maplev-mint-click (click)
@@ -436,86 +452,144 @@ FORM and VARS are used for `y-or-n-p' query."
   (set-buffer (window-buffer (select-window (event-window click))))
   (maplev-mint-handler (event-point click)))
 
-(defun maplev-mint-handler (pos)
+(defun maplev-mint-right-click (click)
+  "Move point to CLICK."
+  (interactive "e")
+  (set-buffer (window-buffer (select-window (event-window click))))
+  (maplev-mint-handler (event-point click) t))
+
+(defun maplev-unpack-list-of-one (lst)
+  "Return the contents of LST if it has one element, otherwise return LST."
+  (if (= 1 (length lst))
+      (car lst)
+    lst))
+
+(defun maplev-mint-handler (pos &optional all-vars)
   "Handle mint output at position POS.
-When called interactively, POS is position where point is."
+When called interactively, POS is position where point is.
+ALL-VARS non-nil means handle all variables, not just the one clicked on."
   (interactive "d")
-  (let ((prop (get-text-property pos 'maplev-mint)))
-    (if prop
-        (let (string vars)
-          (if maplev-mint-process-all-vars
-              (let ((str (buffer-substring-no-properties
-                          (next-single-property-change pos 'maplev-mint)
-                          (previous-single-property-change (1+ pos) 'maplev-mint))))
-                ;; string is like str, but with maplev-variable-spacing
-                ;; vars is a comma separated list of names extracted from str
-                (while (and (not (string= str ""))
-                            (string-match "\\<\\w+\\>" str))
-                  (setq vars (cons (match-string 0 str) vars)
-                        string (if string
-                                   (concat string ","
-                                           (make-string maplev-variable-spacing ?\ )
-                                           (match-string 0 str))
-                                 (match-string 0 str))
-                        str (substring str (match-end 0)))))
-            (setq string (save-excursion
-                           (goto-char pos)
-                           (maplev--ident-around-point))
-                  vars (list string)))
-          ;;
-          (cond
-	   ;; Jump to an included file
-	   ((eq prop 'include-file)
-	    (maplev-mint--goto-include-file pos))
-	   ;;
-           ;; Jump to the start of a procedure in the source.
-           ((eq prop 'proc)
-            (maplev-mint--goto-source-proc pos))
-           ;;
-           ;; Jump to the location of an error in the source code.
-           ((eq prop 'error)
-            (maplev-mint--goto-error pos))
-           ;;
-           ;; Remove unused args from argument list.
-           ((eq prop 'unused-arg)
-            (when (maplev-mint-query "Delete `%s' from argument list? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-delete-vars (maplev--scan-lists -1) (point) vars)))
-           ;;
-           ;; Remove unused local variables from local declaration.
-           ((eq prop 'unused-local)
-            (when (maplev-mint-query "Delete `%s' from local statement? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-delete-declaration "local" vars)))
-           ;;
-           ;; Remove repeated args from argument list.
-           ((eq prop 'repeat-arg)
-            (when (maplev-mint-query "Remove duplicate `%s' from parameters? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-delete-vars (maplev--scan-lists -1) (point) vars 1)))
-           ;;
-           ;; Remove repeated local variables from local declaration.
-           ((eq prop 'repeat-local)
-            (when (maplev-mint-query "Remove duplicate `%s' from local statement? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-delete-declaration "local" vars 1)))
-           ;;
-           ;; Declaration of undeclared locals variables.
-           ((eq prop 'undecl-local)
-            (when (maplev-mint-query "Add `%s' to local statement? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-add-declaration "local" string)))
-           ;;
-           ;; Declaration of undeclared global variables.
-           ((eq prop 'undecl-global)
-            (when (maplev-mint-query "Add `%s' to global statement? " string)
-              (maplev-mint--goto-source-proc pos)
-              (maplev-add-declaration "global" string)))
-           ;;
-           ;; Goto line
-           ((eq prop 'goto-line)
-            (maplev-mint--goto-source-line pos))
-           )))))
+  (let ((prop (get-text-property pos 'maplev-mint))
+	(code-buffer maplev-mint--code-buffer))
+    (when prop
+      (let* ((vars (if all-vars
+		      (split-string (buffer-substring-no-properties
+				     (next-single-property-change pos 'maplev-mint)
+				     (previous-single-property-change (1+ pos) 'maplev-mint))
+				    ", " t " +")
+		    (list (save-excursion
+			    (goto-char pos)
+			    (maplev--ident-around-point)))))
+	     (arg (if (= 1 (length vars)) (car vars) vars)))
+	(cond
+	 ;; Jump to an included file
+	 ((eq prop 'include-file)
+	  (maplev-mint--goto-include-file pos))
+	 ;;
+	 ;; Jump to the start of a procedure in the source.
+	 ((eq prop 'proc)
+	  (maplev-mint--goto-source-proc pos))
+	 ;;
+	 ;; Jump to the location of an error in the source code.
+	 ((eq prop 'error)
+	  (maplev-mint--goto-error pos))
+	 ;;
+	 ;; Remove unused args from argument list.
+	 ((eq prop 'unused-arg)
+	  (when (maplev-mint-query "Delete `%s' from argument list? " arg)
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-delete-vars vars (maplev--scan-lists -1) (point))))
+	 ;;
+	 ;; Remove unused local variables from local declaration.
+	 ((eq prop 'unused-local)
+	  (when (maplev-mint-query "Delete `%s' from local statements? " arg)
+	    (maplev-delete-declarations "local" vars (maplev-mint--goto-source-and-get-region pos))))
+	 ;;
+	 ;; Remove unused exported variables from export declaration.
+	 ((eq prop 'unused-export)
+	  (when (maplev-mint-query "Delete `%s' from export statements? " arg)
+	    (maplev-delete-declarations "export" vars (maplev-mint--goto-source-and-get-region pos))))
+	 ;;
+	 ;; Remove unused global variables from global declaration.
+	 ((eq prop 'unused-global)
+	  (when (maplev-mint-query "Delete `%s' from global statements? " arg)
+	    (maplev-delete-declarations "global" vars (maplev-mint--goto-source-and-get-region pos))))
+	 ;;
+	 ;; Remove repeated args from argument list.
+	 ((eq prop 'repeat-arg)
+	  (when (maplev-mint-query "Remove duplicates of `%s' from parameters? " arg)
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-delete-vars vars (maplev--scan-lists -1) (point) 1)))
+	 ;;
+	 ;; Remove repeated local variables from local declaration.
+	 ((eq prop 'repeat-local)
+	  (when (maplev-mint-query "Remove duplicates of `%s' from local statements? " arg)
+	    (maplev-delete-declarations "local" vars (maplev-mint--goto-source-and-get-region pos))
+	    (maplev-add-declaration "local" vars)))
+	 ;;
+	 ;; Declaration of undeclared locals variables.
+	 ((eq prop 'undecl-local)
+	  (let ((action (x-popup-dialog t `(,(if (stringp arg)
+						 (format "Undeclared variable: %s" arg)
+					       "All undeclared variables")
+					    ("Declare as local" . "local")
+					    ("Declare as export" . "export")))))
+	    (maplev-mint--goto-source-proc pos)
+	    (maplev-add-declaration action vars)))
+	 ;;
+	 ;; Declaration of undeclared global variables.
+	 ((eq prop 'undecl-global)
+	  (let ((region (maplev-mint--goto-source-and-get-region pos)))
+	    (maplev-mint-query-undeclared-globals vars (car region) (cdr region))))
+	  ;; (let ((action (x-popup-dialog t `(,(if (stringp arg)
+	  ;; 					 (format "Undeclared variable: %s" arg)
+	  ;; 				       "All undeclared variables")
+	  ;; 				    ("Quote" . "quote")
+	  ;; 				    ("Declare as global" . "global")
+	  ;; 				    ("Declare as local" . "local")))))
+	  ;;   (if (string= action "quote")
+	  ;; 	(let* ((region (maplev-mint--goto-source-and-get-region pos))
+	  ;; 	       (window (get-buffer-window))
+	  ;; 	       (edges (window-absolute-body-pixel-edges window))
+	  ;; 	       (position (pos-visible-in-window-p nil window t)))
+	  ;; 	  (unless position
+	  ;; 	    (recenter 0)
+	  ;; 	    (setq position (pos-visible-in-window-p nil window t))
+	  ;; 	    (unless position
+	  ;; 	      (error "position is not visible")))
+	  ;; 	  ;; move mouse into source-buffer window so that 
+	  ;; 	  ;; the subsequent keyboard input is into that buffer
+	  ;; 	  (set-mouse-absolute-pixel-position
+	  ;; 	   (+ (nth 0 edges) (nth 0 position))
+	  ;; 	   (+ (nth 1 edges) (nth 1 position)))
+	  ;; 	  (maplev-mint-quote-vars vars (car region) (cdr region)))
+	  ;;     (maplev-mint--goto-source-proc pos)
+	  ;;     (maplev-add-declaration action vars))))
+	 ;;
+	 ;; Declared as both local variable and parameter.
+	 ((eq prop 'local-and-param)
+	  (let ((action (x-popup-dialog t `(,(format "Declared as local and parameter: %s" arg)
+					    ("Remove local declaration" . "local")
+					    ("Remove parameter" . "param")))))
+	    (if (string= action "local")
+		(maplev-delete-declarations "local" vars (maplev-mint--goto-source-and-get-region pos))
+	      (maplev-mint--goto-source-proc pos)
+	      (maplev-delete-vars vars (maplev--scan-lists -1) (point)))))
+	 ;;
+	 ;;
+	 ;; Goto line
+	 ((eq prop 'goto-line)
+	  (maplev-mint--goto-source-line pos)))
+
+	;; rerun mint
+	(when maplev-mint-rerun-flag
+	  (unless maplev-mint--code-buffer
+	    (and maplev-mint-save-rerun-flag
+		 (buffer-modified-p)
+		 ;;(y-or-n-p "save buffer ")
+		 (save-buffer)))
+	  (set-buffer code-buffer)
+	  (maplev-mint-rerun))))))
 
 ;;}}}
 ;;{{{ regions
@@ -526,7 +600,7 @@ Return exit code of mint."
   (interactive "r")
   (let ((code-buffer (current-buffer))
         (code-window (get-buffer-window (current-buffer)))
-        (coding-system-for-read maplev-mint-coding-system)
+        (coding-system-for-read 'undecided-unix)
         (mint-buffer "*Mint*")
 	(config maplev-config)
         status eoi lines errpos)
@@ -548,17 +622,32 @@ Return exit code of mint."
       ;; remember end-of-input
       (setq eoi (point-max))
       ;; Run Mint
-      (setq status (funcall #'call-process-region
-			    (point-min) (point-max)
-			    (slot-value config 'mint) 
-			    nil ; do not delete
-			    mint-buffer
-			    nil  ; do not redisplay
-			    (mapconcat 'identity
-				       (list "-q"
-					     (if syntax-only "-S")
-					     (maplev-get-option-with-include config :mint-options))
-				       " ")))
+      ;; To get this to work on Windows, the mint options passed to
+      ;; call-process-region must be a sequence of strings, one string
+      ;; for each option (including an option argument).  Linux works
+      ;; with that format, or with the options catenated into a single string
+      ;; (separated by spaces, of course).  So am using the format that
+      ;; works on both platforms.
+      
+      (let ((mint (slot-value config 'mint))
+	    ;; N.B. mint occasionally generates nonsense output when screen width (-w) is large.
+	    (mint-args (append (maplev-get-option-with-include config 'mint-options "-w5000")))
+	    (process-environment (if maplev-use-new-language-features
+				     (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
+				   process-environment)))
+	(unless mint
+	  (error "The slot-value of :mint in maplev-config is not assigned"))
+	(when (and syntax-only (not (member "-S" mint-args)))
+	  (setq mint-args (cons "-S" mint-args)))
+	(unless (member "-q" mint-args)
+	  (setq mint-args (cons "-q" mint-args)))
+	(setq status (apply #'call-process-region
+			      (point-min) (point-max)
+			      mint
+			      nil ; do not delete
+			      mint-buffer
+			      nil  ; do not redisplay
+			      mint-args)))
       (delete-region (point-min) eoi)
       ;; Display Mint output
       (maplev-mint-setup code-buffer config)
@@ -591,9 +680,8 @@ Return exit code of mint."
 (defun maplev-mint-buffer ()
   "Run Mint on the current buffer."
   (interactive)
-  (save-restriction
-    (widen)
-    (maplev-mint-region (point-min) (point-max))))
+  (widen)
+  (maplev-mint-region (point-min) (point-max)))
 
 (defun maplev-mint-procedure ()
   "Run Mint on the current procedure."
@@ -619,7 +707,7 @@ If no region has been selected, run Mint on the buffer."
 
 (defun maplev--re-search-forward (regexp &optional bound noerror count)
   "Search forward from point for regular expression REGEXP.
-This function is like `re-search-forward', but comments are ignored.
+This function is like `re-search-forward', but strings and comments are ignored.
 Optional arguments BOUND, NOERROR, and COUNT have the same meaning
 as in `re-search-forward'."
   ;; This approach gets confused by a comment inside the match
@@ -629,34 +717,43 @@ as in `re-search-forward'."
   (if (not count) (setq count 1))
   (let ((dir (if (< count 0) -1 1))
         (pos (point))
+	ppsexp
         case-fold-search)
-    (while (and (not (zerop count)) pos)
-      (setq pos (re-search-forward regexp bound noerror dir))
-      (while (and (nth 4 (parse-partial-sexp (maplev-safe-position) (point)))
-                  (setq pos (re-search-forward regexp bound noerror dir))))
-      (setq count (- count dir)))
-    pos))
+    (with-syntax-table maplev-quote-not-string-syntax-table
+      (while (and (not (zerop count)) pos)
+	(setq pos (re-search-forward regexp bound noerror dir))
+	(while (progn
+		 (setq ppsexp (parse-partial-sexp (maplev-safe-position) (point)))
+		 (and (or (nth 3 ppsexp) (nth 4 ppsexp))
+		      (setq pos (re-search-forward regexp bound noerror dir)))))
+	(setq count (- count dir)))
+      pos)))
       
 (defun maplev--re-search-backward (regexp &optional bound noerror count)
   "Search backward from point for regular expression REGEXP.
-This function is like `re-search-backward', but comments are ignored.
+This function is like `re-search-backward', but strings and comments are ignored.
 Optional arguments BOUND, NOERROR, and COUNT have the same meaning
 as in `re-search-backward'."
   ;; See maplev--re-search-forward.
   (if (not count) (setq count 1))
   (let ((dir (if (< count 0) -1 1))
         (pos (point))
+	ppsexp
         case-fold-search)
-    (while (and (not (zerop count)) pos)
-      (setq pos (re-search-backward regexp bound noerror dir))
-      (while (and (nth 4 (parse-partial-sexp (maplev-safe-position) (point)))
-                  (setq pos (re-search-backward regexp bound noerror dir))))
-      (setq count (- count dir)))
-    pos))
+    (with-syntax-table maplev-quote-not-string-syntax-table
+      (while (and (not (zerop count)) pos)
+	(setq pos (re-search-backward regexp bound noerror dir))
+	(while (progn
+		 (setq ppsexp (parse-partial-sexp (maplev-safe-position) (point)))
+		 (and (or (nth 3 ppsexp) (nth 4 ppsexp))
+		      (setq pos (re-search-backward regexp bound noerror dir)))))
+	(setq count (- count dir)))
+      pos)))
 
 (defun maplev-safe-position (&optional to)
   "Search for safe buffer position before point \(a position not in a comment\).
-Optional arg TO initializes the search.  It defaults to point"
+Optional arg TO initializes the search.  It defaults to point.
+THIS IS NOT ROBUST."
   (unless to (setq to (point)))
   (save-excursion
     (save-match-data
@@ -686,13 +783,13 @@ If optional arg BACK is non-nil, delete whitespace characters before point."
           (delete-region (match-beginning 0) (match-end 0))))))
 
 (defun maplev--statement-terminator ()
-  "Goto the just after the next statement terminator."
+  "Return position after the next statement terminator."
   (save-excursion
     (maplev--re-search-forward "[^:]\\(;\\|:[^-:=]\\)" nil t)
     (+ 1 (match-beginning 1))))
 
 (defun maplev--goto-declaration (keyword)
-  "Move point to the start of the KEYWORD declaration in a Maple procedure.
+  "Move point to after KEYWORD in the KEYWORD declaration in a Maple procedure.
 Return nil if there no such statement.  Point must be to the right of
 the closing parenthesis in the formal parameter list."
   (let ((bound (save-excursion
@@ -703,207 +800,108 @@ the closing parenthesis in the formal parameter list."
     (if (save-excursion
           (maplev--re-search-forward
            (concat "\\<" keyword "\\>") bound t))
-        (goto-char (match-beginning 0)))))
+        (goto-char (match-end 0)))))
 
+(defun maplev-mint-forward-declaration-symbol ()
+  "Move forward to the start of the next symbol in a declaration statement.
+Skip over comments and types."
+  (interactive)
+  (with-syntax-table maplev-symbol-syntax-table
+    (cond
+     ((looking-at "`")
+      (forward-char)
+      (search-forward "`"))
+     ((looking-at "%")
+      (maplev-forward-expr)))
+    (re-search-forward "\\W\\b\\|#\\|(\\*\\|::\\|:=\\|`" nil t)
+    (let ((match (match-string-no-properties 0)))
+      (cond
+       ((equal "#" match)
+	(forward-line)
+	(maplev-mint-forward-declaration-symbol))
+       ((equal "(*" match)
+	(search-forward "*)")
+	(maplev-mint-forward-declaration-symbol))
+       ((or (equal "::" match)
+	    (equal ":=" match))
+	(maplev-forward-expr) 
+	(maplev-mint-forward-declaration-symbol))
+       ((equal "`" match)
+	(backward-char)
+	t)
+       (t)))))
 
-(defun maplev-add-declaration-one-line (keyword var)
-  "To the current procedure's KEYWORD declaration add VAR.
+       
+(defun maplev-add-declaration (keyword vars)
+  "To the current procedure's KEYWORD declaration add VARS, a list of variables.
 If necessary, add a KEYWORD statement.  Point must be after the closing
 parenthesis of the procedure's argument list."
-  (save-excursion
-    (if (maplev--goto-declaration keyword)
-        (let ((end (maplev--statement-terminator)))
-          (if maplev-alphabetize-declarations-p
-              (progn
-                (forward-word)
-                (while (and (< (point) end)
-                            (looking-at (concat "\\s-*\\(" maplev--symbol-re "\\) *,?"))
-                            (string< (match-string-no-properties 1) var))
-                  ;; Move over symbol and, if there, comma.  For now
-                  ;; assume that the symbols do not have
-                  ;; types---including types in-line seems bad form.
-                  ;; Moving across a type is fairly tricky.
-                  (goto-char (match-end 0)))
-                (if (looking-at " *;")
-                    (insert (format ", %s" var))
-                  (insert (format " %s," var))))
-            (goto-char end)
-            (backward-char)
-            (insert "," (make-string maplev-variable-spacing ?\ ) var)))
-      (let (stay)
-        ;; Declarations are ordered: local, global, export
-        (if (maplev--goto-declaration "local")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        (if (maplev--goto-declaration "global")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        ;; Position point and text in preparation for inserting a
-        ;; declaration statement.
-        (if (not (looking-at "[ \t]*\\(#.*\\)?$")) ; More code on line?
-            (just-one-space)      ; Then insert declaration inbetween.
-          (forward-line)            ; Else move to the next code line.
-          (unless stay                 ; Keep moving if we not already
-            (while (looking-at "[ \t]*#") ; have a declaration.
-              (forward-line)))))
-      ;; Insert the declaration statement KEYWORD VAR ; at point.
-      ;; If point is at beginning of line, insert a newline at end.
-      ;; NOTE: It might be better to look whether there is any following text.
-      (let ((new-line (bolp)))
-        (insert keyword " " var "; ")
-        (when new-line
-          (newline)
-          (forward-line -1)))
-      (maplev-indent-line))))
+  (when vars
+    (save-excursion
+      (unless (maplev--goto-declaration keyword)
+	;; The declaration KEYWORD does not exist; insert it.
+	(let (stay)
+	  ;; Declarations are ordered: local, global, export
+	  (if (maplev--goto-declaration "local")
+	      (setq stay (goto-char (maplev--statement-terminator))))
+	  (if (maplev--goto-declaration "global")
+	      (setq stay (goto-char (maplev--statement-terminator))))
+	  ;; Position point and text in preparation for inserting a
+	  ;; declaration statement.
+	  (if (not (looking-at "[ \t]*\\(#.*\\)?$")) ; More code on line?
+	      (just-one-space)      ; Then insert declaration inbetween.
+	    (forward-line)            ; Else move to the next code line.
+	    (unless stay                 ; Keep moving if we not already
+	      (while (looking-at "[ \t]*#") ; have a declaration.
+		(forward-line)))))
+	;; Insert the declaration statement KEYWORD VAR; at point,
+	;; with VAR the first variable.  If point is at beginning of
+	;; line, insert a newline at end.  NOTE: It might be better to
+	;; look whether there is any following text.
+	(let ((new-line (bolp)))
+	  (insert keyword " " (car vars) ";")
+	  (setq vars (cdr vars)) 
+	  (when new-line
+	    (newline)
+	    (forward-line -1)))
+	(maplev-indent-line)
+	(forward-word))
 
-(defun maplev-add-declaration-leading-comma (keyword var)
-  "To the current procedure's KEYWORD declaration add VAR.
-If necessary, add a KEYWORD statement.  Point must be after the
-closing parenthesis of the procedure's argument list.  Optional
-TYPE specifies the declared type of VAR.  The string
-`maplev-var-declaration-symbol' is used as the declaration
-symbol; it is inserted between VAR and TYPE.
+      ;; insert remaining variables
 
-If `maplev-alphabetize-declarations-p' is non-nil, VAR is
-inserted alphabetically into the sequence of existing
-declarations, otherwise it is inserted at the end."
-  (save-excursion
-    (if (maplev--goto-declaration keyword)
-        (let ((end (maplev--statement-terminator)))
-          (if maplev-alphabetize-declarations-p
-              (progn
-                (forward-word)
-                (while (and (< (point) end)
-                            (looking-at (concat "\\s-*\\(?:, \\)?\\(" maplev--symbol-re "\\)"))
-                            (string< (match-string-no-properties 1) var))
-                  (forward-line))
-                (if (looking-at "\\s-*[,;]")
-                    (progn
-                      (insert (format ", %s" var))
-                      (maplev-indent-newline))
-                  (insert (format " %s" var))
-                  (maplev-indent-newline)
-                  (insert ", ")))
-            ;; Insert `, VAR' before terminator.
-            (goto-char end)
-            (forward-line 0)
-            (insert (format ", %s" var))
-            (maplev-indent-newline)))
-      (let (stay)
-        ;; Declarations are ordered: local, global, export
-        (if (maplev--goto-declaration "local")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        (if (maplev--goto-declaration "global")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        ;; Position point and text in preparation for inserting a
-        ;; declaration statement.
-        (if (not (looking-at "[ \t]*\\(#.*\\)?$")) ; More code on line?
-            (just-one-space)      ; Then insert declaration inbetween.
-          (forward-line)          ; Else move to the next code line.
-          (unless stay            ; Keep moving if we not already
-            (while (looking-at "[ \t]*#") ; have a declaration.
-              (forward-line)))))
-      ;; Insert the declaration statement KEYWORD VAR\n; at point.
-      (insert (format " %s %s" keyword var))
-      (maplev-indent-newline)
-      (insert ";")
-      (maplev-indent-newline))))
-
-(defun maplev-add-declaration-trailing-comma (keyword var)
-  "To the current procedure's KEYWORD declaration add VAR.
-If necessary, add a KEYWORD statement.  Point must be after the
-closing parenthesis of the procedure's argument list.  Optional
-TYPE specifies the declared type of VAR.  The string
-`maplev-var-declaration-symbol' is used as the declaration
-symbol; it is inserted between VAR and TYPE.
-
-If `maplev-alphabetize-declarations-p' is non-nil, VAR is
-inserted alphabetically into the sequence of existing
-declarations, otherwise it is inserted at the end."
-  (save-excursion
-    (if (maplev--goto-declaration keyword)
-        (let ((end (maplev--statement-terminator)))
-          (if maplev-alphabetize-declarations-p
-              (progn
-                (forward-line)
-                (while (and (< (point) end)
-                            (looking-at (concat "\\s-*\\(" maplev--symbol-re "\\)"))
-                            (string< (match-string-no-properties 1) var))
-                  (forward-line))
-                (if (< (point) end)
-                    (insert (format "%s," var))
-                  (forward-line -1)
-                  (search-forward ";" (line-end-position))
-                  (replace-match ",")
-                  (forward-line)
-                  (insert (format "%s;" var)))
-                (maplev-indent-newline))
-            ;; Replace terminator with comma.
-            ;; Preserve comments following terminator.
-            (goto-char end)
-            (delete-char -1)
-            (insert ",")
-            (end-of-line)
-            ;; Insert VAR with terminator.
-            (newline)
-            (insert (format "%s;" var))
-            (maplev-indent-line)))
-      (let (stay)
-        ;; Declarations are ordered: local, global, export
-        (if (maplev--goto-declaration "local")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        (if (maplev--goto-declaration "global")
-            (setq stay (goto-char (maplev--statement-terminator))))
-        ;; Position point and text in preparation for inserting a
-        ;; declaration statement.
-        (if (not (looking-at "[ \t]*\\(#.*\\)?$")) ; More code on line?
-            (just-one-space)      ; Then insert declaration inbetween.
-          (forward-line)          ; Else move to the next code line.
-          (unless stay            ; Keep moving if we not already
-            (while (looking-at "[ \t]*#") ; have a declaration.
-              (forward-line)))))
-      ;; Insert the declaration statement KEYWORD VAR ; at point.
-      ;; If point is at beginning of line, insert a newline at end.
-      ;; NOTE: It might be better to look whether there is any following text.
-      (if (bolp)
-          (progn
-            (insert keyword)
-            (maplev-indent-line)
-            (newline)
-            (insert (format "%s;" var))
-            (newline)
-            (forward-line -1))
-        (insert (format " %s %s;" keyword var) ))
-      (maplev-indent-line))))
-
-(defun maplev-add-declaration (keyword var &optional type)
-  "To the KEYWORD declaration of current procedure, add VAR.
-If non-nil, optional TYPE is catenated to VAR and
-`maplev-var-declaration-symbol'.  The function assigned to
-`maplev-add-declaration-function' does the work."
-  (funcall maplev-add-declaration-function keyword
-           (if type
-               (concat var maplev-var-declaration-symbol type)
-             var)))
-
-(defun maplev-add-local-variable (var &optional type)
+      (let ((start (point)))
+	(while vars
+	  (goto-char start)
+	  (let ((var (car vars))
+		(regex (concat "\\s-*\\(" maplev--symbol-re "\\) *,?"))
+		(end (maplev--statement-terminator)))
+	    (setq vars (cdr vars))
+	    (if maplev-alphabetize-declarations-p
+		(progn
+		  ;; (forward-word) ; skip over keyword
+		  (while (and (< (point) end)
+			      (maplev-mint-forward-declaration-symbol)
+			      (looking-at regex)
+			      (string< (match-string-no-properties 1) var))
+		    (goto-char (match-end 0)))
+		  (if (< end (point))
+		      (goto-char (1- end)))
+		  (unless (looking-at (concat (regexp-quote var) "\\_>"))
+		    (let ((space (make-string maplev-variable-spacing ?\ )))
+		      (if (looking-at "\\s-*[:;]")
+			  (insert (format ",%s%s" space var))
+			(insert (format "%s," var) space)))))
+	      ;; non-alphabetic, insert VAR at end.
+	      (goto-char end)
+	      (backward-char)
+	      (insert "," (make-string maplev-variable-spacing ?\ ) var))))))))
+	
+(defun maplev-add-local-variable (var)
   "Add VAR to the current procedure's local statement.
-If TYPE is non-nil, add a type declaration.  Interactively, VAR
-defaults to the identifier point is on."
+Interactively, VAR defaults to the identifier at point."
   (interactive (list (maplev-ident-around-point-interactive
-                      "Local variable")
-                     ;; Query type unless all declarations go on one line.
-                     ;; It seems bad from to use types one one-line; regardless,
-                     ;; `maplev-add-declaration-one-line' currently does not
-                     ;; handle types.
-                     (unless (eq maplev-add-declaration-function 'maplev-add-declaration-one-line)
-                       (let ((type (read-string
-                                    "Type (empty for no type): "
-                                    nil
-                                    maplev--declaration-history)))
-                         (if (equal "" type)
-                             nil
-                           type)))))
-  (maplev-add-variable "local" var type))
-                                 
+                      "Local variable")))
+  (maplev-add-variable "local" var))
 
 (defun maplev-add-global-variable (var)
   "Add VAR to the current procedure's local statement.
@@ -919,99 +917,65 @@ Interactively, VAR defaults to identifier point is on."
                       "Exported variable")))
   (maplev-add-variable "export" var))
 
-(defun maplev-add-variable (keyword var &optional type)
-  "To the current procedure's KEYWORD declaration add VAR.
-If TYPE is non-nil, append a type declaration."
+(defun maplev-add-variable (keyword var)
+  "To the current procedure's KEYWORD declaration add VAR."
   (save-excursion
     (maplev-beginning-of-defun)
     (goto-char (maplev--scan-lists 1))
-    (maplev-add-declaration keyword var type)))
+    (maplev-add-declaration keyword (list var))))
 
-(defun maplev-delete-declaration (keyword vars &optional leave-one)
-  "From the KEYWORD declaration delete occurrences of VARS.
-VARS must be either a string or a list of strings.  If optional
-argument LEAVE-ONE is non-nil, then one occurrence of VARS is left.
-The entire statement is deleted if it is left with no variables."
+(defun maplev-delete-declarations (keyword vars region)
+  "Delete VARS from KEYWORD declarations in the specified REGION."
   (save-excursion
-    (when (maplev--goto-declaration keyword)
-      (maplev-delete-vars (point) (maplev--statement-terminator)
-                          vars leave-one)
-      ;; remove entire KEYWORD statement, if empty
-      (let (case-fold-search)
-        (when (looking-at (concat keyword "[ \t\n]*[;:]\\([ \t#]*$\\)?"))
-          (delete-region (match-beginning 0) (match-end 0))
-          (maplev-delete-whitespace t))))))
+    (save-restriction
+      (narrow-to-region (point) (cdr region))
+      (let ((regex (concat "\\(\\<" keyword "\\>\\)"
+			   "\\|\\(" maplev--defun-re "\\)"
+			   "\\|\\(?:" maplev--defun-end-re "\\)"))
+	    (cnt 0) ; keep track whether in original procedure
+	    term) 
+	(while (maplev--re-search-forward regex nil 'move)
+	  (if (match-string 1)
+	      (when (zerop cnt)
+		(let ((beg (match-beginning 0)))
+		  (maplev-delete-vars vars (point) (maplev--statement-terminator))
+		  ;; remove entire KEYWORD statement, if empty
+		  (save-excursion
+		    (goto-char beg) ; move before KEYWORD
+		    (when (looking-at (concat keyword "[ \t\n]*[;:]\\([ \t#]*$\\)?"))
+		      (delete-region (match-beginning 0) (match-end 0))
+		      (maplev-delete-whitespace t)))))
+	    ;; adjust cnt up/down when entering/exiting a proc/module.
+	    (setq cnt (+ cnt (if (match-string 2) +1 -1)))))))))
 
-(defun maplev-delete-vars-old (start end vars &optional leave-one)
-  "In region between START and END delete occurrences of VARS.
-VARS must be either a string or a list of strings.  If optional
-argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
-  (let (case-fold-search lo)
-    (save-excursion
-      (save-restriction
-        (narrow-to-region start end)
-        (if (stringp vars) (setq vars (list vars)))
-        (while vars
-          (setq lo leave-one)
-          (goto-char (point-min))
-          (while (maplev--re-search-forward
-                  (concat "\\<" (car vars) "\\>"
-                          ;; Add optional type declarations.  I don't know
-                          ;; how to make this robust, a type
-                          ;; declaration can have commas and closing
-                          ;; parentheses.
-                          "\\(\\s-*::\\s-*[^,:;)]+\\)?")
-                  nil t)
-            (if lo
-                (setq lo nil)
-              (delete-region (match-beginning 0) (match-end 0))
-              (maplev-delete-whitespace)
-              (when (or (maplev--re-search-forward  "," nil t)
-                        (maplev--re-search-backward "," nil t))
-                (delete-region (match-beginning 0) (match-end 0))
-                (maplev-delete-whitespace))))
-          (setq vars (cdr vars)))))))
-
-(defun maplev-delete-vars (start end vars &optional leave-one)
-  "In region between START and END delete occurrences of VARS.
-VARS must be either a string or a list of strings.  If optional
-argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
+(defun maplev-delete-vars (vars start end &optional leave-one)
+  "Delete VARS in region between START and END; VARS must be
+either a string or a list of strings.  If optional argument
+LEAVE-ONE is non-nil, the first occurrence of VARS is not
+deleted."
   (let ((parse-sexp-ignore-comments)
-        case-fold-search lo )
+        case-fold-search lo var)
     (save-excursion
       (save-restriction
         (narrow-to-region start end)
         (if (stringp vars) (setq vars (list vars)))
         (while vars
           (setq lo leave-one)
+	  (setq var (car vars))
           (goto-char (point-min))
           (while (maplev--re-search-forward
-                  (concat "\\<" (car vars) "\\>")
+		  ;; hack to handle backquoted symbols
+		  (if (= (aref var 0) ?`)
+		      (regexp-quote var)
+		    (concat "\\_<" (regexp-quote var) "\\_>"))
                   nil t)
             (if lo
                 (setq lo nil)
-              (delete-region (match-beginning 0) (match-end 0))
-              (maplev-delete-whitespace)
-
-              ;; Remove optional type declaration
-              
-              (when (looking-at "::\\s-*")
-                ;; Skip past type declaration operator (::)
-                ;; so looking-at won't match them.
-                (goto-char (match-end 0))
-                (delete-region (match-beginning 0)
-                               (progn
-                                 ;; Unless looking at an argument separator,
-                                 ;; statement terminator, or closing
-                                 ;; parenthesis, or at end of buffer, move
-                                 ;; forward over a balanced expression.
-                                 ;;
-                                 ;; This nees modification to handle comments,
-                                 ;; esp. with leading commas.
-                                 (while (and (not (looking-at "[ \t\f\n]*[,;:#)]"))
-                                             (/= (point) (point-max)))
-                                   (forward-sexp))
-                                 (point))))
+	      (delete-region (match-beginning 0)
+			     (progn 
+			       (maplev-delete-whitespace)
+			       (maplev-forward-expr)
+			       (point)))
               ;; Remove separating comma
               (when (or (maplev--re-search-backward "," nil t)
                         (maplev--re-search-forward  "," nil t))
@@ -1019,7 +983,250 @@ argument LEAVE-ONE is non-nil, then one occurrence of VARS is left."
                 (maplev-delete-whitespace))))
           (setq vars (cdr vars)))))))
 
+(defconst maplev-mint-query-help
+  " y   quote the match
+ '   quote the match
+ !   quote remaining matches
+ Q   quote remaining matches
+ n   skip to next match
+ d   skip all occurrences of current match
+ e   edit the list of variables
+ g   declare match as a global variable
+ l   declare match as a local variable
+ :   convert [foo] to :-foo
+C-l  recenter the screen
+C-r  enter recursive edit (C-M-c to get out)
+ q   quit
+ h   display this help
+ f1  display this help" 
+  "Help message while in `maple-mint-quote-vars'.")
+
+(defvar maplev-mint-query-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map " " 'quote)  ; maybe this should be repeat last?
+    (define-key map "y" 'quote)  
+    (define-key map "'" 'quote)
+    (define-key map "Q" 'quote-rest)
+    (define-key map "!" 'quote-rest)
+
+    (define-key map "d" 'delete)
+    (define-key map "e" 'edit-vars)
+
+    (define-key map "g" 'global)
+    (define-key map "G" 'global-rest)
+    (define-key map "l" 'local)
+    (define-key map "L" 'local-rest)
+
+    
+    (define-key map "n" 'skip)
+    (define-key map "N" 'skip)
+    (define-key map "\d" 'skip)
+    (define-key map "[delete]" 'skip)
+
+    (define-key map ":" 'colon-dash)
+
+    (define-key map "q" 'exit)
+    (define-key map "\r" 'exit)
+    (define-key map "[return]" 'exit)
+
+    (define-key map "C-g" 'quit)
+    (define-key map "C-]" 'quit)
+
+    (define-key map "\C-l" 'recenter)
+    (define-key map "\C-r" 'edit)
+
+    (define-key map "h"    'help)
+    (define-key map "[f1]" 'help)
+    (define-key map [help] 'help)
+    map))
+
+(defun maplev-mint-query-undeclared-globals (vars beg end)
+  "Query to handle occurrences of VARs in the region between BEG and END.
+VARs is a list of undeclared globals."
+  (let (case-fold-search regexp reply start var)
+    (save-excursion
+      (save-restriction
+	(narrow-to-region beg end)
+	(let ((syntax-table maplev-quote-not-string-syntax-table)
+	      (cnt -1)
+	      (message (apply 'propertize
+			      (substitute-command-keys
+			       "Query replacing %s with %s: (\\<maplev-mint-query-map>\\[help] for help) ")
+			      minibuffer-prompt-properties))
+	      (keep-going t)
+	      def done key match quoted quote-rest real-match-data regex unquoted)
+	  (goto-char beg)
+	  (unwind-protect
+	      (while keep-going
+		(unless regex 
+		  (setq regex (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)?"
+				      "\\|\\(" maplev--defun-re "\\|->\\)\\(`\\)?"
+				      "\\|\\(?:" maplev--defun-end-re "\\)")))
+		(if (not (maplev--re-search-forward regex nil 'move))
+		    (setq keep-going nil)
+		  (setq real-match-data (match-data 'integers))
+		  (setq done nil)
+		  (while (not done)
+		    (cond
+		     ((match-string 5) ; typically `module`
+		      (maplev-forward-expr)
+		      (setq done t))
+		     ((or (match-string 1) (match-string 3))
+		      (setq done t)) ; skip :- fields (left or right)
+		     ((match-string 2)
+		      ;; matched a variable
+		      (if (not (zerop cnt))
+			  ;; skip matches inside a proc/module
+			  (setq done t)
+			(setq match (match-string-no-properties 0)
+			      unquoted (match-string-no-properties 2)
+			      quoted  (concat "'" unquoted "'")
+			      start (match-beginning 0))
+			(if (looking-at "'") ; FIXME: this fails if the match is part of a protected expression
+			    ;; skip protected matches
+			    (setq done t)
+			  (if quote-rest
+			      ;; quote the match and continue
+			      (progn
+				(replace-match quoted)
+				(setq done t))
+			    (replace-highlight (match-beginning 0) (match-end 0) nil nil (concat "\\_<" match "\\_>") 'regexp nil nil)
+			    (message message match quoted)
+			    (setq key (vector (read-event)))
+			    (setq def (lookup-key maplev-mint-query-map key))
+			    (cond
+			     ((eq def 'help)
+			      (with-output-to-temp-buffer "*Help*"
+				(princ
+				 (concat "Query replacing "
+					 match
+					 " with "
+					 quoted
+					 ".\n\n"
+					 (substitute-command-keys maplev-mint-query-help)))
+				(with-current-buffer standard-output
+				  (help-mode)))
+			      (set-match-data real-match-data))
+			     ((eq def 'quote)
+			      (replace-match quoted)
+			      (setq done t))
+			     ((or (eq def 'global)
+				  (eq def 'local))
+			      ;; add variable to local/global declaration
+			      (maplev-add-variable (symbol-name def) match)
+			      ;; remove match from vars and update regex
+			      (setq vars (delete match vars)
+				    regex nil
+				    done t))
+			     ((or (eq def 'global-rest)
+				  (eq def 'local-rest))
+			      (let ((var match)
+				    (keyword (if (eq def 'global-rest) "global" "local")))
+				(while vars
+				  (maplev-add-variable keyword var)
+				  (setq var (car vars)
+					vars (cdr vars))))
+			      (setq done t
+				    keep-going nil))
+			     ((eq def 'delete)
+			      ;; remove match from vars and update regex
+			      (setq vars (delete match vars)
+				    regex nil
+				    done t))
+			     ((eq def 'skip)
+			      ;; skip to next match
+			      (setq done t))
+			     ((eq def 'exit)
+			      ;; exit
+			      (setq keep-going nil done t))
+			     ((eq def 'edit)
+			      ;; recursively edit at current match
+			      (let ((opos (point-marker)))
+				(goto-char (match-beginning 0))
+				(save-excursion
+				  (save-window-excursion
+				    (recursive-edit)))
+				(goto-char opos)
+				(set-marker opos nil))
+			      (set-match-data real-match-data))
+			     ((eq def 'edit-vars)
+			      ;; edit the list of vars
+			      (setq vars (maplev-mint-edit-vars vars)
+				    regex nil))
+			     ((eq def 'quote-rest)
+			      ;; quote current and remaining vars
+			      (setq quote-rest t))
+			     ((eq def 'colon-dash)
+			      ;; convert match to colon-dash
+			      (save-excursion
+				(goto-char (1- start))
+				(when (looking-at (concat "\\[" match "\\]"))
+				  (replace-match (concat ":-" unquoted))))
+			      (setq done t))
+			     ((eq def 'recenter)
+			      ;; recenter screen
+			      (recenter-top-bottom))
+			     (t
+			      (setq this-command 'mode-exited)
+			      (setq done t))
+			     )))))
+		     (t (let ((keyword (match-string-no-properties 4)))
+			  (if (string= keyword "->")
+			      (maplev-forward-expr)
+			    (setq cnt (+ cnt (if keyword +1 -1)))))
+			(setq done t))))))
+	    (replace-dehighlight)))))))
+
 ;;}}}
+
+
+(defvar maplev-mint-var-mode-map
+  (let ((map tabulated-list-mode-map))
+    (define-key map "c" 'maplev-mint-var-cont)
+    (define-key map "k" 'maplev-mint-var-kill)
+    map))
+
+(defun maplev-mint-var-cont ()
+  "Exit recursive-edit, to continue processing variables."
+  (interactive)
+  (exit-recursive-edit))
+
+(defun maplev-mint-var-kill ()
+  "Kill current line."
+  (interactive)
+  (let ((item (tabulated-list-delete-entry)))
+    (when item
+      (setq tabulated-list-entries (delq item tabulated-list-entries)))))
+
+(define-derived-mode maplev-mint-var-mode tabulated-list-mode "vars"
+  "Major mode for modifying undeclared variables."
+  (setq tabulated-list-format [("*Variable*" 20 nil)])
+  (setq tabulated-list-padding 1)
+  (tabulated-list-init-header))
+
+(defun maplev-mint-edit-vars (vars)
+  "Open a temporary buffer to edit VARS, a list of variables.
+Return the edited list upon completion."
+  (with-temp-buffer
+    (pop-to-buffer (current-buffer))
+    (maplev-mint-var-mode)
+    (setq tabulated-list-entries 
+	  (let ((cnt 0))
+	    (mapcar (lambda (var) (list (cl-incf cnt) (vector var))) vars)))
+    (tabulated-list-print)
+    (recursive-edit)
+    ;; convert lines to list
+    (goto-char (point-max))
+    (unless (bobp)
+      (forward-line -1)
+      (let (vars)
+	(while 
+	    (let ((var (buffer-substring-no-properties (1+ (point)) (line-end-position))))
+	      (setq vars (cons var vars))
+	      (unless (bobp)
+		(forward-line -1))))
+      vars))))
+  
 
 (provide 'maplev-mint)
 

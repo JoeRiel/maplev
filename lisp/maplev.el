@@ -1,3 +1,4 @@
+
 ;; maplev.el --- Maple mode for GNU Emacs
 ;;
 ;; Copyright (C) 2001,2003,2008,2009,2015 Joseph S. Riel
@@ -143,9 +144,9 @@
 
 (let* ((maplev-dir (file-name-directory (or (locate-library "maplev") "")))
        (maplev-release.el (concat maplev-dir "maplev-release.el")))
-  (when (require 'maplev-release maplev-release.el 'noerror)
-    (autoload 'maplev-release     maplev-release.el)
-    (autoload 'maplev-git-release maplev-release.el)))
+  (when (require 'maplev-release  "maplev-release" 'noerror)
+    (autoload 'maplev-release     "maplev-release")
+    (autoload 'maplev-git-release "maplev-release")))
 
 ;;;###autoload
 (defun maplev-version (&optional here full message)
@@ -184,16 +185,13 @@ When MESSAGE is non-nil, display a message with the version."
 ;;}}}
 ;;{{{ Syntax table
 
-(defvar maplev-mode-syntax-table nil
-  "Syntax table used in MapleV mode buffers.")
-
-(unless maplev-mode-syntax-table
+(defvar maplev-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?_  "_"  table) ; symbol constituent
     (modify-syntax-entry ?~  "_"  table) ; symbol constituent
     (modify-syntax-entry ??  "_"  table) ; symbol constituent
     (modify-syntax-entry ?&  "w"  table) ; word constituent
-    (modify-syntax-entry ?%  "w"  table) ; word constituent
+    (modify-syntax-entry ?%  "w"  table) ; word constituent (questionable; symbol?)
 
     (modify-syntax-entry ?\\ "\\" table) ; escape
     (modify-syntax-entry ?#  "<"  table) ; comment starter
@@ -224,47 +222,42 @@ When MESSAGE is non-nil, display a message with the version."
     (modify-syntax-entry ?\) ")(4n" table)
 
     ;; Entries for R5 and later
-    (modify-syntax-entry ?%  "."  table)
     (modify-syntax-entry ?\" "\"" table)
 
-    ;; Entries for R12 and later.
-    ;; Define the multiline comment delimiters `(*' and `*)'.
+    table)
+  "Syntax table used in MapleV mode buffers.")
 
-    (setq maplev-mode-syntax-table table)))
-
-(defvar maplev-mode-4-syntax-table nil
+(defvar maplev-mode-4-syntax-table
+  (let ((table (make-syntax-table maplev-mode-syntax-table)))
+    (modify-syntax-entry ?\" "." table)
+    table)
   "Syntax table used in MapleV mode buffers for R4.")
 
-;; In R4 the ditto operator is `"'
-
-(unless maplev-mode-4-syntax-table
-  (setq maplev-mode-4-syntax-table
-        (copy-syntax-table maplev-mode-syntax-table))
-  (modify-syntax-entry ?\" "." maplev-mode-4-syntax-table))
-
-(defvar maplev--symbol-syntax-table nil
+(defvar maplev-symbol-syntax-table
+  (let ((table (make-syntax-table maplev-mode-syntax-table)))
+    (modify-syntax-entry ?_  "w"  table)
+    table)
   "Syntax table for Maple, where `_' is a word constituent.")
 
-(unless maplev--symbol-syntax-table
-  (setq maplev--symbol-syntax-table (copy-syntax-table maplev-mode-syntax-table))
-  (modify-syntax-entry ?_  "w"  maplev--symbol-syntax-table))
-
-(defvar maplev-help-mode-syntax-table nil
-  "Syntax table used in Maple help buffer.")
-
-(unless maplev-help-mode-syntax-table
+(defvar maplev-help-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?_ "w" table)
-    (setq maplev-help-mode-syntax-table table)))
+    table)
+  "Syntax table used in Maple help buffer.")
+
+(defvar maplev-quote-not-string-syntax-table
+  (let ((table (make-syntax-table maplev-mode-syntax-table)))
+    (modify-syntax-entry ?\' "." table)
+    (modify-syntax-entry ?\` "_" table)
+    table)
+  "Syntax table used by `maplev--re-search-forward'.")
+  
 
 ;;}}}
 
 ;;{{{ Mode map
 
-(defvar maplev-mode-map nil
-  "Keymap used in Maple mode.")
-
-(unless maplev-mode-map
+(defvar maplev-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [(tab)]                      'maplev-electric-tab)
     (define-key map [(meta tab)]                 'maplev-complete-symbol)
@@ -328,8 +321,8 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
     (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-cmaple)
-
-    (setq maplev-mode-map map)))
+    map)
+     "Keymap used in Maple mode.")
 
 ;;}}}
 ;;{{{ Menu
@@ -348,13 +341,7 @@ When MESSAGE is non-nil, display a message with the version."
        ["Buffer"    maplev-mint-buffer t]
        ["Procedure" maplev-mint-procedure t]
        ["Region"    maplev-mint-region t]
-       ["Rerun"     maplev-mint-rerun :active maplev-mint--code-beginning]
-       "---"
-       ("Mint level"
-        ["severe errors"    (setq maplev-mint-info-level 1) :style radio :selected (= maplev-mint-info-level 1)]
-        ["+ serious errors" (setq maplev-mint-info-level 2) :style radio :selected (= maplev-mint-info-level 2)]
-        ["+ warnings"       (setq maplev-mint-info-level 3) :style radio :selected (= maplev-mint-info-level 3)]
-        ["full report"      (setq maplev-mint-info-level 4) :style radio :selected (= maplev-mint-info-level 4)]))
+       ["Rerun"     maplev-mint-rerun :active maplev-mint--code-beginning])
       ("Maple"
        ["Goto buffer"    maplev-cmaple-pop-to-buffer t]
        ["Send buffer"    maplev-cmaple-send-buffer t]
@@ -369,10 +356,6 @@ When MESSAGE is non-nil, display a message with the version."
        ["Highlighted" maplev-help-region t])
       "---"
       ("Setup"
-       ("Abbrevs"
-        ["Enable abbrevs" abbrev-mode
-         :style toggle :selected abbrev-mode]
-        ["List abbrevs" maplev-abbrev-help t])
        ["Enable auto-fill comments" (setq maplev-auto-fill-comment-flag (not maplev-auto-fill-comment-flag))
 	:style toggle :selected maplev-auto-fill-comment-flag]
        ["Enable auto-string break" (setq maplev-auto-break-strings-flag (not maplev-auto-break-strings-flag))
@@ -395,62 +378,8 @@ When MESSAGE is non-nil, display a message with the version."
       ["Quit"      quit-window t]
       "---"
       ["Info"  maplev-goto-info-node t]
+      ["Info in Browser" maplev-browse-info]
       ["About" maplev-about t])))
-
-;;}}}
-;;{{{ Abbreviations
-
-(defun maplev--abbrev-hook ()
-  "Unexpand an abbreviation in a string or a comment.
-The variable `maplev-expand-abbrevs-in-comments-and-strings-flag'
-controls the expansion."
-  (unless maplev-expand-abbrevs-in-comments-and-strings-flag
-    ;; Searching can be expensive:
-    ;; We assume that strings do not span more than one line
-    (let ((state (parse-partial-sexp (maplev-safe-position) (point))))
-      (if (or (nth 4 state) (nth 3 state))
-          (unexpand-abbrev)))))
-
-(defvar maplev-mode-abbrev-table nil
-  "Abbrev table used in MapleV mode buffers.")
-
-(unless maplev-mode-abbrev-table
-  (let ((ac abbrevs-changed))
-    (define-abbrev-table
-      'maplev-mode-abbrev-table
-      '(("ar"    "array"      maplev--abbrev-hook 0)
-        ("ass"   "assigned"   maplev--abbrev-hook 0)
-        ("co"    "convert"    maplev--abbrev-hook 0)
-        ("err"   "ERROR"      maplev--abbrev-hook 0)
-        ("fail"  "FAIL"       maplev--abbrev-hook 0)
-        ("fr"    "from"       maplev--abbrev-hook 0)
-        ("gl"    "global"     maplev--abbrev-hook 0)
-        ("inf"   "infinity"   maplev--abbrev-hook 0)
-        ("lib"   "libname"    maplev--abbrev-hook 0)
-        ("lo"    "local"      maplev--abbrev-hook 0)
-        ("ma"    "matrix"     maplev--abbrev-hook 0)
-        ("npf"   "nprintf"    maplev--abbrev-hook 0)
-        ("null"  "NULL"       maplev--abbrev-hook 0)
-        ("pi"    "Pi"         maplev--abbrev-hook 0)
-        ("pnam"  "procname"   maplev--abbrev-hook 0)
-        ("pf"    "printf"     maplev--abbrev-hook 0)
-        ("remem" "remember"   maplev--abbrev-hook 0)
-        ("ret"   "RETURN"     maplev--abbrev-hook 0)
-        ("rlib"  "readlib"    maplev--abbrev-hook 0)
-        ("stext" "searchtext" maplev--abbrev-hook 0)
-        ("stxt"  "SearchText" maplev--abbrev-hook 0)
-        ("ta"    "table"      maplev--abbrev-hook 0)
-        ("th"    "then"       maplev--abbrev-hook 0)
-        ("trap"  "traperror"  maplev--abbrev-hook 0)
-        ("ty"    "type"       maplev--abbrev-hook 0)
-        ("user"  "userinfo"   maplev--abbrev-hook 0)
-        ("wh"    "while"      maplev--abbrev-hook 0)))
-    (setq abbrevs-changed ac)))
-
-;; (defun maplev-abbrev-help ()
-;;   "List the currently defined abbreviations."
-;;   (interactive)
-;;   (list-one-abbrev-table maplev-mode-abbrev-table "*Abbrevs*"))
 
 ;;}}}
 ;;{{{ Imenu support
@@ -503,7 +432,7 @@ Check whether `folding-mode' is active."
       (save-restriction
         (widen)
         (goto-char (point-min))
-        (while (re-search-forward "[ \t]+$" (point-max) t)
+        (while (re-search-forward "[ \t]+$" nil t)
           (replace-match "" nil nil))))))
 
 
@@ -607,10 +536,22 @@ Prefix JUSTIFY means justify as well."
   (require 'info)
   (info "maplev"))
 
+(defun maplev-browse-info ()
+  "Open the html version of the maplev documentation in a browser."
+  (interactive)
+  (let ((home (getenv "HOME")))
+    (when home 
+      (let ((html (concat (file-name-as-directory home) 
+			  "maple/toolbox/maplev/info/maplev.html")))
+	(if (file-exists-p html)
+	    (browse-url (concat "file://" html))
+	  (error "html file not found: %s" html))))))
+
 ;;}}}
 
 ;;{{{ MapleV mode 
 
+;;;###autoload
 (define-derived-mode maplev-mode fundamental-mode "MapleV"
   "Major mode for editing Maple code.
 
@@ -630,7 +571,7 @@ Maple libraries.
 Key bindings:
 \\{maplev-mode-map}"
   :group 'maplev
-  :abbrev maplev-mode-abbrev-table
+  :abbrev-table nil
   :syntax-table maplev-mode-syntax-table
 
   ;; paragraph filling
@@ -665,9 +606,6 @@ Key bindings:
   (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
 
   (ad-activate 'fixup-whitespace)
-
-  ;; abbrev expansion
-  (abbrev-mode (if maplev-initial-abbrev-mode-flag 1 0))
 
   ;; comments
   (set (make-local-variable 'comment-start)            maplev-comment-start)
@@ -811,27 +749,25 @@ The name of the procedure is inserted into the title of the fold."
 
 (defconst maplev--operator-re
   (concat "\\(?:"
+	  "\\<"
+	  (regexp-opt '("and" "assuming" "implies" "in" "intersect"
+			"minus" "mod" "not" "or" "subset" "union" "xor"))
+	  "\\>"
+	  "\\|"
           (regexp-opt
            '(":-"
              "||"
              "::"
              "!"
              "^" "@@"
-             "." "*" "&*" "/" "@" "intersect"
-             "mod"
-             "+" "-" "union" "minus"
-             ".." "subset"
-             "<" "<=" ">" ">=" "=" "<>" "in"
+             "." "*" "&*" "/" "@" 
+             "+" "-" 
+             ".." 
+             "<" "<=" ">" ">=" "=" "<>" 
              "$"
-             "not"
-             "and"
-             "or"
-             "xor"
-             "implies"
              "->"
              ;; ","
-             "assuming"
-             ;; ":="
+             ":="
              ))
           ;; neutral operators
           "\\|&\\(?:[~!@$^*-+=\"<>,./?]+\\|[a-zA-Z_][a-zA-Z_0-9]*\\)"
@@ -840,7 +776,7 @@ The name of the procedure is inserted into the title of the fold."
   )
 
 (defconst maplev--number-re
-  "\\=[+-]?\\(?:[0-9]+\\(\\.[0-9]*\\)?\\|\\.[0-9]+\\)\\(?:[Ee][+-]?[0-9]*\\)?"
+  "[+-]?\\(?:[0-9]+\\(\\.[0-9]*\\)?\\|\\.[0-9]+\\)\\(?:[Ee][+-]?[0-9]*\\)?"
   "Regular expression matching a number.
 This is slightly too aggressive, it incorrectly matches, d.Ed, which is invalid.")
 
@@ -860,19 +796,72 @@ This is slightly too aggressive, it incorrectly matches, d.Ed, which is invalid.
   "Regular expression to match a partial expression.")
 
 (defun maplev-forward-expr ()
-  "Move point forward over a complete expression."
+  "Move point forward over a complete expression.
+This is a hack and is hardly robust."
   (interactive)
-  (if
-      (cond
+  (if (cond
        ((looking-at "\\s-*\\s(")
-        (forward-sexp)
-        t)
+	(forward-sexp)
+	t)
        ((looking-at maplev--expr-re)
-        (goto-char (match-end 0)))
-       ((looking-at "\\s-*\\(?:#.*\\)?$")
-        (forward-line)))
+	(goto-char (match-end 0)))
+       ((looking-at "\\s-*\\(?:#.*\\)?$") ; inline-comment
+	(forward-line)
+	(not (eobp))))
       (maplev-forward-expr)))
 
+(defconst maplev-wexp-statement-start-re
+  (concat "\\<"
+	  (mapconcat 'identity (list
+				(regexp-opt '("proc" "module" "do" "if" "use" "try") t)
+				(regexp-opt '("for" "from" "to" "while") t))
+		     "\\|")
+	  "\\>")
+  "Regular expression matching a Maple keyword that starts a statemnt.")
+
+(defconst maplev-wexp-statement-cont-re
+  (concat "\\<"
+	  (mapconcat 'identity (list
+				(regexp-opt '("proc" "module" "do" "if" "use" "try") t)
+				(regexp-opt '("fi" "od") t)
+				(regexp-opt '("end") t))
+		     "\\|")
+	  "\\>")
+  "Regular expression matching a Maple keyword that continues or ends a statement.")
+
+(defun maplev-forward-wexp ()
+  "Move forward over a well-formed Maple expression."
+  (interactive)
+  ;; assume for now point is not in string/comment
+  ;; move forward over white space
+  (re-search-forward "\\=\\(?:[ \t]+\\|\n+\\)+" nil t)
+  (cond
+   ((looking-at maplev-wexp-statement-start-re)
+    ;; move to end of statement
+    (let ((cnt (if (match-string 1) 1 0))
+	  keyword)
+      (goto-char (match-end 0))
+      (while (progn	    
+	       (maplev--re-search-forward maplev-wexp-statement-cont-re)
+	       (setq cnt (+ cnt (if (match-string 1) 1 -1)))
+	       (when (and (match-string 3) ;; matched "end"
+			  (looking-at "\\s-+\\(?:do\\|if\\|module\\|proc\\|try\\|use\\)\\>"))
+		 (goto-char (match-end 0)))
+	       (not (zerop cnt)))))
+    ;; move past whitespace
+    (re-search-forward "\\=\\(?:[ \t]+\\|\n+\\)+" nil t)
+    ;; may need to move over arguments: proc() ... end proc (x,y,z) 
+    (when (looking-at ";\\|:[^:]")
+      (goto-char (match-end 0))))))
+		   
+
+	    
+	 
+	  
+
+
+  
+  
 ;;}}}
 
 ;;{{{ Miscellaneous
@@ -1004,8 +993,6 @@ The real work is done by `maplev-complete-on-module-exports'."
       (maplev-cmaple--send-string
        (maplev--cmaple-process)
        (concat "seq(lprint(e),e=exports(" module "));"))
-      (maplev-cmaple--wait 3)
-      ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
       ;; Delete the input line.
       (delete-region
        (goto-char (point-min))
@@ -1052,31 +1039,27 @@ index/package help pages.  If it already exists, do nothing."
       (unwind-protect
           (with-current-buffer (get-buffer-create (maplev--help-buffer))
             ;; Process help node "index/function".
-            (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (maplev-help-show-topic "index/function" 'hide)
-            (maplev-cmaple--wait 3)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
             (save-restriction
               (narrow-to-region
                (re-search-forward "^    ")
                (save-excursion (goto-char (point-max))
-                               (re-search-backward "See Also")))
+                               (search-backward "See Also")))
               (goto-char (point-max))
-              (while (forward-word -1)
+              (while (backward-word)
                 (setq completions
                       (cons (cons (buffer-substring-no-properties
                                    (point)
-                                   (save-excursion (forward-word 1) (point)))
+                                   (save-excursion (forward-word) (point)))
                                   nil)
                             completions))))
 
             ;; Process help node "index/package".
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-cmaple--wait 3)
             (maplev-help-show-topic "index/package" 'hide)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-cmaple--wait 3)
             (save-restriction
               (narrow-to-region
                (progn (re-search-forward "^    \\w" nil t)
@@ -1098,7 +1081,6 @@ index/package help pages.  If it already exists, do nothing."
             ;; Delete both help pages.
             (maplev-history-delete-item)
             ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-cmaple--wait 3)
             (maplev-history-delete-item))
 
         ;; Assign `maplev-completions'.  Sort the completions.
@@ -1803,6 +1785,16 @@ window, depending on the exclusive-or of
 ;;}}}
 
 ;;{{{ Config file (.maplev)
+
+(defun maplev-find-config-file ()
+  "Find and open the maple configuration file.
+The file is named .maplev and is searched for in the current
+directory and its ancestors."
+  (interactive)
+  (let ((config (maplev-include--find-file-up-path ".maplev")))
+    (if config
+	(find-file config)
+      (message "Could not find .maplev file"))))
 
 (defun maplev-load-config-file ()
   "Find and load the maplev configuration file.

@@ -4,6 +4,13 @@
 
 SHELL = /bin/bash
 
+CLOUD-ID := 5079594903273472
+CLOUD-DESCRIPTION := An Emacs mode for Maple developers
+AUTHOR-ID := 60042
+PKG-DATE := $(shell date '+%B %Y')
+
+include version.mak
+
 PKG := maplev
 pkg := $(PKG)
 
@@ -254,6 +261,28 @@ $(hlp-installed): $(hlp)
 	@$(CP) --verbose $+ $@
 
 # }}}
+# {{{ package
+
+.PHONY: package
+
+PKG-VER := $(PKG)-$(VERSION)
+PKG-DIR := /tmp/$(PKG-VER)
+TAR-FILE := $(PKG-VER).tar
+
+package: $(PKG-DIR) $(TAR-FILE)
+
+$(TAR-FILE): $(PKG-DIR) $(EL-FILES)
+	tar --verbose --create --file $(TAR-FILE) --directory=/tmp $(PKG-VER)
+
+$(PKG-DIR): dir README lisp/*.el doc/maplev.info
+	$(RM) -r $@
+	mkdir $@
+	$(CP) $^ $@
+
+README: README.md
+	pandoc --from=markdown --to=plain --columns=78 --out=$@ $<
+
+# }}}
 # {{{ book
 
 help: $(call print-separator)
@@ -262,22 +291,40 @@ help: $(call print-separator)
 
 book: $(call print-help,book,	Create ${pkg}.maple)
 
-intro: $(INTRO)
 INTRO := maple/mhelp/Intro.mw
+
+intro: $(INTRO)
 
 $(INTRO): maple/src/Intro.md
 	mpldoc --config nightly $<
 
 book := $(PKG).maple
 book: $(book)
-$(book): $(mla) $(hlp) $(INFO-FILE) $(INTRO) Makefile
+$(book): $(mla) $(hlp) $(HTML-FILE) $(PDF-FILE) $(INTRO) $(TAR-FILE)
 	$(RM) $@
-	echo '(MakeBook)("$@" \
-	                 , "$(mla)" \
-	                 , "$(hlp)" \
-	                 , "$(INFO-FILE)" \
-	                 , "$(INTRO)" \
-	                ):' \
+	echo '(MakeBook)("$@" $(foreach file,$^,,"$(file)") \
+	                 , "bin.X86_64_LINUX"        = "pmaple/bin.X86_64_LINUX/pmaple" \
+	                 , "bin.X86_64_WINDOWS"      = "pmaple/bin.X86_64_WINDOWS/pmaple.exe" \
+	                 , "bin.APPLE_UNIVERSAL_OSX" = "pmaple/bin.APPLE_UNIVERSAL_OSX/pmaple" \
+	                ): \
+	     for eq in [NULL \
+	                 , "X-CloudId"        = "$(CLOUD-ID)" \
+	                 , "X-CloudXId"	      = "$(AUTHOR-ID)" \
+	                 , "X-CloudGroup"     = "private" \
+	                 , "X-CloudURL"       = "https://maple.cloud" \
+	                 , "X-CloudVersion"   = "$(CLOUD-VERSION)" \
+	                 , "application_type" = "MaplePackage" \
+	                 , "authors"          = "Joe Riel" \
+	                 , "description"      = "$(CLOUD-DESCRIPTION)" \
+	                 , "language"         = "en" \
+	                 , "screenshots"      = "" \
+	                 , "tags"             = "" \
+	                 , "title"            = "$(pkg)" \
+	                 (*, "thumbnail"      = "$(HOME)/Pictures/Sydney5.jpg" *) \
+	                ] \
+	     do \
+	         PackageTools:-SetProperty("$@", op(eq));\
+	     end do:' \
 	     | cat maple/installer/MakeBook.mpl - \
 	     | $(MAPLE) -q
 
@@ -305,8 +352,6 @@ uninstall: lisp-uninstall
 	$(RM) $(MAPLE-LIB-DIR)/*
 
 .PHONY: install uninstall
-
-
 
 # }}}
 # {{{ Installer
@@ -350,6 +395,7 @@ release: check-release check-branch check-clean
 	@git merge --no-ff --message="merge branch develop into release" develop
 	@sed --in-place "/^\*\*\Version /s/$(RELEASE-REGEX)/$(RELEASE)/" README.md
 	@sed --in-place "/VERSION=/s/$(RELEASE-REGEX)/$(RELEASE)/" run-installer
+	@sed --in-place "3s/$(RELEASE-REGEX)/$(RELEASE)/" lisp/maplev-pkg.el
 	@doc/MakeVersion $(TEXI-VERSION) $(RELEASE)
 	@lisp/MakeVersion $(LISP-VERSION) $(RELEASE)
 	@git commit --quiet --message="prepare release" --all
@@ -376,8 +422,12 @@ ifneq ($(GIT-BRANCH),develop)
 	$(error "must be on develop branch")
 endif
 
-# }}}
 
+maplev-built.zip: maplev.mla doc/maplev.html doc/maplev.info doc/maplev.pdf
+	zip $@ $^
+
+
+# }}}
 # {{{ Distribution
 
 help: $(call print-separator)

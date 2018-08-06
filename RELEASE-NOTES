@@ -1,5 +1,10 @@
 -*- org -*-
 
+* 3.00
+** Use compiled binary (pmaple) to communicate with maple
+** Add maplev-config; remove maplev-executable-alist
+** Improve interactive capabilities of mint-mode
+
 * 2.37
 ** Minor changes.  Purge emacs byte-compile nags.  Will distribute build files.
 * 2.36

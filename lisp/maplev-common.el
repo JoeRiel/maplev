@@ -17,7 +17,8 @@
   (defvar maplev-help-mode-syntax-table)
   (defvar maplev-history-list)
   (defvar maplev-mode-4-syntax-table)
-  (defvar maplev-mode-syntax-table))
+  (defvar maplev-mode-syntax-table)
+  (defvar maplev-quote-not-string-syntax-table))
 
 (declare-function maplev-reset-font-lock "maplev")
 (declare-function maplev--re-search-backward "maplev-mint")
@@ -164,25 +165,35 @@ The defun marked is the one that contains point."
   (push-mark)
   (beginning-of-line)
   (if (looking-at maplev--defun-begin-re) (goto-char (match-end 0)))
-  (let ((count 1)
-        (regexp (concat "\\(" maplev--defun-begin-re "\\)\\|\\(?:" maplev--defun-end-re "\\)")))
+  (let ((count 1) ; decrement for each end statement, increment for each proc
+        (regexp (concat "\\(" maplev--defun-begin-re "\\)\\|\\(?:" maplev--defun-end-re "\\)"))
+	(opoint (point)))
+    ;; move to end of current procedure, using count to skip over local procedure assignments.
     (while (and (/= count 0)
                 (re-search-forward regexp nil 'move))
       (setq count (+ count (if (match-beginning 1) 1 -1))))
     (forward-line)
-    (push-mark (point) nil t)
-    (when (= count 0)
-      (goto-char (match-beginning 0))
-      (setq count -1))
-    (while (and (/= count 0)
-                (re-search-backward regexp nil 'move))
-      (setq count (+ count (if (match-beginning 1) 1 -1))))))
+    (if (/= count 0)
+	;; at bottom of buffer without finding closing mark
+	(progn
+	  (goto-char opoint)
+	  (when (setq opoint (maplev--end-of-defun-pos))
+	    (when (maplev--beginning-of-defun-pos)
+	      (push-mark opoint nil t))))
+      ;; at end of procedure
+      (push-mark (point) nil t) ; set mark after end of current procedure.
+      (when (re-search-backward maplev--defun-end-re nil 'move)
+	(setq count -1)
+	(while (and (/= count 0)
+		    (re-search-backward regexp nil 'move))
+	  (setq count (+ count (if (match-beginning 1) 1 -1))))
+	(zerop count)))))
 
 (defun maplev-current-defun ()
   "Return a list with buffer positions of begin and end of current defun."
-  (save-excursion
-    (maplev-mark-defun)
-    (list (point) (mark))))
+  (save-mark-and-excursion
+    (when (maplev-mark-defun)
+      (list (point) (mark)))))
 
 (defun maplev-narrow-to-defun ()
   "Make text outside current defun invisible."
@@ -220,39 +231,50 @@ If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
   (let* ((state (parse-partial-sexp (maplev-safe-position)
                                     (point)))
          (choice (if (equal ?` (nth 3 state))
-                     ;; inside a string
+                     ;; inside a backquoted symbol
                      (buffer-substring-no-properties
                       (nth 8 state)
-                      (save-excursion (goto-char (nth 8 state))
-                                      (forward-sexp 1) (point)))
-                   (current-word))))
-    (if (string-equal choice "")
-        (cond ((stringp default)
-               default)
-              (default "")
-              ((error "Empty choice")))
-      choice)))
+                      (save-excursion (goto-char (nth 8 state)) ; goto start of string
+				      (condition-case nil
+					  (forward-sexp 1)
+					(error (error "unterminated quoted symbol")))
+				      (point)))
+		   (with-syntax-table maplev-quote-not-string-syntax-table
+		     (current-word)))))
+    (cond
+     ((and choice (string-match "^`.*[^`]$" choice))
+      (save-excursion
+	(setq choice (and (looking-at (concat " *\\(" maplev--quoted-name-re "\\)"))
+			  (match-string-no-properties 1)))))
+     ((and choice (string-match "^[^`].*`$" choice))
+      (save-excursion
+	(setq choice (and (looking-back (concat "\\(" maplev--quoted-name-re "\\) *") 
+					(line-beginning-position))
+			  (match-string-no-properties 1))))))
+    (cond
+     (choice choice)
+     ((stringp default) default)
+     (default "")
+     (t (error "Empty choice")))))
 
 (defun maplev-ident-around-point-interactive (prompt &optional default complete)
   "Request Maple identifier in minibuffer, using PROMPT.
 Default is identifier around point.  If it is empty use DEFAULT.
 Minibuffer completion is used if COMPLETE is non-nil."
   ;; Suppress error message
-  (if (not default) (setq default t))
-  (let ((enable-recursive-minibuffers t)
-        (ident (maplev--ident-around-point default))
-        choice)
-    (setq prompt (concat prompt (unless (string-equal ident "")
+  (let* ((enable-recursive-minibuffers t)
+        (ident (maplev--ident-around-point (or default t)))
+	(prompt (concat prompt (unless (string-equal ident "")
                                   (concat " (default " ident ")"))
-                         ": ")
-          choice (if complete
-                     (completing-read prompt 'maplev--completion
-                                      nil nil nil maplev-history-list ident)
-                   (read-string prompt nil maplev-history-list ident)))
+                         ": "))
+	(choice (if complete
+		    (completing-read prompt 'maplev--completion
+				     nil nil nil maplev-history-list ident)
+		  (read-string prompt nil maplev-history-list ident))))
     ;; Are there situations where we want to suppress the error message??
     (if (string-equal choice "")
-        (error "Empty choice"))
-    (maplev--string-to-name choice)))
+        (error "Empty choice")
+      choice)))
 
 ;;}}}
 

@@ -1,0 +1,327 @@
+% -*- mmm-noweb-code-mode: c-mode -*-
+
+\documentclass[12pt]{article}
+
+
+\usepackage{mathptmx}
+\usepackage[smallcode,longchunks,shortxref]{knoweb}
+\usepackage{syntax,xspace,paralist}
+\usepackage{color}
+\usepackage{ifpdf}
+\ifpdf
+\usepackage[pdftex,colorlinks,backref,bookmarks
+  ,pdftitle={pmaple}
+  ,pdfauthor={Joseph S. Riel}
+  ,pdfpagemode={UseOutline}
+  ,bookmarksopen={true}
+  ]{hyperref}
+\else
+  \usepackage[dvips,backref]{hyperref}
+\fi
+
+\pagestyle{noweb}
+
+\newcommand{\cmaple}{\xspace{\texttt{cmaple}}}
+\newcommand{\pmaple}{\xspace{\texttt{pmaple}}}
+
+\newcommand{\comment}[1]{\textcolor{blue}{#1}}
+
+
+\title{\texttt{pmaple}}
+\author{Joseph S. Riel\quad\href{mailto:jriel@maplesoft.com}{\texttt{jriel@maplesoft.com}}}
+
+\begin{document}
+
+\maketitle
+
+% (knoweb-setup)
+
+\section{Purpose}
+\label{sec:purpose}
+
+This is the documented source code for \pmaple,
+which provides pipe-line communication with the Maple engine,
+and is intended to be used with [[maplev]]-mode, an Emacs
+mode for editing Maple scripts.
+It exists because \cmaple, also known as tty Maple,
+when used in non-interactive mode,
+does not flush prompts to standard output until new input arrives;
+that makes it difficult to determine when a computation is complete.
+
+\section{Code}
+\label{sec:code}
+
+<<pmaple.c>>=
+<<header>> 
+<<includes>>
+<<macros>>
+<<functions>>
+<<main>>
+@
+
+\subsection{Include Files}
+\label{sec:include-files}
+
+The [[maplec.h]] file lies in [[$MAPLE_ROOT/extern/internal]].
+
+<<includes>>=
+#include <ctype.h>  
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <maplec.h>
+#include "getdelim.h"  
+@
+
+\subsection{Macros}
+\label{sec:macros}
+
+
+<<macros>>= 
+#define PROMPT "(**) "
+#define VERSION "0.1.0"
+@
+
+\subsection{Main}
+\label{sec:main}
+
+<<main>>=
+int main( int argc, char *argv[] ) {
+  <<main: vars>>
+  <<process options>>
+  <<initialize Maple>>
+  <<print splash screen>>
+  <<configure Maple>>
+  <<main loop>>
+  <<finish up>>
+}
+@
+
+\subsubsection{Allocate Variables}
+\label{sec:allocate-variables}
+
+
+Allocate string buffers for the input expression, [[expr]], and an error message, [[err]].
+The maximum length of a Maple error message, including the terminating NULL character,
+is 2048 characters.\footnote{See the Maple help page for [[StartMaple]].}
+
+<<main: vars>>=
+char *expr = NULL; /* buffer for input */
+size_t len = 0;    /* assigned total size of expr buffer */
+ssize_t read;      /* indicates status of the read */
+char err[2048];    /* buffer for error message */
+@
+
+
+
+Assign the vector of callback procedures.  This is passed to
+[[StartMaple]]; any non-zero entries are callbacks that are called
+when required to perform the appropriate action.
+
+<<main: vars>>=
+MCallBackVectorDesc cb = { textCallBack, 
+                           0,   /* errorCallBack */
+                           0,   /* statusCallBack */
+                           0,   /* readLineCallBack */
+                           0,   /* redirectCallBack */
+                           0,   /* streamCallBack, */
+                           0,   /* queryInterrupt */
+                           0    /* callBackCallBack */
+  };
+@
+
+
+<<main: vars>>=
+ALGEB dag;  /* eval result (Maple data-structure) */
+@
+
+
+\subsubsection{Process Options}
+\label{sec:process-options}
+
+
+<<main: vars>>=
+int quiet = FALSE;   /* flag, when nonzero suppress the "splash screen" */
+int num;             /* used to extract error/warn level from option */
+int errlev = 1;      /* default error level */
+int warnlev = 3;     /* default warn level */
+int i;               /* argument index */
+@
+
+Search for a [[-q]] (quiet) option; if found reassign [[quiet]] to true.
+Reassign [[errlev]] and [[warnlev]] from the [[-e]] and [[-w]] options,
+respectively.
+
+<<process options>>=
+for ( i=1; i < argc ; i++ ) {
+  if( !strcmp(argv[i], "-q") ) {
+    quiet = TRUE;
+  } else if( (sscanf(argv[i], "-e%d", &num) == 1) ) {
+    errlev = num;
+  } else if( (sscanf(argv[i], "-w%d", &num) == 1) ) {
+    warnlev =  num;
+  }
+}
+@
+
+\subsubsection{Connect to OpenMaple}
+\label{sec:connecttomaple}
+
+Call [[StartMaple]] to assign the kernel vector used in subsequent
+calls to OpenMaple functions.  Pass [[argc]] and [[argv]]; it handles
+all arguments.
+
+<<main: vars>>=
+MKernelVector kv; /* kernel vector handle used in OpenMaple calls */ 
+@
+
+<<initialize Maple>>=
+kv = StartMaple(argc,argv,&cb,NULL,NULL,err);
+if( (kv == NULL )) {
+  printf("Fatal error, %s\n",err);
+  return( 1 );
+}
+@
+
+\subsubsection{Configure Maple}
+\label{sec:configmaple}
+
+<<main: vars>>=
+char cmd[120];
+@
+
+Assign Maple commands that
+  set the screen height to infinity, so pagination is disabled;
+  set the screen width to eighty characters;
+  disable garbage collection notices;
+  assign the error and warning levels;
+  and reassign the version.
+
+<<configure Maple>>=
+sprintf(cmd, 
+        "interface("
+        "'screenheight'=infinity,"
+        "'screenwidth'=80,"
+        "'errorbreak'=%1d,"
+        "'warnlevel'=%1d):"
+        "kernelopts('printbytes'=false):"
+        "<<reassign interface(version)>>"
+        , errlev, warnlev );
+@          
+
+Reassign [[interface(version)]] so that it indicates that this
+is command-line Maple.  That allows [[IsWorksheetInterface()]]
+to return a useful result (false).  It also avoids a bug where
+[[interface(version)]] does not return when the kernel switches
+to multi-threaded.
+
+<<reassign interface(version)>>=
+interface('version'):=cat(`Command-line Interface, `,interface('version')):
+@
+
+
+<<configure Maple>>=
+EvalMapleStatement(kv, cmd);
+@
+
+
+\subsubsection{Main Loop}
+\label{sec:main-loop}
+
+  Print a prompt, read the input, clean it, and send it to the Maple kernel.
+  
+<<main loop>>=
+while (TRUE) {
+  <<print prompt>> 
+  read = getdelim(&expr, &len, '\0', stdin);
+  if( (read == -1 )) break;
+  dag = EvalMapleStatement(kv,expr);
+  if( dag && IsMapleStop(kv,dag) ) break;
+ }
+@
+
+Print the [[prompt]] and flush the print buffer.
+Flushing is critical; this is not done in normal tty Maple,
+except when used interactively.
+
+<<print prompt>>=
+printf( PROMPT );
+<<flush all open output streams>>
+@
+
+<<print splash screen>>=
+if( !quiet ){
+  printf("pMaple v%s (c) copyright 2018 Joseph S. Riel\n", VERSION);
+}  
+@
+
+Close any open files, print a sign-off message and flush it, 
+then return 0, indicating no-errors.
+
+<<finish up>>=
+free(expr);
+printf("That's all, folks.\n");
+<<flush all open output streams>>
+return( 0 );
+@
+
+The [[NULL]] means flush all open output streams.
+
+<<flush all open output streams>>=
+fflush(NULL);
+@
+
+\subsection{Callback Functions}
+\label{sec:call-back-functions}
+
+\subsubsection{Text Callback}
+\label{sec:text-callback}
+
+This function is called by Maple for typical (non-exceptional) output.
+The [[tag]] parameter indicates the type of Maple output.
+The [[output]] parameter contains the string of text.
+
+Print the text to [[stdout]].
+
+<<functions>>=
+static void M_DECL textCallBack( void *data, int tag, const char *output )
+{  
+  printf("%s\n", output);
+}
+@
+
+\subsection{Header}
+\label{sec:header}
+
+<<header>>=
+/* *********************************************************************
+ * pmaple.c --- source file for pmaple
+ *
+ * Author:     Joseph S. Riel <<email>>
+ * Created:    July 2018
+ * Keywords:   maple
+ *
+ * This is the source code for pmaple, which enhances the pipe-line
+ * communication with the Maple engine.  The enhancement is trivial;
+ * it ensures that prompts are flushed to standard output when they 
+ * are generated.  This makes it possible to communicate with the 
+ * Maple engine in a reasonable manner.  With cmaple, the prompts 
+ * are not flushed until new input arrives, which makes it difficult
+ * to determine when a computation is complete.
+ *
+ *********************************************************************** */
+  
+@
+
+\subsection{Miscellaneous}
+\label{sec:miscellaneous}
+
+<<email>>=
+jriel@maplesoft.com>
+@
+
+\end{document}
+
