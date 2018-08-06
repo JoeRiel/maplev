@@ -4,7 +4,7 @@
 
 SHELL = /bin/bash
 
-CLOUD-ID := 5079594903273472
+CLOUD-ID := 5156847439839232
 CLOUD-DESCRIPTION := An Emacs mode for Maple developers
 AUTHOR-ID := 60042
 PKG-DATE := $(shell date '+%B %Y')
