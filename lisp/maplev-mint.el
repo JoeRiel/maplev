@@ -918,7 +918,7 @@ Interactively, VAR defaults to identifier point is on."
   (maplev-add-variable "export" var))
 
 (defun maplev-add-variable (keyword var)
-  "To the current procedure's KEYWORD declaration add VAR."
+  "Add VAR to the current procedure's KEYWORD declaration."
   (save-excursion
     (maplev-beginning-of-defun)
     (goto-char (maplev--scan-lists 1))
