@@ -676,7 +676,7 @@ Return exit code of mint."
     ;; move point in this window
     (when (and code-window errpos)
       (set-window-point code-window errpos)
-      (switch-to-buffer-other-window mint-buffer))
+      (switch-to-buffer mint-buffer))
     status))
 
 (defun maplev-mint-buffer ()
