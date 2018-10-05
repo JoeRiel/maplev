@@ -480,7 +480,8 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 		    (list (save-excursion
 			    (goto-char pos)
 			    (maplev--ident-around-point)))))
-	     (arg (if (= 1 (length vars)) (car vars) vars)))
+	     (arg (if (= 1 (length vars)) (car vars) vars))
+	     (cont t))
 	(cond
 	 ;; Jump to an included file
 	 ((eq prop 'include-file)
@@ -579,10 +580,11 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Goto line
 	 ((eq prop 'goto-line)
+	  (setq cont nil)
 	  (maplev-mint--goto-source-line pos)))
 
 	;; rerun mint
-	(when maplev-mint-rerun-flag
+	(when (and maplev-mint-rerun-flag cont)
 	  (unless maplev-mint--code-buffer
 	    (and maplev-mint-save-rerun-flag
 		 (buffer-modified-p)
