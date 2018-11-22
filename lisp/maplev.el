@@ -246,7 +246,7 @@ When MESSAGE is non-nil, display a message with the version."
   "Syntax table used in Maple help buffer.")
 
 (defvar maplev-quote-not-string-syntax-table
-  (let ((table (make-syntax-table maplev-mode-syntax-table)))
+  (let ((table (make-syntax-table maplev-symbol-syntax-table)))
     (modify-syntax-entry ?\' "." table)
     (modify-syntax-entry ?\` "_" table)
     table)
