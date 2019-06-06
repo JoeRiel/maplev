@@ -1822,7 +1822,7 @@ if `maplev-leading-comma-flag' is non-nil, remove space before a comma."
 	   (looking-at " ,"))
       (delete-char 1)
     (when (and (looking-at " \"")
-	       (looking-back "\""))
+	       (looking-back "\"" nil))
       (delete-char -1)
       (delete-char 2))))
 
