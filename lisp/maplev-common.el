@@ -138,6 +138,117 @@ Return nil if search fails."
                   (match-end 0)))
             ((point))))))
 
+(defun maplev--beginning-of-defun ()
+  "Move point backwards to the beginning of the current defun,
+that is, a Maple procedure or module.  The beginning is the first
+character of the keyword.  Complete end-statements are not required."
+  (interactive)
+  (let ((count 0)
+	(regex (concat "\\_<\\(?:\\(proc\\|module\\)"    ; 1
+		       "\\|\\(do\\|if\\|try\\|use\\)"   ; 2
+		       "\\|\\(end\\|fi\\|od\\|until\\)" ; 3
+		       "\\)\\_>"))
+	(state (syntax-ppss))
+	(start (point)))
+    (unless (or (nth 3 state)
+    		(nth 4 state)
+    		(not (looking-at maplev-partial-end-defun-re)))
+      ;; Handle point in keywords by repositioning point
+      ;; so algorithm correctly handles them.
+      (goto-char (match-end 0))
+      (if (looking-back "\\_<end\\s-\\(proc\\|module\\)?" nil)
+    	  ;; point is in ending keywords.  Move before them.
+    	  (goto-char (match-beginning 0))
+	(if (not (looking-back "\\_<\\(?:proc\\|module\\)" nil))
+	    (goto-char start)
+	  (when (save-excursion
+		  (goto-char start)
+		  (looking-at " *\\(proc\\|module\\)"))
+	    (goto-char start)))))
+    (while (and (>= count 0)
+		(re-search-backward regex))
+      (let ((state (syntax-ppss))) ; FIXME: speed this up
+	(unless (or (nth 3 state)  ; string/quoted
+		    (nth 4 state)) ; comment
+	  (if (match-string-no-properties 3)
+	      (setq count (1+ count))
+	    (unless (looking-back "end\\s-+" nil)
+	      (if (or (match-string-no-properties 1)
+		      (> count 0))
+		  (setq count (1- count))))))))))
+
+
+(defun make-partial-match-regexp-backwards (word)
+  (let ((re (substring word -1)))
+    (mapc (lambda (c) (setq re (concat "\\(?:" (char-to-string c) re "?\\)")))
+	  (reverse (string-to-list (substring word 0 -1))))
+    re))
+
+(make-partial-match-regexp-backwards "end proc")
+
+(defun make-partial-match-regexp (word)
+  (let ((re (substring word 0 1)))
+    (mapc (lambda (c) (setq re (concat "\\(?:" re "?" (char-to-string c) "\\)"))) 
+	  (substring word 1))
+    re))
+
+(defconst maplev-partial-end-defun-re
+  (concat "\\("
+	  (make-partial-match-regexp "end")
+	  "?\\s-+\\)?\\(?:"
+	  (make-partial-match-regexp "proc")
+	  "\\|"
+	  (make-partial-match-regexp "module")
+	  "\\)\\>"))
+
+(defun maplev--end-of-defun ()
+  "Move point forward to the end of the current defun,
+that is, a Maple procedure or module.
+THIS ASSUMES EACH END STATEMENT IS FOLLOWED BY AN APPROPRIATE KEYWORD."
+
+  ;; To handle short end-statements, the search must be from the
+  ;; beginning of the procedure, otherwise there is no way to tell when
+  ;; the procedure has ended.  This currently ignores that by assuming
+  ;; long end-statements are used.
+
+  ;; This algorithm assumes a proc/module is bounded by its keywords.
+  ;; Consider
+  ;;
+  ;;   foo := proc() ... end proc;
+  ;;
+  ;; If point is in "foo", it is considered outside the proc body
+  ;; so moving to the end will move point to end of containing proc
+  ;; (or end of file).
+    
+  (interactive)
+  (let ((count 0)
+	(regex "\\(end\\s-+\\)?\\_<\\(?:proc\\|module\\)\\_>")
+	(state (syntax-ppss))
+	(start (point)))
+    (unless (or (nth 3 state)
+		(nth 4 state)
+		(not (looking-at maplev-partial-end-defun-re)))
+      ;; Handle point in keywords by repositioning point
+      ;; so algorithm correctly handles them.
+      (goto-char (match-end 0))
+      (if (looking-back "\\_<end\\s-\\(proc\\|module\\)" nil)
+	  ;; point is in ending keywords.  Move before them.
+	  (goto-char (match-beginning 0))
+	(goto-char start)
+	;; point is at initial character of beginning keyword; move forward
+	(if (looking-at "proc\\|module")
+	    (goto-char (match-end 0)))))
+    ;; Standard algorithm
+    (while (and (>= count 0)
+		(re-search-forward regex))
+      (setq state (parse-partial-sexp start (point) nil nil state)
+	    start (point))
+      (unless (or (nth 3 state)  ; string/quoted
+		  (nth 4 state)) ; comment
+	(setq count (if (match-string-no-properties 1)
+			(1- count)
+		      (1+ count)))))))
+
 (defun maplev-beginning-of-defun (&optional n)
   "Move point backward to the beginning of defun.
 With optional argument N, move to the beginning of the Nth
