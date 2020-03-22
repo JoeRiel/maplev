@@ -1,5 +1,10 @@
 -*- org -*-
 
+* 3.0.1
+
+** Modify cmaple to cerate maplev-config as neede
+** Handle underscores in maplev-mark-defun
+
 * 3.0
 ** Use compiled binary (pmaple) to communicate with maple
 ** Add maplev-config; remove maplev-executable-alist

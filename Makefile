@@ -313,7 +313,7 @@ $(book): $(mla) $(hlp) $(HTML-FILE) $(PDF-FILE) $(INTRO) $(TAR-FILE)
 	     for eq in [NULL \
 	                 , "X-CloudId"        = "$(CLOUD-ID)" \
 	                 , "X-CloudXId"	      = "$(AUTHOR-ID)" \
-	                 , "X-CloudGroup"     = "private" \
+	                 , "X-CloudGroup"     = "Maple Emacs@$(AUTHOR-ID)" \
 	                 , "X-CloudURL"       = "https://maple.cloud" \
 	                 , "X-CloudVersion"   = "$(CLOUD-VERSION)" \
 	                 , "application_type" = "MaplePackage" \

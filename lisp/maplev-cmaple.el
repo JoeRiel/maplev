@@ -97,8 +97,9 @@ Start one, if necessary."
 (defun maplev-cmaple--start-process ()
   "Start a cmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
-restart it."
-  (let* ((config maplev-config)
+restart it.  If variable `maplev-config' is assigned, use it, otherwise create
+one by calling procedure `maplev-config'."
+  (let* ((config (or maplev-config (maplev-config)))
 	 (process-environment (maplev-cmaple--process-environment))
 	 (pmaple-and-opts (maplev-cmaple--get-pmaple-and-options))
          (buffer (get-buffer-create (maplev--cmaple-buffer)))

@@ -874,7 +874,7 @@ see the @code{:tester} entry, below.
 
 @item :maple
 Shell command to execute tty (command-line) Maple.
-The default is @samp{maple}.  @xref{Maple}.
+@xref{Maple}.
 
 @item :mapledir
 The path to the installation of Maple.
@@ -891,12 +891,12 @@ for a description of the available options.
 
 @item :mint
 Shell command to execute Mint, the Maple syntax-checker.
-The default is @samp{mint}.  @xref{Mint}.
+@xref{Mint}.
 
 @item :mint-options
 A string of options to pass to @command{mint},
 the Maple syntax checker.
-The default is @samp{-i2 -q -v -w 100}.
+The default is @samp{-i2 -q -v}.
 The use of the verbose option, @samp{-v},
 is necessary so that @command{mint} output for include files
 shows the path to the file; the information is used 

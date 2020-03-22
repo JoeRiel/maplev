@@ -6,7 +6,7 @@
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    2.37
+;; Version:    3.01
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -246,7 +246,7 @@ When MESSAGE is non-nil, display a message with the version."
   "Syntax table used in Maple help buffer.")
 
 (defvar maplev-quote-not-string-syntax-table
-  (let ((table (make-syntax-table maplev-mode-syntax-table)))
+  (let ((table (make-syntax-table maplev-symbol-syntax-table)))
     (modify-syntax-entry ?\' "." table)
     (modify-syntax-entry ?\` "_" table)
     table)
@@ -1822,7 +1822,7 @@ if `maplev-leading-comma-flag' is non-nil, remove space before a comma."
 	   (looking-at " ,"))
       (delete-char 1)
     (when (and (looking-at " \"")
-	       (looking-back "\""))
+	       (looking-back "\"" nil))
       (delete-char -1)
       (delete-char 2))))
 

@@ -480,7 +480,8 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 		    (list (save-excursion
 			    (goto-char pos)
 			    (maplev--ident-around-point)))))
-	     (arg (if (= 1 (length vars)) (car vars) vars)))
+	     (arg (if (= 1 (length vars)) (car vars) vars))
+	     (cont t))
 	(cond
 	 ;; Jump to an included file
 	 ((eq prop 'include-file)
@@ -579,10 +580,11 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Goto line
 	 ((eq prop 'goto-line)
+	  (setq cont nil)
 	  (maplev-mint--goto-source-line pos)))
 
 	;; rerun mint
-	(when maplev-mint-rerun-flag
+	(when (and maplev-mint-rerun-flag cont)
 	  (unless maplev-mint--code-buffer
 	    (and maplev-mint-save-rerun-flag
 		 (buffer-modified-p)
@@ -674,7 +676,7 @@ Return exit code of mint."
     ;; move point in this window
     (when (and code-window errpos)
       (set-window-point code-window errpos)
-      (switch-to-buffer-other-window mint-buffer))
+      (switch-to-buffer mint-buffer))
     status))
 
 (defun maplev-mint-buffer ()
@@ -918,10 +920,27 @@ Interactively, VAR defaults to identifier point is on."
   (maplev-add-variable "export" var))
 
 (defun maplev-add-variable (keyword var)
-  "To the current procedure's KEYWORD declaration add VAR."
+  "Add VAR to the current procedure's KEYWORD declaration."
   (save-excursion
     (maplev-beginning-of-defun)
+    (when (re-search-forward ":=\s-*proc" nil t)
+      (goto-char (maplev--scan-lists 1))
+      (maplev-add-declaration keyword (list var)))))
+
+(defun maplev-add-variable-here (keyword var begin)
+  "Add VAR to KEYWORD declaration of procedure/module that begins at BEGIN."
+  (save-excursion
+    (goto-char begin)
+    (unless (re-search-forward "\\<proc\\|module\\>" nil t)
+      (error "Cannot find start of procedure/module"))
+    ;; skip over argument sequence
     (goto-char (maplev--scan-lists 1))
+    ;; skip an optional return type
+    (when (looking-at "\\s-*::")
+      (maplev-forward-expr)
+      (if (looking-at "\\s-*[:;]")
+	  (goto-char (match-end 0))
+	(error "Cannot find end of return type")))
     (maplev-add-declaration keyword (list var))))
 
 (defun maplev-delete-declarations (keyword vars region)
@@ -1113,7 +1132,7 @@ VARs is a list of undeclared globals."
 			     ((or (eq def 'global)
 				  (eq def 'local))
 			      ;; add variable to local/global declaration
-			      (maplev-add-variable (symbol-name def) match)
+			      (maplev-add-variable-here (symbol-name def) match beg)
 			      ;; remove match from vars and update regex
 			      (setq vars (delete match vars)
 				    regex nil
@@ -1123,7 +1142,7 @@ VARs is a list of undeclared globals."
 			      (let ((var match)
 				    (keyword (if (eq def 'global-rest) "global" "local")))
 				(while vars
-				  (maplev-add-variable keyword var)
+				  (maplev-add-variable-here keyword var beg)
 				  (setq var (car vars)
 					vars (cdr vars))))
 			      (setq done t
@@ -1225,8 +1244,15 @@ Return the edited list upon completion."
 	      (setq vars (cons var vars))
 	      (unless (bobp)
 		(forward-line -1))))
-      vars))))
-  
+	vars))))
+
+;; (defun maplev-mint-file-find ()
+;;   (interactive)
+;;   (let ((buffer (current-buffer))
+;; 	(config maple-config)
+;; 	(file   
+		
+
 
 (provide 'maplev-mint)
 
