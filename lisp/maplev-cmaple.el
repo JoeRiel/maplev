@@ -46,17 +46,35 @@ Start one, if necessary."
         process
       (maplev-cmaple--start-process))))
 
+(defun maplev-cmaple-default-pmaple ()
+  "Return the default path to the pmaple executable."
+  (expand-file-name
+   (concat "~/maple/toolbox/maplev/bin/pmaple"
+	   (if (or (eq system-type 'windows-nt)
+		   (eq system-type 'cygwin)
+		   (eq system-type 'ms-dos))
+	       ".exe"
+	     ""))))
+
+
 (defun maplev-cmaple--process-environment ()
   "Return a list of strings of equations that define the process environment."
   (unless maplev-config
     (maplev-config))
-  (let ((bindir (slot-value maplev-config 'bindir)))
+  (let ((bindir   (slot-value maplev-config 'bindir))
+	(mapledir (slot-value maplev-config 'mapledir)))
     (cond
      ((null bindir)
       (error "The :bindir slot of maplev-config is not assigned"))
      ((not (file-directory-p bindir))
-      (error "The :bindir slot of maplev-config, `%s', does not exist" bindir)))
-    (cons
+      (error "The :bindir slot of maplev-config, `%s', does not exist" bindir))
+     ((null mapledir)
+      (error "The :mapledir slot of maplev-config is not assigned"))
+     ((not (file-directory-p mapledir))
+      (error "The :mapledir slot of maplev-config, `%s', does not exist" mapledir)))
+
+    ;; create list of PATH=bindir MAPLE=mapledir ... 
+    (list 
      (cond
       ((eq system-type 'gnu/linux)
        (concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
@@ -67,19 +85,10 @@ Start one, if necessary."
       ((eq system-type 'darwin)
        (concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
       (t (error "Unexpected system-type '%s'" system-type)))
-     (if maplev-use-new-language-features
+     (concat "MAPLE=" mapledir)
+     (if maplev-use-new-language-features 
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
        process-environment))))
-
-(defun maplev-cmaple-default-pmaple ()
-  "Return the default path to the pmaple executable."
-  (expand-file-name
-   (concat "~/maple/toolbox/maplev/bin/pmaple"
-	   (if (or (eq system-type 'windows-nt)
-		   (eq system-type 'cygwin)
-		   (eq system-type 'ms-dos))
-	       ".exe"
-	     ""))))
 
 (defun maplev-cmaple--get-pmaple-and-options ()
   "Return a list of strings consisting of the pmaple executable and its options."
