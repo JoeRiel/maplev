@@ -4,7 +4,7 @@
 
 SHELL = /bin/bash
 
-CLOUD-ID := 5079594903273472
+CLOUD-ID := 5118961662820352
 CLOUD-DESCRIPTION := An Emacs mode for Maple developers
 AUTHOR-ID := 60042
 PKG-DATE := $(shell date '+%B %Y')
@@ -305,7 +305,8 @@ book := $(PKG).maple
 book: $(book)
 $(book): $(mla) $(hlp) $(HTML-FILE) $(PDF-FILE) $(INTRO) $(TAR-FILE)
 	$(RM) $@
-	echo '(MakeBook)("$@" $(foreach file,$^,,"$(file)") \
+	echo '(MakeBook)("$@" \
+	                 , $(foreach file,$^,"$(file)",) NULL \
 	                 , "bin.X86_64_LINUX"        = "pmaple/bin.X86_64_LINUX/pmaple" \
 	                 , "bin.X86_64_WINDOWS"      = "pmaple/bin.X86_64_WINDOWS/pmaple.exe" \
 	                 , "bin.APPLE_UNIVERSAL_OSX" = "pmaple/bin.APPLE_UNIVERSAL_OSX/pmaple" \

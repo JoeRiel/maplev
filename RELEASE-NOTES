@@ -1,5 +1,9 @@
 -*- org -*-
 
+* 3.0.2
+** Assign OS env. var. MAPLE when starting pmaple.
+** Change CLOUD-ID.
+
 * 3.0.1
 
 ** Modify cmaple to cerate maplev-config as neede
