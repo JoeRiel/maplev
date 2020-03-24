@@ -306,7 +306,7 @@ book: $(book)
 $(book): $(mla) $(hlp) $(HTML-FILE) $(PDF-FILE) $(INTRO) $(TAR-FILE)
 	$(RM) $@
 	echo '(MakeBook)("$@" \
-	                 , $(foreach file,$^,,"$(file)") \
+	                 , $(foreach file,$^,"$(file)",) NULL \
 	                 , "bin.X86_64_LINUX"        = "pmaple/bin.X86_64_LINUX/pmaple" \
 	                 , "bin.X86_64_WINDOWS"      = "pmaple/bin.X86_64_WINDOWS/pmaple.exe" \
 	                 , "bin.APPLE_UNIVERSAL_OSX" = "pmaple/bin.APPLE_UNIVERSAL_OSX/pmaple" \
