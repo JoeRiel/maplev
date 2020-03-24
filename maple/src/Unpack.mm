@@ -87,7 +87,9 @@ uses FT = FileTools;
 
     if platform = "unix" or platform = "mac" then
         status := ssystem(sprintf("chmod +x %s", dst));
-        if not status[1] = 0 then
+        if not status[1] = 0
+        or not FileTools:-IsExecutable(dst)
+        then
             WARNING("could not make binary file %1 executable", dst);
         end if;
     end if;
