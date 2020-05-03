@@ -1674,7 +1674,7 @@ create the file."
 				  (not toggle)
 				toggle))
 	   file)
-      (setq file (maplev-find-include-file inc-file inc-first path))
+      (setq file (maplev-find-include-file inc-file path inc-first))
       (if file
 	  (if other-window-flag
 	      (find-file-other-window file )
@@ -1684,7 +1684,7 @@ create the file."
 	(let ((base (file-name-nondirectory inc-file))
 	      (inc-dir inc-file))
 	  (while (and (setq inc-dir (file-name-directory (directory-file-name inc-dir)))
-		      (not (setq file (maplev-find-include-file inc-dir inc-first path)))))
+		      (not (setq file (maplev-find-include-file inc-dir path inc-first)))))
 	  (if (not file)
 	      (error "Include file %s does not exist " inc-file)
 	    (when (yes-or-no-p (format "Create include file %s "
@@ -1693,7 +1693,7 @@ create the file."
 		  (find-file-other-window file)
 		(find-file file)))))))))
 
-(defun maplev-find-include-file (inc-file &optional inc-first inc-path)
+(defun maplev-find-include-file (inc-file &optional inc-path inc-first)
   "Find the Maple include file INC-FILE and return as an absolute path.
 INC-PATH is an optional list of rooted directories.  Use each
 directory, in order, as parent of INC-FILE.  If INC-FIRST is
@@ -1702,15 +1702,15 @@ non-nil, search the INC-PATH directories before using the
 of `default-directory'.  Return nil if the file is not found."
   (if (file-name-absolute-p inc-file)
       (and (file-exists-p inc-file) inc-file)
-    (if inc-first
+    (if (and inc-path inc-first)
 	(or
 	 (maplev-include--find-file-in-path inc-file inc-path)
 	 (maplev-include--find-file-up-path inc-file))
       (or (maplev-include--find-file-in-path inc-file (list default-directory))
-	  (maplev-include--find-file-in-path inc-file inc-path)
+	  (and inc-path (maplev-include--find-file-in-path inc-file inc-path))
 	  (maplev-include--find-file-up-path inc-file)))))
 
-(defun maplev-include--find-file-in-path (file &optional paths)
+(defun maplev-include--find-file-in-path (file paths)
   "Search for FILE in a list of rooted PATHS, which include trailing slash.
 If found, return the absolute path to FILE, otherwise return nil."
   (let (dir abs-file)
