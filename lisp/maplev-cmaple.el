@@ -49,12 +49,14 @@ Start one, if necessary."
 (defun maplev-cmaple-default-pmaple ()
   "Return the default path to the pmaple executable."
   (expand-file-name
-   (concat "~/maple/toolbox/maplev/bin/pmaple"
-	   (if (or (eq system-type 'windows-nt)
-		   (eq system-type 'cygwin)
-		   (eq system-type 'ms-dos))
-	       ".exe"
-	     ""))))
+   (let ((dir "~/maple/toolbox/maplev/"))
+     (cond
+      ((eq system-type 'gnu/linux)
+       (concat dir "bin.X86_64_LINUX/pmaple"))
+      ((eq system-type 'darwin)
+       (concat dir "bin.APPLE_UNIVERSAL_OSX/pmaple"))
+      ((member system-type '(windows-nt cygwin ms-dos))
+       (concat dir "bin.X86_64_WINDOWS/pmaple.exe"))))))
 
 
 (defun maplev-cmaple--process-environment ()
@@ -74,21 +76,20 @@ Start one, if necessary."
       (error "The :mapledir slot of maplev-config, `%s', does not exist" mapledir)))
 
     ;; create list of PATH=bindir MAPLE=mapledir ... 
-    (list 
-     (cond
-      ((eq system-type 'gnu/linux)
-       (concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
-      ((or (eq system-type 'windows-nt)
-	   (eq system-type 'cygwin)
-	   (eq system-type 'ms-dos))
-       (format "set PATH=\"%s;%%PATH%%\"" bindir))
-      ((eq system-type 'darwin)
-       (concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
-      (t (error "Unexpected system-type '%s'" system-type)))
-     (concat "MAPLE=" mapledir)
+    (append
+     (list 
+      (cond
+       ((eq system-type 'gnu/linux)
+	(concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
+       ((member system-type '(windows-nt cygwin ms-dos))
+	(format "PATH=\"%s;%%PATH%%\"" bindir))
+       ((eq system-type 'darwin)
+	(concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
+       (t (error "Unexpected system-type '%s'" system-type)))
+      (concat "MAPLE=" mapledir))
      (if maplev-use-new-language-features 
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
-       process-environment))))
+       (list process-environment)))))
 
 (defun maplev-cmaple--get-pmaple-and-options ()
   "Return a list of strings consisting of the pmaple executable and its options."
