@@ -16,13 +16,11 @@
   (defvar compilation-error-regexp-alist)
   (autoload 'mouse-selection-click-count "mouse"))
 
-  
-
 (defun maplev--string-to-name (name)
   "Convert NAME to a valid Maple name.  Add back-quotes if needed."
   ;; Do we need something more general to match a string that might
   ;; require backquotes?
-  (when (string-match "/" name)
+  (unless (string-match maplev--simple-name-re name)
     (if (not (string= "`" (substring name 0 1)))
         (setq name (concat "`" name)))
     (if (not (string= "`" (substring name -1)))
