@@ -255,7 +255,8 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
     (when (looking-at ".*$")
       (let ((file (maplev-find-include-file 
 		   (match-string-no-properties 0) 
-		   'inc-first (slot-value maplev-config 'include-path))))
+		   (slot-value maplev-config 'include-path)
+		   'inc-first)))
 	(when file
 	  (find-file-other-window file))))))
   
@@ -323,7 +324,7 @@ The line number begins at character position POS."
   "Return the absolute path to the source file starting at current position."
   (when (looking-at "\\s-+\\(to\\s-+[0-9]+\\s-+\\)?of\\s-+\\(.*\\)")
     (let ((file (maplev-expand->file-name (match-string-no-properties 2) (slot-value maplev-config 'mapledir))))
-      (maplev-find-include-file file 'inc-first (slot-value maplev-config 'include-path)))))
+      (maplev-find-include-file file (slot-value maplev-config 'include-path) 'inc-first))))
 
 (defun maplev--replace-string (string replace)
   "In STRING replace as specified by REPLACE.
@@ -1109,7 +1110,7 @@ VARs is a list of undeclared globals."
 			      (progn
 				(replace-match quoted)
 				(setq done t))
-			    (replace-highlight (match-beginning 0) (match-end 0) nil nil (concat "\\_<" match "\\_>") 'regexp nil nil)
+			    (replace-highlight (match-beginning 0) (match-end 0) nil nil (concat "\\_<" match "\\_>") 'regexp nil nil nil)
 			    (message message match quoted)
 			    (setq key (vector (read-event)))
 			    (setq def (lookup-key maplev-mint-query-map key))
