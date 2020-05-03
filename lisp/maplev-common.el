@@ -6,10 +6,11 @@
 ;;; Code:
 ;;
 
-;;{{{ Suppress byte-compile warnings
-
+(require 'maplev-compat)
 (require 'maplev-custom)
 (require 'maplev-re)
+
+;;{{{ Suppress byte-compile warnings
 
 (eval-when-compile
   (defvar maplev-mode-syntax-table)
@@ -17,7 +18,7 @@
   (defvar maplev-help-mode-syntax-table)
   (defvar maplev-history-list)
   (defvar maplev-mode-4-syntax-table)
-  (defvar maplev-mode-syntax-table)
+  (defvar maplev-symbol-syntax-table)
   (defvar maplev-quote-not-string-syntax-table))
 
 (declare-function maplev-reset-font-lock "maplev")
@@ -178,28 +179,6 @@ character of the keyword.  Complete end-statements are not required."
 		  (setq count (1- count))))))))))
 
 
-(defun make-partial-match-regexp-backwards (word)
-  (let ((re (substring word -1)))
-    (mapc (lambda (c) (setq re (concat "\\(?:" (char-to-string c) re "?\\)")))
-	  (reverse (string-to-list (substring word 0 -1))))
-    re))
-
-(make-partial-match-regexp-backwards "end proc")
-
-(defun make-partial-match-regexp (word)
-  (let ((re (substring word 0 1)))
-    (mapc (lambda (c) (setq re (concat "\\(?:" re "?" (char-to-string c) "\\)"))) 
-	  (substring word 1))
-    re))
-
-(defconst maplev-partial-end-defun-re
-  (concat "\\("
-	  (make-partial-match-regexp "end")
-	  "?\\s-+\\)?\\(?:"
-	  (make-partial-match-regexp "proc")
-	  "\\|"
-	  (make-partial-match-regexp "module")
-	  "\\)\\>"))
 
 (defun maplev--end-of-defun ()
   "Move point forward to the end of the current defun,

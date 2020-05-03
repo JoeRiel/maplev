@@ -7,6 +7,7 @@
 ;;
 
 (require 'comint)
+(require 'maplev-compat)
 (require 'maplev-config)
 
 (eval-when-compile

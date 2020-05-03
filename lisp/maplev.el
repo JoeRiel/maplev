@@ -112,6 +112,7 @@
 (require 'imenu)
 (require 'info)
 
+(require 'maplev-compat)                ; compatibility definitions for older Emacs
 (require 'maplev-cmaple)                ; interact with Maple
 (require 'maplev-common)                ; common functions
 (require 'maplev-config)                ; configure maple/mint/tester 
