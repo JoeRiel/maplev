@@ -194,8 +194,7 @@ Use mint to syntax check the region before sending to cmaple."
 (defun maplev-cmaple-direct (input &optional delete)
   "Send the string INPUT to cmaple and return the output.
 If optional argument DELETE is non-nil, delete the echoed Maple input
-from the output buffer.  This is a very simple function, it assumes
-that the input consists of one line and the output is on the following line."
+from the output buffer."
   ;; This may not work on a Windows box; there, the input is not echoed
   ;; to the output buffer.
   (interactive)
@@ -203,15 +202,21 @@ that the input consists of one line and the output is on the following line."
     (with-current-buffer (maplev--cmaple-buffer)
       (save-restriction
         (narrow-to-region (point-max) (point-max))
-        (maplev-cmaple--send-string proc input)
-        (goto-char (point-min))
-        (forward-line)
+	(let ((begin (+ 5 (point))))
+	  (maplev-cmaple--send-string proc input)
+	  (while (or (< (point) begin)
+		     (progn
+		       (goto-char (- (point-max) 5))
+		       (not (looking-at "(\\*\\*) "))))
+	    (sleep-for 0.01)))
         (let ((output (buffer-substring-no-properties
-                       (line-beginning-position) (line-end-position))))
+		       (point-min) (if (= (point) (point-min))
+				       (point)
+				     (1- (point))))))
           (if delete
               (delete-region (point-min) (point-max)))
           output)))))
-      
+
 (defun maplev-cmaple-interrupt ()
   "Interrupt Maple."
   (interactive)
