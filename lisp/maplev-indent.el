@@ -9,7 +9,7 @@
 ;; extended syntax introduced in Maple R6.  Following is a brief
 ;; description of the algorithm.
 ;; 
-;; The buffer local list variable `maplev--update-indent-info' stores
+;; The buffer local list variable `maplev-indent-info' stores
 ;; the indentation information at a particular point, call it the
 ;; `known-indent-point' (the point position is stored in the list).
 ;; When a line is indented, the algorithm checks whether the current
