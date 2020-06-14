@@ -177,13 +177,8 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 	(goto-char (point-min))
 	(forward-line (1- line))))))
     
-(defun maplev-view-goto-source ( download )
-  "Goto the source of the current Maple procedure.
-If optional DOWNLOAD is non-nil and the source file does not
-exist and the environment variable MAPLE_ROOT is assigned and
-ends in /main, use perforce to copy the file from the respository
-to the expected location under MAPLE_ROOT."
-  
+(defun maplev-view-goto-source ()
+  "Goto the source of the current Maple procedure."
   (interactive "P")
   (let* ((proc (maplev-history--stack-current))
 	 (file-line (maplev-view--get-source-and-line proc)))
@@ -198,37 +193,20 @@ to the expected location under MAPLE_ROOT."
 	    (setq file (concat mroot "/" base)))
 
 	  (if (not (file-exists-p file))
-	      (if download
-		  (if (setq mroot (or mroot (getenv "MAPLE_ROOT")))
-		      (if (string= "main" (file-name-nondirectory mroot))
-			  (let ((cmd (format "p4 print -q -k -o %s //wmi/projects/mapleV/main/%s"
-					     file base))
-				(dir (file-name-directory file)))
-			    (unless (file-exists-p dir)
-			      (make-directory dir 'parents))
-			    (message "Downloading file from perforce...")
-			    (unless (zerop (call-process-shell-command cmd))
-			      (if (file-exists-p file) (delete-file file))
-			      (error "Problem downloading file %s" file)))
-			(error "Can only download from/to main"))
-		    (error "Environment variable MAPLE_ROOT is not assigned"))
-		(error "File %s does not exist" file)))
+	      (error "File %s does not exist" file)
+	    ;; Open the file
+	    (find-file file)
+	    (if (eq major-mode 'fundamental-mode)
+		(maplev-mode))
+	    (goto-char (point-min))
+	    (forward-line (1- line)))
+	  (error "No line-info data for %s" proc)))))
 
-	  ;; Open the file
-	  (find-file file)
-	  (if (eq major-mode 'fundamental-mode)
-	      (maplev-mode))
-	  (goto-char (point-min))
-	  (forward-line (1- line)))
-      (error "No line-info data for %s" proc))))
-
-(defun maplev-view--get-source-and-line (proc &optional download)
+(defun maplev-view--get-source-and-line (proc)
   "Return the filename and line number of the source for Maple procedure PROC.
 If found, they are returned as a cons-cell \(file \. line\),
 otherwise nil is returned."
-  (let* ((cmd (format "lprint(maplev:-GetSource(\"%s\",'download'=%s)):"
-		      proc
-		      (if download "true" "false")))
+  (let* ((cmd (format "lprint(maplev:-GetSource(\"%s\")):" proc))
 	 (res (maplev-cmaple-direct cmd 'delete))
 	  file line)
     (when (and (not (string= res "NULL"))
