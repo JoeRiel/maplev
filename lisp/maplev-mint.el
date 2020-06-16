@@ -756,7 +756,7 @@ as in `re-search-backward'."
 (defun maplev-safe-position (&optional to)
   "Search for safe buffer position before point \(a position not in a comment\).
 Optional arg TO initializes the search.  It defaults to point.
-THIS IS NOT ROBUST."
+FIXME.  THIS IS NOT ROBUST."
   (unless to (setq to (point)))
   (save-excursion
     (save-match-data
