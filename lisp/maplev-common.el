@@ -319,7 +319,7 @@ If it is empty use DEFAULT.
 If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
   ;; If point is in a string enclosed by backquotes,
   ;; we take the whole string including the backquotes.
-  (let* ((state (parse-partial-sexp (maplev-safe-position)
+  (let* ((state (parse-partial-sexp (point-min)
                                     (point)))
          (choice (if (equal ?` (nth 3 state))
                      ;; inside a backquoted symbol
