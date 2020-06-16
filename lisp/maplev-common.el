@@ -258,26 +258,36 @@ The defun marked is the one that contains point."
     (if (looking-at maplev--defun-begin-re) (goto-char (match-end 0)))
     (let ((count 1) ; decrement for each end statement, increment for each proc
 	  (regexp (concat "\\(" maplev--defun-begin-re "\\)\\|\\(?:" maplev--defun-end-re "\\)"))
-	  (opoint (point)))
+	  (o-point (point)) ; original point
+	  (p-point (point)) ; point at which state is valid
+	  (state (parse-partial-sexp (point-min) (point)))) ; FIXME, reuse saved state
       ;; move to end of current procedure, using count to skip over local procedure assignments.
       (while (and (/= count 0)
 		  (re-search-forward regexp nil 'move))
-	(setq count (+ count (if (match-beginning 1) 1 -1))))
+	(setq state (parse-partial-sexp p-point (point) nil nil state)
+	      p-point (point))
+	(unless (or (nth 3 state) ; string/quote
+		    (nth 4 state)) ; comment
+	  (setq count (+ count (if (match-beginning 1) 1 -1)))))
       (forward-line)
       (if (/= count 0)
 	  ;; at bottom of buffer without finding closing mark
 	  (progn
-	    (goto-char opoint)
-	    (when (setq opoint (maplev--end-of-defun-pos))
+	    (goto-char o-point)
+	    (when (setq o-point (maplev--end-of-defun-pos))
 	      (when (maplev--beginning-of-defun-pos)
-		(push-mark opoint nil t))))
+		(push-mark o-point nil t))))
 	;; at end of procedure
 	(push-mark (point) nil t) ; set mark after end of current procedure.
 	(when (re-search-backward maplev--defun-end-re nil 'move)
 	  (setq count -1)
 	  (while (and (/= count 0)
 		      (re-search-backward regexp nil 'move))
-	    (setq count (+ count (if (match-beginning 1) 1 -1))))
+	    ;; TBD: rewrite to avoid parsing from point-min
+	    (setq state (parse-partial-sexp (point-min) (point) nil nil state))
+	    (unless (or (nth 3 state) ; string/quote
+			(nth 4 state)) ; comment
+	      (setq count (+ count (if (match-beginning 1) 1 -1)))))
 	  (zerop count))))))
 
 (defun maplev-current-defun ()
@@ -372,3 +382,5 @@ Minibuffer completion is used if COMPLETE is non-nil."
 (provide 'maplev-common)
 
 ;;; maplev-common.el ends here
+
+
