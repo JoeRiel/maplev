@@ -24,7 +24,6 @@
 (declare-function maplev-reset-font-lock "maplev")
 (declare-function maplev--re-search-backward "maplev-mint")
 (declare-function maplev--re-search-forward "maplev-mint")
-(declare-function maplev-safe-position "maplev-mint")
 (declare-function maplev--string-to-name "maplev-utils")
 
 ;;}}}
