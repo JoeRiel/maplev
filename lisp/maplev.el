@@ -1,7 +1,6 @@
-
 ;; maplev.el --- Maple mode for GNU Emacs
 ;;
-;; Copyright (C) 2001,2003,2008,2009,2015 Joseph S. Riel
+;; Copyright (C) 2001,2003,2008,2009,2015,2020 Joseph S. Riel
 
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
