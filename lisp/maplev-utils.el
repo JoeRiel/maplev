@@ -80,6 +80,17 @@ For example, \"-a -w 100\" becomes \(\"-a\" \"-w100\"\)."
 	      opts))))
 
 
+(defun maplev-edit-source (proc)
+  "Edit the source for the file PROC.
+The default is the procedure name at point.
+For this to work, the Maple global variable `debugger/editor` 
+must be appropriately assigned.  See the Maple help page for showstat."
+  (interactive (list (maplev-ident-around-point-interactive
+		      "Maple procedure")))
+  (let ((cmd (format "editsource(%s):" proc)))
+    (maplev-cmaple-direct cmd 'delete)))
+
+
 (provide 'maplev-utils)
 
 ;;; maplev-utils.el ends here
