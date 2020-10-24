@@ -634,7 +634,7 @@ Return exit code of mint."
       
       (let ((mint (slot-value config 'mint))
 	    ;; N.B. mint occasionally generates nonsense output when screen width (-w) is large.
-	    (mint-args (append (maplev-get-option-with-include config 'mint-options "-w5000")))
+	    (mint-args (append (maplev-get-option-with-include config 'mint-options))) ;;  "-w5000")))
 	    (process-environment (if maplev-use-new-language-features
 				     (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
 				   process-environment)))
