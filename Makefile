@@ -15,5 +15,5 @@ CLOUD-VERSION := 1
 BOOK  := true
 CLOUD := true
 
-include MapleLisp-Makefile
+include MapleLisp.mk
 
