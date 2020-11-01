@@ -216,9 +216,9 @@ keyword `end'.")
 
 (defun maplev-indent-skip-optional-end-keyword ()
   "Skip the optional keyword following an end statement."
-  (if (looking-at (concat "[ \t]+"
-                          (maplev--list-to-word-re '("proc" "module" "do" "use" "if" "try"))))
-      (goto-char (match-end 0))))
+  (when (looking-at (concat "[ \t]+"
+			    (maplev--list-to-word-re '("proc" "module" "do" "use" "if" "try"))))
+    (goto-char (match-end 0))))
 
 ;;}}}
 ;;{{{ errors
