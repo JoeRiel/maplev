@@ -206,7 +206,7 @@ keyword `end'.")
     (concat
      (maplev--list-to-word-re
       '("proc" "module" "end"
-        "for" "from" "to" "by" "while" "do" "od" "until"
+        "for" "from" "to" "by" "while" "do" "break" "next" "od" "until"
         "if" "elif" "else" "then" "fi"
         "use" "try" "catch" "finally"))
      "\\|\\("
@@ -343,7 +343,7 @@ beyond \(point\)."
 		      state (parse-partial-sexp point (point) nil nil state)
 		      point (point))
 		(cond
-		 
+
 		 ;; If KEYWORD is in a comment or a quote, do nothing.
 		 ((or (nth 4 state) (nth 3 state) (string= keyword "*)"))) ; comments are more frequent, so check first
 		 
@@ -407,6 +407,11 @@ beyond \(point\)."
 				     (+ (current-indentation) maplev-indent-level)
 				   (current-column))))))
 			   stack))))
+
+		 ;; Check whether keyword is break or next.  Skip following if.
+		 ((or (string= keyword "break") (string= keyword "next"))
+		  (when (looking-at "\\s-+if\\>")
+		    (goto-char (match-end 0))))
 
 		 ;; KEYWORD is out of sequence.  Move point before KEYWORD and
 		 ;; signal an error.
@@ -538,7 +543,6 @@ If the line starts with a flush left comment, return 0."
   (if (looking-at "^#")
       0                         ; Existing comment at bol stays there.
     comment-column))
-
 
 ;;}}}
 
