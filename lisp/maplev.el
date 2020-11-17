@@ -1388,111 +1388,120 @@ file (either < or \").  The second group matches the filename.")
   "Font lock mode face used for Maple protected names."
   :group 'maplev-faces)
 
-(defconst maplev--protected-names
-  (list
-   ;; constants
-   "Catalan" "FAIL" "Pi" "false" "gamma" "infinity" "true"
+(eval-and-compile
+  (defconst maplev--protected-names
+    (list
+     ;; constants
+     "Catalan" "FAIL" "Pi" "false" "gamma" "infinity" "true"
 
-   ;; interface options
-   "ansi" "echo" "errorbreak" "errorcursor" "indentamount" "labeling"
-   "labelwidth" "patchlevel" "plotdevice" "plotoptions" "plotoutput"
-   "postplot" "preplot" "prettyprint" "printbytes" "prompt" "quiet"
-   "screenheight" "screenwidth" "showassumed" "verboseproc" "version"
-   "warnlevel"
-   
-   ;; kernelopts options
-   "ASSERT" "bytesalloc" "bytesused" "cputime" "dagtag" "gcbytesavail"
-   "gcbytesreturned" "gctimes" "maxdigits" "maximmediate" "memusage"
-   "printbytes" "profile" "system" "version" "wordsize"
-   
-   ;; types
-   "_Inert" "And" "Non" "Not" "Or" "SERIES" "SymbolicInfinity" "TEXT"
-   "algebraic" "algext" "algfun" "algnum" "algnumext" 
-   "anyfunc" "anything" "arctrig" "atomic"
-   "boolean" "complex" "complexcons" "constant" "cubic"
-   "cx_infinity" "cx_zero" "embedded_axis" "embedded_imaginary" "embedded_real"
-   "equation" "even" "evenfunc" "expanded" "extended_numeric" "extended_rational"
-   "facint" "finite" "float" "fraction" "function" "hfloat"
-   "identical" "imaginary" "indexable" "indexed" "infinity" "integer"
-   "laurent" "linear" "list" "listlist" "literal" "logical" "mathfunc" "matrix"
-   "moduledefinition" "monomial" "name" "neg_infinity"
-   "negative" "negint" "negzero" "nonnegative" "nonnegint" "nonposint"
-   "nonpositive" "nonreal" "nothing" "numeric" "odd" "oddfunc" "package"
-   "point" "polynom" "pos_infinity" "posint" "positive" "poszero" "prime"
-   "protected" "quadratic" "quartic" "radext" "radfun" "radfunext"
-   "radical" "radnum" "radnumext" "range" "rational" "ratpoly" "real_infinity"
-   "realcons" "relation" "scalar" "sequential" "set" "sfloat" "specfunc" "specindex" "sqrt"
-   "stack" "string" "symbol" "symmfunc" "tabular" "trig" "truefalse" "truefalseFAIL"
-   "undefined" "uneval" "vector" "zppoly"
-   
-   ;; math procedures
-   "AFactor" "AFactors" "AiryAi" "AiryAiZeros" "AiryBi" "AiryBiZeros"
-   "AngerJ" "ArrayDims" "ArrayElems" "ArrayIndFns" "ArrayNumDims"
-   "Berlekamp" "BesselI" "BesselJ" "BesselJZeros" "BesselK" "BesselY"
-   "BesselYZeros" "Beta" "Cache" "ChebyshevT" "ChebyshevU" "CheckArgs"
-   "Chi" "Ci" "Complex" "ComplexRange" "Content" "CoulombF" "CylinderD"
-   "CylinderU" "CylinderV" "D" "DESol" "Describe" "Det" "Diff" "Dirac"
-   "DistDeg" "Divide" "Ei" "EllipticCE" "EllipticCK" "EllipticE" "EllipticF"
-   "EllipticK" "EllipticPi" "Eval" "Expand" "Explore" "ExportVector" "Factor"
-   "Factors" "Fraction" "FresnelC" "FresnelS" "Fresnelf" "Fresnelg" "GAMMA"
-   "GF" "Gausselim" "Gaussjord" "Gcd" "Gcdex" "GegenbauerC" "HFloat" "HankelH1"
-   "HankelH2" "Heaviside" "Hermite" "HermiteH" "HeunB" "HeunBPrime" "HeunC"
-   "HeunCPrime" "HeunD" "HeunDPrime" "HeunG" "HeunGPrime" "HeunT" "HeunTPrime"
-   "ImportVector" "Indep" "Int" "Intat" "Interp" "InverseJacobiAM" "InverseJacobiCD"
-   "InverseJacobiCN" "InverseJacobiCS" "InverseJacobiDC" "InverseJacobiDN"
-   "InverseJacobiDS" "InverseJacobiNC" "InverseJacobiND" "InverseJacobiNS"
-   "InverseJacobiSC" "InverseJacobiSD" "InverseJacobiSN" "Irreduc" "IsMatrixShape"
-   "IsVectorShape" "IsWorksheetInterface" "JacobiAM" "JacobiCD" "JacobiCN" "JacobiCS"
-   "JacobiDC" "JacobiDN" "JacobiDS" "JacobiNC" "JacobiND" "JacobiNS" "JacobiP"
-   "JacobiSC" "JacobiSD" "JacobiSN" "JacobiTheta1" "JacobiTheta2" "JacobiTheta3"
-   "JacobiTheta4" "KelvinBei" "KelvinBer" "KelvinHei" "KelvinHer" "KelvinKei"
-   "KelvinKer" "KummerM" "KummerU" "LaguerreL" "Lcm" "LegendreP" "LegendreQ"
-   "Limit" "LommelS1" "LommelS2" "MOLS" "MathieuA" "MathieuB" "MathieuC"
-   "MathieuCE" "MathieuCEPrime" "MathieuCPrime" "MathieuExponent" "MathieuFloquet"
-   "MathieuFloquetPrime" "MathieuS" "MathieuSE" "MathieuSEPrime" "MathieuSPrime"
-   "Matrix" "MatrixOptions" "MeijerG" "Normal" "Nullspace" "Power" "Powmod" "Prem"
-   "Primfield" "Primitive" "Product" "Psi" "Quo" "RESol" "Randpoly" "Ratrecon"
-   "RealRange" "Rem" "Resultant" "Roots" "Shi" "Si" "Smith" "Sqrfree" "Ssi"
-   "Stirling1" "Stirling2" "String" "StruveH" "StruveL" "Sum" "TopologicalSort"
-   "Trace" "Vector" "WARNING" "WeberE" "WeierstrassP" "WeierstrassPPrime"
-   "WeierstrassSigma" "WeierstrassZeta" "WhittakerM" "WhittakerW" "Wrightomega"
-   "about" "addcoords" "additionally" "addproperty" "algsubs" "alias" "allvalues"
-   "andseq" "apply" "applyop" "applyrule" "arccos" "arccosh" "arccot" "arccoth"
-   "arccsc" "arccsch" "arcsec" "arcsech" "arcsin" "arcsinh" "arctan" "arctanh"
-   "assume" "asympt" "bernoulli" "bernstein" "binomial" "branches" "ceil" "charfcn"
-   "chrem" "coeftayl" "collect" "combine" "comparray" "compiletable" "compoly"
-   "content" "convergs" "copy" "cos" "cosh" "cot" "coth" "coulditbe" "csc" "csch"
-   "dataplot" "define" "definemore" "depends" "dilog" "dinterp" "discont" "discrim"
-   "dismantle" "dsolve" "eliminate" "ellipsoid" "erf" "erfc" "erfi" "euler" "eulermac"
-   "evala" "evalapply" "evalc" "evalr" "evalrC" "example" "exists" "exp" "extrema"
-   "factor" "factors" "fdiscont" "fixdiv" "floor" "fnormal" "forall" "forget"
-   "frac" "freeze" "fsolve" "galois" "gcd" "gcdex" "getassumptions" "hasassumptions"
-   "hasfun" "hasoption" "help" "history" "identify" "ifactor" "ifactors" "igcdex"
-   "ilcm" "ilog" "implicitdiff" "index" "info" "initialcondition" "insertpattern"
-   "int" "intat" "interp" "intsolve" "invfunc" "invztrans" "iperfpow" "iratrecon"
-   "iroot" "irreduc" "is" "iscont" "isolate" "isolve" "ispoly" "isprime" "isqrfree"
-   "issqr" "ithprime" "latex" "lcm" "leadterm" "limit" "ln" "lnGAMMA" "log" "log10"
-   "log2" "maptype" "match" "maximize" "minimize" "modpol" "msolve" "mtaylor" "nextprime"
-   "norm" "nprintf" "odetest" "orseq" "packages" "patmatch" "plot" "plot3d" "plotsetup"
-   "poisson" "polylog" "powmod" "prem" "prevprime" "primpart" "printf" "product" "proot"
-   "protect" "psqrt" "quo" "radfield" "radnormal" "rand" "randomize" "randpoly" "rationalize"
-   "ratrecon" "readdata" "readstat" "realroot" "redefine" "reduce" "related" "rem" "residue"
-   "resultant" "root" "rootbound" "roots" "round" "rsolve" "rtable" "dims" "rtable" "elems"
-   "scanf" "sec" "sech" "selectfun" "shake" "showtime" "signum" "simplify" "sin" "singular"
-   "sinh" "sinterp" "smartplot" "smartplot3d" "solve" "sprem" "sprintf" "sqrfree" "sscanf"
-   "sturm" "sturmseq" "subtype" "sum" "surd" "symmdiff" "tablelook" "tan" "tanh" "testeq"
-   "thaw" "trigsubs" "unapply" "unassign" "undefine" "unprotect" "unwindK" "usage" "value"
-   "verify" "version" "whattype" "xormap" "xorseq" "ztrans"
-   
-   ;; miscellaneous procedures
-   "interface" "readline" "with" "unwith"
-   )
-  "List of some of the protected names in Maple.
-This is supposed to exclude the builtins and reserved words.")
+     ;; interface options
+     "ansi" "echo" "errorbreak" "errorcursor" "indentamount" "labeling"
+     "labelwidth" "patchlevel" "plotdevice" "plotoptions" "plotoutput"
+     "postplot" "preplot" "prettyprint" "printbytes" "prompt" "quiet"
+     "screenheight" "screenwidth" "showassumed" "verboseproc" "version"
+     "warnlevel"
+     
+     ;; kernelopts options
+     "ASSERT" "bytesalloc" "bytesused" "cputime" "dagtag" "gcbytesavail"
+     "gcbytesreturned" "gctimes" "maxdigits" "maximmediate" "memusage"
+     "printbytes" "profile" "system" "version" "wordsize"
+     
+     ;; types
+     "_Inert" "And" "Non" "Not" "Or" "SERIES" "SymbolicInfinity" "TEXT"
+     "algebraic" "algext" "algfun" "algnum" "algnumext" 
+     "anyfunc" "anything" "arctrig" "atomic"
+     "boolean" "complex" "complexcons" "constant" "cubic"
+     "cx_infinity" "cx_zero" "embedded_axis" "embedded_imaginary" "embedded_real"
+     "equation" "even" "evenfunc" "expanded" "extended_numeric" "extended_rational"
+     "facint" "finite" "float" "fraction" "function" "hfloat"
+     "identical" "imaginary" "indexable" "indexed" "infinity" "integer"
+     "laurent" "linear" "list" "listlist" "literal" "logical" "mathfunc" "matrix"
+     "moduledefinition" "monomial" "name" "neg_infinity"
+     "negative" "negint" "negzero" "nonnegative" "nonnegint" "nonposint"
+     "nonpositive" "nonreal" "nothing" "numeric" "odd" "oddfunc" "package"
+     "point" "polynom" "pos_infinity" "posint" "positive" "poszero" "prime"
+     "protected" "quadratic" "quartic" "radext" "radfun" "radfunext"
+     "radical" "radnum" "radnumext" "range" "rational" "ratpoly" "real_infinity"
+     "realcons" "relation" "scalar" "sequential" "set" "sfloat" "specfunc" "specindex" "sqrt"
+     "stack" "string" "symbol" "symmfunc" "tabular" "trig" "truefalse" "truefalseFAIL"
+     "undefined" "uneval" "vector" "zppoly"
+     
+     ;; math procedures
+     ;; Some of these were obtained with
+     ;; ListTools:-MakeUnique(sort(map(op@FunctionAdvisor, FunctionAdvisor(function_classes)))); 
+     "about" "abs" "addcoords" "additionally" "addproperty" "AFactor" "AFactors" "AiryAi"
+     "AiryAiZeros" "AiryBi" "AiryBiZeros" "algsubs" "alias" "allvalues" "andseq" "AngerJ"
+     "AppellF1" "AppellF2" "AppellF3" "AppellF4" "apply" "applyop" "applyrule" "arccos" 
+     "arccosh" "arccot" "arccoth" "arccsc" "arccsch" "arcsec" "arcsech" "arcsin" "arcsinh" 
+     "arctan" "arctanh" "argument" "ArrayDims" "ArrayElems" "ArrayIndFns" "ArrayNumDims"
+     "assume" "asympt" "BellB" "Berlekamp" "bernoulli" "bernstein" "BesselI" "BesselJ"
+     "BesselJZeros" "BesselK" "BesselY" "BesselYZeros" "Beta" "binomial" "branches"
+     "Cache" "ceil" "charfcn" "ChebyshevT" "ChebyshevU" "CheckArgs" "Chi" "chrem" "Ci"
+     "coeftayl" "collect" "combine" "comparray" "compiletable" "CompleteBellB" "Complex"
+     "ComplexRange" "compoly" "conjugate" "Content" "content" "convergs" "copy" "cos"
+     "cosh" "cot" "coth" "coulditbe" "CoulombF" "csc" "csch" "CylinderD" "CylinderU"
+     "CylinderV" "D" "dataplot" "dawson" "define" "definemore" "depends" "Describe"
+     "DESol" "Det" "Diff" "dilog" "dims" "dinterp" "Dirac" "discont" "discrim" "dismantle"
+     "DistDeg" "Divide" "doublefactorial" "dsolve" "Ei" "elems" "eliminate" "ellipsoid"
+     "EllipticCE" "EllipticCK" "EllipticCPi" "EllipticE" "EllipticF" "EllipticK"
+     "EllipticModulus" "EllipticNome" "EllipticPi" "erf" "erfc" "erfi" "euler"
+     "eulermac" "Eval" "evala" "evalapply" "evalc" "evalr" "evalrC" "example"
+     "exists" "exp" "Expand" "Explore" "ExportVector" "extrema" "Factor"
+     "factor" "factorial" "Factors" "factors" "fdiscont" "fixdiv" "floor"
+     "fnormal" "forall" "forget" "fourier" "fouriercos" "fouriersin" "frac"
+     "Fraction" "freeze" "FresnelC" "Fresnelf" "Fresnelg" "FresnelS" "fsolve"
+     "galois" "GAMMA" "GaussAGM" "Gausselim" "Gaussjord" "Gcd" "gcd" "Gcdex" "gcdex"
+     "GegenbauerC" "GeneralizedPolylog" "getassumptions" "GF" "hankel" "HankelH1"
+     "HankelH2" "harmonic" "hasassumptions" "hasfun" "hasoption" "Heaviside" "help"
+     "Hermite" "HermiteH" "HeunB" "HeunBPrime" "HeunC" "HeunCPrime" "HeunD" "HeunDPrime"
+     "HeunG" "HeunGPrime" "HeunT" "HeunTPrime" "HFloat" "hilbert" "history" "hypergeom"
+     "identify" "ifactor" "ifactors" "igcdex" "ilcm" "ilog" "Im" "implicitdiff"
+     "ImportVector" "IncompleteBellB" "Indep" "index" "info" "initialcondition"
+     "insertpattern" "Int" "int" "Intat" "intat" "Interp" "interp" "intsolve"
+     "InverseJacobiAM" "InverseJacobiCD" "InverseJacobiCN" "InverseJacobiCS"
+     "InverseJacobiDC" "InverseJacobiDN" "InverseJacobiDS" "InverseJacobiNC"
+     "InverseJacobiND" "InverseJacobiNS" "InverseJacobiSC" "InverseJacobiSD"
+     "InverseJacobiSN" "invfourier" "invfunc" "invhilbert" "invlaplace" "invmellin"
+     "invztrans" "iperfpow" "iratrecon" "iroot" "Irreduc" "irreduc" "is" "iscont"
+     "IsMatrixShape" "isolate" "isolve" "ispoly" "isprime" "isqrfree" "issqr"
+     "IsVectorShape" "IsWorksheetInterface" "ithprime" "JacobiAM" "JacobiCD"
+     "JacobiCN" "JacobiCS" "JacobiDC" "JacobiDN" "JacobiDS" "JacobiNC" "JacobiND"
+     "JacobiNS" "JacobiP" "JacobiSC" "JacobiSD" "JacobiSN" "JacobiTheta1" "JacobiTheta2"
+     "JacobiTheta3" "JacobiTheta4" "JacobiZeta" "KelvinBei" "KelvinBer" "KelvinHei"
+     "KelvinHer" "KelvinKei" "KelvinKer" "KummerM" "KummerU" "LaguerreL" "LambertW"
+     "laplace" "latex" "Lcm" "lcm" "leadterm" "LegendreP" "LegendreQ" "LerchPhi" "Li"
+     "Limit" "limit" "ln" "lnGAMMA" "log" "log10" "log2" "LommelS1" "LommelS2"
+     "maptype" "match" "MathieuA" "MathieuB" "MathieuC" "MathieuCE" "MathieuCEPrime"
+     "MathieuCPrime" "MathieuExponent" "MathieuFloquet" "MathieuFloquetPrime" "MathieuS"
+     "MathieuSE" "MathieuSEPrime" "MathieuSPrime" "Matrix" "MatrixOptions" "max" "maximize"
+     "MeijerG" "mellin" "min" "minimize" "modpol" "MOLS" "msolve" "mtaylor" "multinomial"
+     "MultiPolylog" "MultiZeta" "nextprime" "NielsenPolylog" "norm" "Normal" "nprintf"
+     "Nullspace" "odetest" "orseq" "packages" "patmatch" "piecewise" "plot" "plot3d"
+     "plotsetup" "pochhammer" "poisson" "polylog" "Power" "Powmod" "powmod" "Prem"
+     "prem" "prevprime" "Primfield" "Primitive" "primpart" "printf" "Product" "product"
+     "proot" "protect" "Psi" "psqrt" "Quo" "quo" "radfield" "radnormal" "rand" "randomize"
+     "Randpoly" "randpoly" "rationalize" "Ratrecon" "ratrecon" "Re" "readdata" "readstat"
+     "RealRange" "realroot" "redefine" "reduce" "related" "Rem" "rem" "residue" "RESol"
+     "Resultant" "resultant" "root" "rootbound" "Roots" "roots" "round" "rsolve" "rtable"
+     "scanf" "sec" "sech" "selectfun" "shake" "Shi" "showtime" "Si" "signum" "simplify"
+     "sin" "singular" "sinh" "sinterp" "smartplot" "smartplot3d" "Smith" "solve"
+     "SphericalY" "sprem" "sprintf" "Sqrfree" "sqrfree" "sscanf" "Ssi" "Stirling1"
+     "Stirling2" "String" "StruveH" "StruveL" "sturm" "sturmseq" "subtype" "Sum" "sum"
+     "surd" "symmdiff" "tablelook" "tan" "tanh" "testeq" "thaw" "TopologicalSort" "Trace"
+     "trigsubs" "unapply" "unassign" "undefine" "unprotect" "unwindK" "usage" "value" "Vector"
+     "verify" "version" "WARNING" "WeberE" "WeierstrassP" "WeierstrassPPrime"
+     "WeierstrassSigma" "WeierstrassZeta" "whattype" "WhittakerM" "WhittakerW"
+     "Wrightomega" "xormap" "xorseq" "Zeta" "ztrans"
+     
+     ;; miscellaneous procedures
+     "interface" "readline" "with" "unwith"
+     )
+    "List of some of the protected names in Maple.
+This is supposed to exclude the builtins and reserved words."))
 
 (defconst maplev--protected-names-re
   (eval-when-compile
-    (concat "\\<" (regexp-opt maplev--protected-names)))
+    (concat "\\<" (regexp-opt maplev--protected-names) "//>"))
   "Regular expression matching Maple protected names.")
 
 
@@ -1527,10 +1536,6 @@ This is supposed to exclude the builtins and reserved words.")
 	      ))
 	    "\\)\\>"))
   "List of undocumented names reserved for internal use.")
-
-
-(defconst maplev--protected-names-procs-re
-  (list "evalindets" "subsindets"))
 
 (defun maplev-font-lock-keywords-1 ()
   "Compute the minimum decoration `font-lock-keywords' for MapleV mode.
