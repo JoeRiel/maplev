@@ -10,6 +10,7 @@
   "Generate a regular expression that matches one of WORDS, a list."
   (concat "\\<\\(" (regexp-opt words) "\\)\\>"))
 
+
 (eval-and-compile
   (defconst maplev--declaration-re
     "\\<\\(?:local\\|options?\\|global\\|description\\|export\\|uses\\)\\>"
@@ -145,7 +146,28 @@ The first group matches the line number, the second group the file name.")
   (defconst maplev--link-re
     "^#LINK\\s-+\\([^ \t\n]+*\\)"
     "Regular expression that matches a link statement.
-The first group is the linked file."))
+The first group is the linked file.")
+
+  (defun maplev--make-suffix-regexp (word)
+    "Create a regular expression that matches a suffix of WORD.
+For example, given \"begin\" the regular expression matches \"gin\"."
+    (let ((re (substring word 0 1)))
+      (mapc (lambda (c) (setq re (concat "\\(?:" re "?" (char-to-string c) "\\)"))) 
+	    (substring word 1))
+      re))
+
+  (defconst maplev-partial-end-defun-re
+    (concat "\\("
+	    (maplev--make-suffix-regexp "end")
+	    "?\\s-+\\)?\\(?:"
+	    (maplev--make-suffix-regexp "proc")
+	    "\\|"
+	    (maplev--make-suffix-regexp "module")
+	    "\\)\\>"))
+  "Regular expression that matches a suffix of the end of a procedure or module
+assignment; this assumes that a naked \"end\" is not used (may have to rethink
+that, as they are used).")
+
 
 (provide 'maplev-re)
 

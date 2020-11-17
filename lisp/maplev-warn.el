@@ -52,6 +52,7 @@
 
 (require 'custom)
 (require 'font-lock)
+(require 'maplev-compat)
 (require 'maplev-custom)
 
 ;;}}}

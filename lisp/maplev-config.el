@@ -190,7 +190,24 @@ Return the object."
   maplev-config)
 
 
-(cl-defmethod maplev-get-option-with-include ((config maplev-config-class) slot &rest options)
+;; (cl-defmethod maplev-get-option-with-include ((config maplev-config-class) slot &rest options)
+;;   "Return a list of options obtained from the SLOT and `:include-path' slots of CONFIG, with OPTIONS appended.
+;; Convert the option string in the OPTION slot of CONFIG, an object of type `maplev-config-class',
+;; to a list of strings and append the include path from the `:include-path' slot.
+;; Do the right thing if the option or include path is empty."
+;;   (append
+;;    (maplev-split-shell-option-string
+;;     (concat (slot-value config slot)
+;; 	    (let ((path (remove "" (slot-value config 'include-path))))
+;; 	      (when path
+;; 		(concat " -I" (mapconcat 'identity path ","))))))
+;;    options))
+
+;; Use defun, instead of cl-defmethod, to work with Emacs 24
+
+
+
+(defun maplev-get-option-with-include (config slot &rest options)
   "Return a list of options obtained from the SLOT and `:include-path' slots of CONFIG, with OPTIONS appended.
 Convert the option string in the OPTION slot of CONFIG, an object of type `maplev-config-class',
 to a list of strings and append the include path from the `:include-path' slot.
@@ -202,7 +219,6 @@ Do the right thing if the option or include path is empty."
 	      (when path
 		(concat " -I" (mapconcat 'identity path ","))))))
    options))
-
 
 (provide 'maplev-config)
 
