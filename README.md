@@ -2,7 +2,7 @@
 MapleV:  An Emacs Package for Maple Developers
 ==============================================
 
-**Version 3.0.2**
+**Version 3.0.3**
 
 MapleV is an Emacs package for developing Maple code.
 Maple is computer algebra system sold by [Maplesoft](http://www.maplesoft.com/).
