@@ -23,6 +23,7 @@ local dest, eqs, files, i, spec, src;
     eqs := seq(eqs[i], i=1.._nrest);
 
     PackageTools:-Create(book, eqs);
+    Cloud:-CopyInfo(book);
 
 end proc:
 

@@ -49,12 +49,14 @@ Start one, if necessary."
 (defun maplev-cmaple-default-pmaple ()
   "Return the default path to the pmaple executable."
   (expand-file-name
-   (concat "~/maple/toolbox/maplev/bin/pmaple"
-	   (if (or (eq system-type 'windows-nt)
-		   (eq system-type 'cygwin)
-		   (eq system-type 'ms-dos))
-	       ".exe"
-	     ""))))
+   (let ((dir "~/maple/toolbox/maplev/"))
+     (cond
+      ((eq system-type 'gnu/linux)
+       (concat dir "bin.X86_64_LINUX/pmaple"))
+      ((eq system-type 'darwin)
+       (concat dir "bin.APPLE_UNIVERSAL_OSX/pmaple"))
+      ((member system-type '(windows-nt cygwin ms-dos))
+       (concat dir "bin.X86_64_WINDOWS/pmaple.exe"))))))
 
 
 (defun maplev-cmaple--process-environment ()
@@ -74,21 +76,20 @@ Start one, if necessary."
       (error "The :mapledir slot of maplev-config, `%s', does not exist" mapledir)))
 
     ;; create list of PATH=bindir MAPLE=mapledir ... 
-    (list 
-     (cond
-      ((eq system-type 'gnu/linux)
-       (concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
-      ((or (eq system-type 'windows-nt)
-	   (eq system-type 'cygwin)
-	   (eq system-type 'ms-dos))
-       (format "set PATH=\"%s;%%PATH%%\"" bindir))
-      ((eq system-type 'darwin)
-       (concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
-      (t (error "Unexpected system-type '%s'" system-type)))
-     (concat "MAPLE=" mapledir)
+    (append
+     (list 
+      (cond
+       ((eq system-type 'gnu/linux)
+	(concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
+       ((member system-type '(windows-nt cygwin ms-dos))
+	(format "PATH=\"%s;%%PATH%%\"" bindir))
+       ((eq system-type 'darwin)
+	(concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
+       (t (error "Unexpected system-type '%s'" system-type)))
+      (concat "MAPLE=" mapledir))
      (if maplev-use-new-language-features 
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
-       process-environment))))
+       (list process-environment)))))
 
 (defun maplev-cmaple--get-pmaple-and-options ()
   "Return a list of strings consisting of the pmaple executable and its options."
@@ -193,8 +194,7 @@ Use mint to syntax check the region before sending to cmaple."
 (defun maplev-cmaple-direct (input &optional delete)
   "Send the string INPUT to cmaple and return the output.
 If optional argument DELETE is non-nil, delete the echoed Maple input
-from the output buffer.  This is a very simple function, it assumes
-that the input consists of one line and the output is on the following line."
+from the output buffer."
   ;; This may not work on a Windows box; there, the input is not echoed
   ;; to the output buffer.
   (interactive)
@@ -202,15 +202,21 @@ that the input consists of one line and the output is on the following line."
     (with-current-buffer (maplev--cmaple-buffer)
       (save-restriction
         (narrow-to-region (point-max) (point-max))
-        (maplev-cmaple--send-string proc input)
-        (goto-char (point-min))
-        (forward-line)
+	(let ((begin (+ 5 (point))))
+	  (maplev-cmaple--send-string proc input)
+	  (while (or (< (point) begin)
+		     (progn
+		       (goto-char (- (point-max) 5))
+		       (not (looking-at "(\\*\\*) "))))
+	    (sleep-for 0.01)))
         (let ((output (buffer-substring-no-properties
-                       (line-beginning-position) (line-end-position))))
+		       (point-min) (if (= (point) (point-min))
+				       (point)
+				     (1- (point))))))
           (if delete
               (delete-region (point-min) (point-max)))
           output)))))
-      
+
 (defun maplev-cmaple-interrupt ()
   "Interrupt Maple."
   (interactive)

@@ -16,12 +16,12 @@ maplev := module()
 
 export Copy, EmacsInitialization, GetSource, Print, Setup, Unpack;
 
-$include <Copy.mm>
-$include <EmacsInitialization.mm>
-$include <GetSource.mm>
-$include <Print.mm>
-$include <Setup.mm>
-$include <Unpack.mm>
+$include <src/Copy.mm>
+$include <src/EmacsInitialization.mm>
+$include <src/GetSource.mm>
+$include <src/Print.mm>
+$include <src/Setup.mm>
+$include <src/Unpack.mm>
 
 ##
 end module:

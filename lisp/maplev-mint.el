@@ -255,7 +255,8 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
     (when (looking-at ".*$")
       (let ((file (maplev-find-include-file 
 		   (match-string-no-properties 0) 
-		   'inc-first (slot-value maplev-config 'include-path))))
+		   (slot-value maplev-config 'include-path)
+		   'inc-first)))
 	(when file
 	  (find-file-other-window file))))))
   
@@ -323,7 +324,7 @@ The line number begins at character position POS."
   "Return the absolute path to the source file starting at current position."
   (when (looking-at "\\s-+\\(to\\s-+[0-9]+\\s-+\\)?of\\s-+\\(.*\\)")
     (let ((file (maplev-expand->file-name (match-string-no-properties 2) (slot-value maplev-config 'mapledir))))
-      (maplev-find-include-file file 'inc-first (slot-value maplev-config 'include-path)))))
+      (maplev-find-include-file file (slot-value maplev-config 'include-path) 'inc-first))))
 
 (defun maplev--replace-string (string replace)
   "In STRING replace as specified by REPLACE.
@@ -633,7 +634,7 @@ Return exit code of mint."
       
       (let ((mint (slot-value config 'mint))
 	    ;; N.B. mint occasionally generates nonsense output when screen width (-w) is large.
-	    (mint-args (append (maplev-get-option-with-include config 'mint-options "-w5000")))
+	    (mint-args (append (maplev-get-option-with-include config 'mint-options))) ;;  "-w5000")))
 	    (process-environment (if maplev-use-new-language-features
 				     (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
 				   process-environment)))
@@ -755,7 +756,7 @@ as in `re-search-backward'."
 (defun maplev-safe-position (&optional to)
   "Search for safe buffer position before point \(a position not in a comment\).
 Optional arg TO initializes the search.  It defaults to point.
-THIS IS NOT ROBUST."
+FIXME.  THIS IS NOT ROBUST."
   (unless to (setq to (point)))
   (save-excursion
     (save-match-data
@@ -1004,9 +1005,10 @@ deleted."
 
 (defconst maplev-mint-query-help
   " y   quote the match
- '   quote the match
- !   quote remaining matches
- Q   quote remaining matches
+ '   single quote the match
+ !   single quote remaining matches
+ Q   single quote remaining matches
+ \"  double quote the match
  n   skip to next match
  d   skip all occurrences of current match
  e   edit the list of variables
@@ -1022,11 +1024,13 @@ C-r  enter recursive edit (C-M-c to get out)
 
 (defvar maplev-mint-query-map
   (let ((map (make-sparse-keymap)))
-    (define-key map " " 'quote)  ; maybe this should be repeat last?
-    (define-key map "y" 'quote)  
-    (define-key map "'" 'quote)
-    (define-key map "Q" 'quote-rest)
-    (define-key map "!" 'quote-rest)
+    (define-key map " " 'single-quote)  ; maybe this should be repeat last?
+    (define-key map "y" 'single-quote)  
+    (define-key map "'" 'single-quote)
+    (define-key map "Q" 'single-quote-rest)
+    (define-key map "!" 'single-quote-rest)
+
+    (define-key map "\"" 'double-quote)
 
     (define-key map "d" 'delete)
     (define-key map "e" 'edit-vars)
@@ -1073,7 +1077,7 @@ VARs is a list of undeclared globals."
 			       "Query replacing %s with %s: (\\<maplev-mint-query-map>\\[help] for help) ")
 			      minibuffer-prompt-properties))
 	      (keep-going t)
-	      def done key match quoted quote-rest real-match-data regex unquoted)
+	      def done double-quoted key match quoted quote-rest real-match-data regex unquoted)
 	  (goto-char beg)
 	  (unwind-protect
 	      (while keep-going
@@ -1100,6 +1104,7 @@ VARs is a list of undeclared globals."
 			(setq match (match-string-no-properties 0)
 			      unquoted (match-string-no-properties 2)
 			      quoted  (concat "'" unquoted "'")
+			      double-quoted  (concat "\"" unquoted "\"")
 			      start (match-beginning 0))
 			(if (looking-at "'") ; FIXME: this fails if the match is part of a protected expression
 			    ;; skip protected matches
@@ -1109,7 +1114,7 @@ VARs is a list of undeclared globals."
 			      (progn
 				(replace-match quoted)
 				(setq done t))
-			    (replace-highlight (match-beginning 0) (match-end 0) nil nil (concat "\\_<" match "\\_>") 'regexp nil nil)
+			    (replace-highlight (match-beginning 0) (match-end 0) nil nil (concat "\\_<" match "\\_>") 'regexp nil nil nil)
 			    (message message match quoted)
 			    (setq key (vector (read-event)))
 			    (setq def (lookup-key maplev-mint-query-map key))
@@ -1126,8 +1131,11 @@ VARs is a list of undeclared globals."
 				(with-current-buffer standard-output
 				  (help-mode)))
 			      (set-match-data real-match-data))
-			     ((eq def 'quote)
+			     ((eq def 'single-quote)
 			      (replace-match quoted)
+			      (setq done t))
+			     ((eq def 'double-quote)
+			      (replace-match double-quoted)
 			      (setq done t))
 			     ((or (eq def 'global)
 				  (eq def 'local))
@@ -1172,7 +1180,7 @@ VARs is a list of undeclared globals."
 			      ;; edit the list of vars
 			      (setq vars (maplev-mint-edit-vars vars)
 				    regex nil))
-			     ((eq def 'quote-rest)
+			     ((eq def 'single-quote-rest)
 			      ;; quote current and remaining vars
 			      (setq quote-rest t))
 			     ((eq def 'colon-dash)

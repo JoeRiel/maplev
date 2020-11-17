@@ -1,12 +1,11 @@
-
 ;; maplev.el --- Maple mode for GNU Emacs
 ;;
-;; Copyright (C) 2001,2003,2008,2009,2015 Joseph S. Riel
+;; Copyright (C) 2001,2003,2008,2009,2015,2020 Joseph S. Riel
 
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    3.0.2
+;; Version:    3.0.3
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -112,6 +111,7 @@
 (require 'imenu)
 (require 'info)
 
+(require 'maplev-compat)                ; compatibility definitions for older Emacs
 (require 'maplev-cmaple)                ; interact with Maple
 (require 'maplev-common)                ; common functions
 (require 'maplev-config)                ; configure maple/mint/tester 
@@ -165,7 +165,7 @@ When MESSAGE is non-nil, display a message with the version."
     (when here (insert version))
     (when message (message "%s" version))
     version))
-	
+
 ;;}}}
 
 (eval-and-compile
@@ -251,7 +251,7 @@ When MESSAGE is non-nil, display a message with the version."
     (modify-syntax-entry ?\` "_" table)
     table)
   "Syntax table used by `maplev--re-search-forward'.")
-  
+
 
 ;;}}}
 
@@ -322,7 +322,7 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
     (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-cmaple)
     map)
-     "Keymap used in Maple mode.")
+  "Keymap used in Maple mode.")
 
 ;;}}}
 ;;{{{ Menu
@@ -853,15 +853,7 @@ This is a hack and is hardly robust."
     ;; may need to move over arguments: proc() ... end proc (x,y,z) 
     (when (looking-at ";\\|:[^:]")
       (goto-char (match-end 0))))))
-		   
 
-	    
-	 
-	  
-
-
-  
-  
 ;;}}}
 
 ;;{{{ Miscellaneous
@@ -1028,63 +1020,63 @@ The real work is done by `maplev-complete-on-module-exports'."
 index/package help pages.  If it already exists, do nothing."
   (unless maplev-completions)
 
-    ;; To make it easy to pick out the package names from the
-    ;; index/package help page, set the interface variable
-    ;; `screenwidth' to infinity and save the original value in the
-    ;; elisp variable screenwidth.
-    
-    (let ((screenwidth (maplev-cmaple-direct
-                        "lprint(interface('screenwidth'=infinity));" t))
-          completions)
-      (unwind-protect
-          (with-current-buffer (get-buffer-create (maplev--help-buffer))
-            ;; Process help node "index/function".
-            ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-help-show-topic "index/function" 'hide)
-            ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (save-restriction
-              (narrow-to-region
-               (re-search-forward "^    ")
-               (save-excursion (goto-char (point-max))
-                               (search-backward "See Also")))
-              (goto-char (point-max))
-              (while (backward-word)
-                (setq completions
-                      (cons (cons (buffer-substring-no-properties
-                                   (point)
-                                   (save-excursion (forward-word) (point)))
-                                  nil)
-                            completions))))
+  ;; To make it easy to pick out the package names from the
+  ;; index/package help page, set the interface variable
+  ;; `screenwidth' to infinity and save the original value in the
+  ;; elisp variable screenwidth.
+  
+  (let ((screenwidth (maplev-cmaple-direct
+		      "lprint(interface('screenwidth'=infinity));" t))
+	completions)
+    (unwind-protect
+	(with-current-buffer (get-buffer-create (maplev--help-buffer))
+	  ;; Process help node "index/function".
+	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  (maplev-help-show-topic "index/function" 'hide)
+	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  (save-restriction
+	    (narrow-to-region
+	     (re-search-forward "^    ")
+	     (save-excursion (goto-char (point-max))
+			     (search-backward "See Also")))
+	    (goto-char (point-max))
+	    (while (backward-word)
+	      (setq completions
+		    (cons (cons (buffer-substring-no-properties
+				 (point)
+				 (save-excursion (forward-word) (point)))
+				nil)
+			  completions))))
 
-            ;; Process help node "index/package".
-            ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-help-show-topic "index/package" 'hide)
-            ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (save-restriction
-              (narrow-to-region
-               (progn (re-search-forward "^    \\w" nil t)
-                      (goto-char (match-beginning 0))) ; first package
-               (progn (re-search-forward "^-" nil t)
-                      (goto-char (match-beginning 0)))) ; bullets after packages
-              (goto-char (point-max))
-              ;; Assign a regular expression to match each package name;
-              ;; the name is matched by the first group in regexp.
-              (let ((regexp (concat
-                             "^\\s-+"   ; whitespace at start of line
-                             "\\(" maplev--name-re "\\)"))) ; package name (first group)
-                (while (re-search-backward regexp nil 'move)
-                  (setq completions
-                        (cons (cons (buffer-substring-no-properties
-                                     (match-beginning 1) (match-end 1))
-                                    nil)
-                              completions)))))
-            ;; Delete both help pages.
-            (maplev-history-delete-item)
-            ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
-            (maplev-history-delete-item))
+	  ;; Process help node "index/package".
+	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  (maplev-help-show-topic "index/package" 'hide)
+	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  (save-restriction
+	    (narrow-to-region
+	     (progn (re-search-forward "^    \\w" nil t)
+		    (goto-char (match-beginning 0))) ; first package
+	     (progn (re-search-forward "^-" nil t)
+		    (goto-char (match-beginning 0)))) ; bullets after packages
+	    (goto-char (point-max))
+	    ;; Assign a regular expression to match each package name;
+	    ;; the name is matched by the first group in regexp.
+	    (let ((regexp (concat
+			   "^\\s-+"   ; whitespace at start of line
+			   "\\(" maplev--name-re "\\)"))) ; package name (first group)
+	      (while (re-search-backward regexp nil 'move)
+		(setq completions
+		      (cons (cons (buffer-substring-no-properties
+				   (match-beginning 1) (match-end 1))
+				  nil)
+			    completions)))))
+	  ;; Delete both help pages.
+	  (maplev-history-delete-item)
+	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  (maplev-history-delete-item))
 
-        ;; Assign `maplev-completions'.  Sort the completions.
-        (setq maplev-completions (sort completions #'(lambda (a b) (string< (car a) (car b)))))
+      ;; Assign `maplev-completions'.  Sort the completions.
+      (setq maplev-completions (sort completions #'(lambda (a b) (string< (car a) (car b)))))
       ;; Restore the original interface screenwidth.
       (maplev-cmaple-direct (concat "interface('screenwidth'=" screenwidth ");") t))))
 
@@ -1193,7 +1185,7 @@ moved to be before it."
       (concat (file-name-as-directory mroot)
 	      (substring >file 1))
     >file))
-  
+
 ;;}}}
 ;;{{{ tab-width
 
@@ -1331,15 +1323,15 @@ file (either < or \").  The second group matches the filename.")
     "MorrBrilCull" "NameSpace" "NextAfter" "Normalizer" "NumericClass" 
     "NumericEvent" "NumericEventHandler" "NumericStatus" "Object"
     "OrderedNE" "RETURN" "Re" "Record" "SDMPolynom" "SFloatExponent"
-    "SFloatMantissa" "Scale10" "Scale2" "SearchText" "TRACE" "ToInert"
+    "SFloatMantissa" "Scale10" "Scale2" "SearchText" "String" "TRACE" "ToInert"
     "Unordered" "UpdateSource" "_hackwareToPointer" "_jvm"
     "_local" "_maplet" "_savelib" "_treeMatch" "_unify" "_xml" "abs"
-    "add" "addressof" "anames" "andmap" "appendto" "array"
+    "add" "addressof" "anames" "andmap" "andseq" "appendto" "array"
     "assemble" "assign" "assigned" "attributes" "bind" "call_external"
     "callback" "cat" "coeff" "coeffs" "conjugate" "convert" "crinterp"
     "debugopts" "define_external" "degree" "denom" "diff" "disassemble"
     "divide" "dlclose" "done" "entries" "eval" "evalb" "evalf"
-     "evalgf1" "evalhf" "evalindets" "evaln"
+    "evalgf1" "evalhf" "evalindets" "evaln"
     "expand" "exports" "factorial" "frem" "frontend" "gc" "genpoly"
     "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "ifelse" 
     "igcd" "ilog10" "ilog2" "implies" "indets" "indices" "inner"
@@ -1349,7 +1341,7 @@ file (either < or \").  The second group matches the filename.")
     "macro" "map" "map2" "max" "maxnorm" "member" "membertype" "min"
     "minus" "mod" "modp" "modp1" "modp2" "mods" "mul" "mvMultiply"
     "negate" "nops" "normal" "numboccur" "numelems" "numer"
-    "op" "order" "ormap" "overload" "parse" "piecewise" "pointto"
+    "op" "order" "ormap" "orseq" "overload" "parse" "piecewise" "pointto"
     "print" "print_preprocess" "readlib" "reduce_opr" "remove" "rhs"
     "rtable" "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
     "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
@@ -1360,7 +1352,7 @@ file (either < or \").  The second group matches the filename.")
     "subs" "subset" "subsindets" "subsop" "substring" "system" "table"
     "taylor" "tcoeff" "time" "timelimit" "traperror" "trunc" "type"
     "typematch" "unames" "unbind" "upperbound" "userinfo"
-    "wbOpen" "wbOpenURI" "writeto" "~Array" "~Matrix" "~Vector")
+    "wbOpen" "wbOpenURI" "writeto" "xormap" "xorseq" "~Array" "~Matrix" "~Vector")
   "List of builtin functions as of Maple 2016")
 
 ;; (defconst maplev--builtin-functions-alist
@@ -1396,107 +1388,122 @@ file (either < or \").  The second group matches the filename.")
   "Font lock mode face used for Maple protected names."
   :group 'maplev-faces)
 
+(eval-and-compile
+  (defconst maplev--protected-names
+    (list
+     ;; constants
+     "Catalan" "FAIL" "Pi" "false" "gamma" "infinity" "true"
+
+     ;; interface options
+     "ansi" "echo" "errorbreak" "errorcursor" "indentamount" "labeling"
+     "labelwidth" "patchlevel" "plotdevice" "plotoptions" "plotoutput"
+     "postplot" "preplot" "prettyprint" "printbytes" "prompt" "quiet"
+     "screenheight" "screenwidth" "showassumed" "verboseproc" "version"
+     "warnlevel"
+     
+     ;; kernelopts options
+     "ASSERT" "bytesalloc" "bytesused" "cputime" "dagtag" "gcbytesavail"
+     "gcbytesreturned" "gctimes" "maxdigits" "maximmediate" "memusage"
+     "printbytes" "profile" "system" "version" "wordsize"
+     
+     ;; types
+     "_Inert" "And" "Non" "Not" "Or" "SERIES" "SymbolicInfinity" "TEXT"
+     "algebraic" "algext" "algfun" "algnum" "algnumext" 
+     "anyfunc" "anything" "arctrig" "atomic"
+     "boolean" "complex" "complexcons" "constant" "cubic"
+     "cx_infinity" "cx_zero" "embedded_axis" "embedded_imaginary" "embedded_real"
+     "equation" "even" "evenfunc" "expanded" "extended_numeric" "extended_rational"
+     "facint" "finite" "float" "fraction" "function" "hfloat"
+     "identical" "imaginary" "indexable" "indexed" "infinity" "integer"
+     "laurent" "linear" "list" "listlist" "literal" "logical" "mathfunc" "matrix"
+     "moduledefinition" "monomial" "name" "neg_infinity"
+     "negative" "negint" "negzero" "nonnegative" "nonnegint" "nonposint"
+     "nonpositive" "nonreal" "nothing" "numeric" "odd" "oddfunc" "package"
+     "point" "polynom" "pos_infinity" "posint" "positive" "poszero" "prime"
+     "protected" "quadratic" "quartic" "radext" "radfun" "radfunext"
+     "radical" "radnum" "radnumext" "range" "rational" "ratpoly" "real_infinity"
+     "realcons" "relation" "scalar" "sequential" "set" "sfloat" "specfunc" "specindex" "sqrt"
+     "stack" "string" "symbol" "symmfunc" "tabular" "trig" "truefalse" "truefalseFAIL"
+     "undefined" "uneval" "vector" "zppoly"
+     
+     ;; math procedures
+     ;; Some of these were obtained with
+     ;; ListTools:-MakeUnique(sort(map(op@FunctionAdvisor, FunctionAdvisor(function_classes)))); 
+     "about" "abs" "addcoords" "additionally" "addproperty" "AFactor" "AFactors" "AiryAi"
+     "AiryAiZeros" "AiryBi" "AiryBiZeros" "algsubs" "alias" "allvalues" "andseq" "AngerJ"
+     "AppellF1" "AppellF2" "AppellF3" "AppellF4" "apply" "applyop" "applyrule" "arccos" 
+     "arccosh" "arccot" "arccoth" "arccsc" "arccsch" "arcsec" "arcsech" "arcsin" "arcsinh" 
+     "arctan" "arctanh" "argument" "ArrayDims" "ArrayElems" "ArrayIndFns" "ArrayNumDims"
+     "assume" "asympt" "BellB" "Berlekamp" "bernoulli" "bernstein" "BesselI" "BesselJ"
+     "BesselJZeros" "BesselK" "BesselY" "BesselYZeros" "Beta" "binomial" "branches"
+     "Cache" "ceil" "charfcn" "ChebyshevT" "ChebyshevU" "CheckArgs" "Chi" "chrem" "Ci"
+     "coeftayl" "collect" "combine" "comparray" "compiletable" "CompleteBellB" "Complex"
+     "ComplexRange" "compoly" "conjugate" "Content" "content" "convergs" "copy" "cos"
+     "cosh" "cot" "coth" "coulditbe" "CoulombF" "csc" "csch" "CylinderD" "CylinderU"
+     "CylinderV" "D" "dataplot" "dawson" "define" "definemore" "depends" "Describe"
+     "DESol" "Det" "Diff" "dilog" "dims" "dinterp" "Dirac" "discont" "discrim" "dismantle"
+     "DistDeg" "Divide" "doublefactorial" "dsolve" "Ei" "elems" "eliminate" "ellipsoid"
+     "EllipticCE" "EllipticCK" "EllipticCPi" "EllipticE" "EllipticF" "EllipticK"
+     "EllipticModulus" "EllipticNome" "EllipticPi" "erf" "erfc" "erfi" "euler"
+     "eulermac" "Eval" "evala" "evalapply" "evalc" "evalr" "evalrC" "example"
+     "exists" "exp" "Expand" "Explore" "ExportVector" "extrema" "Factor"
+     "factor" "factorial" "Factors" "factors" "fdiscont" "fixdiv" "floor"
+     "fnormal" "forall" "forget" "fourier" "fouriercos" "fouriersin" "frac"
+     "Fraction" "freeze" "FresnelC" "Fresnelf" "Fresnelg" "FresnelS" "fsolve"
+     "galois" "GAMMA" "GaussAGM" "Gausselim" "Gaussjord" "Gcd" "gcd" "Gcdex" "gcdex"
+     "GegenbauerC" "GeneralizedPolylog" "getassumptions" "GF" "hankel" "HankelH1"
+     "HankelH2" "harmonic" "hasassumptions" "hasfun" "hasoption" "Heaviside" "help"
+     "Hermite" "HermiteH" "HeunB" "HeunBPrime" "HeunC" "HeunCPrime" "HeunD" "HeunDPrime"
+     "HeunG" "HeunGPrime" "HeunT" "HeunTPrime" "HFloat" "hilbert" "history" "hypergeom"
+     "identify" "ifactor" "ifactors" "igcdex" "ilcm" "ilog" "Im" "implicitdiff"
+     "ImportVector" "IncompleteBellB" "Indep" "index" "info" "initialcondition"
+     "insertpattern" "Int" "int" "Intat" "intat" "Interp" "interp" "intsolve"
+     "InverseJacobiAM" "InverseJacobiCD" "InverseJacobiCN" "InverseJacobiCS"
+     "InverseJacobiDC" "InverseJacobiDN" "InverseJacobiDS" "InverseJacobiNC"
+     "InverseJacobiND" "InverseJacobiNS" "InverseJacobiSC" "InverseJacobiSD"
+     "InverseJacobiSN" "invfourier" "invfunc" "invhilbert" "invlaplace" "invmellin"
+     "invztrans" "iperfpow" "iratrecon" "iroot" "Irreduc" "irreduc" "is" "iscont"
+     "IsMatrixShape" "isolate" "isolve" "ispoly" "isprime" "isqrfree" "issqr"
+     "IsVectorShape" "IsWorksheetInterface" "ithprime" "JacobiAM" "JacobiCD"
+     "JacobiCN" "JacobiCS" "JacobiDC" "JacobiDN" "JacobiDS" "JacobiNC" "JacobiND"
+     "JacobiNS" "JacobiP" "JacobiSC" "JacobiSD" "JacobiSN" "JacobiTheta1" "JacobiTheta2"
+     "JacobiTheta3" "JacobiTheta4" "JacobiZeta" "KelvinBei" "KelvinBer" "KelvinHei"
+     "KelvinHer" "KelvinKei" "KelvinKer" "KummerM" "KummerU" "LaguerreL" "LambertW"
+     "laplace" "latex" "Lcm" "lcm" "leadterm" "LegendreP" "LegendreQ" "LerchPhi" "Li"
+     "Limit" "limit" "ln" "lnGAMMA" "log" "log10" "log2" "LommelS1" "LommelS2"
+     "maptype" "match" "MathieuA" "MathieuB" "MathieuC" "MathieuCE" "MathieuCEPrime"
+     "MathieuCPrime" "MathieuExponent" "MathieuFloquet" "MathieuFloquetPrime" "MathieuS"
+     "MathieuSE" "MathieuSEPrime" "MathieuSPrime" "Matrix" "MatrixOptions" "max" "maximize"
+     "MeijerG" "mellin" "min" "minimize" "modpol" "MOLS" "msolve" "mtaylor" "multinomial"
+     "MultiPolylog" "MultiZeta" "nextprime" "NielsenPolylog" "norm" "Normal" "nprintf"
+     "Nullspace" "odetest" "orseq" "packages" "patmatch" "piecewise" "plot" "plot3d"
+     "plotsetup" "pochhammer" "poisson" "polylog" "Power" "Powmod" "powmod" "Prem"
+     "prem" "prevprime" "Primfield" "Primitive" "primpart" "printf" "Product" "product"
+     "proot" "protect" "Psi" "psqrt" "Quo" "quo" "radfield" "radnormal" "rand" "randomize"
+     "Randpoly" "randpoly" "rationalize" "Ratrecon" "ratrecon" "Re" "readdata" "readstat"
+     "RealRange" "realroot" "redefine" "reduce" "related" "Rem" "rem" "residue" "RESol"
+     "Resultant" "resultant" "root" "rootbound" "Roots" "roots" "round" "rsolve" "rtable"
+     "scanf" "sec" "sech" "selectfun" "shake" "Shi" "showtime" "Si" "signum" "simplify"
+     "sin" "singular" "sinh" "sinterp" "smartplot" "smartplot3d" "Smith" "solve"
+     "SphericalY" "sprem" "sprintf" "Sqrfree" "sqrfree" "sscanf" "Ssi" "Stirling1"
+     "Stirling2" "String" "StruveH" "StruveL" "sturm" "sturmseq" "subtype" "Sum" "sum"
+     "surd" "symmdiff" "tablelook" "tan" "tanh" "testeq" "thaw" "TopologicalSort" "Trace"
+     "trigsubs" "unapply" "unassign" "undefine" "unprotect" "unwindK" "usage" "value" "Vector"
+     "verify" "version" "WARNING" "WeberE" "WeierstrassP" "WeierstrassPPrime"
+     "WeierstrassSigma" "WeierstrassZeta" "whattype" "WhittakerM" "WhittakerW"
+     "Wrightomega" "xormap" "xorseq" "Zeta" "ztrans"
+     
+     ;; miscellaneous procedures
+     "interface" "readline" "with" "unwith"
+     )
+    "List of some of the protected names in Maple.
+This is supposed to exclude the builtins and reserved words."))
+
 (defconst maplev--protected-names-re
   (eval-when-compile
-    (concat "\\<"
-            (regexp-opt
-             (list
-	      ;; constants
-	      "Catalan" "FAIL" "Pi" "false" "gamma" "infinity" "true"
+    (concat "\\<" (regexp-opt maplev--protected-names) "//>"))
+  "Regular expression matching Maple protected names.")
 
-	      ;; interface options
-	      "ansi" "echo" "errorbreak" "errorcursor" "indentamount" "labeling"
-	      "labelwidth" "patchlevel" "plotdevice" "plotoptions" "plotoutput"
-	      "postplot" "preplot" "prettyprint" "printbytes" "prompt" "quiet"
-	      "screenheight" "screenwidth" "showassumed" "verboseproc" "version"
-	      "warnlevel"
-	      
-	      ;; kernelopts options
-	      "ASSERT" "bytesalloc" "bytesused" "cputime" "dagtag" "gcbytesavail"
-	      "gcbytesreturned" "gctimes" "maxdigits" "maximmediate" "memusage"
-	      "printbytes" "profile" "system" "version" "wordsize"
-	      
-	      ;; types
-	      "And" "Non" "Not" "Or" "SymbolicInfinity" "TEXT"
-	      "algebraic" "algext" "algfun" "algnum" "algnumext" 
-	      "anyfunc" "anything" "arctrig" "atomic"
-	      "boolean" "complex" "complexcons" "constant" "cubic"
-	      "cx_infinity" "cx_zero" "embedded_axis" "embedded_imaginary" "embedded_real"
-	      "equation" "even" "evenfunc" "expanded" "extended_numeric" "extended_rational"
-	      "facint" "finite" "float" "fraction" "function" "hfloat"
-	      "identical" "imaginary" "indexable" "indexed" "infinity" "integer"
-	      "laurent" "linear" "list" "listlist" "literal" "mathfunc"
-	      "moduledefinition" "monomial" "name" "neg_infinity"
-	      "negative" "negint" "negzero" "nonnegative" "nonnegint" "nonposint"
-	      "nonpositive" "nonreal" "nothing" "numeric" "odd" "oddfunc" "package"
-	      "point" "polynom" "pos_infinity" "posint" "positive" "poszero" "prime"
-	      "protected" "quadratic" "quartic" "radext" "radfun" "radfunext"
-	      "radical" "radnum" "radnumext" "range" "rational" "ratpoly" "real_infinity"
-	      "realcons" "relation" "scalar" "sequential" "set" "sfloat" "specfunc" "sqrt"
-	      "stack" "string" "symbol" "symmfunc" "tabular" "trig" "truefalse" "truefalseFAIL"
-	      "undefined" "uneval" "zppoly"
-	      
-	      ;; math procedures
-	      "AiryAi" "AiryAiZeros" "AiryBi" "AiryBiZeros" "AngerJ" "ArrayDims" 
-	      "ArrayElems" "ArrayIndFns" "ArrayNumDims" "BesselI" "BesselJ" 
-	      "BesselJZeros" "BesselK" "BesselY" "BesselYZeros" "Beta" "ChebyshevT" 
-	      "ChebyshevU" "CheckArgs" "Chi" "Ci" "CoulombF" "CylinderD" "CylinderU"
-	      "CylinderV" "D" "DESol" "Dirac" "Ei" "EllipticCE" "EllipticCK" 
-	      "EllipticF" "EllipticK" "ExportVector" "FresnelC" "FresnelS" "Fresnelf"
-	      "Fresnelg" "GAMMA" "GF" "GegenbauerC" "HankelH1" "HankelH2" "Heaviside"
-	      "HermiteH" "ImportVector" "InverseJacobiAM" "InverseJacobiCD" 
-	      "InverseJacobiCN" "InverseJacobiCS" "InverseJacobiDC" "InverseJacobiDN" 
-	      "InverseJacobiDS" "InverseJacobiNC" "InverseJacobiND" "InverseJacobiNS" 
-	      "InverseJacobiSC" "InverseJacobiSD" "InverseJacobiSN" "IsMatrixShape" 
-	      "IsVectorShape" "IsWorksheetInterface" "JacobiAM" "JacobiCD" "JacobiCN" 
-	      "JacobiCS" "JacobiDC" "JacobiDN" "JacobiDS" "JacobiNC" "JacobiND" 
-	      "JacobiNS" "JacobiP" "JacobiSC" "JacobiSD" "JacobiSN" "JacobiTheta1" 
-	      "JacobiTheta2" "JacobiTheta3" "JacobiTheta4" "KelvinBei" "KelvinBer" 
-	      "KelvinHei" "KelvinHer" "KelvinKei" "KelvinKer" "KummerM" "KummerU" 
-	      "LaguerreL" "LegendreP" "LegendreQ" "LommelS1" "LommelS2" "MOLS" 
-	      "MathieuA" "MathieuB" "MathieuC" "MathieuCE" "MathieuCEPrime" 
-	      "MathieuCPrime" "MathieuExponent" "MathieuFloquet" "MathieuS" "MathieuSE"
-	      "MathieuSEPrime" "MathieuSPrime" "Matrix" "MatrixOptions" "MeijerG" "Psi"
-	      "RESol" "RealRange" "Shi" "Si" "Ssi" "Stirling1" "Stirling2" 
-	      "StruveH" "StruveL" "TopologicalSort" "Vector" "WARNING" "WeberE" 
-	      "WeierstrassP" "WeierstrassPPrime" "WeierstrassSigma" "WeierstrassZeta" 
-	      "WhittakerM" "WhittakerW" "Wrightomega" "about" "addcoords" 
-	      "additionally" "addproperty" "algsubs" "apply" "applyop" "applyrule" 
-	      "arccos" "arccosh" "arccot" "arccoth" "arccsc" "arccsch" "arcsec" 
-	      "arcsech" "arcsin" "arcsinh" "arctan" "arctanh" "assume" "bernstein" 
-	      "binomial" "ceil" "charfcn" "chrem" "coeftayl" "collect" "combine" 
-	      "comparray" "compiletable" "compoly" "content" "convergs" "copy" "cos"
-	      "cosh" "cot" "coth" "coulditbe" "csc" "csch" "define" "definemore" 
-	      "dilog" "dinterp" "discont" "discrim" "dismantle" "dsolve" "eliminate"
-	      "ellipsoid" "erf" "erfc" "erfi" "euler" "eulermac" "evala" "evalapply"
-	      "evalc" "evalr" "evalrC" "example" "exists" "exp" "extrema" "factor" 
-	      "factors" "fdiscont" "fixdiv" "floor" "forall" "frac" "freeze" "galois"
-	      "gcd" "gcdex" "getassumptions" "hasassumptions" "hasfun" "hasoption" 
-	      "help" "history" "ifactor" "ifactors" "igcdex" "ilcm" "ilog" 
-	      "implicitdiff" "info" "initialcondition" "insertpattern" "intat" "interp"
-	      "invztrans" "iperfpow" "iratrecon" "iroot" "irreduc" "is" "iscont" 
-	      "isolate" "isolve" "ispoly" "isqrfree" "issqr" "ithprime" "latex" "lcm"
-	      "limit" "ln" "lnGAMMA" "log" "log10" "maptype" "match" "maximize" 
-	      "minimize" "modpol" "msolve" "mtaylor" "nextprime" "nprintf" "odetest"
-	      "packages" "patmatch" "plot" "plot3d" "plotsetup" "poisson" "polylog" 
-	      "powmod" "prem" "prevprime" "primpart" "printf" "product" "proot" 
-	      "protect" "psqrt" "quo" "radfield" "radnormal" "rand" "randomize" 
-	      "randpoly" "rationalize" "ratrecon" "readdata" "readstat" "redefine" 
-	      "related" "rem" "residue" "resultant" "root" "rootbound" "roots" 
-	      "round" "rsolve" "rtable_dims" "rtable_elems" "scanf" "sec" "sech" 
-	      "selectfun" "shake" "showtime" "signum" "simplify" "sin" "singular" 
-	      "sinh" "sinterp" "smartplot" "smartplot3d" "sprem" "sprintf" "sqrfree"
-	      "sscanf" "sturm" "sturmseq" "subtype" "sum" "symmdiff" "tablelook" 
-	      "tan" "tanh" "testeq" "thaw" "unapply" "unassign" "undefine" 
-	      "unprotect" "unwindK" "unwith" "usage" "value" "verify" "version" 
-	      "whattype" "with" "ztrans"
-
-	      ;; miscellaneous procedures
-	      "interface" "readline"
-	      ))
-	    "\\>"))
-  "List of some of the protected names in Maple.
-This is supposed to exclude the builtins and reserved words.")
 
 (defvar maplev-undocumented-face   'maplev-undocumented-face
   "*Face name for Maple undocumented names.")
@@ -1529,10 +1536,6 @@ This is supposed to exclude the builtins and reserved words.")
 	      ))
 	    "\\)\\>"))
   "List of undocumented names reserved for internal use.")
-
-
-(defconst maplev--protected-names-procs-re
-  (list "evalindets" "subsindets"))
 
 (defun maplev-font-lock-keywords-1 ()
   "Compute the minimum decoration `font-lock-keywords' for MapleV mode.
@@ -1673,7 +1676,7 @@ create the file."
 				  (not toggle)
 				toggle))
 	   file)
-      (setq file (maplev-find-include-file inc-file inc-first path))
+      (setq file (maplev-find-include-file inc-file path inc-first))
       (if file
 	  (if other-window-flag
 	      (find-file-other-window file )
@@ -1683,7 +1686,7 @@ create the file."
 	(let ((base (file-name-nondirectory inc-file))
 	      (inc-dir inc-file))
 	  (while (and (setq inc-dir (file-name-directory (directory-file-name inc-dir)))
-		      (not (setq file (maplev-find-include-file inc-dir inc-first path)))))
+		      (not (setq file (maplev-find-include-file inc-dir path inc-first)))))
 	  (if (not file)
 	      (error "Include file %s does not exist " inc-file)
 	    (when (yes-or-no-p (format "Create include file %s "
@@ -1692,7 +1695,7 @@ create the file."
 		  (find-file-other-window file)
 		(find-file file)))))))))
 
-(defun maplev-find-include-file (inc-file &optional inc-first inc-path)
+(defun maplev-find-include-file (inc-file &optional inc-path inc-first)
   "Find the Maple include file INC-FILE and return as an absolute path.
 INC-PATH is an optional list of rooted directories.  Use each
 directory, in order, as parent of INC-FILE.  If INC-FIRST is
@@ -1701,15 +1704,15 @@ non-nil, search the INC-PATH directories before using the
 of `default-directory'.  Return nil if the file is not found."
   (if (file-name-absolute-p inc-file)
       (and (file-exists-p inc-file) inc-file)
-    (if inc-first
+    (if (and inc-path inc-first)
 	(or
 	 (maplev-include--find-file-in-path inc-file inc-path)
 	 (maplev-include--find-file-up-path inc-file))
       (or (maplev-include--find-file-in-path inc-file (list default-directory))
-	  (maplev-include--find-file-in-path inc-file inc-path)
+	  (and inc-path (maplev-include--find-file-in-path inc-file inc-path))
 	  (maplev-include--find-file-up-path inc-file)))))
 
-(defun maplev-include--find-file-in-path (file &optional paths)
+(defun maplev-include--find-file-in-path (file paths)
   "Search for FILE in a list of rooted PATHS, which include trailing slash.
 If found, return the absolute path to FILE, otherwise return nil."
   (let (dir abs-file)

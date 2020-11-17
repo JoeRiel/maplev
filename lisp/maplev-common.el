@@ -6,10 +6,11 @@
 ;;; Code:
 ;;
 
-;;{{{ Suppress byte-compile warnings
-
+(require 'maplev-compat)
 (require 'maplev-custom)
 (require 'maplev-re)
+
+;;{{{ Suppress byte-compile warnings
 
 (eval-when-compile
   (defvar maplev-mode-syntax-table)
@@ -17,13 +18,12 @@
   (defvar maplev-help-mode-syntax-table)
   (defvar maplev-history-list)
   (defvar maplev-mode-4-syntax-table)
-  (defvar maplev-mode-syntax-table)
+  (defvar maplev-symbol-syntax-table)
   (defvar maplev-quote-not-string-syntax-table))
 
 (declare-function maplev-reset-font-lock "maplev")
 (declare-function maplev--re-search-backward "maplev-mint")
 (declare-function maplev--re-search-forward "maplev-mint")
-(declare-function maplev-safe-position "maplev-mint")
 (declare-function maplev--string-to-name "maplev-utils")
 
 ;;}}}
@@ -178,28 +178,6 @@ character of the keyword.  Complete end-statements are not required."
 		  (setq count (1- count))))))))))
 
 
-(defun make-partial-match-regexp-backwards (word)
-  (let ((re (substring word -1)))
-    (mapc (lambda (c) (setq re (concat "\\(?:" (char-to-string c) re "?\\)")))
-	  (reverse (string-to-list (substring word 0 -1))))
-    re))
-
-(make-partial-match-regexp-backwards "end proc")
-
-(defun make-partial-match-regexp (word)
-  (let ((re (substring word 0 1)))
-    (mapc (lambda (c) (setq re (concat "\\(?:" re "?" (char-to-string c) "\\)"))) 
-	  (substring word 1))
-    re))
-
-(defconst maplev-partial-end-defun-re
-  (concat "\\("
-	  (make-partial-match-regexp "end")
-	  "?\\s-+\\)?\\(?:"
-	  (make-partial-match-regexp "proc")
-	  "\\|"
-	  (make-partial-match-regexp "module")
-	  "\\)\\>"))
 
 (defun maplev--end-of-defun ()
   "Move point forward to the end of the current defun,
@@ -279,26 +257,36 @@ The defun marked is the one that contains point."
     (if (looking-at maplev--defun-begin-re) (goto-char (match-end 0)))
     (let ((count 1) ; decrement for each end statement, increment for each proc
 	  (regexp (concat "\\(" maplev--defun-begin-re "\\)\\|\\(?:" maplev--defun-end-re "\\)"))
-	  (opoint (point)))
+	  (o-point (point)) ; original point
+	  (p-point (point)) ; point at which state is valid
+	  (state (parse-partial-sexp (point-min) (point)))) ; FIXME, reuse saved state
       ;; move to end of current procedure, using count to skip over local procedure assignments.
       (while (and (/= count 0)
 		  (re-search-forward regexp nil 'move))
-	(setq count (+ count (if (match-beginning 1) 1 -1))))
+	(setq state (parse-partial-sexp p-point (point) nil nil state)
+	      p-point (point))
+	(unless (or (nth 3 state) ; string/quote
+		    (nth 4 state)) ; comment
+	  (setq count (+ count (if (match-beginning 1) 1 -1)))))
       (forward-line)
       (if (/= count 0)
 	  ;; at bottom of buffer without finding closing mark
 	  (progn
-	    (goto-char opoint)
-	    (when (setq opoint (maplev--end-of-defun-pos))
+	    (goto-char o-point)
+	    (when (setq o-point (maplev--end-of-defun-pos))
 	      (when (maplev--beginning-of-defun-pos)
-		(push-mark opoint nil t))))
+		(push-mark o-point nil t))))
 	;; at end of procedure
 	(push-mark (point) nil t) ; set mark after end of current procedure.
 	(when (re-search-backward maplev--defun-end-re nil 'move)
 	  (setq count -1)
 	  (while (and (/= count 0)
 		      (re-search-backward regexp nil 'move))
-	    (setq count (+ count (if (match-beginning 1) 1 -1))))
+	    ;; TBD: rewrite to avoid parsing from point-min
+	    (setq state (parse-partial-sexp (point-min) (point) nil nil state))
+	    (unless (or (nth 3 state) ; string/quote
+			(nth 4 state)) ; comment
+	      (setq count (+ count (if (match-beginning 1) 1 -1)))))
 	  (zerop count))))))
 
 (defun maplev-current-defun ()
@@ -340,7 +328,7 @@ If it is empty use DEFAULT.
 If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
   ;; If point is in a string enclosed by backquotes,
   ;; we take the whole string including the backquotes.
-  (let* ((state (parse-partial-sexp (maplev-safe-position)
+  (let* ((state (parse-partial-sexp (point-min)
                                     (point)))
          (choice (if (equal ?` (nth 3 state))
                      ;; inside a backquoted symbol
@@ -393,3 +381,5 @@ Minibuffer completion is used if COMPLETE is non-nil."
 (provide 'maplev-common)
 
 ;;; maplev-common.el ends here
+
+

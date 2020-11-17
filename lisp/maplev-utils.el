@@ -16,13 +16,11 @@
   (defvar compilation-error-regexp-alist)
   (autoload 'mouse-selection-click-count "mouse"))
 
-  
-
 (defun maplev--string-to-name (name)
   "Convert NAME to a valid Maple name.  Add back-quotes if needed."
   ;; Do we need something more general to match a string that might
   ;; require backquotes?
-  (when (string-match "/" name)
+  (unless (string-match maplev--simple-name-re name)
     (if (not (string= "`" (substring name 0 1)))
         (setq name (concat "`" name)))
     (if (not (string= "`" (substring name -1)))
@@ -80,6 +78,17 @@ For example, \"-a -w 100\" becomes \(\"-a\" \"-w100\"\)."
 				(replace-match "" t t s 1)
 			      s)))
 	      opts))))
+
+
+(defun maplev-edit-source (proc)
+  "Edit the source for the file PROC.
+The default is the procedure name at point.
+For this to work, the Maple global variable `debugger/editor` 
+must be appropriately assigned.  See the Maple help page for showstat."
+  (interactive (list (maplev-ident-around-point-interactive
+		      "Maple procedure")))
+  (let ((cmd (format "editsource(%s):" proc)))
+    (maplev-cmaple-direct cmd 'delete)))
 
 
 (provide 'maplev-utils)
