@@ -5,7 +5,7 @@
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    3.0.3
+;; Version:    3.0.4
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -1501,7 +1501,7 @@ This is supposed to exclude the builtins and reserved words."))
 
 (defconst maplev--protected-names-re
   (eval-when-compile
-    (concat "\\<" (regexp-opt maplev--protected-names) "//>"))
+    (concat "\\<" (regexp-opt maplev--protected-names) "\\>"))
   "Regular expression matching Maple protected names.")
 
 
