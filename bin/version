@@ -87,6 +87,13 @@ sed $sed_opt "
 " "$file"
 
 #}}}
+#{{{ * lisp/maplev-pkg.el
+
+file="lisp/maplev-pkg.el"
+[ -z "$version" ] && echo -ne "$file:\t"
+sed $sed_opt "/\"maplev\"/${sed_cmd}" "$file"
+
+#}}}
 #{{{ * README.md
 file="README.md"
 [ -z "$version" ] && echo -ne "$file:\t"
