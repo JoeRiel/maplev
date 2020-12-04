@@ -2,8 +2,9 @@
 #
 # Maintainer: Joe Riel <jriel@maplesoft.com>
 
+include version.mk
+
 PKG := maplev
-VERSION := 3.0.3
 
 # CLOUD-ID := 5655772713713664
 # CLOUD-DESCRIPTION := An Emacs mode for Maple developers

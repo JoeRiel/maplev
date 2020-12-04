@@ -70,6 +70,13 @@ file="VERSION"
 [ -z "$version" ] || echo "${version}" > ${file}
 
 #}}}
+#{{{ * version.mk
+
+file="version.mk"
+[ -z "$version" ] && echo -ne "$file:\t"
+sed $sed_opt "/^VERSION := /${sed_cmd}" "$file"
+
+#}}}
 #{{{ * lisp/maplev.el
 
 file="lisp/maplev.el"
