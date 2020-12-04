@@ -1,5 +1,7 @@
 -*- org -*-
 
+* 3.0.4
+** Fix maplev--protected-names-re
 * 3.0.3
 ** Add maplev-compat.el.
 ** Add maplev-edit-source.

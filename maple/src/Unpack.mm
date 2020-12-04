@@ -49,7 +49,7 @@ uses FT = FileTools;
 
     book := sprintf("maple://%s", book);
 
-    #{{{ Doc
+    #{{{ Doc (html and pdf)
 
     printf("\nextracting doc files\n");
 
@@ -59,8 +59,13 @@ uses FT = FileTools;
         FT:-MakeDirectory(dstdir, 'recurse');
     end if;
 
-    Copy(join(book, "maplev.html"), join(dstdir, "maplev.html"), 'force', 'verbose');
-    Copy(join(book, "maplev.pdf"),  join(dstdir, "maplev.pdf"),  'force', 'verbose');
+    src := join(book, "maplev.html");
+    dst := join(dstdir, "maplev.html");
+    Copy(src, dst, 'force', 'verbose');
+
+    src := join(book, "maplev.pdf");
+    dst := join(dstdir, "maplev.pdf");
+    Copy(src, dst, 'force', 'verbose');
 
     #}}}
     #{{{ Binary file
@@ -68,12 +73,12 @@ uses FT = FileTools;
     printf("\nextracting pmaple binary file\n");
 
     platform := kernelopts('platform');
+    binfile := ifelse(platform = "windows"
+                      , "pmaple.exe"
+                      , "pmaple"
+                     );
+
     systype  := FileTools:-Filename(kernelopts('bindir'));
-
-    if platform = "windows" then binfile := "pmaple.exe";
-    else                         binfile := "pmaple";
-    end if;
-
     dstdir := join(tboxdir, systype);
 
     if not FT:-Exists(dstdir) then
@@ -83,7 +88,7 @@ uses FT = FileTools;
     src := join(book, systype, binfile);
     dst := join(dstdir, binfile);
 
-    Copy(src, dst, 'force', 'verbose',NULL);
+    Copy(src, dst, 'force', 'verbose');
 
     if platform = "unix" or platform = "mac" then
         status := ssystem(sprintf("chmod +x %s", dst));
@@ -99,7 +104,12 @@ uses FT = FileTools;
 
     printf("\nextracting tar file\n");
 
-    src := FT:-ListDirectory(book, 'returnonly' = "*.tar")[1];
+    src := FT:-ListDirectory(book, 'returnonly' = "*.tar");
+    if src = [] then
+        error "missing tar file";
+    else
+        src := src[1];
+    end if;
 
     dst := join(tboxdir, src);
     src := join(book, src);
