@@ -1501,7 +1501,7 @@ This is supposed to exclude the builtins and reserved words."))
 
 (defconst maplev--protected-names-re
   (eval-when-compile
-    (concat "\\<" (regexp-opt maplev--protected-names) "//>"))
+    (concat "\\<" (regexp-opt maplev--protected-names) "\\>"))
   "Regular expression matching Maple protected names.")
 
 
