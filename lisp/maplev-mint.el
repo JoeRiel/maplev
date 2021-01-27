@@ -477,7 +477,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 		      (split-string (buffer-substring-no-properties
 				     (next-single-property-change pos 'maplev-mint)
 				     (previous-single-property-change (1+ pos) 'maplev-mint))
-				    ", " t " +")
+				    ",[ \t\n]+" t " +")
 		    (list (save-excursion
 			    (goto-char pos)
 			    (maplev--ident-around-point)))))
