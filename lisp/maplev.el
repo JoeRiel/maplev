@@ -1272,8 +1272,8 @@ otherwise use `maplev-tab-width'."
   (eval-when-compile
     (concat "^\\$\\("
 	    (regexp-opt (list
-			 "define" "elif" "else" "endif" "file"
-			 "ifdef" "ifndef" "include" "undef"
+			 "define" "elif" "elifdef" "elifndef" "else" "endif"
+			 "file" "ifdef" "ifndef" "include" "undef"
 			 ))
 	    "\\)"))
   "Regex of preprocessor directives.")
