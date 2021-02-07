@@ -16,6 +16,9 @@
   (defvar compilation-error-regexp-alist)
   (autoload 'mouse-selection-click-count "mouse"))
 
+(declare-function maplev-ident-around-point-interactive "maplev-common")
+(declare-function maplev-cmaple-direct "maplev-cmaple")
+
 (defun maplev--string-to-name (name)
   "Convert NAME to a valid Maple name.  Add back-quotes if needed."
   ;; Do we need something more general to match a string that might
