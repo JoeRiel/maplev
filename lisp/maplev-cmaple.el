@@ -121,6 +121,8 @@ one by calling procedure `maplev-config'."
       (if process (delete-process process))
       (if maplev-startup-directory
           (cd (expand-file-name maplev-startup-directory)))
+      (let ((root "/home/joe/maplesoft/sandbox/main/internal/bin.X86_64_LINUX"))
+	(setenv "LD_LIBRARY_PATH" (format "%s:%s/system" root root)))
       (set-process-filter
        (setq process (apply #'start-process
                             "Maple"
