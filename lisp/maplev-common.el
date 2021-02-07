@@ -107,7 +107,7 @@ Return nil if search fails."
   ;; and move to the end of the match.  Searching forward is more
   ;; complicated because point could lie within an end statement.
 
-  (let ((regexp (if top maplev--top-defun-end-re maplev--defun-end-re))
+  (let ((regexp (if top maplev--top-defun-end-re-colon maplev--defun-end-re-colon))
         pos)
     (setq n (or n 1))
     (save-excursion
@@ -256,7 +256,7 @@ The defun marked is the one that contains point."
   (with-syntax-table maplev-symbol-syntax-table
     (if (looking-at maplev--defun-begin-re) (goto-char (match-end 0)))
     (let ((count 1) ; decrement for each end statement, increment for each proc
-	  (regexp (concat "\\(" maplev--defun-begin-re "\\)\\|\\(?:" maplev--defun-end-re "\\)"))
+	  (regexp (concat "\\(" maplev--defun-begin-re "\\)\\|\\(?:" maplev--defun-end-re-colon "\\)"))
 	  (o-point (point)) ; original point
 	  (p-point (point)) ; point at which state is valid
 	  (state (parse-partial-sexp (point-min) (point)))) ; FIXME, reuse saved state
@@ -278,7 +278,7 @@ The defun marked is the one that contains point."
 		(push-mark o-point nil t))))
 	;; at end of procedure
 	(push-mark (point) nil t) ; set mark after end of current procedure.
-	(when (re-search-backward maplev--defun-end-re nil 'move)
+	(when (re-search-backward maplev--defun-end-re-colon nil 'move)
 	  (setq count -1)
 	  (while (and (/= count 0)
 		      (re-search-backward regexp nil 'move))

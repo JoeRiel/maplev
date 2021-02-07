@@ -119,7 +119,7 @@ Set STATE and STACK in variable to nil."
          (save-excursion
            (when (re-search-backward
                   (concat "\\(" maplev--top-defun-begin-re "\\)\\|"
-                          "\\(" maplev--top-defun-end-re "\\)") nil t)
+                          "\\(" maplev--top-defun-end-re-colon "\\)") nil t)
              (if (nth 2 (match-data))   ; found proc?
                  (match-beginning 0)    ;   start of proc
                (match-end 0))))         ;   end of proc

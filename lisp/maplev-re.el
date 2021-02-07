@@ -100,7 +100,6 @@ The second group corresponds to the name of the defun.")
 The first group corresponds to the name of the defun.
 This requires that the procedure is flush-left.")
 
-
   (defconst maplev--defun-end-re
     ;; This regular expression matches any nonqualified end statement,
     ;; such as "do ... end"; however, I consider such code to be bad form
@@ -109,16 +108,22 @@ This requires that the procedure is flush-left.")
     ;; "do ... od".
     (concat "\\<end\\>"
 	    "\\(?:[ \t]+" maplev--defun-re "\\)?"
-	    "[ \t]*[:;]")
+	    )
+    "Regular expression for \"end\" statement in a Maple defun.
+It does not allow line-breaks as this messes up searching.
+It matches from the \"end\" to the optional following symbol.")
+
+  (defconst maplev--defun-end-re-colon
+    (concat maplev--defun-end-re "[ \t]*[:;]")
     "Regular expression for \"end\" statement in a Maple defun.
 It does not allow line-breaks as this messes up searching.
 It matches from the \"end\" to the terminating colon or semicolon.")
 
-  (defconst maplev--top-defun-end-re
-    (concat "^\\(?:" maplev--defun-end-re "\\)" ; flush left end
+  (defconst maplev--top-defun-end-re-colon
+    (concat "^\\(?:" maplev--defun-end-re-colon "\\)" ; flush left end
 	    "\\|"                         ; or
 	    maplev--top-defun-begin-re "[^#\n]*" ; one line proc
-	    maplev--defun-end-re)
+	    maplev--defun-end-re-colon)
     "Regular expression for \"end\" statement in a top level Maple procedure assignment.
 It matches either a flush left \"end\" or a one line procedure assignment.")
 
