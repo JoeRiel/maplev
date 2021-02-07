@@ -53,7 +53,7 @@ case where a name has a newline character.")
     "Regular expression for Maple comments.
 A backslash at the end of the line does not continue the comment.")
 
-  (defconst maplev--defun-re "\\(?:\\<proc\\>\\|\\<module\\>\\)"
+  (defconst maplev--defun-re "\\(?:\\<proc\\|module\\)\\>"
     "Regular expression at start of a Maple procedure or module.")
 
   (defconst maplev--assignment-re
