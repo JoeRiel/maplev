@@ -195,10 +195,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
                                , "\n"      = sprintf("\n%*s", indent, "") # indent
                                , ifelse(keep_line_numbers
                                         , NULL
-                                        , op([NULL
-                                              , "\n( +)" = "\n\\1\\1" # double spaces used for indenting
-                                              , "\n (....)" = "\n"    # remove numbers
-                                             ])
+                                        , "\n (......)" = "\n    "  # remove numbers
                                        )
                               )
                       );
@@ -264,4 +261,4 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
 ##
 
-end module;
+end module:
