@@ -1004,11 +1004,11 @@ deleted."
           (setq vars (cdr vars)))))))
 
 (defconst maplev-mint-query-help
-  " y   quote the match
- '   single quote the match
- !   single quote remaining matches
- Q   single quote remaining matches
- \"  double quote the match
+  " y   single-quote the match
+ '   single-quote the match
+ !   single-quote remaining matches
+ Q   single-quote remaining matches
+ \"  double-quote the match
  n   skip to next match
  d   skip all occurrences of current match
  e   edit the list of variables
