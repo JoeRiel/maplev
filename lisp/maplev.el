@@ -1285,6 +1285,10 @@ The first group matches the character used to delimit the
 file (either < or \").  The second group matches the filename.")
 
 
+(defconst maplev--constructors
+  (list "HFloat" "Float" "SFloat")
+  "List of Maple constructors.")
+
 ;;{{{  builtins
 
 ;; Currently the backquoted builtin functions are font-locked as
