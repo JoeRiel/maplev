@@ -1805,12 +1805,12 @@ The file is named .maplev and is searched for in the current
 directory and its ancestors.  Return the path to the configuration
 file if one was found, nil otherwise."
   (interactive)
-  (let ((config (maplev-include--find-file-up-path ".maplev")))
-    (when config
+  (let ((maplev-config-file (maplev-include--find-file-up-path ".maplev")))
+    (when maplev-config-file
       (condition-case err
 	  (progn 
-	    (load config)
-	    config)
+	    (load maplev-config-file)
+	    maplev-config-file)
 	(error
 	 (error "Problem loading config file %s: %s" config err))))))
 
