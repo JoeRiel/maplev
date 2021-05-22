@@ -21,11 +21,12 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 ##PROCEDURE maplev[Print][ModuleApply]
 
     ModuleApply := proc(s :: string
+                        , { file :: string := "" }
                         , { return_string :: truefalse := false }
                         , { keep_line_numbers :: truefalse := false }
                        )
 
-    local expr, opacity, width;
+    local expr, opacity, str, width;
 
         try
             # Save and reset configuration.
@@ -42,10 +43,14 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
             kernelopts('opaquemodules' = opacity);
         end try;
 
+        str := buf:-value('clear');
+
         if return_string then
-            buf:-value('clear');
+            return str;
+        elif file = "" then
+            printf("%s\n", str);
         else
-            printf("%s\n", buf:-value('clear'));
+            FileTools:-Text:-WriteFile(file, str);
         end if;
 
     end proc;
