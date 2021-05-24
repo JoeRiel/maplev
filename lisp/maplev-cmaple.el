@@ -18,7 +18,8 @@
 
 (eval-when-compile
   (defvar maplev-mint-error-level)
-  (defvar maplev-startup-directory))
+  (defvar maplev-startup-directory)
+  (defvar maplev-load-path))
 
 (declare-function maplev-mint-region "maplev-mint")
 (declare-function maplev-current-defun "maplev-common")
@@ -121,8 +122,8 @@ one by calling procedure `maplev-config'."
       (if process (delete-process process))
       (if maplev-startup-directory
           (cd (expand-file-name maplev-startup-directory)))
-      (let ((root "/home/joe/maplesoft/sandbox/main/internal/bin.X86_64_LINUX"))
-	(setenv "LD_LIBRARY_PATH" (format "%s:%s/system" root root)))
+      (if maplev-load-path
+       	(setenv "LD_LIBRARY_PATH" maplev-load-path))
       (set-process-filter
        (setq process (apply #'start-process
                             "Maple"
