@@ -1816,7 +1816,7 @@ file if one was found, nil otherwise."
 	    (load maplev-config-file)
 	    maplev-config-file)
 	(error
-	 (error "Problem loading config file %s: %s" config err))))))
+	 (error "Problem loading config file %s: %s" maplev-config-file err))))))
 
 ;;}}}
 
