@@ -1257,7 +1257,7 @@ otherwise use `maplev-tab-width'."
 (defconst maplev--deprecated-re
   (eval-when-compile
     (maplev--list-to-word-re
-     (list "traperror" "linalg" "solvefor" "ERROR")))
+     (list "queue" "stack" "traperror" "linalg" "solvefor" "ERROR")))
   "Regex of deprecated keywords and procedures.")
 
 (defconst maplev--special-words-re
