@@ -1284,9 +1284,8 @@ otherwise use `maplev-tab-width'."
 The first group matches the character used to delimit the
 file (either < or \").  The second group matches the filename.")
 
-
-(defconst maplev--constructors
-  (list "HFloat" "Float" "SFloat")
+(defconst maplev-constructors
+  (list "Complex" "Float" "Fraction" "HFloat" "Integer" "SFloat")
   "List of Maple constructors.")
 
 ;;{{{  builtins
@@ -1570,8 +1569,8 @@ Add builtin functions to the medium decoration keywords."
   (let ((max-specpdl-size 10000))       ; default 600 is too small
     (append (maplev-font-lock-keywords-2)
             (list (list (maplev--list-to-word-re (append maplev-builtin-functions
-							 maplev-builtin-types))
-                        ;; Xemacs doesn't have font-lock-builtin-face
+							 maplev-builtin-types
+							 maplev-constructors))
                         '(0 font-lock-builtin-face))
                   (list maplev--deprecated-re '(0 font-lock-warning-face))
                   (list maplev--protected-names-re '(0 maplev-protected-face))
