@@ -1236,7 +1236,7 @@ otherwise use `maplev-tab-width'."
   "List of reserved words in Maple.")
 
 (defconst maplev-special-words
-  '("args" "nargs" "procname" "RootOf" "Float" "thismodule" "thisproc"
+  '("args" "nargs" "procname" "RootOf" "thismodule" "thisproc"
     "_options" "_noptions" "_rest" "_nrest"
     "_params" "_nparams" "_passed" "_npassed"
     "_nresults" "static")
