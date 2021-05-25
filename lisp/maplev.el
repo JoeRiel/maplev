@@ -1526,20 +1526,21 @@ This is supposed to exclude the builtins and reserved words."))
     (concat "\\<\\(?:"
 	    (regexp-opt
 	     (list
-	      "ARRAY" "DAESimplify" "Discrim" "EqualStructure" "FRAMESCALING"
-	      "GetAlgExt" "InertNames" "MPFloat" "MorrBrilCull" "NONUNIFORM"
-	      "NumericTools" "PIECEWISE" "PackageManagement" "PatternMatching"
-	      "PiecewiseTools" "PseudoStack" "PuiseuxSeries" "RestoreSession"
-	      "SaveSession" "Subres" "TABLE" "TRACE" "TestTools" "UNIFORM"
-	      "UpdateSource" "VerifyTools" "_X" "_Z" "_a" "_b" "_c" "_x" "_y" "_z"
-	      "assignfcn" "bind" "cmagdiff" "crinterp" "dlclose" "evalgf1"
-	      "gmp_isprime" "inner" "is_gmp" "mvMultiply" "negate" "reduce_opr"
-	      "rtableInfo" "rtable_convolution" "rtable_histogram" "rtable_is_zero"
-	      "rtable_normalize_index" "rtable_scale" "rtable_sort_indices" "rtable_zip"
-	      "unbind"
+	      "_a" "_b" "_c" "_X" "_x" "_y" "_Z" "_z"
+	      "abnd" "ARRAY" "assignfcn" "bind" "cmagdiff" "crinterp"
+	      "DAESimplify" "Discrim" "dlclose" "EqualStructure" "evalgf1"
+	      "fgbrs" "FRAMESCALING" "GetAlgExt" "gmp_isprime" "InertForms"
+	      "InertNames" "inner" "is_gmp" "libmgb" "MorrBrilCull" "MPFloat"
+	      "mvMultiply" "negate" "NONUNIFORM" "NumericTools" "PackageManagement"
+	      "PatternMatching" "PIECEWISE" "PiecewiseTools" "PseudoStack" "PuiseuxSeries"
+	      "reduce_opr" "RestoreSession" "rtable_convolution" "rtable_histogram"
+	      "rtable_is_zero" "rtable_normalize_index" "rtable_scale" "rtable_sort_indices"
+	      "rtable_zip" "rtableInfo" "SaveSession" "sdmp" "Subres" "TABLE" "TestTools"
+	      "TRACE" "unbind" "UNIFORM" "UpdateSource" "VerifyTools" 
 	      ))
 	    "\\)\\>"))
   "List of undocumented names reserved for internal use.")
+
 
 (defun maplev-font-lock-keywords-1 ()
   "Compute the minimum decoration `font-lock-keywords' for MapleV mode.
