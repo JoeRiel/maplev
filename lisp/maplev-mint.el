@@ -272,24 +272,26 @@ procedure, or module."
 in the source buffer of the proc/module referenced at POS in the
 mint buffer.  Point in the source buffer is set to just after the
 formal parameter list."
-  (let (beg class end file line toline)
+  (let (beg class end file (line 0) toline)
     (save-excursion
       (goto-char pos)
-      (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)")
+      (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)" nil 'noerror)
       ;; Assign class Procedure, Operator, or Module
       (setq class (match-string-no-properties 3))
-      (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
-      (setq line (1- (string-to-number (match-string-no-properties 1)))
-	    file (maplev-mint-get-source-file)
-	    toline (if (re-search-forward "to\\s-*\\([0-9]+\\)" (line-end-position) 'move)
-		       (string-to-number (match-string-no-properties 1))
-		     (1+ line))))
+      (when (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)" nil 'noerror)
+	(setq line (1- (string-to-number (match-string-no-properties 1)))
+	      file (maplev-mint-get-source-file)
+	      toline (if (re-search-forward "to\\s-*\\([0-9]+\\)" (line-end-position) 'move)
+			 (string-to-number (match-string-no-properties 1))
+		       (1+ line)))))
     ;; move point to the beginning of that line in the source
     (maplev-mint--goto-source-pos line 0 file)
-    (save-excursion
-      (setq beg (point))
-      (forward-line (- toline line))
-      (setq end (point)))
+    (setq beg (point))
+    (setq end (if (null toline)
+		  (point-max)
+		(save-excursion
+		  (forward-line (- toline line))
+		  (point))))
     ;; Use class to position point after formal parameter list
     (cond 
      ((string= class "Procedure")
