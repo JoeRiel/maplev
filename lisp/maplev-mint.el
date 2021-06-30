@@ -543,32 +543,18 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Declaration of undeclared global variables.
 	 ((eq prop 'undecl-global)
-	  (let ((region (maplev-mint--goto-source-and-get-region pos)))
-	    (maplev-mint-query-undeclared-globals vars (car region) (cdr region))))
-	  ;; (let ((action (x-popup-dialog t `(,(if (stringp arg)
-	  ;; 					 (format "Undeclared variable: %s" arg)
-	  ;; 				       "All undeclared variables")
-	  ;; 				    ("Quote" . "quote")
-	  ;; 				    ("Declare as global" . "global")
-	  ;; 				    ("Declare as local" . "local")))))
-	  ;;   (if (string= action "quote")
-	  ;; 	(let* ((region (maplev-mint--goto-source-and-get-region pos))
-	  ;; 	       (window (get-buffer-window))
-	  ;; 	       (edges (window-absolute-body-pixel-edges window))
-	  ;; 	       (position (pos-visible-in-window-p nil window t)))
-	  ;; 	  (unless position
-	  ;; 	    (recenter 0)
-	  ;; 	    (setq position (pos-visible-in-window-p nil window t))
-	  ;; 	    (unless position
-	  ;; 	      (error "position is not visible")))
-	  ;; 	  ;; move mouse into source-buffer window so that 
-	  ;; 	  ;; the subsequent keyboard input is into that buffer
-	  ;; 	  (set-mouse-absolute-pixel-position
-	  ;; 	   (+ (nth 0 edges) (nth 0 position))
-	  ;; 	   (+ (nth 1 edges) (nth 1 position)))
-	  ;; 	  (maplev-mint-quote-vars vars (car region) (cdr region)))
-	  ;;     (maplev-mint--goto-source-proc pos)
-	  ;;     (maplev-add-declaration action vars))))
+	  (let (dofile region)
+	    (if (save-excursion
+		  (goto-char pos)
+		  (re-search-backward "These names were used as global names but the names don't start with _")
+		  (beginning-of-line)
+		  (looking-at "  ")) 
+		(setq region (maplev-mint--goto-source-and-get-region pos))
+	      ; non-indented mint statement; query throughout file
+	      (maplev-mint--goto-source-pos 1 0 nil)
+	      (setq dofile t
+		    region (cons (point-min) (point-max))))
+	    (maplev-mint-query-undeclared-globals vars (car region) (cdr region) dofile)))
 	 ;;
 	 ;; Declared as both local variable and parameter.
 	 ((eq prop 'local-and-param)
@@ -579,7 +565,6 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 		(maplev-delete-declarations "local" vars (maplev-mint--goto-source-and-get-region pos))
 	      (maplev-mint--goto-source-proc pos)
 	      (maplev-delete-vars vars (maplev--scan-lists -1) (point)))))
-	 ;;
 	 ;;
 	 ;; Goto line
 	 ((eq prop 'goto-line)
@@ -1065,15 +1050,16 @@ C-r  enter recursive edit (C-M-c to get out)
     (define-key map [help] 'help)
     map))
 
-(defun maplev-mint-query-undeclared-globals (vars beg end)
+(defun maplev-mint-query-undeclared-globals (vars beg end dofile)
   "Query to handle occurrences of VARs in the region between BEG and END.
+When DOFILE is non-nil, ...
 VARs is a list of undeclared globals."
   (let (case-fold-search regexp reply start var)
     (save-excursion
       (save-restriction
 	(narrow-to-region beg end)
 	(let ((syntax-table maplev-quote-not-string-syntax-table)
-	      (cnt -1)
+	      (cnt (if dofile 0 -1))
 	      (message (apply 'propertize
 			      (substitute-command-keys
 			       "Query replacing %s with %s: (\\<maplev-mint-query-map>\\[help] for help) ")
@@ -1084,6 +1070,12 @@ VARs is a list of undeclared globals."
 	  (unwind-protect
 	      (while keep-going
 		(unless regex 
+		  ;; assign regex. It has the following numbered groups:
+		  ;; 1) :-
+		  ;; 2) variable
+		  ;; 3) :-
+		  ;; 4) proc|module|->
+		  ;; 5) end (proc|module)?
 		  (setq regex (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)?"
 				      "\\|\\(" maplev--defun-re "\\|->\\)\\(`\\)?"
 				      "\\|\\(?:" maplev--defun-end-re "\\)")))
@@ -1093,12 +1085,12 @@ VARs is a list of undeclared globals."
 		  (setq done nil)
 		  (while (not done)
 		    (cond
-		     ((match-string 5) ; typically `module`
+		     ((match-string-no-properties 5) ; typically `module`
 		      (maplev-forward-expr)
 		      (setq done t))
-		     ((or (match-string 1) (match-string 3))
+		     ((or (match-string-no-properties 1) (match-string-no-properties 3))
 		      (setq done t)) ; skip :- fields (left or right)
-		     ((match-string 2)
+		     ((match-string-no-properties 2)
 		      ;; matched a variable
 		      (if (not (zerop cnt))
 			  ;; skip matches inside a proc/module
