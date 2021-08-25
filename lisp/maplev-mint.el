@@ -409,35 +409,36 @@ Each element is a list of the form \(REGEXP FACE PROP VAR\):
 
 (defun maplev-mint-fontify-buffer ()
   "Fontify the mint buffer.  Does not use font-lock mode."
-  (let ((mlist maplev-mint-fontify-alist)
-        regexp mel buffer-read-only case-fold-search)
-    (font-lock-mode -1) ; turn-off font-lock
-    ;; Process elements of maplev-mint-fontify-alist
-    (while (setq mel (car mlist))
-      (goto-char (point-min))
-      (setq regexp (concat (nth 0 mel)
-                           (if (nth 3 mel) maplev-mint-variables-re)))
-      (while (re-search-forward regexp nil t)
-        (let ((beg (match-beginning 1))
-              (end (match-end 1)))
-          ;; Here we are working with variables whose values are symbols
-          ;; with a face property.
-	  (let ((prop (nth 1 mel)))
-	    (put-text-property beg end 'face (eval prop))
-	    (when (eq prop 'maplev-mint-link-face)
-	      (put-text-property beg end 'mouse-face 'highlight)
-	      (put-text-property beg end 'help-echo "goto source")))
-          (when (nth 2 mel)
-            ;; Embed mint action as value of text property `maplev-mint'
-            (put-text-property beg end 'maplev-mint (eval (nth 2 mel)))
-            (if (nth 3 mel)
-                (save-excursion
-                  (goto-char beg)
-                  (while (re-search-forward "\\_<\\(\\w+\\)\\_>\\(::[^ \n]+\\)?\\( := [^ \n]*\\)?" end t)
-                    (put-text-property (match-beginning 1) (match-end 1)
-                                       'mouse-face 'highlight)))))))
-      (setq mlist (cdr mlist)))
-    (set-buffer-modified-p nil)))
+  (save-excursion
+    (let ((mlist maplev-mint-fontify-alist)
+          regexp mel buffer-read-only case-fold-search)
+      (font-lock-mode -1) ; turn-off font-lock
+      ;; Process elements of maplev-mint-fontify-alist
+      (while (setq mel (car mlist))
+	(goto-char (point-min))
+	(setq regexp (concat (nth 0 mel)
+                             (if (nth 3 mel) maplev-mint-variables-re)))
+	(while (re-search-forward regexp nil t)
+          (let ((beg (match-beginning 1))
+		(end (match-end 1)))
+            ;; Here we are working with variables whose values are symbols
+            ;; with a face property.
+	    (let ((prop (nth 1 mel)))
+	      (put-text-property beg end 'face (eval prop))
+	      (when (eq prop 'maplev-mint-link-face)
+		(put-text-property beg end 'mouse-face 'highlight)
+		(put-text-property beg end 'help-echo "goto source")))
+            (when (nth 2 mel)
+              ;; Embed mint action as value of text property `maplev-mint'
+              (put-text-property beg end 'maplev-mint (eval (nth 2 mel)))
+              (if (nth 3 mel)
+                  (save-excursion
+                    (goto-char beg)
+                    (while (re-search-forward "\\_<\\(\\w+\\)\\_>\\(::[^ \n]+\\)?\\( := [^ \n]*\\)?" end t)
+                      (put-text-property (match-beginning 1) (match-end 1)
+					 'mouse-face 'highlight)))))))
+	(setq mlist (cdr mlist)))
+      (set-buffer-modified-p nil))))
 
 ;;}}}
 ;;{{{ interactive functions
@@ -660,12 +661,19 @@ Return exit code of mint."
       (goto-char (point-min))
       (if (re-search-forward "^[ \t]*\\^" nil t)
           (setq errpos (maplev-mint--goto-error (point)))))
+	
     ;; If there is an error in the maple source and a window displays it,
     ;; move point in this window
     (when (and code-window errpos)
       (set-window-point code-window errpos)
       (switch-to-buffer mint-buffer))
     status))
+
+(defun fuckit ()
+  (interactive)
+  (goto-char (point-min))
+  (while (re-search-forward "^This source file is included:" nil t)
+    (forward-line)))
 
 (defun maplev-mint-buffer ()
   "Run Mint on the current buffer."
