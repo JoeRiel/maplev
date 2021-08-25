@@ -281,7 +281,7 @@ formal parameter list."
       (when (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)" nil 'noerror)
 	(setq line (1- (string-to-number (match-string-no-properties 1)))
 	      file (maplev-mint-get-source-file)
-	      toline (if (re-search-forward "to\\s-*\\([0-9]+\\)" (line-end-position) 'move)
+	      toline (if (re-search-forward "to\\s-*\\([0-9]+\\)" (line-end-position 2) t)
 			 (string-to-number (match-string-no-properties 1))
 		       (1+ line)))))
     ;; move point to the beginning of that line in the source
