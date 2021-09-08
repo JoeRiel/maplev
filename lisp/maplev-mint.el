@@ -547,7 +547,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	  (let (dofile region)
 	    (if (save-excursion
 		  (goto-char pos)
-		  (re-search-backward "These names were used as global names but the names don't start with _")
+		  (re-search-backward "These names were used as global names but \\(the names don't start with _\\|were not declared\\)")
 		  (beginning-of-line)
 		  (looking-at "  ")) 
 		(setq region (maplev-mint--goto-source-and-get-region pos))
