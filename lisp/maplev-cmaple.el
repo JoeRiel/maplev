@@ -88,9 +88,9 @@ Start one, if necessary."
 	(concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
        (t (error "Unexpected system-type '%s'" system-type)))
       (concat "MAPLE=" mapledir))
-     (if maplev-use-new-language-features 
+     (if maplev-use-new-language-features
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
-       (list process-environment)))))
+       process-environment))))
 
 (defun maplev-cmaple--get-pmaple-and-options ()
   "Return a list of strings consisting of the pmaple executable and its options."
