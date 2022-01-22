@@ -666,7 +666,7 @@ Key bindings:
 
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
-      (add-hook 'local-write-file-hooks 'maplev-remove-trailing-spaces))
+      (add-hook 'write-file-functions 'maplev-remove-trailing-spaces))
   ;;(make-local-hook 'before-change-functions)
   (add-hook 'before-change-functions 'maplev-indent-before-change-function nil t)
   (run-hooks 'maplev-mode-hook))
