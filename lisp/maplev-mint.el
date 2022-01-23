@@ -253,8 +253,8 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
   (when (search-backward "included: ")
     (goto-char (match-end 0))
     (when (looking-at ".*$")
-      (let ((file (maplev-find-include-file 
-		   (match-string-no-properties 0) 
+      (let ((file (maplev-find-include-file
+		   (match-string-no-properties 0)
 		   (slot-value maplev-config 'include-path)
 		   'inc-first)))
 	(when file
@@ -293,7 +293,7 @@ formal parameter list."
 		  (forward-line (- toline line))
 		  (point))))
     ;; Use class to position point after formal parameter list
-    (cond 
+    (cond
      ((string= class "Procedure")
       (when (re-search-forward "\\<proc *(" (line-end-position) t)
 	(backward-char)
@@ -549,7 +549,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 		  (goto-char pos)
 		  (re-search-backward "These names were used as global names but \\(the names don't start with _\\|were not declared\\)")
 		  (beginning-of-line)
-		  (looking-at "  ")) 
+		  (looking-at "  "))
 		(setq region (maplev-mint--goto-source-and-get-region pos))
 	      ; non-indented mint statement; query throughout file
 	      (maplev-mint--goto-source-pos 1 0 nil)
@@ -586,7 +586,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 ;;{{{ regions
 
 (defun maplev-mint-region (beg end &optional syntax-only)
-  "Run Mint on the current region \(from BEG to END\).
+  "Run Mint on the current region, from BEG to END.
 Return exit code of mint."
   (interactive "r")
   (let ((code-buffer (current-buffer))
@@ -668,12 +668,6 @@ Return exit code of mint."
       (set-window-point code-window errpos)
       (switch-to-buffer mint-buffer))
     status))
-
-(defun fuckit ()
-  (interactive)
-  (goto-char (point-min))
-  (while (re-search-forward "^This source file is included:" nil t)
-    (forward-line)))
 
 (defun maplev-mint-buffer ()
   "Run Mint on the current buffer."
@@ -822,7 +816,7 @@ Skip over comments and types."
 	(maplev-mint-forward-declaration-symbol))
        ((or (equal "::" match)
 	    (equal ":=" match))
-	(maplev-forward-expr) 
+	(maplev-forward-expr)
 	(maplev-mint-forward-declaration-symbol))
        ((equal "`" match)
 	(backward-char)
@@ -858,7 +852,7 @@ parenthesis of the procedure's argument list."
 	;; look whether there is any following text.
 	(let ((new-line (bolp)))
 	  (insert keyword " " (car vars) ";")
-	  (setq vars (cdr vars)) 
+	  (setq vars (cdr vars))
 	  (when new-line
 	    (newline)
 	    (forward-line -1)))
@@ -948,7 +942,7 @@ Interactively, VAR defaults to identifier point is on."
 			   "\\|\\(" maplev--defun-re "\\)"
 			   "\\|\\(?:" maplev--defun-end-re "\\)"))
 	    (cnt 0) ; keep track whether in original procedure
-	    term) 
+	    term)
 	(while (maplev--re-search-forward regex nil 'move)
 	  (if (match-string 1)
 	      (when (zerop cnt)
@@ -987,7 +981,7 @@ deleted."
             (if lo
                 (setq lo nil)
 	      (delete-region (match-beginning 0)
-			     (progn 
+			     (progn
 			       (maplev-delete-whitespace)
 			       (maplev-forward-expr)
 			       (point)))
@@ -1014,13 +1008,13 @@ C-l  recenter the screen
 C-r  enter recursive edit (C-M-c to get out)
  q   quit
  h   display this help
- f1  display this help" 
+ f1  display this help"
   "Help message while in `maple-mint-quote-vars'.")
 
 (defvar maplev-mint-query-map
   (let ((map (make-sparse-keymap)))
     (define-key map " " 'single-quote)  ; maybe this should be repeat last?
-    (define-key map "y" 'single-quote)  
+    (define-key map "y" 'single-quote)
     (define-key map "'" 'single-quote)
     (define-key map "Q" 'single-quote-rest)
     (define-key map "!" 'single-quote-rest)
@@ -1077,16 +1071,17 @@ VARs is a list of undeclared globals."
 	  (goto-char beg)
 	  (unwind-protect
 	      (while keep-going
-		(unless regex 
+		(unless regex
 		  ;; assign regex. It has the following numbered groups:
 		  ;; 1) :-
 		  ;; 2) variable
 		  ;; 3) :-
 		  ;; 4) proc|module|->
 		  ;; 5) end (proc|module)?
+
 		  (setq regex (concat "\\(:-\\)?\\_<`?\\(" (regexp-opt vars) "\\)`?\\_>\\(:-\\)?"
-				      "\\|\\(" maplev--defun-re "\\|->\\)\\(`\\)?"
-				      "\\|\\(?:" maplev--defun-end-re "\\)")))
+				      "\\|\\(" maplev--defun-re "\\|->\\)"
+				      "\\|\\(" maplev--defun-end-re "\\)")))
 		(if (not (maplev--re-search-forward regex nil 'move))
 		    (setq keep-going nil)
 		  (setq real-match-data (match-data 'integers))
@@ -1239,7 +1234,7 @@ Return the edited list upon completion."
   (with-temp-buffer
     (pop-to-buffer (current-buffer))
     (maplev-mint-var-mode)
-    (setq tabulated-list-entries 
+    (setq tabulated-list-entries
 	  (let ((cnt 0))
 	    (mapcar (lambda (var) (list (cl-incf cnt) (vector var))) vars)))
     (tabulated-list-print)
@@ -1249,7 +1244,7 @@ Return the edited list upon completion."
     (unless (bobp)
       (forward-line -1)
       (let (vars)
-	(while 
+	(while
 	    (let ((var (buffer-substring-no-properties (1+ (point)) (line-end-position))))
 	      (setq vars (cons var vars))
 	      (unless (bobp)
@@ -1260,7 +1255,7 @@ Return the edited list upon completion."
 ;;   (interactive)
 ;;   (let ((buffer (current-buffer))
 ;; 	(config maple-config)
-;; 	(file   
+;; 	(file
 		
 
 

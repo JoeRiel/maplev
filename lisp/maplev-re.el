@@ -157,7 +157,7 @@ The first group is the linked file.")
     "Create a regular expression that matches a suffix of WORD.
 For example, given \"begin\" the regular expression matches \"gin\"."
     (let ((re (substring word 0 1)))
-      (mapc (lambda (c) (setq re (concat "\\(?:" re "?" (char-to-string c) "\\)"))) 
+      (mapc (lambda (c) (setq re (concat "\\(?:" re "?" (char-to-string c) "\\)")))
 	    (substring word 1))
       re))
 
