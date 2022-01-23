@@ -114,7 +114,7 @@
 (require 'maplev-compat)                ; compatibility definitions for older Emacs
 (require 'maplev-cmaple)                ; interact with Maple
 (require 'maplev-common)                ; common functions
-(require 'maplev-config)                ; configure maple/mint/tester 
+(require 'maplev-config)                ; configure maple/mint/tester
 (require 'maplev-custom)                ; customizable variables
 (require 'maplev-help)                  ; maplev-help-mode (view help pages)
 (require 'maplev-indent)                ; indentation engine
@@ -760,10 +760,10 @@ The name of the procedure is inserted into the title of the fold."
              "::"
              "!"
              "^" "@@"
-             "." "*" "&*" "/" "@" 
-             "+" "-" 
-             ".." 
-             "<" "<=" ">" ">=" "=" "<>" 
+             "." "*" "&*" "/" "@"
+             "+" "-"
+             ".."
+             "<" "<=" ">" ">=" "=" "<>"
              "$"
              "->"
              ;; ","
@@ -841,7 +841,7 @@ This is a hack and is hardly robust."
     (let ((cnt (if (match-string 1) 1 0))
 	  keyword)
       (goto-char (match-end 0))
-      (while (progn	    
+      (while (progn
 	       (maplev--re-search-forward maplev-wexp-statement-cont-re)
 	       (setq cnt (+ cnt (if (match-string 1) 1 -1)))
 	       (when (and (match-string 3) ;; matched "end"
@@ -850,7 +850,7 @@ This is a hack and is hardly robust."
 	       (not (zerop cnt)))))
     ;; move past whitespace
     (re-search-forward "\\=\\(?:[ \t]+\\|\n+\\)+" nil t)
-    ;; may need to move over arguments: proc() ... end proc (x,y,z) 
+    ;; may need to move over arguments: proc() ... end proc (x,y,z)
     (when (looking-at ";\\|:[^:]")
       (goto-char (match-end 0))))))
 
@@ -1223,15 +1223,15 @@ otherwise use `maplev-tab-width'."
 ;;{{{   reserved words
 
 (defconst maplev-reserved-words
-  '("and" "assuming" "break" "by" "catch" 
-    "description"  "do" "done" "elif" "else" 
-    "end" "error" "export" "fi" "finally" 
-    "for" "from" "global" "if" "implies" 
-    "in" "intersect" "local" "minus" "mod" 
-    "module" "next" "not" "od" "option" 
-    "options" "or" "proc" "quit" "read" 
-    "return" "save" "stop" "subset" "then" 
-    "to" "try" "union" "until" "use" "uses" 
+  '("and" "assuming" "break" "by" "catch"
+    "description"  "do" "done" "elif" "else"
+    "end" "error" "export" "fi" "finally"
+    "for" "from" "global" "if" "implies"
+    "in" "intersect" "local" "minus" "mod"
+    "module" "next" "not" "od" "option"
+    "options" "or" "proc" "quit" "read"
+    "return" "save" "stop" "subset" "then"
+    "to" "try" "union" "until" "use" "uses"
     "while" "xor")
   "List of reserved words in Maple.")
 
@@ -1317,46 +1317,50 @@ file (either < or \").  The second group matches the filename.")
   "List of builtin Maple types.")
 
 (defconst maplev-builtin-functions
+  ;; use sort([anames('builtin')]) to generate
   '(;; "`$`" "`*`" "`**`" "`+`" "`..`" "`::`" "`<`" "`<=`" "`<>`" "`=`" "`>`" "`>=`" "`?()`" "`?[]`" "`[]`" "`^`"
     ;; "`and`" "`if`" "`evalf/hypergeom/kernel`" "`int/series`" "`intersect`" "`kernel/transpose`" "`not`"
-    ;; "`or`" "`quit`" "`union`" "`xor`" "`{}`" "`||`" "`~`" 
+    ;; "`or`" "`quit`" "`union`" "`xor`" "`{}`" "`||`" "`~`"
+    ;; "`and`" "and=`"
     "ASSERT" "Array" "ArrayOptions" "CopySign"
     "DEBUG" "Default0" "DefaultOverflow" "DefaultUnderflow" "ERROR"
-    "EqualEntries" "EqualStructure" "FromInert" "Im" "MPFloat" 
-    "MorrBrilCull" "NameSpace" "NextAfter" "Normalizer" "NumericClass" 
+    "EqualEntries" "EqualStructure" "FromInert" "Im" "MPFloat"
+    "MorrBrilCull" "NameSpace" "NextAfter" "Normalizer" "NumericClass"
     "NumericEvent" "NumericEventHandler" "NumericStatus" "Object"
     "OrderedNE" "RETURN" "Re" "Record" "SDMPolynom" "SFloatExponent"
     "SFloatMantissa" "Scale10" "Scale2" "SearchText" "String" "TRACE" "ToInert"
-    "Unordered" "UpdateSource" "_hackwareToPointer" "_jvm"
-    "_local" "_maplet" "_savelib" "_treeMatch" "_unify" "_xml" "abs"
-    "add" "addressof" "anames" "andmap" "andseq" "appendto" "array"
+    "Unordered" "UpdateSource" "_error" "_hackwareToPointer" "_jvm"
+    "_local" "_maplet" "_mint" "_savelib" "_treeMatch" "_unify" "_xml"
+    "abs" "add" "addressof" "anames" "`and`" "`and=`" "andmap" "andseq" "appendto" "array"
     "assemble" "assign" "assigned" "attributes" "bind" "call_external"
     "callback" "cat" "coeff" "coeffs" "conjugate" "convert" "crinterp"
     "debugopts" "define_external" "degree" "denom" "diff" "disassemble"
-    "divide" "dlclose" "done" "entries" "eval" "evalb" "evalf"
+    "divide" "dlclose" "`done`" "entries" "eval" "evalb" "evalf" "`evalf/hypergeom/kernel`"
     "evalgf1" "evalhf" "evalindets" "evaln"
     "expand" "exports" "factorial" "frem" "frontend" "gc" "genpoly"
-    "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "ifelse" 
-    "igcd" "ilog10" "ilog2" "implies" "indets" "indices" "inner"
-    "iolib" "iquo" "irem" "is_gmp" "isqrt"
-    "kernelopts" "lcoeff" "ldegree" "length"
+    "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "`if`" "ifelse"
+    "igcd" "ilcm" "ilog10" "ilog2" "`implies`" "`implies=`" "indets" "indices" "inner"
+    "`int/series`" "`intersect`" "`intersect=`" 
+    "iolib" "iquo" "iratrecon" "irem" "is_gmp" "isqrt"
+    "`kernel/transpose`" "kernelopts" "lcoeff" "ldegree" "length"
     "lexorder" "lhs" "localGridInterfaceRun" "lowerbound" "lprint"
     "macro" "map" "map2" "max" "maxnorm" "member" "membertype" "min"
-    "minus" "mod" "modp" "modp1" "modp2" "mods" "mul" "mvMultiply"
-    "negate" "nops" "normal" "numboccur" "numelems" "numer"
-    "op" "order" "ormap" "orseq" "overload" "parse" "piecewise" "pointto"
-    "print" "print_preprocess" "readlib" "reduce_opr" "remove" "rhs"
+    "`minus`" "`minus=`" "`mod`" "`mod=`" "modp" "modp1" "modp2" "mods" "mul" "mvMultiply"
+    "negate" "nops" "normal" "`not`" "numboccur" "numelems" "numer"
+    "op" "`or`" "`or=" "order" "ormap" "orseq" "overload" "parse" "piecewise" "pointto"
+    "print" "print_preprocess" "`quit`" "readlib" "reduce_opr" "remove" "rhs"
     "rtable" "rtableInfo" "rtable_convolution" "rtable_eval" "rtable_histogram"
     "rtable_indfns" "rtable_is_zero" "rtable_normalize_index"
-    "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_redim"
-    "rtable_scale" "rtable_scanblock" "rtable_size" "rtable_sort_indices"
-    "rtable_zip" "savelib" "searchtext" "select" "selectremove" "seq"
-    "series" "setattribute" "sign" "sort" "ssystem" "stop" "streamcall"
-    "subs" "subset" "subsindets" "subsop" "substring" "system" "table"
+    "rtable_num_dims" "rtable_num_elems" "rtable_options" "rtable_redim" "rtable_rotate"
+    "rtable_scale" "rtable_scanblock" "rtable_size" "rtable_sort_indices" "rtable_zip"
+    "savelib" "searchtext" "select" "selectremove" "seq"
+    "series" "setattribute" "sign" "sort" "ssystem" "`stop`" "streamcall"
+    "subs" "`subset`" "subsindets" "subsop" "substring" "system" "table"
     "taylor" "tcoeff" "time" "timelimit" "traperror" "trunc" "type"
-    "typematch" "unames" "unbind" "upperbound" "userinfo"
-    "wbOpen" "wbOpenURI" "writeto" "xormap" "xorseq" "~Array" "~Matrix" "~Vector")
-  "List of builtin functions as of Maple 2016")
+    "typematch" "unames" "unbind" "`union`" "`union=`" "upperbound" "userinfo"
+    "whattype" "writeto" "`xor`" "`xor=`" "xormap" "xorseq"
+    "~Array" "~Matrix" "~Vector")
+  "List of builtin functions as of Maple 2022.")
 
 ;; (defconst maplev--builtin-functions-alist
 ;;  '((3 .  ("`$`"                                                                                                                                                                                                                             "ERROR"                                             "Im"                                                                                                                                            "RETURN" "Re"                                                                            "SearchText"                                                                                            "abs"       "addressof" "alias" "anames"                  "appendto" "array" "assemble" "assigned"                                            "callback" "cat" "coeff" "coeffs"             "convert"            "debugopts"                   "degree"         "diff" "disassemble" "divide"                    "entries" "eval" "evalb" "evalf" "`evalf/hypergeom`"                  "evalhf" "evaln" "expand"                              "frontend" "gc" "genpoly"                    "goto" "has" "hastype"           "icontent" "`if`" "igcd" "ilog10"                     "indets" "indices"         "intersect" "`int/series`"         "iquo" "irem"          "isqrt"                                   "lcoeff" "ldegree" "length" "lexorder"       "lprint" "macro" "map"        "max" "maxnorm" "member" "min" "`minus`"         "modp" "modp1"         "mods"                             "nops" "normal"         "numboccur" "numer" "op"        "order"                    "parse"             "pointto" "print" "printf" "protect"          "readlib" "readline"                                                                                                                                                                                                                                                                                                                          "searchtext" "select"                "seq" "series"                                   "sign" "sort" "sscanf" "ssystem"                       "subs"            "subsop" "substring" "system" "table" "taylor" "tcoeff" "time"             "traperror" "trunc" "type"             "unames"          "`union`" "unprotect" "userinfo" "words" "writeto"         ))
@@ -1411,7 +1415,7 @@ file (either < or \").  The second group matches the filename.")
      
      ;; types
      "_Inert" "And" "Non" "Not" "Or" "SERIES" "SymbolicInfinity" "TEXT"
-     "algebraic" "algext" "algfun" "algnum" "algnumext" 
+     "algebraic" "algext" "algfun" "algnum" "algnumext"
      "anyfunc" "anything" "arctrig" "atomic"
      "boolean" "complex" "complexcons" "constant" "cubic"
      "cx_infinity" "cx_zero" "embedded_axis" "embedded_imaginary" "embedded_real"
@@ -1434,8 +1438,8 @@ file (either < or \").  The second group matches the filename.")
      ;; ListTools:-MakeUnique(sort(map(op@FunctionAdvisor, FunctionAdvisor(function_classes)))); 
      "about" "abs" "addcoords" "additionally" "addproperty" "AFactor" "AFactors" "AiryAi"
      "AiryAiZeros" "AiryBi" "AiryBiZeros" "algsubs" "alias" "allvalues" "andseq" "AngerJ"
-     "AppellF1" "AppellF2" "AppellF3" "AppellF4" "apply" "applyop" "applyrule" "arccos" 
-     "arccosh" "arccot" "arccoth" "arccsc" "arccsch" "arcsec" "arcsech" "arcsin" "arcsinh" 
+     "AppellF1" "AppellF2" "AppellF3" "AppellF4" "apply" "applyop" "applyrule" "arccos"
+     "arccosh" "arccot" "arccoth" "arccsc" "arccsch" "arcsec" "arcsech" "arcsin" "arcsinh"
      "arctan" "arctanh" "argument" "ArrayDims" "ArrayElems" "ArrayIndFns" "ArrayNumDims"
      "assume" "asympt" "BellB" "Berlekamp" "bernoulli" "bernstein" "BesselI" "BesselJ"
      "BesselJZeros" "BesselK" "BesselY" "BesselYZeros" "Beta" "binomial" "branches"
@@ -1535,7 +1539,7 @@ This is supposed to exclude the builtins and reserved words."))
 	      "reduce_opr" "RestoreSession" "rtable_convolution" "rtable_histogram"
 	      "rtable_is_zero" "rtable_normalize_index" "rtable_scale" "rtable_sort_indices"
 	      "rtable_zip" "rtableInfo" "SaveSession" "sdmp" "Subres" "TABLE" "TestTools"
-	      "TRACE" "unbind" "UNIFORM" "UpdateSource" "VerifyTools" 
+	      "TRACE" "unbind" "UNIFORM" "UpdateSource" "VerifyTools"
 	      ))
 	    "\\)\\>"))
   "List of undocumented names reserved for internal use.")
@@ -1812,7 +1816,7 @@ file if one was found, nil otherwise."
   (let ((maplev-config-file (maplev-include--find-file-up-path ".maplev")))
     (when maplev-config-file
       (condition-case err
-	  (progn 
+	  (progn
 	    (load maplev-config-file)
 	    maplev-config-file)
 	(error
