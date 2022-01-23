@@ -1425,47 +1425,14 @@ The file @file{maplev.mla} should be installed at @file{~/maple/toolbox/emacs/li
 @node Customizing, Info documentation, Maple Files, Installation
 @section Customizing
 
-Some of MapleV's default settings must be customized for your
-installation.  Most significantly, you must specify the locations of the
-executable files for @command{mint} and @command{maple}, 
-the command-line version of Maple.  
-Multiple versions of @command{mint} and @command{maple} can be assigned
-and selected.  The easiest method is to invoke @code{customize} 
-using the following commands:
+The default settings for MapleV can can be customized
+by executing, in Emacs, the following commands.
 
 @example
 M-x load-library @key{RET} maplev @key{RET}
 M-x customize-group @key{RET} maplev @key{RET}
 @end example
 
-Select the @strong{MapleV Executables} subgroup and customize
-@code{maplev-executable-alist}.  It is a list of sublists.
-Each sublist contains four items:
-an identifier,
-the path to the Maple tty executable,
-the path to the a Maple initialization file, and
-the path to the @command{mint} executable.  An example of a sublist is
-
-@example
-("maple17" "/usr/local/maple17/bin/maple" nil "/usr/local/maple17/bin/mint")
-@end example
-
-The identifier is arbitrary.
-To determine the name and path to the @command{maple} and @command{mint} executables,
-launch @command{maple} and execute @code{kernelopts(mapledir)}, that
-returns the directory in which Maple is installed.
-   
-On Linux or Mac, the shell commands are locate in the @file{bin}
-subdirectory of the installed directory and are named @file{maple}
-and @file{mint}.
-   
-On Windows the shell commands are usually in the @file{bin.wnt}
-subdirectory of the installed directory and are named
-@file{cmapleXXXX.exe} and @file{mintXXXX.exe}, where @file{XXXX} is the
-Maple release.  When entering the path to the binaries, use forward
-slashes (@file{/}) as the directory separators.
-
-After setting the values, click the @samp{Apply and Save} button.
 
 @node Info documentation,  , Customizing, Installation
 @section Info documentation

@@ -1,7 +1,7 @@
 (define-package  
-  "maplev" "3.0.4"  
+  "maplev" "3.0.5"  
   "GNU Emacs package for Maple developers"
-  '((button-lock "20150223.554")))
+  '((button-lock "1.0.2")))
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:

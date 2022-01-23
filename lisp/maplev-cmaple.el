@@ -18,7 +18,8 @@
 
 (eval-when-compile
   (defvar maplev-mint-error-level)
-  (defvar maplev-startup-directory))
+  (defvar maplev-startup-directory)
+  (defvar maplev-load-path))
 
 (declare-function maplev-mint-region "maplev-mint")
 (declare-function maplev-current-defun "maplev-common")
@@ -75,9 +76,9 @@ Start one, if necessary."
      ((not (file-directory-p mapledir))
       (error "The :mapledir slot of maplev-config, `%s', does not exist" mapledir)))
 
-    ;; create list of PATH=bindir MAPLE=mapledir ... 
+    ;; create list of PATH=bindir MAPLE=mapledir ...
     (append
-     (list 
+     (list
       (cond
        ((eq system-type 'gnu/linux)
 	(concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
@@ -87,9 +88,9 @@ Start one, if necessary."
 	(concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
        (t (error "Unexpected system-type '%s'" system-type)))
       (concat "MAPLE=" mapledir))
-     (if maplev-use-new-language-features 
+     (if maplev-use-new-language-features
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
-       (list process-environment)))))
+       process-environment))))
 
 (defun maplev-cmaple--get-pmaple-and-options ()
   "Return a list of strings consisting of the pmaple executable and its options."
@@ -108,7 +109,7 @@ Start one, if necessary."
   "Start a cmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it.  If variable `maplev-config' is assigned, use it, otherwise create
-one by calling procedure `maplev-config'."
+one by calling function `maplev-config'."
   (let* ((config (or maplev-config (maplev-config)))
 	 (process-environment (maplev-cmaple--process-environment))
 	 (pmaple-and-opts (maplev-cmaple--get-pmaple-and-options))
@@ -121,6 +122,8 @@ one by calling procedure `maplev-config'."
       (if process (delete-process process))
       (if maplev-startup-directory
           (cd (expand-file-name maplev-startup-directory)))
+      (if maplev-load-path
+       	(setenv "LD_LIBRARY_PATH" maplev-load-path))
       (set-process-filter
        (setq process (apply #'start-process
                             "Maple"
