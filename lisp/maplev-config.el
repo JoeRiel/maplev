@@ -145,8 +145,8 @@ is inherited from `maplev-config-default'.")
 (make-variable-buffer-local 'maplev-config)
 
 (defun maplev-config (&rest fields)
-  "Assign the buffer-local variable `maplev-config' by passing
-FIELDS to the object constructor for `maplev-config-class'.
+  "Assign the buffer-local variable `maplev-config'.
+Pass FIELDS to the object constructor for `maplev-config-class'.
 The `maplev-config-default' object is used to assign the defaults.
 
  If the slot `:compile' is non-nil, assign its value to

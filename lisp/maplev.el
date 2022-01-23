@@ -150,7 +150,7 @@
 
 ;;;###autoload
 (defun maplev-version (&optional here full message)
-  "Show the maplev-mode version in the echo area.
+  "Show the `maplev-mode' version in the echo area.
 With prefix argument HERE, insert it at point.
 When FULL is non-nil, use a verbose version string.
 When MESSAGE is non-nil, display a message with the version."
@@ -416,7 +416,7 @@ the entire buffer."
 
 (defun maplev--imenu-create-index-function ()
   "Create an index for `imenu'.
-Check whether `folding-mode' is active."
+Check whether command `folding-mode' is active."
   (if folding-mode (folding-open-buffer))
   (imenu-default-create-index-function))
 
@@ -540,8 +540,8 @@ Prefix JUSTIFY means justify as well."
   "Open the html version of the maplev documentation in a browser."
   (interactive)
   (let ((home (getenv "HOME")))
-    (when home 
-      (let ((html (concat (file-name-as-directory home) 
+    (when home
+      (let ((html (concat (file-name-as-directory home)
 			  "maple/toolbox/maplev/info/maplev.html")))
 	(if (file-exists-p html)
 	    (browse-url (concat "file://" html))
@@ -549,7 +549,7 @@ Prefix JUSTIFY means justify as well."
 
 ;;}}}
 
-;;{{{ MapleV mode 
+;;{{{ MapleV mode
 
 ;;;###autoload
 (define-derived-mode maplev-mode fundamental-mode "MapleV"
@@ -882,7 +882,7 @@ This is a hack and is hardly robust."
 
 (defun maplev--template-proc-module (function name args description)
   "Insert a template for a Maple FUNCTION \(\"proc\" or \"module\"\).
-Use NAME, ARGUMENTS, and DESCRIPTION. Move point to body of FUNCTION.
+Use NAME, ARGS, and DESCRIPTION.  Move point to body of FUNCTION.
 
 If NAME equals \"\" then the function is anonymous,
 no assignment operator is inserted and the closing
@@ -938,7 +938,7 @@ Prompt for the NAME, ARGS, and DESCRIPTION.  See `maplev-template'."
 
 (defun maplev-template-module (name args description)
   "Insert a template for a Maple module and move point to its body.
-Prompt for the NAME, ARGUMENTS, and DESCRIPTION.  See `maplev-template'."
+Prompt for the NAME, ARGS, and DESCRIPTION.  See `maplev-template'."
   (interactive "*sName (return for anonymous) \nsArguments: \nsDescription: ")
   (maplev--template-proc-module "module" name args description))
 
@@ -1016,8 +1016,8 @@ The real work is done by `maplev-complete-on-module-exports'."
       (delete-region (point-min) (point-max)))))
 
 (defun maplev--generate-initial-completions ()
-  "Generate `maplev-completions' from the index/function and
-index/package help pages.  If it already exists, do nothing."
+  "Generate `maplev-completions' from maple help pages.
+If it already exists, do nothing."
   (unless maplev-completions)
 
   ;; To make it easy to pick out the package names from the
@@ -1190,12 +1190,12 @@ moved to be before it."
 ;;{{{ tab-width
 
 (defvar maplev-get-tab-width-function nil
-  "Use this to modify the tab-width used by maplev on a per-file basis.
+  "Use this to modify the tab width used by maplev on a per-file basis.
 If assigned it is passed the name of the file and should return
-the desired tab-width.")
+the desired tab width.")
 
 (defun maplev-set-tab-width (&optional file)
-  "Return the value of tab-width required by optional FILE, or if nil,
+  "Return the value of tab width required by optional FILE, or if nil,
 the file name given be `buffer-file-name'.  If the function
 `maplev-get-tab-width-function' is assigned, call it with FILE,
 otherwise use `maplev-tab-width'."
@@ -1665,7 +1665,7 @@ If nil then `font-lock-maximum-decoration' selects the level."
 If found, the file is opened either in this window or the other
 window, depending on the exclusive-or of TOGGLE with
 `maplev-include-file-other-window-flag'.  The :include-path slot
-of `maplev-config' specifies the search paths.  If the file
+of variable `maplev-config' specifies the search paths.  If the file
 cannot be found, but the proper directory exists, query user to
 create the file."
   (interactive "P")

@@ -328,8 +328,8 @@ The features enabled are release dependent."
   :group 'maplev-executables)
 
 (defcustom maplev-load-path nil
-  "If non-nil, set environment variable LD_LIBRARY_PATH to this value
-when starting the cmaple process."
+  "If non-nil, set environment variable LD_LIBRARY_PATH to this value.
+This is done when starting the cmaple process."
   :type '(choice string (const :tag "None" nil))
   :group 'maplev-executables)
 

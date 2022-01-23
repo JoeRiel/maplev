@@ -139,8 +139,8 @@ Return nil if search fails."
             ((point))))))
 
 (defun maplev--beginning-of-defun ()
-  "Move point backwards to the beginning of the current defun,
-that is, a Maple procedure or module.  The beginning is the first
+  "Move point backwards to the beginning of the current defun.
+The defun is a Maple procedure or module.  The beginning is the first
 character of the keyword.  Complete end-statements are not required."
   (interactive)
   (let ((count 0)
@@ -180,8 +180,7 @@ character of the keyword.  Complete end-statements are not required."
 
 
 (defun maplev--end-of-defun ()
-  "Move point forward to the end of the current defun,
-that is, a Maple procedure or module.
+  "Move point forward to the end of the current defun.
 THIS ASSUMES EACH END STATEMENT IS FOLLOWED BY AN APPROPRIATE KEYWORD."
 
   ;; To handle short end-statements, the search must be from the
@@ -337,7 +336,7 @@ If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
                       (save-excursion (goto-char (nth 8 state)) ; goto start of string
 				      (condition-case nil
 					  (forward-sexp 1)
-					(error (error "unterminated quoted symbol")))
+					(error (error "Unterminated quoted symbol")))
 				      (point)))
 		   (with-syntax-table maplev-quote-not-string-syntax-table
 		     (current-word)))))
@@ -348,7 +347,7 @@ If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
 			  (match-string-no-properties 1)))))
      ((and choice (string-match "^[^`].*`$" choice))
       (save-excursion
-	(setq choice (and (looking-back (concat "\\(" maplev--quoted-name-re "\\) *") 
+	(setq choice (and (looking-back (concat "\\(" maplev--quoted-name-re "\\) *")
 					(line-beginning-position))
 			  (match-string-no-properties 1))))))
     (cond

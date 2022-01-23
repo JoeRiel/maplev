@@ -76,9 +76,9 @@ Start one, if necessary."
      ((not (file-directory-p mapledir))
       (error "The :mapledir slot of maplev-config, `%s', does not exist" mapledir)))
 
-    ;; create list of PATH=bindir MAPLE=mapledir ... 
+    ;; create list of PATH=bindir MAPLE=mapledir ...
     (append
-     (list 
+     (list
       (cond
        ((eq system-type 'gnu/linux)
 	(concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
@@ -109,7 +109,7 @@ Start one, if necessary."
   "Start a cmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it.  If variable `maplev-config' is assigned, use it, otherwise create
-one by calling procedure `maplev-config'."
+one by calling function `maplev-config'."
   (let* ((config (or maplev-config (maplev-config)))
 	 (process-environment (maplev-cmaple--process-environment))
 	 (pmaple-and-opts (maplev-cmaple--get-pmaple-and-options))
