@@ -3,6 +3,7 @@
 /addon.el
 /builtins12
 /builtins13
+/bugs/
 /doc/maplev.info
 /font-locks-for-Wilson
 /maplev-*
@@ -25,10 +26,8 @@
 /lisp/maplev.wy
 /lisp/keywords.mpl
 /lisp/Makefile
-/lisp/maplev-parse_el
-/lisp/maplev-pp_el
-/lisp/maplev-smie_el
-/lisp/ob-maple-orig_el
+/lisp/*_el
+/pmaple/bin.*
 /NOTES
 /TODO
 /lisp/mpl.grammar
