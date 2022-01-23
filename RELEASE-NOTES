@@ -1,5 +1,12 @@
 -*- org -*-
 
+* 3.0.5
+** Fix bug in maplev-cmaple--process-environment.
+** Change maplev-pkg.el to require button-lock 1.0.2 (in elpa).
+** Replaced deprecated local-write-file-hooks with write-file-functions.   
+** Improve mint corrections.
+** cmaple: set LD_LIBRARY_PATH environment variable.
+** Add $elifdef and $elifndef to highlighted preprocessor macros.
 * 3.0.4
 ** Fix maplev--protected-names-re
 * 3.0.3

@@ -16,6 +16,9 @@
   (defvar compilation-error-regexp-alist)
   (autoload 'mouse-selection-click-count "mouse"))
 
+(declare-function maplev-ident-around-point-interactive "maplev-common")
+(declare-function maplev-cmaple-direct "maplev-cmaple")
+
 (defun maplev--string-to-name (name)
   "Convert NAME to a valid Maple name.  Add back-quotes if needed."
   ;; Do we need something more general to match a string that might
@@ -54,10 +57,12 @@ regardless of where you click."
     (yank arg)))
 
 (defun maplev-add-maple-to-compilation ()
-  "Add the symbol \`maple to `compilation-error-regexp-alist'
-and the `maplev--compile-error-re' regexp to 'compilation-error-regexp-alist'.
-This font-locks the compilation buffer when using the `compile' command to
-build Maple libraries.  Requires customizing `compile-command'."
+  "Modify variables to fontify the compilation buffer.
+Add the symbol \`maple to `compilation-error-regexp-alist' and
+the `maplev--compile-error-re' regexp to
+`compilation-error-regexp-alist-alist'.  This fontifies the
+compilation buffer when using the `compile' command to build
+Maple libraries.  Requires customizing `compile-command'."
   (interactive)
   (unless (member 'maple compilation-error-regexp-alist)
     (add-to-list 'compilation-error-regexp-alist 'maple)
@@ -65,15 +70,15 @@ build Maple libraries.  Requires customizing `compile-command'."
 
 (defun maplev-split-shell-option-string (opt)
   "Convert OPT, a string of command line options, into a list of options.
-Close up space between option and argument.  
+Close up space between option and argument.
 For example, \"-a -w 100\" becomes \(\"-a\" \"-w100\"\)."
   (let ((opt (string-trim opt)))
-    (if (and 
+    (if (and
 	 (> (length opt) 0)
 	 (/= (aref opt 0) ?-))
-	(error "option string does not have leading hypen: %s" opt))
+	(error "Option string does not have leading hypen: %s" opt))
     (let ((opts (split-string (string-trim opt) "\\(^\\| +\\)-" t)))
-      (mapcar (lambda (s) 
+      (mapcar (lambda (s)
 		(concat "-" (if (string-match "^.\\( +\\)[^ ]" s)
 				(replace-match "" t t s 1)
 			      s)))
@@ -83,7 +88,7 @@ For example, \"-a -w 100\" becomes \(\"-a\" \"-w100\"\)."
 (defun maplev-edit-source (proc)
   "Edit the source for the file PROC.
 The default is the procedure name at point.
-For this to work, the Maple global variable `debugger/editor` 
+For this to work, the Maple global variable `debugger/editor`
 must be appropriately assigned.  See the Maple help page for showstat."
   (interactive (list (maplev-ident-around-point-interactive
 		      "Maple procedure")))

@@ -107,7 +107,7 @@ Return nil if search fails."
   ;; and move to the end of the match.  Searching forward is more
   ;; complicated because point could lie within an end statement.
 
-  (let ((regexp (if top maplev--top-defun-end-re maplev--defun-end-re))
+  (let ((regexp (if top maplev--top-defun-end-re-colon maplev--defun-end-re-colon))
         pos)
     (setq n (or n 1))
     (save-excursion
@@ -139,8 +139,8 @@ Return nil if search fails."
             ((point))))))
 
 (defun maplev--beginning-of-defun ()
-  "Move point backwards to the beginning of the current defun,
-that is, a Maple procedure or module.  The beginning is the first
+  "Move point backwards to the beginning of the current defun.
+The defun is a Maple procedure or module.  The beginning is the first
 character of the keyword.  Complete end-statements are not required."
   (interactive)
   (let ((count 0)
@@ -180,8 +180,7 @@ character of the keyword.  Complete end-statements are not required."
 
 
 (defun maplev--end-of-defun ()
-  "Move point forward to the end of the current defun,
-that is, a Maple procedure or module.
+  "Move point forward to the end of the current defun.
 THIS ASSUMES EACH END STATEMENT IS FOLLOWED BY AN APPROPRIATE KEYWORD."
 
   ;; To handle short end-statements, the search must be from the
@@ -256,7 +255,7 @@ The defun marked is the one that contains point."
   (with-syntax-table maplev-symbol-syntax-table
     (if (looking-at maplev--defun-begin-re) (goto-char (match-end 0)))
     (let ((count 1) ; decrement for each end statement, increment for each proc
-	  (regexp (concat "\\(" maplev--defun-begin-re "\\)\\|\\(?:" maplev--defun-end-re "\\)"))
+	  (regexp (concat "\\(" maplev--defun-begin-re "\\)\\|\\(?:" maplev--defun-end-re-colon "\\)"))
 	  (o-point (point)) ; original point
 	  (p-point (point)) ; point at which state is valid
 	  (state (parse-partial-sexp (point-min) (point)))) ; FIXME, reuse saved state
@@ -278,7 +277,7 @@ The defun marked is the one that contains point."
 		(push-mark o-point nil t))))
 	;; at end of procedure
 	(push-mark (point) nil t) ; set mark after end of current procedure.
-	(when (re-search-backward maplev--defun-end-re nil 'move)
+	(when (re-search-backward maplev--defun-end-re-colon nil 'move)
 	  (setq count -1)
 	  (while (and (/= count 0)
 		      (re-search-backward regexp nil 'move))
@@ -337,7 +336,7 @@ If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
                       (save-excursion (goto-char (nth 8 state)) ; goto start of string
 				      (condition-case nil
 					  (forward-sexp 1)
-					(error (error "unterminated quoted symbol")))
+					(error (error "Unterminated quoted symbol")))
 				      (point)))
 		   (with-syntax-table maplev-quote-not-string-syntax-table
 		     (current-word)))))
@@ -348,7 +347,7 @@ If choice is empty, an error is signaled, unless DEFAULT equals \"\" or t."
 			  (match-string-no-properties 1)))))
      ((and choice (string-match "^[^`].*`$" choice))
       (save-excursion
-	(setq choice (and (looking-back (concat "\\(" maplev--quoted-name-re "\\) *") 
+	(setq choice (and (looking-back (concat "\\(" maplev--quoted-name-re "\\) *")
 					(line-beginning-position))
 			  (match-string-no-properties 1))))))
     (cond

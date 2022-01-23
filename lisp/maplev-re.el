@@ -53,7 +53,7 @@ case where a name has a newline character.")
     "Regular expression for Maple comments.
 A backslash at the end of the line does not continue the comment.")
 
-  (defconst maplev--defun-re "\\(?:\\<proc\\>\\|\\<module\\>\\)"
+  (defconst maplev--defun-re "\\(?:\\<proc\\|module\\)\\>"
     "Regular expression at start of a Maple procedure or module.")
 
   (defconst maplev--assignment-re
@@ -100,7 +100,6 @@ The second group corresponds to the name of the defun.")
 The first group corresponds to the name of the defun.
 This requires that the procedure is flush-left.")
 
-
   (defconst maplev--defun-end-re
     ;; This regular expression matches any nonqualified end statement,
     ;; such as "do ... end"; however, I consider such code to be bad form
@@ -109,16 +108,22 @@ This requires that the procedure is flush-left.")
     ;; "do ... od".
     (concat "\\<end\\>"
 	    "\\(?:[ \t]+" maplev--defun-re "\\)?"
-	    "[ \t]*[:;]")
+	    )
+    "Regular expression for \"end\" statement in a Maple defun.
+It does not allow line-breaks as this messes up searching.
+It matches from the \"end\" to the optional following symbol.")
+
+  (defconst maplev--defun-end-re-colon
+    (concat maplev--defun-end-re "[ \t]*[:;]")
     "Regular expression for \"end\" statement in a Maple defun.
 It does not allow line-breaks as this messes up searching.
 It matches from the \"end\" to the terminating colon or semicolon.")
 
-  (defconst maplev--top-defun-end-re
-    (concat "^\\(?:" maplev--defun-end-re "\\)" ; flush left end
+  (defconst maplev--top-defun-end-re-colon
+    (concat "^\\(?:" maplev--defun-end-re-colon "\\)" ; flush left end
 	    "\\|"                         ; or
 	    maplev--top-defun-begin-re "[^#\n]*" ; one line proc
-	    maplev--defun-end-re)
+	    maplev--defun-end-re-colon)
     "Regular expression for \"end\" statement in a top level Maple procedure assignment.
 It matches either a flush left \"end\" or a one line procedure assignment.")
 
@@ -152,7 +157,7 @@ The first group is the linked file.")
     "Create a regular expression that matches a suffix of WORD.
 For example, given \"begin\" the regular expression matches \"gin\"."
     (let ((re (substring word 0 1)))
-      (mapc (lambda (c) (setq re (concat "\\(?:" re "?" (char-to-string c) "\\)"))) 
+      (mapc (lambda (c) (setq re (concat "\\(?:" re "?" (char-to-string c) "\\)")))
 	    (substring word 1))
       re))
 

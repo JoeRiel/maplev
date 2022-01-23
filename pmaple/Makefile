@@ -4,12 +4,13 @@ SHELL := /bin/bash
 
 UNAME := $(shell uname)
 
-include help-system.mak
+include help-system.mk
 
 # {{{ Directories
 
-LISP-DIR := $(HOME)/.emacs.d/maple
-BIN-DIR := $(LISP-DIR)/bin
+# LISP-DIR := $(HOME)/.emacs.d/maple
+# BIN-DIR := $(LISP-DIR)/bin
+BIN-DIR := $(HOME)/maple/toolbox/maplev
 
 # }}}
 
@@ -91,7 +92,7 @@ bin.X86_64_WINDOWS/pmaple.exe: $(C-FILES) $(H-FILES) $(MAPLEC-DLL)
 
 install: $(call print-help,install,	Install the binaries and executables into $(BIN-DIR))
 
-install: pmaple
+install: 
 	install -D --target-directory=$(BIN-DIR) $+
 
 # }}}
