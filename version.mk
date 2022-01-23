@@ -1,4 +1,4 @@
 # This is a hand-edited file
 #
-VERSION := 3.0.4
+VERSION := 3.0.5
 
