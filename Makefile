@@ -5,13 +5,6 @@
 include version.mk
 
 PKG := maplev
-
-# CLOUD-ID := 5655772713713664
-# CLOUD-DESCRIPTION := An Emacs mode for Maple developers
-# CLOUD-GROUP := Maple Emacs:5683998438195200
-# CLOUD-VERSION := 1
-# PKG-DATE := $(shell date '+%B %Y')
-
 EXTRA_ELFLAGS := --eval "(add-to-list (quote load-path) (expand-file-name \".emacs.d/elpa/button-lock-1.0.2\" \"$(HOME)\"))"
 
 # Activate selected make sections
