@@ -619,13 +619,14 @@ Return exit code of mint."
       ;; with that format, or with the options catenated into a single string
       ;; (separated by spaces, of course).  So am using the format that
       ;; works on both platforms.
-      
+
       (let ((mint (slot-value config 'mint))
 	    ;; N.B. mint occasionally generates nonsense output when screen width (-w) is large.
 	    (mint-args (append (maplev-get-option-with-include config 'mint-options))) ;;  "-w5000")))
 	    (process-environment (if maplev-use-new-language-features
 				     (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
-				   process-environment)))
+				   process-environment))
+	    (coding-system-for-read 'raw-text))
 	(unless mint
 	  (error "The slot-value of :mint in maplev-config is not assigned"))
 	(when (and syntax-only (not (member "-S" mint-args)))
