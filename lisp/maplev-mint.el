@@ -128,7 +128,7 @@ This is only used if `maplev-mint-rerun-flag' is non-nil."
 Set `maplev-mint--code-buffer' to CODE-BUFFER, the buffer that
 contains the source code.  Set buffer-local variable
 `maplev-config' to CONFIG."
-  (unless (eq major-mode 'maple-mint-mode)
+  (unless (eq major-mode 'maplev-mint-mode)
     (maplev-mint-mode))
   (setq maplev-config config
 	maplev-mint--code-buffer code-buffer))
