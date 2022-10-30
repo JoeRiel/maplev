@@ -1,7 +1,7 @@
 ;;; maplev-mint.el --- Syntax checking for Maple
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 ;;
@@ -120,7 +120,6 @@ This is only used if `maplev-mint-rerun-flag' is non-nil."
   (make-local-variable 'maplev-mint--code-buffer)
   (set (make-local-variable 'paragraph-start) "[^ ]")
   (set (make-local-variable 'paragraph-separate) paragraph-start)
-  (maplev-mint-fontify-buffer)
   (setq truncate-lines nil))
 
 (defun maplev-mint-setup (code-buffer config)
@@ -223,12 +222,12 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
             ;; list.  This may be tougher than I envisioned.  How are
             ;; optional type declarations handled?  The difficulty is
             ;; that they could have commas and closing parentheses.
-            
+
             ;;            args-re (concat "\\s-*\\<\\w+\\>\\(\\s-*::\\s-*[^
             )
       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
       (setq line (1- (string-to-number (match-string 1)))))
-    
+
     ;; move point in source to beginning of line where procedure/module assignment begins.
 
     (maplev-mint--goto-source-pos line 0)
@@ -259,7 +258,7 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
 		   'inc-first)))
 	(when file
 	  (find-file-other-window file))))))
-  
+
 
 (defun maplev-mint--goto-source-proc (pos)
   "Move to position in source buffer corresponding to link at POS in mint buffer.
@@ -643,6 +642,7 @@ Return exit code of mint."
       (delete-region (point-min) eoi)
       ;; Display Mint output
       (maplev-mint-setup code-buffer config)
+      (maplev-mint-fontify-buffer)
       (setq lines (if (= (buffer-size) 0)
                       0
                     (count-lines (point-min) (point-max))))
@@ -662,7 +662,7 @@ Return exit code of mint."
       (goto-char (point-min))
       (if (re-search-forward "^[ \t]*\\^" nil t)
           (setq errpos (maplev-mint--goto-error (point)))))
-	
+
     ;; If there is an error in the maple source and a window displays it,
     ;; move point in this window
     (when (and code-window errpos)
