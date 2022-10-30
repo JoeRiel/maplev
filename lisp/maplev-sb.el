@@ -46,7 +46,7 @@
 (add-to-list 'speedbar-dynamic-tags-function-list
 	     '(maplev-sb-fetch-dynamic-tags . maplev-sb-insert-tags-list))
 
-(speedbar-add-supported-extension '(".mpl" ".mm"))
+(speedbar-add-supported-extension '(".mpl" ".mm" ".mi"))
 
 ;;; Customizations
 
@@ -156,7 +156,7 @@ See Info node `(speedbar)Creating a display'."
       (error
        (message (cadr err))
        t))))
-		
+
 
 (defun maplev-sb-mark-defuns ()
   "Add markers to modules and procedures in the current buffer,
@@ -176,9 +176,9 @@ or the symbol 'end."
     (set (make-local-variable 'speedbar-tag-hierarchy-method) nil)
     (set (make-local-variable 'speedbar-generic-list-group-expand-button-type) 'expandtag)
     (set (make-local-variable 'speedbar-generic-list-tag-button-type) 'statictag)
-    
+
     (goto-char (point-min))     ; start at top of buffer
-    
+
     (let ((point (point))
 	  (macros maplev-sb-defined-macros) ; list of defined macros
 	  (depth 0)
