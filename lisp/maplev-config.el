@@ -117,6 +117,14 @@ page for mint.  The verbose option (normally -v), is necessary
 for mint-mode to properly display and use the path to included
 file.")
 
+   (project-source
+    :initarg            :project-source
+    :initform           nil
+    :type               (or null string)
+    :custom             (choice (const nil) string)
+    :documentation      "Path to main Maple source file for the project.
+Currently used with `maplev-mint-project'.")
+
    (tester
     :initarg            :tester
     :initform           nil

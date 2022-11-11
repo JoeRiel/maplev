@@ -945,7 +945,7 @@ Interactively, VAR defaults to identifier point is on."
 	    (cnt 0) ; keep track whether in original procedure
 	    term)
 	(while (maplev--re-search-forward regex nil 'move)
-	  (if (match-string 1)
+	  (if (match-string-no-properties 1)
 	      (when (zerop cnt)
 		(let ((beg (match-beginning 0)))
 		  (maplev-delete-vars vars (point) (maplev--statement-terminator))
@@ -956,7 +956,12 @@ Interactively, VAR defaults to identifier point is on."
 		      (delete-region (match-beginning 0) (match-end 0))
 		      (maplev-delete-whitespace t)))))
 	    ;; adjust cnt up/down when entering/exiting a proc/module.
-	    (setq cnt (+ cnt (if (match-string 2) +1 -1)))))))))
+	    ;; FIXME: not robust
+	    (setq cnt (+ cnt (if (match-string 2) +1
+			       (if (or (looking-back "proc" (- (point) 5))
+				       (not (looking-at "\\s-+\\(?:if\\|do\\|uses\\)")))
+				   -1
+				 0))))))))))
 
 (defun maplev-delete-vars (vars start end &optional leave-one)
   "Delete VARS in region between START and END; VARS must be
