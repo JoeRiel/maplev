@@ -7,12 +7,12 @@
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation; either version 2 of the
 ;; License, or (at your option) any later version.
-;;     
+;;
 ;; This program is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
-;;     
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc.,  51 Franklin St, Fifth Floor, Boston, MA
@@ -30,7 +30,7 @@
 (require 'eieio)
 (require 'eieio-custom)
 (require 'maplev-utils)
-	 
+
 (eval-when-compile
   (defvar maplev-config-default)      ; see maplev-custom.el
   (defvar maplev-config-auto-assign)  ; ibid
@@ -106,7 +106,7 @@ See the Maple help page for maple.")
     :documentation "Command to execute Mint.  If nil, this field
 is auto-assigned by the function `maplev-config' if `:maple' is
 properly assigned and `maplev-config-auto-assign' is non-nil.")
-   
+
    (mint-options
     :initarg            :mint-options
     :initform           "-i2 -q -v"
@@ -142,7 +142,7 @@ This is used with `mpldoc-mode', specifically, `mpldoc-test-run-tester'.")
 The default, nil, uses the value of the :maple slot for the -maple option
 and the value of the :maple-options slot for the -moptions option.
 Used by `mpldoc-test-run-tester'."))
-  
+
   "A class for configuring Maple projects.")
 
 (defvar maplev-config nil

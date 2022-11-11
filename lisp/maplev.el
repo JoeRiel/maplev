@@ -210,7 +210,7 @@ When MESSAGE is non-nil, display a message with the version."
     (modify-syntax-entry ?<  "."  table)
     (modify-syntax-entry ?.  "."  table)
     (modify-syntax-entry ?|  "."  table)
-    
+
     (modify-syntax-entry ?\" "\"" table) ; string quote
     (modify-syntax-entry ?\' "\"" table) ; string quote
     (modify-syntax-entry ?\` "\"" table) ; string quote
@@ -292,7 +292,7 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control c) (tab) ?p]  'maplev-indent-procedure)
     (define-key map [(control c) (tab) ?r]  'maplev-indent-region)
     (define-key map [(control c) (tab) ?k]  'maplev-indent-clear-info)
-    
+
     ;; Cmaple commands
     (define-key map [(control c) (control c) ?b]      'maplev-cmaple-send-buffer)
     (define-key map [(control c) (control c) ?p]      'maplev-cmaple-send-procedure)
@@ -305,6 +305,7 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control c) (control c) ?s]      'maplev-cmaple-status)
 
     ;; Mint commands
+    (define-key map [(control c) return ?P] 'maplev-mint-project)
     (define-key map [(control c) return ?b] 'maplev-mint-buffer)
     (define-key map [(control c) return ?p] 'maplev-mint-procedure)
     (define-key map [(control c) return ?r] 'maplev-mint-region)
@@ -1024,7 +1025,7 @@ If it already exists, do nothing."
   ;; index/package help page, set the interface variable
   ;; `screenwidth' to infinity and save the original value in the
   ;; elisp variable screenwidth.
-  
+
   (let ((screenwidth (maplev-cmaple-direct
 		      "lprint(interface('screenwidth'=infinity));" t))
 	completions)
@@ -1340,7 +1341,7 @@ file (either < or \").  The second group matches the filename.")
     "expand" "exports" "factorial" "frem" "frontend" "gc" "genpoly"
     "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "`if`" "ifelse"
     "igcd" "ilcm" "ilog10" "ilog2" "`implies`" "`implies=`" "indets" "indices" "inner"
-    "`int/series`" "`intersect`" "`intersect=`" 
+    "`int/series`" "`intersect`" "`intersect=`"
     "iolib" "iquo" "iratrecon" "irem" "is_gmp" "isqrt"
     "`kernel/transpose`" "kernelopts" "lcoeff" "ldegree" "length"
     "lexorder" "lhs" "localGridInterfaceRun" "lowerbound" "lprint"
@@ -1407,12 +1408,12 @@ file (either < or \").  The second group matches the filename.")
      "postplot" "preplot" "prettyprint" "printbytes" "prompt" "quiet"
      "screenheight" "screenwidth" "showassumed" "verboseproc" "version"
      "warnlevel"
-     
+
      ;; kernelopts options
      "ASSERT" "bytesalloc" "bytesused" "cputime" "dagtag" "gcbytesavail"
      "gcbytesreturned" "gctimes" "maxdigits" "maximmediate" "memusage"
      "printbytes" "profile" "system" "version" "wordsize"
-     
+
      ;; types
      "_Inert" "And" "Non" "Not" "Or" "SERIES" "SymbolicInfinity" "TEXT"
      "algebraic" "algext" "algfun" "algnum" "algnumext"
@@ -1428,14 +1429,14 @@ file (either < or \").  The second group matches the filename.")
      "nonpositive" "nonreal" "nothing" "numeric" "odd" "oddfunc" "package"
      "point" "polynom" "pos_infinity" "posint" "positive" "poszero" "prime"
      "protected" "quadratic" "quartic" "radext" "radfun" "radfunext"
-     "radical" "radnum" "radnumext" "range" "rational" "ratpoly" "real_infinity"
+     "radical" "radnum" "radnumext" "range" "rational" "ratpoly" "real" "real_infinity"
      "realcons" "relation" "scalar" "sequential" "set" "sfloat" "specfunc" "specindex" "sqrt"
      "stack" "string" "symbol" "symmfunc" "tabular" "trig" "truefalse" "truefalseFAIL"
      "undefined" "uneval" "vector" "zppoly"
-     
+
      ;; math procedures
      ;; Some of these were obtained with
-     ;; ListTools:-MakeUnique(sort(map(op@FunctionAdvisor, FunctionAdvisor(function_classes)))); 
+     ;; ListTools:-MakeUnique(sort(map(op@FunctionAdvisor, FunctionAdvisor(function_classes))));
      "about" "abs" "addcoords" "additionally" "addproperty" "AFactor" "AFactors" "AiryAi"
      "AiryAiZeros" "AiryBi" "AiryBiZeros" "algsubs" "alias" "allvalues" "andseq" "AngerJ"
      "AppellF1" "AppellF2" "AppellF3" "AppellF4" "apply" "applyop" "applyrule" "arccos"
@@ -1449,7 +1450,7 @@ file (either < or \").  The second group matches the filename.")
      "cosh" "cot" "coth" "coulditbe" "CoulombF" "csc" "csch" "CylinderD" "CylinderU"
      "CylinderV" "D" "dataplot" "dawson" "define" "definemore" "depends" "Describe"
      "DESol" "Det" "Diff" "dilog" "dims" "dinterp" "Dirac" "discont" "discrim" "dismantle"
-     "DistDeg" "Divide" "doublefactorial" "dsolve" "Ei" "elems" "eliminate" "ellipsoid"
+     "DistDeg" "Divide" "doublefactorial" "dsolve" "Ei" "eliminate" "ellipsoid"
      "EllipticCE" "EllipticCK" "EllipticCPi" "EllipticE" "EllipticF" "EllipticK"
      "EllipticModulus" "EllipticNome" "EllipticPi" "erf" "erfc" "erfi" "euler"
      "eulermac" "Eval" "evala" "evalapply" "evalc" "evalr" "evalrC" "example"
@@ -1499,7 +1500,7 @@ file (either < or \").  The second group matches the filename.")
      "verify" "version" "WARNING" "WeberE" "WeierstrassP" "WeierstrassPPrime"
      "WeierstrassSigma" "WeierstrassZeta" "whattype" "WhittakerM" "WhittakerW"
      "Wrightomega" "xormap" "xorseq" "Zeta" "ztrans"
-     
+
      ;; miscellaneous procedures
      "interface" "readline" "with" "unwith"
      )

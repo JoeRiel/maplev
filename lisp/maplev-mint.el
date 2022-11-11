@@ -670,6 +670,23 @@ Return exit code of mint."
       (switch-to-buffer mint-buffer))
     status))
 
+(defun maplev-mint-file (file)
+  "Run Mint on FILE."
+  (interactive)
+  (if (not (file-exists-p file))
+      (error "file %s does not exist" file)
+    (find-file file)
+    (maplev-mint-buffer)))
+
+(defun maplev-mint-project ()
+  "Run Mint on the current project.
+The `project-source' slot of the object `maplev-config' must be assigned."
+  (interactive)
+  (let ((file (slot-value maplev-config 'project-source)))
+    (if file
+	(maplev-mint-file file)
+      (error "project-source slot of maplev-config not assigned"))))
+
 (defun maplev-mint-buffer ()
   "Run Mint on the current buffer."
   (interactive)
@@ -721,7 +738,7 @@ as in `re-search-forward'."
 		      (setq pos (re-search-forward regexp bound noerror dir)))))
 	(setq count (- count dir)))
       pos)))
-      
+
 (defun maplev--re-search-backward (regexp &optional bound noerror count)
   "Search backward from point for regular expression REGEXP.
 This function is like `re-search-backward', but strings and comments are ignored.
@@ -824,7 +841,7 @@ Skip over comments and types."
 	t)
        (t)))))
 
-       
+
 (defun maplev-add-declaration (keyword vars)
   "To the current procedure's KEYWORD declaration add VARS, a list of variables.
 If necessary, add a KEYWORD statement.  Point must be after the closing
@@ -888,7 +905,7 @@ parenthesis of the procedure's argument list."
 	      (goto-char end)
 	      (backward-char)
 	      (insert "," (make-string maplev-variable-spacing ?\ ) var))))))))
-	
+
 (defun maplev-add-local-variable (var)
   "Add VAR to the current procedure's local statement.
 Interactively, VAR defaults to the identifier at point."
@@ -1035,7 +1052,7 @@ C-r  enter recursive edit (C-M-c to get out)
     (define-key map "l" 'local)
     (define-key map "L" 'local-rest)
 
-    
+
     (define-key map "n" 'skip)
     (define-key map "N" 'skip)
     (define-key map "\d" 'skip)
@@ -1262,7 +1279,7 @@ Return the edited list upon completion."
 ;;   (let ((buffer (current-buffer))
 ;; 	(config maple-config)
 ;; 	(file
-		
+
 
 
 (provide 'maplev-mint)
