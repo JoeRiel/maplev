@@ -1,7 +1,7 @@
 ;;; maplev-view.el --- mode for displaying Maple procedures
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 ;;
@@ -35,7 +35,8 @@
 ;;{{{ mode map
 
 (defvar maplev-view-mode-map
-  (let ((map (copy-keymap maplev-help-mode-map)))
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map maplev-help-mode-map)
     ;; remove P (parent) key-binding
     (define-key map [?P] nil)
     ;; (define-key map [?v] 'maplev-view-toggle-view)
@@ -51,7 +52,7 @@
 \\{maplev-view-mode-map}"
   :syntax-table maplev-mode-syntax-table
   :abbrev-table nil
-  
+
   (set (make-local-variable 'maplev--process-item) #'maplev--proc-process)
 
   (make-local-variable 'maplev-history--stack) ; set up the stack
@@ -176,7 +177,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 	(insert-file-contents file)
 	(goto-char (point-min))
 	(forward-line (1- line))))))
-    
+
 (defun maplev-view-goto-source ()
   "Goto the source of the current Maple procedure."
   (interactive "P")

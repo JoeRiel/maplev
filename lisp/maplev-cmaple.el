@@ -243,7 +243,7 @@ from the output buffer."
   "Clear the contents of the cmaple buffer."
   (with-current-buffer (maplev--cmaple-buffer)
     (delete-region (point-min) (point-max))))
-                 
+
 
 (defun maplev-cmaple-pop-to-buffer ()
   "Pop up a buffer with command line Maple.  Start Maple, if necessary."
@@ -277,7 +277,8 @@ PROCESS is the Maple process."
 ;;{{{ mode map
 
 (defvar maplev-cmaple-mode-map
-  (let ((map (copy-keymap comint-mode-map)))
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map comint-mode-map)
     (define-key map [(return)]                'maplev-cmaple-send)
     (define-key map [(control c) (control c)] 'maplev-cmaple-interrupt)
     (define-key map [?\?]                     'maplev-help-at-point)
@@ -291,7 +292,7 @@ PROCESS is the Maple process."
       (define-key map [(meta control y)]        'maplev-insert-cut-buffer)
       ;; mouse button bindings
       (define-key map [(control meta mouse-2)]  'maplev-mouse-yank-cut-buffer))
-    
+
     (define-key map [(shift mouse-2)]         'maplev-help-follow-mouse)
     (define-key map [(control shift mouse-2)] 'maplev-help-follow-mouse)
     (define-key map [(meta shift mouse-2)]    'maplev-view-follow-mouse)
@@ -319,7 +320,7 @@ This mode has the same commands as `comint-mode' plus some
 additional commands for interacting with cmaple.
 
 \\{maplev-cmaple-map}"
-  
+
   (setq comint-prompt-regexp (concat "^\\(" (regexp-quote maplev-cmaple-prompt) "\\)+ *")
         comint-eol-on-send t  ; goto end of line before sending
         mode-name "Maple"
@@ -341,7 +342,7 @@ CONFIG is an object of type `maplev-config-class."
   (maplev-cmaple-mode)
   (setq maplev-config config))
 
-  
+
 
 ;;}}}
 
