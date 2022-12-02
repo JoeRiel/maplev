@@ -1,7 +1,7 @@
 ;;; maplev-common.el --- Common functions for maplev
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 ;;
@@ -196,7 +196,7 @@ THIS ASSUMES EACH END STATEMENT IS FOLLOWED BY AN APPROPRIATE KEYWORD."
   ;; If point is in "foo", it is considered outside the proc body
   ;; so moving to the end will move point to end of containing proc
   ;; (or end of file).
-    
+
   (interactive)
   (let ((count 0)
 	(regex "\\(end\\s-+\\)?\\_<\\(?:proc\\|module\\)\\_>")
@@ -235,7 +235,7 @@ end of the Nth following defun."
   (setq n (or n 1))
   (goto-char (or (maplev--beginning-of-defun-pos nil n)
                  (if (> n 0) (point-min) (point-max)))))
-       
+
 (defun maplev-end-of-defun (&optional n)
   "Move point forward to the end of defun.
 With optional argument N, move to the end of the Nth following
