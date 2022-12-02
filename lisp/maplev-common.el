@@ -289,7 +289,8 @@ The defun marked is the one that contains point."
 	  (zerop count))))))
 
 (defun maplev-current-defun ()
-  "Return a list with buffer positions of begin and end of current defun."
+  "Return a list with buffer positions of begin and end of current defun.
+Retun nil if current defun not found."
   (save-mark-and-excursion
     (when (maplev-mark-defun)
       (list (point) (mark)))))
@@ -299,7 +300,8 @@ The defun marked is the one that contains point."
   (interactive)
   (widen)
   (let ((reg (maplev-current-defun)))
-    (narrow-to-region (car reg) (nth 1 reg))))
+    (when reg
+      (narrow-to-region (car reg) (nth 1 reg)))))
 
 
 (defun maplev-what-proc (&optional nodisplay)

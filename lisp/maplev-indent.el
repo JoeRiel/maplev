@@ -514,7 +514,8 @@ BEG and END may also be passed to the function."
 (defun maplev-indent-procedure ()
   "Indent the current procedure or module."
   (interactive)
-  (apply 'maplev-indent-region (maplev-current-defun)))
+  (let ((reg (maplev-current-defun)))
+    (when reg (apply 'maplev-indent-region reg))))
 
 (defun maplev-indent-line ()
   "Indent current line according to grammar.

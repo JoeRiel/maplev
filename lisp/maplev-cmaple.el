@@ -1,7 +1,7 @@
 ;;; maplev-cmaple.el --- Communicate with Maple process
 
 ;;; Commentary:
-;; 
+;;
 
 ;; Define the functions used for communicating with the command line
 ;; Maple process.  A change has been made for the 3.0 release;
@@ -192,7 +192,8 @@ Use mint to syntax check the region before sending to cmaple."
 (defun maplev-cmaple-send-procedure ()
   "Send the current procedure to cmaple."
   (interactive)
-  (apply 'maplev-cmaple-send-region (maplev-current-defun)))
+  (let ((reg (maplev-current-defun)))
+    (when reg (apply 'maplev-cmaple-send-region reg))))
 
 (defun maplev-cmaple-direct (input &optional delete)
   "Send the string INPUT to cmaple and return the output.

@@ -696,7 +696,8 @@ The `project-source' slot of the object `maplev-config' must be assigned."
 (defun maplev-mint-procedure ()
   "Run Mint on the current procedure."
   (interactive)
-  (apply 'maplev-mint-region (maplev-current-defun)))
+  (let ((reg (maplev-current-defun)))
+    (when reg (apply 'maplev-mint-region reg))))
 
 (defun maplev-mint-rerun ()
   "Rerun Mint on the previously executed region.
