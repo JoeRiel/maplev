@@ -1,21 +1,20 @@
-#LINK maplev.mpl
+#LINK MapleVInstaller.mpl
+
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE(help) maplev:-EmacsInitialization
+##PROCEDURE(help) MapleVInstaller:-EmacsInitialization
 ##HALFLINE print elisp code that can be used to configure maplev.
 ##AUTHOR   Joe Riel
 ##DATE     Feb 2017
 ##CALLINGSEQUENCE
-##- maplev:-EmacsInitialization()
+##- MapleVInstaller:-EmacsInitialization()
 ##RETURNS
 ##- `NULL`
 ##DESCRIPTION
 ##- Print elisp code that can be used to configure the **maplev** emacs package.
 
-#LINK maplev.mpl
-
 EmacsInitialization := proc()
 
-local bindir, cmaple, file, join, mapledir, mint, platform, pmaple, systype;
+local bindir, file, join, maple, mapledir, mint, platform, pmaple, systype;
 
     join := proc()
         FileTools:-JoinPath([_passed]);
@@ -27,12 +26,12 @@ local bindir, cmaple, file, join, mapledir, mint, platform, pmaple, systype;
 
     systype := FileTools:-Filename(kernelopts('bindir'));
 
-    cmaple := join(bindir, "cmaple");
+    maple  := join(bindir, "cmaple");
     mint   := join(bindir, "mint");
     pmaple := join(kernelopts('toolboxdir' = 'maplev'), systype, "pmaple");
 
     if platform = "windows" then
-        cmaple := cat(cmaple , ".exe");
+        maple  := cat(maple , ".exe");
         mint   := cat(mint   , ".exe");
         pmaple := cat(pmaple , ".exe");
     elif platform = "unix" then
@@ -40,13 +39,13 @@ local bindir, cmaple, file, join, mapledir, mint, platform, pmaple, systype;
         for file in ["maple", "smaple"] do
             file := join(mapledir, "bin", file);
             if FileTools:-Exists(file) then
-                cmaple := file;
+                maple := file;
                 break;
             end if;
         end do;
     end if;
 
-    if not FileTools:-Exists(cmaple) then cmaple := 'nil'; end if;
+    if not FileTools:-Exists(maple)  then maple  := 'nil'; end if;
     if not FileTools:-Exists(pmaple) then pmaple := 'nil'; end if;
     if not FileTools:-Exists(mint)   then mint   := 'nil'; end if;
 
@@ -64,7 +63,7 @@ local bindir, cmaple, file, join, mapledir, mint, platform, pmaple, systype;
            "                      :pmaple   %a)))\n"
            , bindir
            , mapledir
-           , cmaple
+           , maple
            , mint
            , pmaple
           );

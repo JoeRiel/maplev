@@ -9,14 +9,14 @@
 ##  to assign the appropriate settings for interfacing with
 ##  the Emacs **maplev-mode**.
 
-    Setup := proc()
-        kernelopts('printbytes' = false);
-        interface('prettyprint'    = 1
-                  , 'verboseproc'  = 2
-                  , 'errorbreak'   = 0
-                  , 'warnlevel'    = 2
-                  , 'errorcursor'  = false
-                  , 'screenheight' = infinity
-                 );
-        NULL;
-    end proc;
+Setup := proc()
+    kernelopts('printbytes' = false);
+    interface('prettyprint'    = 1
+              , 'verboseproc'  = 2
+              , 'errorbreak'   = 0
+              , 'warnlevel'    = 2
+              , 'errorcursor'  = false
+              , 'screenheight' = infinity
+             );
+    NULL;
+end proc;

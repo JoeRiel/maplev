@@ -1,6 +1,7 @@
-#LINK maplev.mpl
+#LINK MapleVInstaller.mpl
+
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE(help) maplev:-Copy
+##PROCEDURE(help) MapleVInstaller:-Copy
 ##HALFLINE copy file
 ##AUTHOR   Joe Riel
 ##DATE     Jun 2018
