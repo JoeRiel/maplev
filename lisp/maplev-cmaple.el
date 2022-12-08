@@ -93,17 +93,23 @@ Start one, if necessary."
        process-environment))))
 
 (defun maplev-cmaple--get-pmaple-and-options ()
-  "Return a list of strings consisting of the pmaple executable and its options."
-  (let ((pmaple (slot-value maplev-config 'pmaple)))
+  "Return a list of strings consisting of the pmaple executable, maple tty,
+and the options to pass to pmaple."
+  (let ((pmaple (slot-value maplev-config 'pmaple))
+	(maple (slot-value maplev-config 'maple)))
     (unless pmaple
       (setq pmaple (maplev-cmaple-default-pmaple)))
+    (unless maple
+      (error "The maple slot of `maple-config' is not assigned"))
     (cond
      ((not (file-exists-p pmaple))
       (error "The pmaple file, '%s', does not exist" pmaple))
      ((not (file-exists-p pmaple))
       (error "The pmaple file, '%s', is not executable" pmaple))
+     ((not (file-exists-p maple))
+      (error "The specified maple, '%s', does not exist" maple))
      (t
-      (cons pmaple (maplev-get-option-with-include maplev-config :maple-options "-q"))))))
+      (cons pmaple (cons maple (maplev-get-option-with-include maplev-config :maple-options "-q")))))))
 
 (defun maplev-cmaple--start-process ()
   "Start a cmaple process associated with the current buffer.

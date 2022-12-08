@@ -29,6 +29,7 @@
 
 \title{\texttt{pmaple}}
 \author{Joseph S. Riel\quad\href{mailto:jriel@maplesoft.com}{\texttt{jriel@maplesoft.com}}}
+\date{8 December 2022 \\[1ex] 0.2.0}
 
 \begin{document}
 
@@ -52,7 +53,7 @@ that makes it difficult to determine when a computation is complete.
 \label{sec:code}
 
 <<pmaple.c>>=
-<<header>> 
+<<header>>
 <<includes>>
 <<macros>>
 <<functions>>
@@ -62,10 +63,10 @@ that makes it difficult to determine when a computation is complete.
 \subsection{Include Files}
 \label{sec:include-files}
 
-The [[maplec.h]] file lies in [[$MAPLE_ROOT/extern/internal]].
+The [[maplec.h]] file lies in [[$MAPLE_ROOT/extern/include]].
 
 <<includes>>=
-#include <ctype.h>  
+#include <ctype.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -73,16 +74,16 @@ The [[maplec.h]] file lies in [[$MAPLE_ROOT/extern/internal]].
 #include <string.h>
 #include <time.h>
 #include <maplec.h>
-#include "getdelim.h"  
+#include "getdelim.h"
 @
 
 \subsection{Macros}
 \label{sec:macros}
 
 
-<<macros>>= 
+<<macros>>=
 #define PROMPT "(**) "
-#define VERSION "0.1.0"
+#define VERSION "0.2.0"
 @
 
 \subsection{Main}
@@ -122,7 +123,7 @@ Assign the vector of callback procedures.  This is passed to
 when required to perform the appropriate action.
 
 <<main: vars>>=
-MCallBackVectorDesc cb = { textCallBack, 
+MCallBackVectorDesc cb = { textCallBack,
                            0,   /* errorCallBack */
                            0,   /* statusCallBack */
                            0,   /* readLineCallBack */
@@ -156,7 +157,7 @@ Reassign [[errlev]] and [[warnlev]] from the [[-e]] and [[-w]] options,
 respectively.
 
 <<process options>>=
-for ( i=1; i < argc ; i++ ) {
+for ( i=2; i < argc ; i++ ) {
   if( !strcmp(argv[i], "-q") ) {
     quiet = TRUE;
   } else if( (sscanf(argv[i], "-e%d", &num) == 1) ) {
@@ -171,15 +172,16 @@ for ( i=1; i < argc ; i++ ) {
 \label{sec:connecttomaple}
 
 Call [[StartMaple]] to assign the kernel vector used in subsequent
-calls to OpenMaple functions.  Pass [[argc]] and [[argv]]; it handles
-all arguments.
+calls to OpenMaple functions.  Drop the first argument in [[argv]]
+(the [[pmaple]] executable path) so that the first (0-th) element is
+the path to cmaple and decrement [[argc]] accordingly.
 
 <<main: vars>>=
-MKernelVector kv; /* kernel vector handle used in OpenMaple calls */ 
+MKernelVector kv; /* kernel vector handle used in OpenMaple calls */
 @
 
 <<initialize Maple>>=
-kv = StartMaple(argc,argv,&cb,NULL,NULL,err);
+kv = StartMaple(--argc,++argv,&cb,NULL,NULL,err);
 if( (kv == NULL )) {
   printf("Fatal error, %s\n",err);
   return( 1 );
@@ -201,7 +203,7 @@ Assign Maple commands that
   and reassign the version.
 
 <<configure Maple>>=
-sprintf(cmd, 
+sprintf(cmd,
         "interface("
         "'screenheight'=infinity,"
         "'screenwidth'=80,"
@@ -210,7 +212,7 @@ sprintf(cmd,
         "kernelopts('printbytes'=false):"
         "<<reassign interface(version)>>"
         , errlev, warnlev );
-@          
+@
 
 Reassign [[interface(version)]] so that it indicates that this
 is command-line Maple.  That allows [[IsWorksheetInterface()]]
@@ -232,10 +234,10 @@ EvalMapleStatement(kv, cmd);
 \label{sec:main-loop}
 
   Print a prompt, read the input, clean it, and send it to the Maple kernel.
-  
+
 <<main loop>>=
 while (TRUE) {
-  <<print prompt>> 
+  <<print prompt>>
   read = getdelim(&expr, &len, '\0', stdin);
   if( (read == -1 )) break;
   dag = EvalMapleStatement(kv,expr);
@@ -255,10 +257,10 @@ printf( PROMPT );
 <<print splash screen>>=
 if( !quiet ){
   printf("pMaple v%s (c) copyright 2018 Joseph S. Riel\n", VERSION);
-}  
+}
 @
 
-Close any open files, print a sign-off message and flush it, 
+Close any open files, print a sign-off message and flush it,
 then return 0, indicating no-errors.
 
 <<finish up>>=
@@ -288,7 +290,7 @@ Print the text to [[stdout]].
 
 <<functions>>=
 static void M_DECL textCallBack( void *data, int tag, const char *output )
-{  
+{
   printf("%s\n", output);
 }
 @
@@ -306,14 +308,14 @@ static void M_DECL textCallBack( void *data, int tag, const char *output )
  *
  * This is the source code for pmaple, which enhances the pipe-line
  * communication with the Maple engine.  The enhancement is trivial;
- * it ensures that prompts are flushed to standard output when they 
- * are generated.  This makes it possible to communicate with the 
- * Maple engine in a reasonable manner.  With cmaple, the prompts 
+ * it ensures that prompts are flushed to standard output when they
+ * are generated.  This makes it possible to communicate with the
+ * Maple engine in a reasonable manner.  With cmaple, the prompts
  * are not flushed until new input arrives, which makes it difficult
  * to determine when a computation is complete.
  *
  *********************************************************************** */
-  
+
 @
 
 \subsection{Miscellaneous}
