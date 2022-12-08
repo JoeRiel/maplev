@@ -1,11 +1,11 @@
 #LINK maplev.mpl
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE(help) maplev[Unpack]
+##PROCEDURE(help) maplev:-Unpack
 ##HALFLINE unpack the lisp and info files for MapleV
 ##AUTHOR   Joe Riel
 ##DATE     Feb 2017
 ##CALLINGSEQUENCE
-##- Unpack('opts')
+##- Unpack()
 ##DESCRIPTION
 ##- The `Unpack` command unpacks the lisp, info, and binary files for MapleV.
 ##  It also byte compiles the lisp files.
@@ -26,11 +26,11 @@
 ##SEEALSO
 ##- "maplev"
 
-#LINK maplev.mpl
+$define EMACS_PKG "maplev"
 
 Unpack := proc( )
 
-local binfile, book, dst, dstdir, join, platform, src, status, systype, tboxdir;
+local binfile, book, dst, dstdir, html, join, pdf, platform, src, status, systype, tboxdir;
 
 
 uses FT = FileTools;
@@ -59,12 +59,14 @@ uses FT = FileTools;
         FT:-MakeDirectory(dstdir, 'recurse');
     end if;
 
-    src := join(book, "maplev.html");
-    dst := join(dstdir, "maplev.html");
+    html := sprintf("%s.html", EMACS_PKG);
+    src := join(book, html);
+    dst := join(dstdir, html);
     Copy(src, dst, 'force', 'verbose');
 
-    src := join(book, "maplev.pdf");
-    dst := join(dstdir, "maplev.pdf");
+    pdf := sprintf("%s.pdf", EMACS_PKG);
+    src := join(book, pdf);
+    dst := join(dstdir, pdf);
     Copy(src, dst, 'force', 'verbose');
 
     #}}}
@@ -120,3 +122,5 @@ uses FT = FileTools;
     return NULL;
 
 end proc:
+
+$undef EMACS_PKG

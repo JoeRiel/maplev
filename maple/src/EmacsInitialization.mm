@@ -1,6 +1,6 @@
 #LINK maplev.mpl
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE(help) maplev[EmacsInitialization]
+##PROCEDURE(help) maplev:-EmacsInitialization
 ##HALFLINE print elisp code that can be used to configure maplev.
 ##AUTHOR   Joe Riel
 ##DATE     Feb 2017

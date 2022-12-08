@@ -1,6 +1,6 @@
 #LINK maplev.mpl
 
-##PROCEDURE maplev[Setup]
+##PROCEDURE maplev:-Setup
 ##HALFLINE Setup maple for communicating with the Emacs  ~maplev-mode~.
 ##CALLINGSEQUENCE
 ##- maplev:-Setup()
