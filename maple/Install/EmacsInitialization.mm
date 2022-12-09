@@ -50,7 +50,7 @@ local bindir, file, join, maple, mapledir, mint, platform, pmaple, systype;
     if not FileTools:-Exists(mint)   then mint   := 'nil'; end if;
 
     printf(";; Open files with extension .mpl with maplev-mode\n"
-           "(setq auto-mode-alist (cons `(\"\\\\.mpl\\\\'\" . maplev-mode) auto-mode-alist))\n"
+           "(add-to-list 'auto-mode-alist `(\"\\\\.mpl\\\\'\" . maplev-mode))\n"
            "\n"
            ";; Assign maplev-config-default; it can also be customized with M-x customize-group RET maplev\n"
            "(eval-after-load 'maplev-config\n"

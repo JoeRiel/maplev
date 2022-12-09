@@ -1,7 +1,7 @@
-#LINK MapleVInstaller.mpl
+#LINK Install.mpl
 
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE(help) MapleVInstaller:-Unpack
+##PROCEDURE(help) maplev:-Install:-Unpack
 ##HALFLINE unpack the lisp and info files for MapleV
 ##AUTHOR   Joe Riel
 ##DATE     Feb 2017

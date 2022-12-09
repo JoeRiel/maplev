@@ -14,9 +14,9 @@
 unprotect('maplev'):
 maplev := module()
 
-export Installer, GetSource, Print, Setup;
+export Install, GetSource, Print, Setup;
 
-$include <Installer/Installer.mpl>
+$include <Install/Install.mpl>
 $include <src/GetSource.mm>
 $include <src/Print.mm>
 $include <src/Setup.mm>

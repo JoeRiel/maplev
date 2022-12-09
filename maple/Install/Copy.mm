@@ -1,4 +1,4 @@
-#LINK MapleVInstaller.mpl
+#LINK Install.mpl
 
 ##INCLUDE ../include/mpldoc_macros.mpi
 ##PROCEDURE(help) MapleVInstaller:-Copy
