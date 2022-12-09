@@ -59,7 +59,6 @@ Start one, if necessary."
       ((member system-type '(windows-nt cygwin ms-dos))
        (concat dir "bin.X86_64_WINDOWS/pmaple.exe"))))))
 
-
 (defun maplev-cmaple--process-environment ()
   "Return a list of strings of equations that define the process environment."
   (unless maplev-config
@@ -76,18 +75,21 @@ Start one, if necessary."
      ((not (file-directory-p mapledir))
       (error "The :mapledir slot of maplev-config, `%s', does not exist" mapledir)))
 
-    ;; create list of PATH=bindir MAPLE=mapledir ...
+    ;; Create list of PATH=bindir MAPLE_ROOt=mapledir ...
+    ;; From testing, none of this appears to matter on Windows,
+    ;; and only MAPLE_ROOT matters on linux.
+
     (append
      (list
       (cond
        ((eq system-type 'gnu/linux)
-	(concat "LD_LIBRARY_PATH=" bindir ":$LD_LIBRARY_PATH"))
+	(concat "LD_LIBRARY_PATH=" bindir ":" (getenv "LD_LIBRARY_PATH")))
        ((member system-type '(windows-nt cygwin ms-dos))
 	(format "PATH=\"%s;%%PATH%%\"" bindir))
        ((eq system-type 'darwin)
-	(concat "DYLD_LIBRARY_PATH=" bindir ":$DYLD_LIBRARY_PATH"))
+	(concat "DYLD_LIBRARY_PATH=" bindir ":" (getenv "DYLD_LIBRARY_PATH")))
        (t (error "Unexpected system-type '%s'" system-type)))
-      (concat "MAPLE=" mapledir))
+      (concat "MAPLE_ROOT=" mapledir))
      (if maplev-use-new-language-features
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
        process-environment))))
