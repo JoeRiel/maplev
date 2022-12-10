@@ -2,4 +2,5 @@
   (maplev-config
    :maple-options "-B -A2 -e2"
    :include-path (concat proj-root "/maple")
+   :project-source (concat proj-root "/maple/src/maplev.mpl")
    :compile (format "make -C %s mla-install" proj-root)))
