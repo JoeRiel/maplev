@@ -47,7 +47,6 @@
 ##  that contains the lisp and info files for MapleV.
 ##>(noexecute) maplev:-Install:-lisp();
 ##
-##
 ##- To install the lisp and info files,
 ##  open Emacs, execute the command  ~M-x package-install-file~,
 ##  and then enter the path to the tar file,
@@ -63,7 +62,6 @@
 ##  to configure MapleV.
 ##
 ##>(noexecute) maplev:-Install:-EmacsInitialization();
-##
 ##
 ##ENDSUBSECTION
 ##SUBSECTION(collapsed) Maintainance
