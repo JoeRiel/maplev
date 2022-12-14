@@ -10,7 +10,7 @@
 @end direntry
 
 @copying
-MapleV is a GNU Emacs major mode for developing source code for Maple, 
+MapleV is a GNU Emacs major mode for developing source code for Maple,
 a computer algebra system (CAS) from @w{Waterloo Maple Inc}.  MapleV is
 written entirely in Emacs-Lisp and is distributed under the GNU General
 Public License.
@@ -38,14 +38,14 @@ Texts.  A copy of the license is included in the section entitled
 @subtitle A GNU Emacs Mode for Maple Developers
 @subtitle MapleV Version @value{VERSION}
 @subtitle @value{DATE}
-  
+
 @author Joseph S.@ Riel
 @page
 @vskip 0pt plus 1filll
 Maple is a registered trademark of Waterloo Maple Inc.@*
 
 Copyright @copyright{} 1999, 2010 Joseph S. Riel@*
- 
+
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
 are preserved on all copies.
@@ -169,7 +169,7 @@ Evolution
 @cindex Introduction
 
 @iftex
-MapleV is a GNU Emacs major mode for developing source code for Maple, 
+MapleV is a GNU Emacs major mode for developing source code for Maple,
 a computer algebra system (CAS) owned by @w{Waterloo Maple Inc}.  In
 this manual @dfn{MapleV} refers to the Emacs major mode and @dfn{Maple}
 to the CAS.  MapleV is written entirely in Emacs-Lisp and is distributed
@@ -402,7 +402,7 @@ indented.  The following sections give examples and demonstrate workarounds.
 MapleV's indentation algorithm does not (currently) handle continued
 expressions.  It aligns continuations with the left most
 character in the preceding line.  In an assignment it is preferable to
-align with the right side of the assignment.  
+align with the right side of the assignment.
 
 @subsubheading Problem
 
@@ -411,16 +411,16 @@ aligned with the preceding line, as the following illustrates:
 
 @example
 ---------- Buffer: foo ----------
-y := a + ( ... ) 
+y := a + ( ... )
      + b;@point{}
 ---------- Buffer: foo ----------
 
 @key{TAB}
    @result{}
 ---------- Buffer: foo ----------
-y := a + ( ... ) 
+y := a + ( ... )
 + b;@point{}
----------- Buffer: foo ----------        
+---------- Buffer: foo ----------
 @end example
 
 @subsubheading Solution
@@ -430,7 +430,7 @@ aligned with the opening column:
 
 @example
 ---------- Buffer: foo ----------
-y := ( a + ( ... ) 
+y := ( a + ( ... )
        + b );
 ---------- Buffer: foo ----------
 @end example
@@ -543,11 +543,11 @@ may set in your @file{.emacs} file.  @inforef{Font Lock,,emacs}, for
 information.  MapleV mode provides three levels of decoration:
 
 @enumerate
-@item 
+@item
 Comments, quotes, top-level procedure names and Maple reserved works
 are highlighted.
 
-@item 
+@item
 Everything in level 1 plus Maple special words, initial variables, and
 the ditto operators are highlighted.
 
@@ -585,7 +585,7 @@ comments.  @inforef{Comments,,emacs}. The commands are reproduced here
 for convenience.
 
 @table @kbd
-@item M-; 
+@item M-;
 Insert or align an inline comment (@code{indent-for-comment}).  The
 comment character is inserted at column @code{comment-column}.
 
@@ -606,7 +606,7 @@ The following variables affect comments:
 
 @vtable @code
 @item maplev-auto-fill-comment-flag
-A boolean flag. If non-nil, the default, comment lines wrap as they are
+A boolean flag; if non-nil, the default, comment lines wrap as they are
 typed.  Wrapping, however, does not automatically start in an inline
 comment; it must be invoked with @code{fill-paragraph}.
 
@@ -654,7 +654,7 @@ effects.  @xref{Preventing indentation}, for an example.
 @table @kbd
 @item C-c C-t p
 @kindex C-c C-t p
-Insert a procedure template (@code{maplev-template-proc}).  
+Insert a procedure template (@code{maplev-template-proc}).
 The user is queried for the name, arguments, and a description of the procedure.
 Any of the entries can be left blank.  If the name is blank then an
 anonymous procedure is inserted, otherwise an assignment is inserted
@@ -733,12 +733,12 @@ Only the first macro in a @code{macro} assignment is indexed.
 
 @findex maplev-find-include-file-at-point
 Maple include statements, such as @code{$include <somefile>},
-are font-locked and active.  
+are font-locked and active.
 Clicking on them, or typing @kbd{C-c C-o},
 calls @kbd{maplev-find-include-file-at-point},
 which searches for the file and, if successful, opens it.
 If the path exists, but the file does not, the user is
-asked whether to create the file.  
+asked whether to create the file.
 
 @vindex maplev-include-path
 The include path can be assigned, as a list of strings,
@@ -748,7 +748,7 @@ The paths are searched in the order of occurrence in the list.
 
 @vindex maplev-include-file-other-window-flag
 The customizable variable @kbd{maplev-include-file-other-window-flag}
-determines whether the file is opened in the current window or 
+determines whether the file is opened in the current window or
 another window.
 
 @node LINK, Indent trace output, Include statements, Miscellaneous features
@@ -789,7 +789,7 @@ Hierarchically indent selected region in the buffer.
 Emacs variable that sets the indentation level for trace output.
 The default is four spaces.
 
-@end table       
+@end table
 
 
 @node Configuration, Mint, Miscellaneous features, top
@@ -821,7 +821,7 @@ When Maplev-mode is applied to a buffer
   if the flag @code{maplev-load-config-file-flag} is non-nil.
 The search begins in @code{default-directory},
 which is typically the directory associated with the current buffer,
-  and moves upward through the file hierarchy, 
+  and moves upward through the file hierarchy,
   stopping when the file is found or root is reached.
 If the file is found, it is loaded as an Emacs lisp file.
 @cindex .maplev
@@ -839,7 +839,7 @@ If the file is found, it is loaded as an Emacs lisp file.
 @findex maplev-config
 @vindex maplev-config-class
 
-The function @code{maplev-config} constructs 
+The function @code{maplev-config} constructs
 an @code{eieio} object of class @code{maplev-config-class}
 and assigns it to the eponymous buffer-local variable @code{maplev-config}.
 For details about objects, see @ref{Top,,, eieio, The EIEIO Manual}.
@@ -899,9 +899,9 @@ the Maple syntax checker.
 The default is @samp{-i2 -q -v}.
 The use of the verbose option, @samp{-v},
 is necessary so that @command{mint} output for include files
-shows the path to the file; the information is used 
+shows the path to the file; the information is used
 to jump to the source location of a mint warning.
-Maplesoft developers: be aware that @command{smint} 
+Maplesoft developers: be aware that @command{smint}
 use @samp{-V} for the verbose option.
 See the Maple help page for @command{mint}
 for a description of the available options.
@@ -914,9 +914,13 @@ The executable should in @file{user-emacs-directory/maple/bin},
 where @code{user-emacs-directory} is the value of that
 variable and typically @file{$HOME/.emacs.d}.
 
+@item :project-source
+Absolute path to main Maple source file for the project.
+Currently used by @code{maplev-mint-project}.
+
 @item :tester
 Shell command to execute Maplesoft @command{tester}.
-Used by @code{mpldoc-test-run-tester}, 
+Used by @code{mpldoc-test-run-tester},
 which is part of the @code{mpldoc} package.
 @xref{Testing,, Testing, mpldoc, The Mpldoc Manual}.
 Use of this requires access to Maplesoft's @code{tester} facility.
@@ -929,24 +933,26 @@ The default is nil.
 
 
 @node Configuration Example,  , Configuration Object, Configuration
-@section Configuration Example 
+@section Configuration Example
 
 Following is a typical example of the content of a @file{.maplev} file,
 for a Maple package/project named @code{Bark}.
 
 @example
-(let ((proj-root (concat (getenv "HOME") "/maple/Bark")))
+(let* ((pkg "Bark")
+       (proj-root (concat (getenv "HOME") "/maple/" pkg)))
   (maplev-config
    :maple-options "-B -A2 -e2"  ; setup libname and error/assert levels
    :mint-options "-l"           ; ignore leading underscore
    :include-path proj-root      ; used by maple and mint
-   :compile (format "make -C %s mla-install" proj-root))) ; 
+   :project-source (concat proj-root "/maple/src/" pkg ".mpl")
+   :compile (format "make -C %s mla-install" proj-root))) ;
 @end example
 @cindex .maplev
 
 The @code{:compile} value in this example is a shell command
 that passes the @code{mla-install} target
-to a project-specific @file{Makefile}.  
+to a project-specific @file{Makefile}.
 The associated rule in the @file{Makefile}
 builds and installs the Maple library archive, @file{Bark.mla}.
 
@@ -962,7 +968,7 @@ builds and installs the Maple library archive, @file{Bark.mla}.
 Mint is Maple's syntax checker. It analyzes a Maple program and produces
 a report about the syntax and variable usage.  MapleV can run
 @command{mint} on the entire buffer or a portion of it.  The output of
-mint is displayed in a buffer with a special mode, @code{mint-mode},
+mint is displayed in a buffer with a special mode, @code{maplev-mint-mode},
 that provides a convenient means for locating and correcting syntax
 errors.
 
@@ -984,28 +990,34 @@ slots of @code{maplev-config} must be properly configured.
 
 @kindex C-c @key{RET} b
 @kindex C-c @key{RET} p
+@kindex C-c @key{RET} P
 @kindex C-c @key{RET} r
 @kindex C-c @key{RET} @key{RET}
 
-@findex mint-buffer
-@findex mint-procedure
-@findex mint-region
-@findex mint-rerun
+@findex maplev-mint-buffer
+@findex maplev-mint-procedure
+@findex maplev-mint-project
+@findex maplev-mint-region
+@findex maplev-mint-rerun
 
 The following commands send source code in the buffer to @command{mint}:
 
 @table @kbd
 @item C-c @key{RET} b
-Run @command{mint} on the buffer (@code{mint-buffer}).
+Run @command{mint} on the buffer (@code{maplev-mint-buffer}).
 
 @item C-c @key{RET} p
-Run @command{mint} on the current procedure (@code{mint-procedure}).
+Run @command{mint} on the current procedure (@code{maplev-mint-procedure}).
+
+@item C-c @key{RET} P
+Run @command{mint} on the project source file, if the @code{maplev-project-source} slot
+of @code{maplev-config} is assigned.
 
 @item C-c @key{RET} r
-Run @command{mint} on the marked region (@code{mint-region}).
+Run @command{mint} on the marked region (@code{maplev-mint-region}).
 
 @item C-c @key{RET} @key{RET}
-Rerun the previous @command{mint} command (@code{mint-rerun}).
+Rerun the previous @command{mint} command (@code{maplev-mint-rerun}).
 
 @end table
 
@@ -1034,7 +1046,7 @@ Incremental forward search (@code{isearch-forward}).
 Incremental backward search (@code{isearch-backward}).
 
 @item @key{RET}
-Re-execute the previous mint command (@code{mint-rerun}).
+Re-execute the previous mint command (@code{maplev-mint-rerun}).
 
 @item @key{DEL}
 Scroll down (@code{scroll-down}).
@@ -1097,34 +1109,34 @@ Maple process.  Maple commands can be directly executed in the buffer.
 @kindex C-c C-c i
 @kindex C-c C-c k
 
-@findex cmaplev-send-buffer
-@findex cmaplev-send-procedure
-@findex cmaplev-send-region
-@findex cmaplev-goto-buffer
-@findex cmaplev-interrupt
-@findex cmaplev-kill
+@findex maplev-cmaple-send-buffer
+@findex maplev-cmaple-send-procedure
+@findex maplev-cmaple-send-region
+@findex maplev-cmaple-goto-buffer
+@findex maplev-cmaple-interrupt
+@findex maplev-cmaple-kill
 
 The following commands in the MapleV buffer affect the Maple engine:
 
 @table @kbd
 @item C-c C-c b
-Send the entire buffer to the Maple engine (@code{cmaplev-send-buffer}).
+Send the entire buffer to the Maple engine (@code{maplev-cmaple-send-buffer}).
 
 @item C-c C-c p
 Send the current procedure to the Maple engine
-(@code{cmaplev-send-procedure}).
+(@code{maplev-cmaple-send-procedure}).
 
 @item C-c C-c r
-Send the marked region to the Maple engine (@code{cmaplev-send-region}).
+Send the marked region to the Maple engine (@code{maplev-cmaple-send-region}).
 
 @item C-c C-c g
-Goto the Maple buffer (@code{cmaplev-goto-buffer}).
+Goto the Maple buffer (@code{maplev-cmaple-goto-buffer}).
 
 @item C-c C-c i
-Interrupt the Maple engine (@code{cmaplev-interrupt}).
+Interrupt the Maple engine (@code{maplev-cmaple-interrupt}).
 
 @item C-c C-c k
-Kill the Maple engine (@code{cmaplev-kill}).
+Kill the Maple engine (@code{maplev-cmaple-kill}).
 
 @end table
 
@@ -1193,7 +1205,7 @@ Display the Maple help page for the topic at the click
 
 Help pages are displayed in a buffer with major mode
 @code{maplev-help-mode}.
-@ifinfo 
+@ifinfo
 @xref{MapleV help mode}.
 @end ifinfo
 
@@ -1220,20 +1232,27 @@ the help page for the topic.  The following commands are available:
 @kindex ?
 
 @table @kbd
-@item s
-Incremental forward search (@code{isearch-forward}).
 
-@item p
-Previous help topic (@code{maplev-prev-item}).
+@item d
+Delete topic (@code{maplev-history-delete-item})
+
+@item f
+Tear off window (@code{maplev-tear-off-window})
 
 @item n
 Next help topic (@code{maplev-next-item}).
+
+@item p
+Previous help topic (@code{maplev-prev-item}).
 
 @item P
 Parent help topic (@code{maplev-help-parent}).
 
 @item r
 Redraw help page (@code{maple-redo-item}).
+
+@item s
+Incremental forward search (@code{isearch-forward}).
 
 @item ?
 @itemx C-?
@@ -1257,7 +1276,7 @@ Use the command @code{maplev-clear-history} to erase the history.
 The help page for a chosen topic is displayed by sending the string
 @samp{?TOPIC} to the Maple engine and capturing the output.  If the
 Maple engine is busy an error message, @samp{Maple busy}, is displayed in
-the message window.  
+the message window.
 
 
 
@@ -1324,13 +1343,13 @@ The following commands are available:
 Incremental forward search (@code{isearch-forward}).
 
 @item p
-Previous procedure (@code{maplev-prev-item}).
+Previous procedure (@code{maplev-history-prev-item}).
 
 @item n
-Next procedure (@code{maplev-next-item}).
+Next procedure (@code{maplev-history-next-item}).
 
 @item r
-Redraw procedure (@code{maple-redo-item}).
+Redraw procedure (@code{maplev-history-redo-item}).
 
 @item ?
 @itemx C-?
@@ -1404,7 +1423,7 @@ source, add the following to your @file{.emacs} file, modifying the
 regular expression as needed.
 
 @example
-(setq auto-mode-alist 
+(setq auto-mode-alist
       (cons `("\\.mpl\\'" . maplev-mode) auto-mode-alist))
 @end example
 
