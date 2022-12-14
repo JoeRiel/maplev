@@ -317,7 +317,7 @@ See the documentation for `align-exclude-rules-list' for more info."
 
 (defcustom maplev-startup-directory nil
   "If non-nil, change to this directory before running Maple.
-Otherwise use the default directory of `maplev-cmaple-buffer'."
+Otherwise use the default directory of `maplev-pmaple-buffer'."
   :type '(choice string (const :tag "Use default" nil))
   :group 'maplev-executables)
 
@@ -329,7 +329,7 @@ The features enabled are release dependent."
 
 (defcustom maplev-load-path nil
   "If non-nil, set environment variable LD_LIBRARY_PATH to this value.
-This is done when starting the cmaple process."
+This is done when starting the pmaple process."
   :type '(choice string (const :tag "None" nil))
   :group 'maplev-executables)
 

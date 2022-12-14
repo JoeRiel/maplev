@@ -46,7 +46,7 @@
 
 (defun maplev-setup ()
   "If in `maplev-mode' also refontify the buffer."
-  (cond ((memq major-mode '(maplev-mode maplev-cmaple-mode maplev-view-mode))
+  (cond ((memq major-mode '(maplev-mode maplev-pmaple-mode maplev-view-mode))
 	 (set-syntax-table maplev-mode-syntax-table))
         ;; for consistency also maplev-help-mode
         ((eq major-mode 'maplev-help-mode)

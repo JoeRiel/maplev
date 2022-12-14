@@ -19,8 +19,8 @@
 
 (declare-function event-point "maplev-common")
 (declare-function event-window "maplev-common")
-(declare-function maplev--cleanup-buffer "maplev-cmaple")
-(declare-function maplev--cmaple-process "maplev-cmaple")
+(declare-function maplev--cleanup-buffer "maplev-pmaple")
+(declare-function maplev--pmaple-process "maplev-pmaple")
 (declare-function maplev--ident-around-point "maplev-common")
 (declare-function maplev-history--stack-current "maplev-history")
 (declare-function maplev-history--stack-process "maplev-history")
@@ -29,7 +29,7 @@
 (declare-function maplev-indent-buffer "maplev-indent")
 (declare-function maplev-mode "maplev")
 (declare-function maplev-reset-font-lock "maplev")
-(declare-function maplev-cmaple-direct "maplev-cmaple")
+(declare-function maplev-pmaple-direct "maplev-pmaple")
 
 
 ;;{{{ mode map
@@ -117,7 +117,7 @@ If optional arg HIDE is non-nil do not display buffer."
 
 (defun maplev--proc-process (proc)
   "Display the Maple procedure PROC \(a string\) in `maplev--proc-buffer'."
-  (let ((process (maplev--cmaple-process)))
+  (let ((process (maplev--pmaple-process)))
     (set-process-filter process 'maplev-view-filter)
     (set-buffer (maplev--proc-buffer))
     (setq mode-line-buffer-identification (format "%-12s" proc))
@@ -208,7 +208,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 If found, they are returned as a cons-cell \(file \. line\),
 otherwise nil is returned."
   (let* ((cmd (format "lprint(maplev:-GetSource(\"%s\")):" proc))
-	 (res (maplev-cmaple-direct cmd 'delete))
+	 (res (maplev-pmaple-direct cmd 'delete))
 	  file line)
     (when (and (not (string= res "NULL"))
 	       (string-match "^\\[\"\\([^\"]*\\)\", \\([0-9]+\\)" res))

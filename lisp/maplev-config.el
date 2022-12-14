@@ -34,7 +34,7 @@
 (eval-when-compile
   (defvar maplev-config-default)      ; see maplev-custom.el
   (defvar maplev-config-auto-assign)  ; ibid
-  (declare-function maplev-cmaple-default-pmaple "maplev-cmaple.el"))
+  (declare-function maplev-pmaple-default-pmaple "maplev-pmaple.el"))
 
 (defclass maplev-config-class ()
 
@@ -182,7 +182,7 @@ Return the object."
 	;; convert string to list
 	(setq include-path (list include-path)))
       (unless pmaple
-	(setq file (maplev-cmaple-default-pmaple))
+	(setq file (maplev-pmaple-default-pmaple))
 	(if (file-exists-p file) (setq pmaple file)))
       (when maplev-config-auto-assign
 	(when maple

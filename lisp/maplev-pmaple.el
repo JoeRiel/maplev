@@ -1,4 +1,4 @@
-;;; maplev-cmaple.el --- Communicate with Maple process
+;;; maplev-pmaple.el --- Communicate with Maple process
 
 ;;; Commentary:
 ;;
@@ -6,7 +6,7 @@
 ;; Define the functions used for communicating with the command line
 ;; Maple process.  A change has been made for the 3.0 release;
 ;; communication is now done through pmaple, a binary executable
-;; provided with this package.  Previously the cmaple command that
+;; provided with this package.  Previously the pmaple command that
 ;; is part of Maple was used, however, it required handshaking to
 ;; communicate with Emacs and the result was never ideal.
 
@@ -26,28 +26,28 @@
 
 ;;{{{ constants and variables
 
-(defconst maplev-cmaple-prompt "(**) "
+(defconst maplev-pmaple-prompt "(**) "
   "String inserted as prompt in Maple buffer.")
 
 
 ;;}}}
 ;;{{{ mode functions
 
-(defun maplev--cmaple-buffer ()
-  "Return the name of the cmaple buffer associated with the current buffer.
+(defun maplev--pmaple-buffer ()
+  "Return the name of the pmaple buffer associated with the current buffer.
 Use the buffer-local variable `maplev-config'."
   (concat "Maple" (and maplev-config
 		       (format " (%s)" (slot-value maplev-config 'maple)))))
 
-(defun maplev--cmaple-process ()
-  "Return the cmaple process associated with the current buffer.
+(defun maplev--pmaple-process ()
+  "Return the pmaple process associated with the current buffer.
 Start one, if necessary."
-  (let ((process (get-buffer-process (maplev--cmaple-buffer))))
+  (let ((process (get-buffer-process (maplev--pmaple-buffer))))
     (if (and process (eq (process-status process) 'run))
         process
-      (maplev-cmaple--start-process))))
+      (maplev-pmaple--start-process))))
 
-(defun maplev-cmaple-default-pmaple ()
+(defun maplev-pmaple-default-pmaple ()
   "Return the default path to the pmaple executable."
   (expand-file-name
    (let ((dir "~/maple/toolbox/maplev/"))
@@ -59,7 +59,7 @@ Start one, if necessary."
       ((member system-type '(windows-nt cygwin ms-dos))
        (concat dir "bin.X86_64_WINDOWS/pmaple.exe"))))))
 
-(defun maplev-cmaple--process-environment ()
+(defun maplev-pmaple--process-environment ()
   "Return a list of strings of equations that define the process environment."
   (unless maplev-config
     (maplev-config))
@@ -94,13 +94,13 @@ Start one, if necessary."
 	 (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
        process-environment))))
 
-(defun maplev-cmaple--get-pmaple-and-options ()
+(defun maplev-pmaple--get-pmaple-and-options ()
   "Return a list of strings consisting of the pmaple executable, maple tty,
 and the options to pass to pmaple."
   (let ((pmaple (slot-value maplev-config 'pmaple))
 	(maple (slot-value maplev-config 'maple)))
     (unless pmaple
-      (setq pmaple (maplev-cmaple-default-pmaple)))
+      (setq pmaple (maplev-pmaple-default-pmaple)))
     (unless maple
       (error "The maple slot of `maple-config' is not assigned"))
     (cond
@@ -113,15 +113,15 @@ and the options to pass to pmaple."
      (t
       (cons pmaple (cons maple (maplev-get-option-with-include maplev-config :maple-options "-q")))))))
 
-(defun maplev-cmaple--start-process ()
-  "Start a cmaple process associated with the current buffer.
+(defun maplev-pmaple--start-process ()
+  "Start a pmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it.  If variable `maplev-config' is assigned, use it, otherwise create
 one by calling function `maplev-config'."
   (let* ((config (or maplev-config (maplev-config)))
-	 (process-environment (maplev-cmaple--process-environment))
-	 (pmaple-and-opts (maplev-cmaple--get-pmaple-and-options))
-         (buffer (get-buffer-create (maplev--cmaple-buffer)))
+	 (process-environment (maplev-pmaple--process-environment))
+	 (pmaple-and-opts (maplev-pmaple--get-pmaple-and-options))
+         (buffer (get-buffer-create (maplev--pmaple-buffer)))
          (process (get-buffer-process buffer))
          ;; Just testing this.  Is there an advantage to a PTY process?
 	 (process-connection-type 'pty))
@@ -137,17 +137,17 @@ one by calling function `maplev-config'."
                             "Maple"
 			    buffer
                             pmaple-and-opts))
-       'maplev--cmaple-filter)
-      (maplev-cmaple-setup config)
+       'maplev--pmaple-filter)
+      (maplev-pmaple-setup config)
       (message "Maple started")
       process)))
 
 
-(defun maplev-cmaple-send ()
+(defun maplev-pmaple-send ()
   "Send input to Maple."
   (interactive)
-  (let ((pmark (process-mark (maplev--cmaple-process)))
-        (comint-input-sender #'maplev-cmaple--send-string))
+  (let ((pmark (process-mark (maplev--pmaple-process)))
+        (comint-input-sender #'maplev-pmaple--send-string))
     ;; Only _new_ input is checked for typos, see comint-send-input.
     ;; We might need something smarter for comint-get-old-input.
     ;; Why does comint-send-input use (line-end-position) instead of
@@ -156,14 +156,14 @@ one by calling function `maplev-config'."
 	    (zerop (maplev-mint-region pmark (line-end-position) 'syntax-only)))
         (comint-send-input))))
 
-(defun maplev-cmaple--send-string (process maple-input &optional echo)
-  "Send MAPLE-INPUT to the cmaple PROCESS.
+(defun maplev-pmaple--send-string (process maple-input &optional echo)
+  "Send MAPLE-INPUT to the pmaple PROCESS.
 If ECHO is non-nil, print MAPLE-INPUT to the output buffer."
   (with-current-buffer (process-buffer process)
     (goto-char (point-max))
     (when echo
       (insert-before-markers maple-input ?\n)))
-  (set-process-filter process #'maplev--cmaple-filter)
+  (set-process-filter process #'maplev--pmaple-filter)
   (comint-simple-send process
 		      ;; trim white-space at end of MAPLE and append a null character;
 		      ;; the null character is the delimiter used by pmaple.
@@ -172,50 +172,50 @@ If ECHO is non-nil, print MAPLE-INPUT to the output buffer."
 				maple-input)
 			      (string ?\0))))
 
-(defun maplev-cmaple-send-region (beg end)
-  "Send the region from BEG to END to cmaple.
+(defun maplev-pmaple-send-region (beg end)
+  "Send the region from BEG to END to pmaple.
 If called interactively use the marked region.
-If called with a prefix the cmaple buffer is first cleared.
-Use mint to syntax check the region before sending to cmaple."
+If called with a prefix the pmaple buffer is first cleared.
+Use mint to syntax check the region before sending to pmaple."
   (interactive "r")
   (when (equal 0 (maplev-mint-region beg end 'syntax-only))
     (when current-prefix-arg
-      (maplev-cmaple--clear-buffer))
-    (maplev-cmaple--send-string (maplev--cmaple-process)
+      (maplev-pmaple--clear-buffer))
+    (maplev-pmaple--send-string (maplev--pmaple-process)
 				(buffer-substring-no-properties beg end)
 				'echo)))
 
-(defun maplev-cmaple-send-line ()
-  "Send the current line to cmaple."
+(defun maplev-pmaple-send-line ()
+  "Send the current line to pmaple."
   (interactive)
   (save-excursion
     (back-to-indentation)
-    (maplev-cmaple-send-region (point) (line-end-position))))
+    (maplev-pmaple-send-region (point) (line-end-position))))
 
-(defun maplev-cmaple-send-buffer ()
-  "Send the buffer to cmaple."
+(defun maplev-pmaple-send-buffer ()
+  "Send the buffer to pmaple."
   (interactive)
-  (maplev-cmaple-send-region (point-min) (point-max)))
+  (maplev-pmaple-send-region (point-min) (point-max)))
 
-(defun maplev-cmaple-send-procedure ()
-  "Send the current procedure to cmaple."
+(defun maplev-pmaple-send-procedure ()
+  "Send the current procedure to pmaple."
   (interactive)
   (let ((reg (maplev-current-defun)))
-    (when reg (apply 'maplev-cmaple-send-region reg))))
+    (when reg (apply 'maplev-pmaple-send-region reg))))
 
-(defun maplev-cmaple-direct (input &optional delete)
-  "Send the string INPUT to cmaple and return the output.
+(defun maplev-pmaple-direct (input &optional delete)
+  "Send the string INPUT to pmaple and return the output.
 If optional argument DELETE is non-nil, delete the echoed Maple input
 from the output buffer."
   ;; This may not work on a Windows box; there, the input is not echoed
   ;; to the output buffer.
   (interactive)
-  (let ((proc (maplev--cmaple-process))) ; ensure Maple is started
-    (with-current-buffer (maplev--cmaple-buffer)
+  (let ((proc (maplev--pmaple-process))) ; ensure Maple is started
+    (with-current-buffer (maplev--pmaple-buffer)
       (save-restriction
         (narrow-to-region (point-max) (point-max))
 	(let ((begin (+ 5 (point))))
-	  (maplev-cmaple--send-string proc input)
+	  (maplev-pmaple--send-string proc input)
 	  (while (or (< (point) begin)
 		     (progn
 		       (goto-char (- (point-max) 5))
@@ -229,40 +229,40 @@ from the output buffer."
               (delete-region (point-min) (point-max)))
           output)))))
 
-(defun maplev-cmaple-interrupt ()
+(defun maplev-pmaple-interrupt ()
   "Interrupt Maple."
   (interactive)
-  (let ((process (get-buffer-process (maplev--cmaple-buffer))))
+  (let ((process (get-buffer-process (maplev--pmaple-buffer))))
     (if (null process)
 	(error "The buffer has no process")
       (message "Interrupt process %s" (process-name process))
       (interrupt-process process))))
 
-(defun maplev-cmaple-kill ()
+(defun maplev-pmaple-kill ()
   "Kill Maple."
   (interactive)
-  (let ((process (get-buffer-process (maplev--cmaple-buffer))))
+  (let ((process (get-buffer-process (maplev--pmaple-buffer))))
     (if (null process)
 	(message "No maple process")
       (message "Kill process %s" (process-name process))
       (kill-process process))))
 
-(defun maplev-cmaple--clear-buffer ()
-  "Clear the contents of the cmaple buffer."
-  (with-current-buffer (maplev--cmaple-buffer)
+(defun maplev-pmaple--clear-buffer ()
+  "Clear the contents of the pmaple buffer."
+  (with-current-buffer (maplev--pmaple-buffer)
     (delete-region (point-min) (point-max))))
 
 
-(defun maplev-cmaple-pop-to-buffer ()
+(defun maplev-pmaple-pop-to-buffer ()
   "Pop up a buffer with command line Maple.  Start Maple, if necessary."
   (interactive)
-  (maplev--cmaple-process)
-  (pop-to-buffer (maplev--cmaple-buffer))
+  (maplev--pmaple-process)
+  (pop-to-buffer (maplev--pmaple-buffer))
   (goto-char (point-max)))
 
-(defalias 'cmaple 'maplev-cmaple-pop-to-buffer)
+(defalias 'pmaple 'maplev-pmaple-pop-to-buffer)
 
-(defun maplev--cmaple-filter (process maple-output)
+(defun maplev--pmaple-filter (process maple-output)
   "Send the string MAPLE-OUTPUT to the Maple buffer.
 PROCESS is the Maple process."
   (with-current-buffer (process-buffer process)
@@ -276,19 +276,19 @@ PROCESS is the Maple process."
   (goto-char (point-min))
   (while (re-search-forward "\r+" nil t) (replace-match "\n")))
 
-(defun maplev-cmaple-newline ()
+(defun maplev-pmaple-newline ()
   "Insert a newline but do not send input to pmaple."
   (interactive)
-  (insert ?\n maplev-cmaple-prompt))
+  (insert ?\n maplev-pmaple-prompt))
 
 ;;}}}
 ;;{{{ mode map
 
-(defvar maplev-cmaple-mode-map
+(defvar maplev-pmaple-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map comint-mode-map)
-    (define-key map [(return)]                'maplev-cmaple-send)
-    (define-key map [(control c) (control c)] 'maplev-cmaple-interrupt)
+    (define-key map [(return)]                'maplev-pmaple-send)
+    (define-key map [(control c) (control c)] 'maplev-pmaple-interrupt)
     (define-key map [?\?]                     'maplev-help-at-point)
     (define-key map [(control ?\?)]           'maplev-help-at-point)
     (define-key map [(meta ?\?)]              'maplev-view-at-point)
@@ -310,26 +310,26 @@ PROCESS is the Maple process."
     (define-key map [(control c) (control s)]     nil)
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
-    (define-key map [(shift return)]             'maplev-cmaple-newline)
+    (define-key map [(shift return)]             'maplev-pmaple-newline)
     map)
-  "Keymap used in Maple cmaple mode.")
+  "Keymap used in Maple pmaple mode.")
 
 ;;}}}
 ;;{{{ mode definition
 
 (defconst maplev-input-line-keyword
-  `((,(concat "^" (regexp-quote maplev-cmaple-prompt)) . maplev-input-face))
-  "Keyword for font locking input lines in `maplev-cmaple-mode'.")
+  `((,(concat "^" (regexp-quote maplev-pmaple-prompt)) . maplev-input-face))
+  "Keyword for font locking input lines in `maplev-pmaple-mode'.")
 
-(define-derived-mode maplev-cmaple-mode comint-mode
-  "Major mode for interacting with cmaple.
+(define-derived-mode maplev-pmaple-mode comint-mode
+  "Major mode for interacting with pmaple.
 
 This mode has the same commands as `comint-mode' plus some
-additional commands for interacting with cmaple.
+additional commands for interacting with pmaple.
 
-\\{maplev-cmaple-map}"
+\\{maplev-pmaple-map}"
 
-  (setq comint-prompt-regexp (concat "^\\(" (regexp-quote maplev-cmaple-prompt) "\\)+ *")
+  (setq comint-prompt-regexp (concat "^\\(" (regexp-quote maplev-pmaple-prompt) "\\)+ *")
         comint-eol-on-send t  ; goto end of line before sending
         mode-name "Maple"
 	comint-use-prompt-regexp t)
@@ -344,16 +344,16 @@ additional commands for interacting with cmaple.
   (set (make-local-variable 'comint-process-echoes) t)
   (font-lock-mode 1))
 
-(defun maplev-cmaple-setup (config)
-  "Set `major-mode' to `maplev-cmaple-mode'.
+(defun maplev-pmaple-setup (config)
+  "Set `major-mode' to `maplev-pmaple-mode'.
 CONFIG is an object of type `maplev-config-class."
-  (maplev-cmaple-mode)
+  (maplev-pmaple-mode)
   (setq maplev-config config))
 
 
 
 ;;}}}
 
-(provide 'maplev-cmaple)
+(provide 'maplev-pmaple)
 
-;;; maplev-cmaple.el ends here
+;;; maplev-pmaple.el ends here

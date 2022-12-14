@@ -17,7 +17,7 @@
   (autoload 'mouse-selection-click-count "mouse"))
 
 (declare-function maplev-ident-around-point-interactive "maplev-common")
-(declare-function maplev-cmaple-direct "maplev-cmaple")
+(declare-function maplev-pmaple-direct "maplev-pmaple")
 
 (defun maplev--string-to-name (name)
   "Convert NAME to a valid Maple name.  Add back-quotes if needed."
@@ -93,7 +93,7 @@ must be appropriately assigned.  See the Maple help page for showstat."
   (interactive (list (maplev-ident-around-point-interactive
 		      "Maple procedure")))
   (let ((cmd (format "editsource(%s):" proc)))
-    (maplev-cmaple-direct cmd 'delete)))
+    (maplev-pmaple-direct cmd 'delete)))
 
 
 (provide 'maplev-utils)

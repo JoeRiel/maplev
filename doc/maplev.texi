@@ -1109,34 +1109,34 @@ Maple process.  Maple commands can be directly executed in the buffer.
 @kindex C-c C-c i
 @kindex C-c C-c k
 
-@findex maplev-cmaple-send-buffer
-@findex maplev-cmaple-send-procedure
-@findex maplev-cmaple-send-region
-@findex maplev-cmaple-goto-buffer
-@findex maplev-cmaple-interrupt
-@findex maplev-cmaple-kill
+@findex maplev-pmaple-send-buffer
+@findex maplev-pmaple-send-procedure
+@findex maplev-pmaple-send-region
+@findex maplev-pmaple-goto-buffer
+@findex maplev-pmaple-interrupt
+@findex maplev-pmaple-kill
 
 The following commands in the MapleV buffer affect the Maple engine:
 
 @table @kbd
 @item C-c C-c b
-Send the entire buffer to the Maple engine (@code{maplev-cmaple-send-buffer}).
+Send the entire buffer to the Maple engine (@code{maplev-pmaple-send-buffer}).
 
 @item C-c C-c p
 Send the current procedure to the Maple engine
-(@code{maplev-cmaple-send-procedure}).
+(@code{maplev-pmaple-send-procedure}).
 
 @item C-c C-c r
-Send the marked region to the Maple engine (@code{maplev-cmaple-send-region}).
+Send the marked region to the Maple engine (@code{maplev-pmaple-send-region}).
 
 @item C-c C-c g
-Goto the Maple buffer (@code{maplev-cmaple-goto-buffer}).
+Goto the Maple buffer (@code{maplev-pmaple-goto-buffer}).
 
 @item C-c C-c i
-Interrupt the Maple engine (@code{maplev-cmaple-interrupt}).
+Interrupt the Maple engine (@code{maplev-pmaple-interrupt}).
 
 @item C-c C-c k
-Kill the Maple engine (@code{maplev-cmaple-kill}).
+Kill the Maple engine (@code{maplev-pmaple-kill}).
 
 @end table
 
@@ -1146,10 +1146,10 @@ These commands are available through the menubar, @kbd{MapleV -> Maple}.
 @node Cmaple mode,  , Running Maple, Maple
 @section Cmaple mode
 @cindex Cmaple mode
-@cindex Mode, cmaple
+@cindex Mode, pmaple
 
 The command line version of Maple is run in a buffer with the mode
-@code{cmaple-process-mode} that is based on @code{comint-mode}.
+@code{pmaple-process-mode} that is based on @code{comint-mode}.
 @inforef{Shell Mode,,emacs} for more information.
 In addition to the normal @code{comint} commands, the following commands
 are available:
