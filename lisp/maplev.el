@@ -341,6 +341,7 @@ When MESSAGE is non-nil, display a message with the version."
       ("Mint"
        ["Buffer"    maplev-mint-buffer t]
        ["Procedure" maplev-mint-procedure t]
+       ["Project"   maplev-mint-project t]
        ["Region"    maplev-mint-region t]
        ["Rerun"     maplev-mint-rerun :active maplev-mint--code-beginning])
       ("Maple"
