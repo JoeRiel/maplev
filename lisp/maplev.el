@@ -293,7 +293,7 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control c) (tab) ?r]  'maplev-indent-region)
     (define-key map [(control c) (tab) ?k]  'maplev-indent-clear-info)
 
-    ;; Cmaple commands
+    ;; pmaple commands
     (define-key map [(control c) (control c) ?b]      'maplev-pmaple-send-buffer)
     (define-key map [(control c) (control c) ?p]      'maplev-pmaple-send-procedure)
     (define-key map [(control c) (control c) ?r]      'maplev-pmaple-send-region)
@@ -322,6 +322,8 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
     (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-pmaple)
+
+    (define-key map [(control c) (control f) ?c] 'maplev-find-config-file)
     map)
   "Keymap used in Maple mode.")
 
@@ -375,7 +377,8 @@ When MESSAGE is non-nil, display a message with the version."
       "---"
       ["Add Index" maplev-add-imenu (not (and (boundp 'imenu--index-alist)
                                               imenu--index-alist))]
-
+      "---"
+      ["Open config file" maplev-find-config-file t]
       "---"
       ["Quit"      quit-window t]
       "---"
