@@ -95,7 +95,8 @@ Start one, if necessary."
        process-environment))))
 
 (defun maplev-pmaple--get-pmaple-and-options ()
-  "Return a list of strings consisting of the pmaple executable, maple tty,
+  "Return a list of arguments to pass to `start-process' to launch pmaple.
+The list consists of the pmaple executable, maple tty,
 and the options to pass to pmaple."
   (let ((pmaple (slot-value maplev-config 'pmaple))
 	(maple (slot-value maplev-config 'maple)))

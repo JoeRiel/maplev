@@ -576,7 +576,6 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	  (unless maplev-mint--code-buffer
 	    (and maplev-mint-save-rerun-flag
 		 (buffer-modified-p)
-		 ;;(y-or-n-p "save buffer ")
 		 (save-buffer)))
 	  (set-buffer code-buffer)
 	  (maplev-mint-rerun))))))
@@ -586,6 +585,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 
 (defun maplev-mint-region (beg end &optional syntax-only)
   "Run Mint on the current region, from BEG to END.
+If optional argument SYNTAX-ONLY is non-nil, only report syntax errors.
 Return exit code of mint."
   (interactive "r")
   (let ((code-buffer (current-buffer))
@@ -674,7 +674,7 @@ Return exit code of mint."
   "Run Mint on FILE."
   (interactive)
   (if (not (file-exists-p file))
-      (error "file %s does not exist" file)
+      (error "File %s does not exist" file)
     (find-file file)
     (maplev-mint-buffer)))
 
@@ -685,7 +685,7 @@ The `project-source' slot of the object `maplev-config' must be assigned."
   (let ((file (slot-value maplev-config 'project-source)))
     (if file
 	(maplev-mint-file file)
-      (error "project-source slot of maplev-config not assigned"))))
+      (error "Project-source slot of maplev-config not assigned"))))
 
 (defun maplev-mint-buffer ()
   "Run Mint on the current buffer."
@@ -982,10 +982,9 @@ Interactively, VAR defaults to identifier point is on."
 				 0))))))))))
 
 (defun maplev-delete-vars (vars start end &optional leave-one)
-  "Delete VARS in region between START and END; VARS must be
-either a string or a list of strings.  If optional argument
-LEAVE-ONE is non-nil, the first occurrence of VARS is not
-deleted."
+  "Delete VARS in region between START and END.
+VARS must be either a string or a list of strings.  If optional argument
+LEAVE-ONE is non-nil, the first occurrence of VARS is not deleted."
   (let ((parse-sexp-ignore-comments)
         case-fold-search lo var)
     (save-excursion
@@ -1077,7 +1076,7 @@ C-r  enter recursive edit (C-M-c to get out)
     map))
 
 (defun maplev-mint-query-undeclared-globals (vars beg end dofile)
-  "Query to handle occurrences of VARs in the region between BEG and END.
+  "Query to handle occurrences of VARS in the region between BEG and END.
 When DOFILE is non-nil, ...
 VARs is a list of undeclared globals."
   (let (case-fold-search regexp reply start var)
@@ -1235,7 +1234,7 @@ VARs is a list of undeclared globals."
     map))
 
 (defun maplev-mint-var-cont ()
-  "Exit recursive-edit, to continue processing variables."
+  "Exit recursive edit, to continue processing variables."
   (interactive)
   (exit-recursive-edit))
 
