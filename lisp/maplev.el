@@ -5,7 +5,7 @@
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    3.0.5
+;; Version:    3.1.0
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
