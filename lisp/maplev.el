@@ -324,6 +324,7 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-pmaple)
 
     (define-key map [(control c) (control f) ?c] 'maplev-find-config-file)
+    (define-key map [(control c) (control f) ?p] 'maplev-find-project-source-file)
     map)
   "Keymap used in Maple mode.")
 
@@ -379,6 +380,7 @@ When MESSAGE is non-nil, display a message with the version."
                                               imenu--index-alist))]
       "---"
       ["Open config file" maplev-find-config-file t]
+      ["Open project file" maplev-find-project-source-file (slot-value maplev-config 'project-source)]
       "---"
       ["Quit"      quit-window t]
       "---"
@@ -1826,6 +1828,18 @@ file if one was found, nil otherwise."
 	    maplev-config-file)
 	(error
 	 (error "Problem loading config file %s: %s" maplev-config-file err))))))
+
+;;}}}
+;;{{{ Project source file
+
+(defun maplev-find-project-source-file ()
+  "Open the project-source file specified by the `maplev-config' object."
+  (interactive)
+  (let ((file (slot-value maplev-config 'project-source)))
+    (if file
+	(find-file file)
+      (message "No project-source file specified"))))
+
 
 ;;}}}
 
