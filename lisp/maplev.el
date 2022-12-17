@@ -168,9 +168,9 @@ When MESSAGE is non-nil, display a message with the version."
 
 ;;}}}
 
-(eval-and-compile
-  (condition-case nil (require 'imenu) (error nil))
-  (condition-case nil (require 'align) (error nil)))
+;; (eval-and-compile
+;;   (condition-case nil (require 'imenu) (error nil))
+;;   (condition-case nil (require 'align) (error nil)))
 
 (defsubst maplev--short-delay ()
   "Pause for a brief duration."
