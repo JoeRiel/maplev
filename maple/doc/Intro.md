@@ -11,7 +11,7 @@
 ##
 ##SECTION Requirements
 ##- "GNU Emacs" 27+.  Earlier versions may work
-##- Maple 2022+.  Earlier versions are supported but may lack some features.
+##- "Maple" 2022+.  Earlier versions are supported but may lack some features.
 ##
 ##SECTION Installation
 ##
@@ -21,36 +21,29 @@
 ##-- the Emacs lisp and info files.
 ##
 ##SUBSECTION Maple
-##- Install the Maple-side of this package.
-##  Use either the "MapleCloud" install command, or execute the following.
+##- Install the Maple library and help files
+##  by executing the following command:
 ##
 ##>(noexecute) PackageTools:-Install("this://",'overwrite'):
 ##
 ##ENDSUBSECTION
 ##SUBSECTION pmaple
-##- To install **pmaple**, a binary executable used by Emacs to access Maple,
-##  execute the following.
+##- Install **pmaple**, a binary executable used by Emacs to access Maple,
+##  by executing the following command:
 ##
-##>(noexecute) maplev:-Install:-pmaple();
+##>(noexecute) maplev:-Install('pmaple');
 ##
 ##ENDSUBSECTION
-##SUBSECTION Emacs Lisp
-##- MapleV uses the Emacs package ~button-lock~,
-##  which is available from the Melpa stable distribution.
-##  To obtain it, add the following lines to the "Emacs InitFile"
-##  and restart Emacs.
-##SET(noshow)
-##> printf("(require 'package)\n"):
-##> printf("(add-to-list 'package-archives '(\"MELPA Stable\" . \"https://stable.melpa.org/packages/\"))\n"):
-##UNSET
-##- Execute the following command to unpack the tar file
-##  that contains the lisp and info files for MapleV.
-##>(noexecute) maplev:-Install:-lisp();
+##SUBSECTION Emacs
+##- Unpack the tar file that contains the lisp and info files for MapleV
+##  by executing the following command:
+##
+##>(noexecute) maplev:-Install('emacs');
 ##
 ##- To install the lisp and info files,
-##  open Emacs, execute the command  ~M-x package-install-file~,
+##  launch Emacs, execute the command  ~M-x package-install-file~,
 ##  and then enter the path to the tar file,
-##  shown in the printed output of ~maplev:-Install:-lisp()~, above.
+##  shown in the printed output of ~maplev:-Install('emacs')~, above.
 ##
 ##- At this point you should be able to read the info pages
 ##  for MapleV from inside Emacs by executing ~C-h i~
@@ -61,7 +54,7 @@
 ##  elisp code that can be added to your "Emacs InitFile"
 ##  to configure MapleV.
 ##
-##>(noexecute) maplev:-Install:-EmacsInitialization();
+##>(noexecute) maplev:-Install('print_emacs');
 ##
 ##ENDSUBSECTION
 ##SUBSECTION(collapsed) Maintainance
@@ -71,7 +64,9 @@
 ##
 ##ENDSUBSECTION
 ##XREFMAP
-##- "github" : https://github.com/JoeRiel/maplev
-##- "GNU Emacs" : https://www.gnu.org/software/emacs
-##- "MapleCloud" : help:worksheet/cloud/login
 ##- "Emacs InitFile" : https://www.emacswiki.org/emacs/InitFile
+##- "github"         : https://github.com/JoeRiel/maplev
+##- "GNU Emacs"      : https://www.gnu.org/software/emacs
+##- "Maple"          : https://maplesoft.com/products/Maple
+##
+##ENDMPLDOC
