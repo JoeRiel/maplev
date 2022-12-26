@@ -137,7 +137,7 @@ Mint
 Maple
 
 * Running Maple::               Commands for sending code to the Maple engine.
-* Cmaple mode::                 Mode for interacting with Maple.
+* pmaple mode::                 Mode for interacting with Maple.
 
 Help pages
 
@@ -1084,23 +1084,24 @@ Face for notes (usually @samp{on line}).
 
 @node Maple, Help pages, Mint, top
 @chapter Maple
-@cindex Cmaple
+@cindex pmaple
 @cindex Maple, command line
 
-The command line version of Maple can be started in a buffer.  All or
-portions of the code in the MapleV buffer can be passed directly to the
-Maple process.  Maple commands can be directly executed in the buffer.
+An OpenMaple binary, @command{pmaple}, provides access to the Maple engine from Emacs
+and is used to simulate the command line version of Maple (cmaple) as well
+as serve help pages and display procedures and modules stored in Maple
+archives.
 
 @menu
 * Running Maple::               Commands for sending code to the Maple engine.
-* Cmaple mode::                 Mode for interacting with Maple.
+* pmaple mode::                 Mode for interacting with Maple.
 @end menu
 
 
-@node Running Maple, Cmaple mode, Maple, Maple
+@node Running Maple, pmaple mode, Maple, Maple
 @section Running Maple
-@cindex Cmaple, running
-@cindex Running, Cmaple
+@cindex pmaple, running
+@cindex Running, pmaple
 
 @kindex C-c C-c b
 @kindex C-c C-c p
@@ -1116,7 +1117,9 @@ Maple process.  Maple commands can be directly executed in the buffer.
 @findex maplev-pmaple-interrupt
 @findex maplev-pmaple-kill
 
-The following commands in the MapleV buffer affect the Maple engine:
+The following commands,
+available through the menubar, @kbd{MapleV -> Maple},
+interact with @command{pmaple}.
 
 @table @kbd
 @item C-c C-c b
@@ -1140,19 +1143,16 @@ Kill the Maple engine (@code{maplev-pmaple-kill}).
 
 @end table
 
-These commands are available through the menubar, @kbd{MapleV -> Maple}.
-
-
-@node Cmaple mode,  , Running Maple, Maple
-@section Cmaple mode
-@cindex Cmaple mode
+@node pmaple mode,  , Running Maple, Maple
+@section pmaple mode
+@cindex pmaple mode
 @cindex Mode, pmaple
 
-The command line version of Maple is run in a buffer with the mode
-@code{pmaple-process-mode} that is based on @code{comint-mode}.
+The @command{pmaple} binary can be used interactively in a buffer
+with the mode @code{maplev-pmaple-mode} that is based on @code{comint-mode}.
 @inforef{Shell Mode,,emacs} for more information.
-In addition to the normal @code{comint} commands, the following commands
-are available:
+In addition to the normal @code{comint} commands,
+the following commands are available:
 
 @table @kbd
 @item ?
@@ -1163,7 +1163,6 @@ Display a Maple help topic (@pxref{Help pages}).
 Display a Maple expression (@pxref{Viewing}).
 
 @end table
-
 
 
 @node Help pages, Viewing, Maple, top
