@@ -13,9 +13,9 @@ BOOK  := true
 CLOUD := true
 
 BOOK-FILES := doc/${PKG}.html doc/${PKG}.pdf
-BOOK-MAP := , "bin.APPLE_UNIVERSAL_OSX/pmaple" = "pmaple/bin.APPLE_UNIVERSAL_OSX/pmaple"\
-            , "bin.X86_64_LINUX/pmaple"        = "pmaple/bin.X86_64_LINUX/pmaple"\
+BOOK-MAP := , "bin.X86_64_LINUX/pmaple"        = "pmaple/bin.X86_64_LINUX/pmaple"\
             , "bin.X86_64_WINDOWS/pmaple.exe"  = "pmaple/bin.X86_64_WINDOWS/pmaple.exe"
+#	    , "bin.APPLE_UNIVERSAL_OSX/pmaple" = "pmaple/bin.APPLE_UNIVERSAL_OSX/pmaple"
 
 INSTALLER := true
 
