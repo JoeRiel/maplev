@@ -135,8 +135,6 @@ one by calling function `maplev-config'."
       (if process (delete-process process))
       (if maplev-startup-directory
           (cd (expand-file-name maplev-startup-directory)))
-      (if maplev-load-path
-       	(setenv "LD_LIBRARY_PATH" maplev-load-path))
       (set-process-filter
        (setq process (apply #'start-process
                             "Maple"

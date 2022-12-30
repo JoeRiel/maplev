@@ -1,7 +1,7 @@
 ;;; maplev-custom.el --- Customizable parameters for maplev
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 ;;
@@ -323,12 +323,6 @@ Otherwise use the default directory of `maplev-pmaple-buffer'."
   "If non-nil, use the new language features of Maple.
 The features enabled are release dependent."
   :type 'boolean
-  :group 'maplev-executables)
-
-(defcustom maplev-load-path nil
-  "If non-nil, set environment variable LD_LIBRARY_PATH to this value.
-This is done when starting the pmaple process."
-  :type '(choice string (const :tag "None" nil))
   :group 'maplev-executables)
 
 ;;}}}
