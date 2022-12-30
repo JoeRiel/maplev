@@ -99,7 +99,8 @@ Start one, if necessary."
 The list consists of the pmaple executable, maple tty,
 and the options to pass to pmaple."
   (let ((pmaple (slot-value maplev-config 'pmaple))
-	(maple (slot-value maplev-config 'maple)))
+	(maple (slot-value maplev-config 'maple))
+	(buffer (maplev--pmaple-buffer)))
     (unless pmaple
       (setq pmaple (maplev-pmaple-default-pmaple)))
     (unless maple
@@ -112,7 +113,10 @@ and the options to pass to pmaple."
      ((not (file-exists-p maple))
       (error "The specified maple, '%s', does not exist" maple))
      (t
-      (cons pmaple (cons maple (maplev-get-option-with-include maplev-config :maple-options "-q")))))))
+      (cons pmaple (cons maple (maplev-get-option-with-include maplev-config
+							       :maple-options
+							       "-q"
+							       (format "-c maplev:-Setup(\"%s\")" buffer))))))))
 
 (defun maplev-pmaple--start-process ()
   "Start a pmaple process associated with the current buffer.
