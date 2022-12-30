@@ -1,4 +1,4 @@
-##TOPIC(help,label=Intro) maplev[Intro]
+##TOPIC(help,label="Intro") maplev[Intro]
 ##TITLE MapleV
 ##HALFLINE An Emacs Package for Maple Developers
 ##AUTHOR   Joe Riel
@@ -14,53 +14,46 @@
 ##- "Maple" 2022+.  Earlier versions are supported but may lack some features.
 ##
 ##SECTION Installation
-##
-##-(nolead) A few pieces must be installed and configured.
-##-- the Maple library and help files for MapleV;
-##-- **pmaple**, a binary executable;
-##-- the Emacs lisp and info files.
+##SET(noexecute)
 ##
 ##SUBSECTION Maple
 ##- Install the Maple library and help files
 ##  by executing the following command:
 ##
-##>(noexecute) PackageTools:-Install("this://",'overwrite'):
-##
-##ENDSUBSECTION
-##SUBSECTION pmaple
-##- Install **pmaple**, a binary executable used by Emacs to access Maple,
-##  by executing the following command:
-##
-##>(noexecute) maplev:-Install('pmaple');
+##> PackageTools:-Install("this://",'overwrite'):
 ##
 ##ENDSUBSECTION
 ##SUBSECTION Emacs
 ##- Unpack the tar file that contains the lisp and info files for MapleV
 ##  by executing the following command:
 ##
-##>(noexecute) maplev:-Install('emacs');
+##> maplev:-Install('emacs'):
 ##
 ##- To install the lisp and info files,
-##  launch Emacs, execute the command  ~M-x package-install-file~,
-##  and then enter the path to the tar file,
+##  launch Emacs, and in it execute the command  ~M-x package-install-file~,
+##  then enter the path to the tar file,
 ##  shown in the printed output of ~maplev:-Install('emacs')~, above.
 ##
 ##- At this point you should be able to read the info pages
 ##  for MapleV from inside Emacs by executing ~C-h i~
-##  and selecting the **maplev** entry.
+##  and selecting the **MapleV** entry.
 ##  ~C-h~ means hold down the control key and press ~h~.
 ##
 ##- Execute the following command to print
 ##  elisp code that can be added to your "Emacs InitFile"
 ##  to configure MapleV.
 ##
-##>(noexecute) maplev:-Install('print_emacs');
+##> maplev:-Install('emacs_init'):
+##
+##CODEEDITREGION(name="emacs_init",display="code",autofit="false")
+##ENDCODEEDITREGION
 ##
 ##ENDSUBSECTION
+##
 ##SUBSECTION(collapsed) Maintainance
 ##- This section is for the package maintainer's usage.
-##>(noexecute) PackageTools:-GetProperty("this://","X-CloudId");
-##>(noexecute) PackageTools:-GetProperty("this://","X-CloudGroup");
+##> PackageTools:-GetProperty("this://","X-CloudId");
+##> PackageTools:-GetProperty("this://","X-CloudGroup");
 ##
 ##ENDSUBSECTION
 ##XREFMAP
