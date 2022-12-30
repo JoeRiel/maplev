@@ -286,6 +286,24 @@ PROCESS is the Maple process."
   (interactive)
   (insert ?\n maplev-pmaple-prompt))
 
+
+(defun maplev-pmaple-insert-image (file buffer)
+  "Insert FILE image into the pmaple BUFFER.
+A newline is inserted after the image and the process marker
+is moved after the newline; that prevents `comint-delete-input'
+from deleting the image when the history mechanism is used."
+  (with-current-buffer buffer
+    (let ((marker (process-mark (get-buffer-process buffer))))
+      (put-image (create-image file 'png) marker)
+      (goto-char marker)
+      (insert "\n")
+      (set-marker marker (point)))))
+
+(defun maplev-pmaple-remove-images ()
+  "Remove all images from the buffer."
+  (interactive)
+  (remove-images (point-min) (point-max)))
+
 ;;}}}
 ;;{{{ mode map
 
