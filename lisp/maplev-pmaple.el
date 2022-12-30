@@ -338,6 +338,21 @@ from deleting the image when the history mechanism is used."
   "Keymap used in Maple pmaple mode.")
 
 ;;}}}
+;;{{{ menu
+
+(defvar maplev-pmaple-menu nil)
+(unless maplev-pmaple-menu
+  (easy-menu-define
+    maplev-pmaple-menu maplev-pmaple-mode-map
+    "Menu for maplev-pmaple mode."
+    `("MapleV"
+      ["Remove plots"  maplev-pmaple-remove-images t]
+      ["Interrupt"   maplev-pmaple-interrupt t]
+      ["Kill"        maplev-pmaple-kill t]
+      ("Help"
+       ["Word"         maplev-help-at-point t]))))
+
+;;}}}
 ;;{{{ mode definition
 
 (defconst maplev-input-line-keyword
