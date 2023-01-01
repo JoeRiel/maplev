@@ -25,7 +25,7 @@
 
 ;;; Commentary:
 
-;; This file provides some basic hooks to ... 
+;; This file provides some basic hooks to ...
 
 ;;; Code:
 
@@ -39,7 +39,7 @@
 (add-to-list 'org-babel-tangle-lang-exts '("maple" . "mpl"))
 
 ;; FIXME:  this does not belong here (nor does it work)
-;; (org-babel-do-load-languages 
+;; (org-babel-do-load-languages
 ;;  'org-babel-load-languages
 ;;  '((maple . t)
 ;;    (shell . t)
@@ -60,8 +60,8 @@
 
 (defun org-babel-execute:maple (body params)
   "Execute a block of Maple code with org-babel.
-This function is called by `org-babel-execute-src-block'.  
-BODY is a string of the contents of the block.  
+This function is called by `org-babel-execute-src-block'.
+BODY is a string of the contents of the block.
 PARAMS is a list of cons-cells of the form \(:key . \"value\"\)."
   (unless (string= "none" (cdr (assoc :session params)))
     (error "sessions are currently not supported"))

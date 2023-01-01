@@ -1,7 +1,7 @@
 ;;; maplev-mint.el --- Syntax checking for Maple
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 ;;
@@ -120,7 +120,6 @@ This is only used if `maplev-mint-rerun-flag' is non-nil."
   (make-local-variable 'maplev-mint--code-buffer)
   (set (make-local-variable 'paragraph-start) "[^ ]")
   (set (make-local-variable 'paragraph-separate) paragraph-start)
-  (maplev-mint-fontify-buffer)
   (setq truncate-lines nil))
 
 (defun maplev-mint-setup (code-buffer config)
@@ -128,7 +127,7 @@ This is only used if `maplev-mint-rerun-flag' is non-nil."
 Set `maplev-mint--code-buffer' to CODE-BUFFER, the buffer that
 contains the source code.  Set buffer-local variable
 `maplev-config' to CONFIG."
-  (unless (eq major-mode 'maple-mint-mode)
+  (unless (eq major-mode 'maplev-mint-mode)
     (maplev-mint-mode))
   (setq maplev-config config
 	maplev-mint--code-buffer code-buffer))
@@ -223,12 +222,12 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
             ;; list.  This may be tougher than I envisioned.  How are
             ;; optional type declarations handled?  The difficulty is
             ;; that they could have commas and closing parentheses.
-            
+
             ;;            args-re (concat "\\s-*\\<\\w+\\>\\(\\s-*::\\s-*[^
             )
       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)")
       (setq line (1- (string-to-number (match-string 1)))))
-    
+
     ;; move point in source to beginning of line where procedure/module assignment begins.
 
     (maplev-mint--goto-source-pos line 0)
@@ -259,7 +258,7 @@ THIS NEEDS WORK TO HANDLE OPERATORS."
 		   'inc-first)))
 	(when file
 	  (find-file-other-window file))))))
-  
+
 
 (defun maplev-mint--goto-source-proc (pos)
   "Move to position in source buffer corresponding to link at POS in mint buffer.
@@ -577,7 +576,6 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	  (unless maplev-mint--code-buffer
 	    (and maplev-mint-save-rerun-flag
 		 (buffer-modified-p)
-		 ;;(y-or-n-p "save buffer ")
 		 (save-buffer)))
 	  (set-buffer code-buffer)
 	  (maplev-mint-rerun))))))
@@ -587,6 +585,7 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 
 (defun maplev-mint-region (beg end &optional syntax-only)
   "Run Mint on the current region, from BEG to END.
+If optional argument SYNTAX-ONLY is non-nil, only report syntax errors.
 Return exit code of mint."
   (interactive "r")
   (let ((code-buffer (current-buffer))
@@ -619,13 +618,14 @@ Return exit code of mint."
       ;; with that format, or with the options catenated into a single string
       ;; (separated by spaces, of course).  So am using the format that
       ;; works on both platforms.
-      
+
       (let ((mint (slot-value config 'mint))
 	    ;; N.B. mint occasionally generates nonsense output when screen width (-w) is large.
 	    (mint-args (append (maplev-get-option-with-include config 'mint-options))) ;;  "-w5000")))
 	    (process-environment (if maplev-use-new-language-features
 				     (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
-				   process-environment)))
+				   process-environment))
+	    (coding-system-for-read 'raw-text))
 	(unless mint
 	  (error "The slot-value of :mint in maplev-config is not assigned"))
 	(when (and syntax-only (not (member "-S" mint-args)))
@@ -642,6 +642,7 @@ Return exit code of mint."
       (delete-region (point-min) eoi)
       ;; Display Mint output
       (maplev-mint-setup code-buffer config)
+      (maplev-mint-fontify-buffer)
       (setq lines (if (= (buffer-size) 0)
                       0
                     (count-lines (point-min) (point-max))))
@@ -661,13 +662,30 @@ Return exit code of mint."
       (goto-char (point-min))
       (if (re-search-forward "^[ \t]*\\^" nil t)
           (setq errpos (maplev-mint--goto-error (point)))))
-	
+
     ;; If there is an error in the maple source and a window displays it,
     ;; move point in this window
     (when (and code-window errpos)
       (set-window-point code-window errpos)
       (switch-to-buffer mint-buffer))
     status))
+
+(defun maplev-mint-file (file)
+  "Run Mint on FILE."
+  (interactive)
+  (if (not (file-exists-p file))
+      (error "File %s does not exist" file)
+    (find-file file)
+    (maplev-mint-buffer)))
+
+(defun maplev-mint-project ()
+  "Run Mint on the current project.
+The `project-source' slot of the object `maplev-config' must be assigned."
+  (interactive)
+  (let ((file (slot-value maplev-config 'project-source)))
+    (if file
+	(maplev-mint-file file)
+      (error "Project-source slot of maplev-config not assigned"))))
 
 (defun maplev-mint-buffer ()
   "Run Mint on the current buffer."
@@ -678,7 +696,8 @@ Return exit code of mint."
 (defun maplev-mint-procedure ()
   "Run Mint on the current procedure."
   (interactive)
-  (apply 'maplev-mint-region (maplev-current-defun)))
+  (let ((reg (maplev-current-defun)))
+    (when reg (apply 'maplev-mint-region reg))))
 
 (defun maplev-mint-rerun ()
   "Rerun Mint on the previously executed region.
@@ -720,7 +739,7 @@ as in `re-search-forward'."
 		      (setq pos (re-search-forward regexp bound noerror dir)))))
 	(setq count (- count dir)))
       pos)))
-      
+
 (defun maplev--re-search-backward (regexp &optional bound noerror count)
   "Search backward from point for regular expression REGEXP.
 This function is like `re-search-backward', but strings and comments are ignored.
@@ -823,7 +842,7 @@ Skip over comments and types."
 	t)
        (t)))))
 
-       
+
 (defun maplev-add-declaration (keyword vars)
   "To the current procedure's KEYWORD declaration add VARS, a list of variables.
 If necessary, add a KEYWORD statement.  Point must be after the closing
@@ -887,7 +906,7 @@ parenthesis of the procedure's argument list."
 	      (goto-char end)
 	      (backward-char)
 	      (insert "," (make-string maplev-variable-spacing ?\ ) var))))))))
-	
+
 (defun maplev-add-local-variable (var)
   "Add VAR to the current procedure's local statement.
 Interactively, VAR defaults to the identifier at point."
@@ -944,7 +963,7 @@ Interactively, VAR defaults to identifier point is on."
 	    (cnt 0) ; keep track whether in original procedure
 	    term)
 	(while (maplev--re-search-forward regex nil 'move)
-	  (if (match-string 1)
+	  (if (match-string-no-properties 1)
 	      (when (zerop cnt)
 		(let ((beg (match-beginning 0)))
 		  (maplev-delete-vars vars (point) (maplev--statement-terminator))
@@ -955,13 +974,17 @@ Interactively, VAR defaults to identifier point is on."
 		      (delete-region (match-beginning 0) (match-end 0))
 		      (maplev-delete-whitespace t)))))
 	    ;; adjust cnt up/down when entering/exiting a proc/module.
-	    (setq cnt (+ cnt (if (match-string 2) +1 -1)))))))))
+	    ;; FIXME: not robust
+	    (setq cnt (+ cnt (if (match-string 2) +1
+			       (if (or (looking-back "proc" (- (point) 5))
+				       (not (looking-at "\\s-+\\(?:if\\|do\\|uses\\)")))
+				   -1
+				 0))))))))))
 
 (defun maplev-delete-vars (vars start end &optional leave-one)
-  "Delete VARS in region between START and END; VARS must be
-either a string or a list of strings.  If optional argument
-LEAVE-ONE is non-nil, the first occurrence of VARS is not
-deleted."
+  "Delete VARS in region between START and END.
+VARS must be either a string or a list of strings.  If optional argument
+LEAVE-ONE is non-nil, the first occurrence of VARS is not deleted."
   (let ((parse-sexp-ignore-comments)
         case-fold-search lo var)
     (save-excursion
@@ -1029,7 +1052,7 @@ C-r  enter recursive edit (C-M-c to get out)
     (define-key map "l" 'local)
     (define-key map "L" 'local-rest)
 
-    
+
     (define-key map "n" 'skip)
     (define-key map "N" 'skip)
     (define-key map "\d" 'skip)
@@ -1053,7 +1076,7 @@ C-r  enter recursive edit (C-M-c to get out)
     map))
 
 (defun maplev-mint-query-undeclared-globals (vars beg end dofile)
-  "Query to handle occurrences of VARs in the region between BEG and END.
+  "Query to handle occurrences of VARS in the region between BEG and END.
 When DOFILE is non-nil, ...
 VARs is a list of undeclared globals."
   (let (case-fold-search regexp reply start var)
@@ -1211,7 +1234,7 @@ VARs is a list of undeclared globals."
     map))
 
 (defun maplev-mint-var-cont ()
-  "Exit recursive-edit, to continue processing variables."
+  "Exit recursive edit, to continue processing variables."
   (interactive)
   (exit-recursive-edit))
 
@@ -1256,7 +1279,7 @@ Return the edited list upon completion."
 ;;   (let ((buffer (current-buffer))
 ;; 	(config maple-config)
 ;; 	(file
-		
+
 
 
 (provide 'maplev-mint)

@@ -1,7 +1,7 @@
 #LINK maplev.mpl
 
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE maplev[GetSource]
+##PROCEDURE maplev:-GetSource
 ##HALFLINE return the source file and line number of a procedure
 ##INDEXPAGE maplev[Exports],GetSource,return the source file and line number of a Maple procedure
 ##CALLINGSEQUENCE

@@ -1,7 +1,7 @@
 ;;; maplev-view.el --- mode for displaying Maple procedures
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 ;;
@@ -19,8 +19,8 @@
 
 (declare-function event-point "maplev-common")
 (declare-function event-window "maplev-common")
-(declare-function maplev--cleanup-buffer "maplev-cmaple")
-(declare-function maplev--cmaple-process "maplev-cmaple")
+(declare-function maplev--cleanup-buffer "maplev-pmaple")
+(declare-function maplev--pmaple-process "maplev-pmaple")
 (declare-function maplev--ident-around-point "maplev-common")
 (declare-function maplev-history--stack-current "maplev-history")
 (declare-function maplev-history--stack-process "maplev-history")
@@ -29,13 +29,14 @@
 (declare-function maplev-indent-buffer "maplev-indent")
 (declare-function maplev-mode "maplev")
 (declare-function maplev-reset-font-lock "maplev")
-(declare-function maplev-cmaple-direct "maplev-cmaple")
+(declare-function maplev-pmaple-direct "maplev-pmaple")
 
 
 ;;{{{ mode map
 
 (defvar maplev-view-mode-map
-  (let ((map (copy-keymap maplev-help-mode-map)))
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map maplev-help-mode-map)
     ;; remove P (parent) key-binding
     (define-key map [?P] nil)
     ;; (define-key map [?v] 'maplev-view-toggle-view)
@@ -51,7 +52,7 @@
 \\{maplev-view-mode-map}"
   :syntax-table maplev-mode-syntax-table
   :abbrev-table nil
-  
+
   (set (make-local-variable 'maplev--process-item) #'maplev--proc-process)
 
   (make-local-variable 'maplev-history--stack) ; set up the stack
@@ -116,7 +117,7 @@ If optional arg HIDE is non-nil do not display buffer."
 
 (defun maplev--proc-process (proc)
   "Display the Maple procedure PROC \(a string\) in `maplev--proc-buffer'."
-  (let ((process (maplev--cmaple-process)))
+  (let ((process (maplev--pmaple-process)))
     (set-process-filter process 'maplev-view-filter)
     (set-buffer (maplev--proc-buffer))
     (setq mode-line-buffer-identification (format "%-12s" proc))
@@ -176,7 +177,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 	(insert-file-contents file)
 	(goto-char (point-min))
 	(forward-line (1- line))))))
-    
+
 (defun maplev-view-goto-source ()
   "Goto the source of the current Maple procedure."
   (interactive "P")
@@ -207,7 +208,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 If found, they are returned as a cons-cell \(file \. line\),
 otherwise nil is returned."
   (let* ((cmd (format "lprint(maplev:-GetSource(\"%s\")):" proc))
-	 (res (maplev-cmaple-direct cmd 'delete))
+	 (res (maplev-pmaple-direct cmd 'delete))
 	  file line)
     (when (and (not (string= res "NULL"))
 	       (string-match "^\\[\"\\([^\"]*\\)\", \\([0-9]+\\)" res))

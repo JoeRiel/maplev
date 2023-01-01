@@ -13,11 +13,11 @@
 (require 'maplev-history)
 (require 'maplev-utils)
 
-(declare-function maplev--cleanup-buffer "maplev-cmaple")
-(declare-function maplev--cmaple-buffer "maplev-cmaple")
-(declare-function maplev--cmaple-process "maplev-cmaple")
+(declare-function maplev--cleanup-buffer "maplev-pmaple")
+(declare-function maplev--pmaple-buffer "maplev-pmaple")
+(declare-function maplev--pmaple-process "maplev-pmaple")
 (declare-function maplev--proc-buffer "maplev-view")
-(declare-function maplev-cmaple-direct "maplev-cmaple")
+(declare-function maplev-pmaple-direct "maplev-pmaple")
 
 ;;{{{ mode map
 
@@ -39,11 +39,11 @@
     (define-key map [?f]                         'maplev-tear-off-window)
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
-    (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-cmaple)
+    (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-pmaple)
     (define-key map [(control c) (control c)]    'maplev-help-reset-help)
     (define-key map [?h]                         'maplev-switch-buffer-help) ; short-cut
     (define-key map [?l]                         'maplev-switch-buffer-proc) ; short-cut
-    (define-key map [?c]                         'maplev-switch-buffer-cmaple) ; short-cut
+    (define-key map [?c]                         'maplev-switch-buffer-pmaple) ; short-cut
     (define-key map [(return)]                   'maplev-help-at-point)
     (define-key map [(meta return)]              'maplev-view-at-point)
 
@@ -170,8 +170,8 @@ If HIDE is non-nil, do not bring buffer to front."
 
 (defun maplev--help-process (topic)
   "Display Maple help for TOPIC in `maplev--help-buffer'."
-  (let ((process (maplev--cmaple-process)))
-    ;; (maplev-cmaple--lock-access)
+  (let ((process (maplev--pmaple-process)))
+    ;; (maplev-pmaple--lock-access)
     (set-process-filter process 'maplev--help-filter)
     (set-buffer (maplev--help-buffer))
     (setq mode-line-buffer-identification (format "%-12s" topic))
@@ -220,10 +220,10 @@ PROCESS calls this filter.  STRING is the output."
   (interactive)
   (maplev-switch-buffer (maplev--proc-buffer)))
 
-(defun maplev-switch-buffer-cmaple ()
-  "Switch to cmaple buffer, if it exists."
+(defun maplev-switch-buffer-pmaple ()
+  "Switch to pmaple buffer, if it exists."
   (interactive)
-  (maplev-switch-buffer (maplev--cmaple-buffer)))
+  (maplev-switch-buffer (maplev--pmaple-buffer)))
 
 (defun maplev-switch-buffer (buffer)
   "Switch to BUFFER, if it exists."
@@ -252,7 +252,7 @@ PROCESS calls this filter.  STRING is the output."
 (defun maplev-help-reset-help ()
   "Reset the settings that affect the display of help pages."
   (interactive))
-;;  (maplev-cmaple-direct " 'delete))
+;;  (maplev-pmaple-direct " 'delete))
 
 (defun maplev-help-standard-help (topic)
   "Display help for TOPIC in the Standard help browser.

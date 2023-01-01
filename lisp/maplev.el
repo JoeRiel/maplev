@@ -5,7 +5,7 @@
 ;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
 ;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Created:    June 1999
-;; Version:    3.0.5
+;; Version:    3.1.0
 ;; Keywords:   Maple, languages
 
 ;;{{{ License
@@ -30,7 +30,7 @@
 ;; This package defines five major modes:
 ;;
 ;;   maplev-mode:        for editing Maple code
-;;   maplev-cmaple-mode: for running Maple
+;;   maplev-pmaple-mode: for running Maple
 ;;   maplev-mint-mode:   for displaying the output of mint
 ;;   maplev-help-mode:   for displaying Maple help pages
 ;;   maplev-view-mode:   for displaying Maple procedures
@@ -54,7 +54,7 @@
 ;; the following to your `.emacs':
 ;;
 ;;   (autoload 'maplev-mode "maplev" "Maple editing mode" t)
-;;   (autoload 'cmaple      "maplev" "Start maple process" t)
+;;   (autoload 'pmaple      "maplev" "Start maple process" t)
 ;;
 ;; To have Emacs automagically start in MapleV mode when editing Maple
 ;; source, add the following to your .emacs, modifying the regexp
@@ -112,7 +112,7 @@
 (require 'info)
 
 (require 'maplev-compat)                ; compatibility definitions for older Emacs
-(require 'maplev-cmaple)                ; interact with Maple
+(require 'maplev-pmaple)                ; interact with Maple
 (require 'maplev-common)                ; common functions
 (require 'maplev-config)                ; configure maple/mint/tester
 (require 'maplev-custom)                ; customizable variables
@@ -168,9 +168,9 @@ When MESSAGE is non-nil, display a message with the version."
 
 ;;}}}
 
-(eval-and-compile
-  (condition-case nil (require 'imenu) (error nil))
-  (condition-case nil (require 'align) (error nil)))
+;; (eval-and-compile
+;;   (condition-case nil (require 'imenu) (error nil))
+;;   (condition-case nil (require 'align) (error nil)))
 
 (defsubst maplev--short-delay ()
   "Pause for a brief duration."
@@ -210,7 +210,7 @@ When MESSAGE is non-nil, display a message with the version."
     (modify-syntax-entry ?<  "."  table)
     (modify-syntax-entry ?.  "."  table)
     (modify-syntax-entry ?|  "."  table)
-    
+
     (modify-syntax-entry ?\" "\"" table) ; string quote
     (modify-syntax-entry ?\' "\"" table) ; string quote
     (modify-syntax-entry ?\` "\"" table) ; string quote
@@ -292,19 +292,20 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control c) (tab) ?p]  'maplev-indent-procedure)
     (define-key map [(control c) (tab) ?r]  'maplev-indent-region)
     (define-key map [(control c) (tab) ?k]  'maplev-indent-clear-info)
-    
-    ;; Cmaple commands
-    (define-key map [(control c) (control c) ?b]      'maplev-cmaple-send-buffer)
-    (define-key map [(control c) (control c) ?p]      'maplev-cmaple-send-procedure)
-    (define-key map [(control c) (control c) ?r]      'maplev-cmaple-send-region)
-    (define-key map [(control c) (control c) ?l]      'maplev-cmaple-send-line)
-    (define-key map [(control c) (control c) return]  'maplev-cmaple-send-line)
-    (define-key map [(control c) (control c) ?g]      'maplev-cmaple-pop-to-buffer)
-    (define-key map [(control c) (control c) ?i]      'maplev-cmaple-interrupt)
-    (define-key map [(control c) (control c) ?k]      'maplev-cmaple-kill)
-    (define-key map [(control c) (control c) ?s]      'maplev-cmaple-status)
+
+    ;; pmaple commands
+    (define-key map [(control c) (control c) ?b]      'maplev-pmaple-send-buffer)
+    (define-key map [(control c) (control c) ?p]      'maplev-pmaple-send-procedure)
+    (define-key map [(control c) (control c) ?r]      'maplev-pmaple-send-region)
+    (define-key map [(control c) (control c) ?l]      'maplev-pmaple-send-line)
+    (define-key map [(control c) (control c) return]  'maplev-pmaple-send-line)
+    (define-key map [(control c) (control c) ?g]      'maplev-pmaple-pop-to-buffer)
+    (define-key map [(control c) (control c) ?i]      'maplev-pmaple-interrupt)
+    (define-key map [(control c) (control c) ?k]      'maplev-pmaple-kill)
+    (define-key map [(control c) (control c) ?s]      'maplev-pmaple-status)
 
     ;; Mint commands
+    (define-key map [(control c) return ?P] 'maplev-mint-project)
     (define-key map [(control c) return ?b] 'maplev-mint-buffer)
     (define-key map [(control c) return ?p] 'maplev-mint-procedure)
     (define-key map [(control c) return ?r] 'maplev-mint-region)
@@ -320,7 +321,10 @@ When MESSAGE is non-nil, display a message with the version."
 
     (define-key map [(control c) (control s) ?h] 'maplev-switch-buffer-help)
     (define-key map [(control c) (control s) ?l] 'maplev-switch-buffer-proc)
-    (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-cmaple)
+    (define-key map [(control c) (control s) ?c] 'maplev-switch-buffer-pmaple)
+
+    (define-key map [(control c) (control f) ?c] 'maplev-find-config-file)
+    (define-key map [(control c) (control f) ?p] 'maplev-find-project-source-file)
     map)
   "Keymap used in Maple mode.")
 
@@ -340,17 +344,18 @@ When MESSAGE is non-nil, display a message with the version."
       ("Mint"
        ["Buffer"    maplev-mint-buffer t]
        ["Procedure" maplev-mint-procedure t]
+       ["Project"   maplev-mint-project t]
        ["Region"    maplev-mint-region t]
        ["Rerun"     maplev-mint-rerun :active maplev-mint--code-beginning])
       ("Maple"
-       ["Goto buffer"    maplev-cmaple-pop-to-buffer t]
-       ["Send buffer"    maplev-cmaple-send-buffer t]
-       ["Send procedure" maplev-cmaple-send-procedure t]
-       ["Send region"    maplev-cmaple-send-region t]
-       ["Send line"      maplev-cmaple-send-line t]
+       ["Goto buffer"    maplev-pmaple-pop-to-buffer t]
+       ["Send buffer"    maplev-pmaple-send-buffer t]
+       ["Send procedure" maplev-pmaple-send-procedure t]
+       ["Send region"    maplev-pmaple-send-region t]
+       ["Send line"      maplev-pmaple-send-line t]
        "---"
-       ["Interrupt"   maplev-cmaple-interrupt t]
-       ["Kill"        maplev-cmaple-kill t])
+       ["Interrupt"   maplev-pmaple-interrupt t]
+       ["Kill"        maplev-pmaple-kill t])
       ("Help"
        ["Word"        maplev-help-at-point t]
        ["Highlighted" maplev-help-region t])
@@ -373,7 +378,9 @@ When MESSAGE is non-nil, display a message with the version."
       "---"
       ["Add Index" maplev-add-imenu (not (and (boundp 'imenu--index-alist)
                                               imenu--index-alist))]
-
+      "---"
+      ["Open config file" maplev-find-config-file t]
+      ["Open project file" maplev-find-project-source-file (slot-value maplev-config 'project-source)]
       "---"
       ["Quit"      quit-window t]
       "---"
@@ -978,12 +985,12 @@ The real work is done by `maplev-complete-on-module-exports'."
 (defun maplev-complete-on-module-exports (module)
   "Add the exports of MODULE to `maplev-completions'."
 
-  (with-current-buffer (maplev--cmaple-buffer)
+  (with-current-buffer (maplev--pmaple-buffer)
     (save-restriction
       ;; Print each export of module on a separate line in a narrowed buffer.
       (narrow-to-region (point-max) (point-max))
-      (maplev-cmaple--send-string
-       (maplev--cmaple-process)
+      (maplev-pmaple--send-string
+       (maplev--pmaple-process)
        (concat "seq(lprint(e),e=exports(" module "));"))
       ;; Delete the input line.
       (delete-region
@@ -1012,7 +1019,7 @@ The real work is done by `maplev-complete-on-module-exports'."
           (setq maplev-completions
 		(maplev-remove-dupes
 		 (sort completions #'(lambda (a b) (string< (car a) (car b))))))))
-      ;; Delete the output from the cmaple buffer.
+      ;; Delete the output from the pmaple buffer.
       (delete-region (point-min) (point-max)))))
 
 (defun maplev--generate-initial-completions ()
@@ -1024,16 +1031,16 @@ If it already exists, do nothing."
   ;; index/package help page, set the interface variable
   ;; `screenwidth' to infinity and save the original value in the
   ;; elisp variable screenwidth.
-  
-  (let ((screenwidth (maplev-cmaple-direct
+
+  (let ((screenwidth (maplev-pmaple-direct
 		      "lprint(interface('screenwidth'=infinity));" t))
 	completions)
     (unwind-protect
 	(with-current-buffer (get-buffer-create (maplev--help-buffer))
 	  ;; Process help node "index/function".
-	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
 	  (maplev-help-show-topic "index/function" 'hide)
-	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
 	  (save-restriction
 	    (narrow-to-region
 	     (re-search-forward "^    ")
@@ -1049,9 +1056,9 @@ If it already exists, do nothing."
 			  completions))))
 
 	  ;; Process help node "index/package".
-	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
 	  (maplev-help-show-topic "index/package" 'hide)
-	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
 	  (save-restriction
 	    (narrow-to-region
 	     (progn (re-search-forward "^    \\w" nil t)
@@ -1072,13 +1079,13 @@ If it already exists, do nothing."
 			    completions)))))
 	  ;; Delete both help pages.
 	  (maplev-history-delete-item)
-	  ;; (while (maplev-cmaple--locked-p) (maplev--short-delay))
+	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
 	  (maplev-history-delete-item))
 
       ;; Assign `maplev-completions'.  Sort the completions.
       (setq maplev-completions (sort completions #'(lambda (a b) (string< (car a) (car b)))))
       ;; Restore the original interface screenwidth.
-      (maplev-cmaple-direct (concat "interface('screenwidth'=" screenwidth ");") t))))
+      (maplev-pmaple-direct (concat "interface('screenwidth'=" screenwidth ");") t))))
 
 
 (defun maplev--completion (word predicate mode)
@@ -1340,7 +1347,7 @@ file (either < or \").  The second group matches the filename.")
     "expand" "exports" "factorial" "frem" "frontend" "gc" "genpoly"
     "gmp_isprime" "goto" "has" "hastype" "hfarray" "icontent" "`if`" "ifelse"
     "igcd" "ilcm" "ilog10" "ilog2" "`implies`" "`implies=`" "indets" "indices" "inner"
-    "`int/series`" "`intersect`" "`intersect=`" 
+    "`int/series`" "`intersect`" "`intersect=`"
     "iolib" "iquo" "iratrecon" "irem" "is_gmp" "isqrt"
     "`kernel/transpose`" "kernelopts" "lcoeff" "ldegree" "length"
     "lexorder" "lhs" "localGridInterfaceRun" "lowerbound" "lprint"
@@ -1407,12 +1414,12 @@ file (either < or \").  The second group matches the filename.")
      "postplot" "preplot" "prettyprint" "printbytes" "prompt" "quiet"
      "screenheight" "screenwidth" "showassumed" "verboseproc" "version"
      "warnlevel"
-     
+
      ;; kernelopts options
      "ASSERT" "bytesalloc" "bytesused" "cputime" "dagtag" "gcbytesavail"
      "gcbytesreturned" "gctimes" "maxdigits" "maximmediate" "memusage"
      "printbytes" "profile" "system" "version" "wordsize"
-     
+
      ;; types
      "_Inert" "And" "Non" "Not" "Or" "SERIES" "SymbolicInfinity" "TEXT"
      "algebraic" "algext" "algfun" "algnum" "algnumext"
@@ -1428,14 +1435,14 @@ file (either < or \").  The second group matches the filename.")
      "nonpositive" "nonreal" "nothing" "numeric" "odd" "oddfunc" "package"
      "point" "polynom" "pos_infinity" "posint" "positive" "poszero" "prime"
      "protected" "quadratic" "quartic" "radext" "radfun" "radfunext"
-     "radical" "radnum" "radnumext" "range" "rational" "ratpoly" "real_infinity"
+     "radical" "radnum" "radnumext" "range" "rational" "ratpoly" "real" "real_infinity"
      "realcons" "relation" "scalar" "sequential" "set" "sfloat" "specfunc" "specindex" "sqrt"
      "stack" "string" "symbol" "symmfunc" "tabular" "trig" "truefalse" "truefalseFAIL"
      "undefined" "uneval" "vector" "zppoly"
-     
+
      ;; math procedures
      ;; Some of these were obtained with
-     ;; ListTools:-MakeUnique(sort(map(op@FunctionAdvisor, FunctionAdvisor(function_classes)))); 
+     ;; ListTools:-MakeUnique(sort(map(op@FunctionAdvisor, FunctionAdvisor(function_classes))));
      "about" "abs" "addcoords" "additionally" "addproperty" "AFactor" "AFactors" "AiryAi"
      "AiryAiZeros" "AiryBi" "AiryBiZeros" "algsubs" "alias" "allvalues" "andseq" "AngerJ"
      "AppellF1" "AppellF2" "AppellF3" "AppellF4" "apply" "applyop" "applyrule" "arccos"
@@ -1449,7 +1456,7 @@ file (either < or \").  The second group matches the filename.")
      "cosh" "cot" "coth" "coulditbe" "CoulombF" "csc" "csch" "CylinderD" "CylinderU"
      "CylinderV" "D" "dataplot" "dawson" "define" "definemore" "depends" "Describe"
      "DESol" "Det" "Diff" "dilog" "dims" "dinterp" "Dirac" "discont" "discrim" "dismantle"
-     "DistDeg" "Divide" "doublefactorial" "dsolve" "Ei" "elems" "eliminate" "ellipsoid"
+     "DistDeg" "Divide" "doublefactorial" "dsolve" "Ei" "eliminate" "ellipsoid"
      "EllipticCE" "EllipticCK" "EllipticCPi" "EllipticE" "EllipticF" "EllipticK"
      "EllipticModulus" "EllipticNome" "EllipticPi" "erf" "erfc" "erfi" "euler"
      "eulermac" "Eval" "evala" "evalapply" "evalc" "evalr" "evalrC" "example"
@@ -1499,7 +1506,7 @@ file (either < or \").  The second group matches the filename.")
      "verify" "version" "WARNING" "WeberE" "WeierstrassP" "WeierstrassPPrime"
      "WeierstrassSigma" "WeierstrassZeta" "whattype" "WhittakerM" "WhittakerW"
      "Wrightomega" "xormap" "xorseq" "Zeta" "ztrans"
-     
+
      ;; miscellaneous procedures
      "interface" "readline" "with" "unwith"
      )
@@ -1823,6 +1830,18 @@ file if one was found, nil otherwise."
 	 (error "Problem loading config file %s: %s" maplev-config-file err))))))
 
 ;;}}}
+;;{{{ Project source file
+
+(defun maplev-find-project-source-file ()
+  "Open the project-source file specified by the `maplev-config' object."
+  (interactive)
+  (let ((file (slot-value maplev-config 'project-source)))
+    (if file
+	(find-file file)
+      (message "No project-source file specified"))))
+
+
+;;}}}
 
 ;;{{{ leading-comma stuff
 
@@ -1858,6 +1877,19 @@ if `maplev-leading-comma-flag' is non-nil, remove space before a comma."
 
 ;;}}}
 
+;;{{{ Debug
+
+;; Functions for aiding maple debugging
+
+(defun maplev-stopat ()
+  "Push onto the kill ring a Maple stopat command for the current position in the source file."
+  (interactive)
+  (let ((filename (buffer-file-name))
+	(linenum (line-number-at-pos)))
+    (kill-new (format "stopat(\"%s\",%s):" filename linenum))))
+
+
+;;}}}
 
 (provide 'maplev)
 (provide 'maplev-mode)

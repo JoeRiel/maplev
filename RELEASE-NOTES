@@ -1,9 +1,16 @@
 -*- org -*-
 
+* 3.1.0
+** Add Plot function to permit plotting with pmaple.
+** Rename cmaple stuff to pmaple.
+** Add button-lock.el (simplifies install).
+** Add project-source to maplev-config object.
+** Improve Intro and Install.
+
 * 3.0.5
 ** Fix bug in maplev-cmaple--process-environment.
 ** Change maplev-pkg.el to require button-lock 1.0.2 (in elpa).
-** Replaced deprecated local-write-file-hooks with write-file-functions.   
+** Replaced deprecated local-write-file-hooks with write-file-functions.
 ** Improve mint corrections.
 ** cmaple: set LD_LIBRARY_PATH environment variable.
 ** Add $elifdef and $elifndef to highlighted preprocessor macros.
@@ -45,10 +52,10 @@
 ** Add maplev-config.el: configure maplev for a project
 ** Add maplev-version.el: used to embed git-version.
 ** Improve indentation speed for single line balanced expressions
-** Remove maplev-executable-alist.   
+** Remove maplev-executable-alist.
 
 * 2.33
-** Add maplev-tabs-indent-mode 
+** Add maplev-tabs-indent-mode
 ** Add README.md, delete README, install, tweak Makefile
 * 2.32
 ** eliminate customizing font-lock per release
@@ -78,7 +85,7 @@
 * 2.28
 ** Split maplev.el into multiple files
 ** Remove ~ as a component of a simple name, allowed as initial character.
-** Update Makefile 
+** Update Makefile
 ** Fix version number of maplev info file
 * 2.27:
 ** Font-lock 'static' (as special word)
@@ -110,7 +117,7 @@
 ** Search and load a maplev configuration file, which can be project specific.
    The configuration file is elisp.  A typical use is to set maplev-include-path
    (which is now buffer-local) so that the buttonizing (above) works properly
-   with the project.  
+   with the project.
 * 2.20:
 ** Handle leading tilde in symbols (new with Maple 16; used for coercion).
 ** Improve README.
