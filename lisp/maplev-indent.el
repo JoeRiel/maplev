@@ -1,14 +1,14 @@
 ;;; maplev-indent.el --- Indentation engine for MapleV
 
 ;;; Commentary:
-;; 
+;;
 
 ;; The indentation functions handle the indentation of Maple code.
 ;; They are based on the Maple-mode package written by Nicholas
 ;; Thie'ry.  Considerable changes have been made to handle the
 ;; extended syntax introduced in Maple R6.  Following is a brief
 ;; description of the algorithm.
-;; 
+;;
 ;; The buffer local list variable `maplev-indent-info' stores
 ;; the indentation information at a particular point, call it the
 ;; `known-indent-point' (the point position is stored in the list).
@@ -160,18 +160,18 @@ character position of the beginning of the change.  UNUSED is not used."
      (list "do"   . ((maplev--list-to-word-re '("od" "end" "until")) t indent))
      (list "od"   . (nil nil 0))
      (list "until" . (nil nil 0))
-     
+
      (list "if"   . ("\\<then\\>" t 0))
      (list "elif" . ("\\<then\\>" nil 0))
      (list "else" . ((maplev--list-to-word-re '("fi" "end")) nil indent))
      (list "then" . ((maplev--list-to-word-re '("elif" "else" "fi" "end")) nil indent))
      (list "fi"   . (nil nil 0))
-     
+
      (list "use"  . ("\\<end\\>" t indent))
      (list "try"  . ((maplev--list-to-word-re '("catch" "finally" "end")) t indent))
      (list "catch".  ((maplev--list-to-word-re '("catch" "finally" "end")) t indent))
      (list "finally".  ((maplev--list-to-word-re '("end")) t indent))
-     
+
      (list "{"    . ("}" t nil))
      (list "["    . ("]" t nil))
      (list "("    . (")" t nil))
@@ -322,14 +322,14 @@ beyond \(point\)."
 	    ;; Change the buffer syntax table to maplev-symbol-syntax-table
 	    ;; so that the underscore is considered a word constituent.
 	    (with-syntax-table maplev-symbol-syntax-table
-	      
+
 	      (goto-char point)
 	      (while (re-search-forward maplev-indent-grammar-keyword-re end 'move)
-		
+
 		;; Assign loop variables.  KEY-POINT is assigned the position
 		;; after the next keyword.  If no keyword exists in the line,
 		;; KEY-POINT is nil.
-		
+
 		(setq keyword (match-string-no-properties 0)
 		      key-list (cdr (assoc keyword maplev-indent-grammar-alist))
 		      indent (nth 2 key-list)
@@ -347,7 +347,7 @@ beyond \(point\)."
 
 		 ;; If KEYWORD is in a comment or a quote, do nothing.
 		 ((or (nth 4 state) (nth 3 state) (string= keyword "*)"))) ; comments are more frequent, so check first
-		 
+
 		 ;; Does KEYWORD pair with the top one on STACK?
 		 ((and match-re (string-match match-re keyword))
 		  ;; Should more keywords follow KEYWORD?
@@ -514,7 +514,8 @@ BEG and END may also be passed to the function."
 (defun maplev-indent-procedure ()
   "Indent the current procedure or module."
   (interactive)
-  (apply 'maplev-indent-region (maplev-current-defun)))
+  (let ((reg (maplev-current-defun)))
+    (when reg (apply 'maplev-indent-region reg))))
 
 (defun maplev-indent-line ()
   "Indent current line according to grammar.

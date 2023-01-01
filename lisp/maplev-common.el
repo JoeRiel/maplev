@@ -1,7 +1,7 @@
 ;;; maplev-common.el --- Common functions for maplev
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 ;;
@@ -46,7 +46,7 @@
 
 (defun maplev-setup ()
   "If in `maplev-mode' also refontify the buffer."
-  (cond ((memq major-mode '(maplev-mode maplev-cmaple-mode maplev-view-mode))
+  (cond ((memq major-mode '(maplev-mode maplev-pmaple-mode maplev-view-mode))
 	 (set-syntax-table maplev-mode-syntax-table))
         ;; for consistency also maplev-help-mode
         ((eq major-mode 'maplev-help-mode)
@@ -196,7 +196,7 @@ THIS ASSUMES EACH END STATEMENT IS FOLLOWED BY AN APPROPRIATE KEYWORD."
   ;; If point is in "foo", it is considered outside the proc body
   ;; so moving to the end will move point to end of containing proc
   ;; (or end of file).
-    
+
   (interactive)
   (let ((count 0)
 	(regex "\\(end\\s-+\\)?\\_<\\(?:proc\\|module\\)\\_>")
@@ -235,7 +235,7 @@ end of the Nth following defun."
   (setq n (or n 1))
   (goto-char (or (maplev--beginning-of-defun-pos nil n)
                  (if (> n 0) (point-min) (point-max)))))
-       
+
 (defun maplev-end-of-defun (&optional n)
   "Move point forward to the end of defun.
 With optional argument N, move to the end of the Nth following
@@ -289,7 +289,8 @@ The defun marked is the one that contains point."
 	  (zerop count))))))
 
 (defun maplev-current-defun ()
-  "Return a list with buffer positions of begin and end of current defun."
+  "Return a list with buffer positions of begin and end of current defun.
+Retun nil if current defun not found."
   (save-mark-and-excursion
     (when (maplev-mark-defun)
       (list (point) (mark)))))
@@ -299,7 +300,8 @@ The defun marked is the one that contains point."
   (interactive)
   (widen)
   (let ((reg (maplev-current-defun)))
-    (narrow-to-region (car reg) (nth 1 reg))))
+    (when reg
+      (narrow-to-region (car reg) (nth 1 reg)))))
 
 
 (defun maplev-what-proc (&optional nodisplay)

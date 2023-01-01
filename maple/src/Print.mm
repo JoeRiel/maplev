@@ -18,7 +18,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
         buf := StringTools:-StringBuffer();
     end proc;
 
-##PROCEDURE maplev[Print][ModuleApply]
+##PROCEDURE maplev:-Print:-ModuleApply
 
     ModuleApply := proc(s :: string
                         , { file :: string := "" }
@@ -55,7 +55,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
     end proc;
 
-##PROCEDURE maplev[Print][Dispatch]
+##PROCEDURE maplev:-Print:-Dispatch
 
     Dispatch := proc(indent :: nonnegint
                      , nomen
@@ -76,7 +76,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
     end proc;
 
 
-##PROCEDURE maplev[Print][PrintModule]
+##PROCEDURE maplev:-Print:-PrintModule
 ##DESCRIPTION
 ##- The `PrintModule` commands prints module 'm',
 ##  which can be either a regular module, or an object.
@@ -156,7 +156,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
     end proc;
 
-##PROCEDURE maplev[Print][PrintProc]
+##PROCEDURE maplev:-Print:-PrintProc
 ##HALFLINE print a procedure
 
 
@@ -226,7 +226,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
     end proc;
 
 
-##PROCEDURE maplev[Print][PrintRecord]
+##PROCEDURE maplev:-Print:-PrintRecord
 ##DESCRIPTION
 
     PrintRecord := proc(indent :: nonnegint

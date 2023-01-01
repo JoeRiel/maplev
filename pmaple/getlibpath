@@ -7,12 +7,12 @@
 # If SYS is assigned, then it determines the basename of the binary directory,
 # that is, "bin.${SYS}".
 
-MAPLE=${MAPLE_ROOT}
 
-SYSTYPE="$(./maple.system.type)"
-MAPLE_BIN=${MAPLE}/internal/${SYSTYPE}
+MAPLE=/opt/maple2023
+SYSTYPE="$($MAPLE/bin/maple.system.type)"
+MAPLE_BIN=${MAPLE}/${SYSTYPE}
 
-# Check whether MAPLE_BIN has subdirectories, 
+# Check whether MAPLE_BIN has subdirectories,
 # if so assign them to EXTRA_MAPLE_BIN_DIRS.
 
 if [ "$(ls -1p | sed -n '/\/$/{p;q}')" ]; then
@@ -25,6 +25,7 @@ else
     EXTRA_MAPLE_BIN_DIRS=""
 fi
 
+echo EXTRA_MAPLE_BIN_DIRS=$EXTRA_MAPLE_BIN_DIRS
 echo ${EXTRA_MAPLE_BIN_DIRS}${MAPLE_BIN}:${MAPLE}/toolbox/MapleSim/${SYSTYPE}
 
 exit 0
