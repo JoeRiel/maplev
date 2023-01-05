@@ -186,7 +186,16 @@ if( (kv == NULL )) {
   printf("Fatal error, %s\n",err);
   return( 1 );
 }
+<<main: replace plot driver>>
 @
+
+\subsubsection{Replace Plot Driver}
+\label{sec:replaceplotdriver}
+
+<<main: replace plot driver>>=
+RegisterPlotCallBack(kv,plotCallBack);
+@
+
 
 \subsubsection{Configure Maple}
 \label{sec:configmaple}
@@ -292,6 +301,17 @@ Print the text to [[stdout]].
 static void M_DECL textCallBack( void *data, int tag, const char *output )
 {
   printf("%s\n", output);
+}
+@
+
+\subsubsection{Plot Callback}
+\label{sec:plot-callback}
+
+
+<<functions>>=
+static void M_DECL plotCallBack( void *data, void *mplot )
+{
+  printf("Use maplev:-Plot to display plots.  See its help page.\n");
 }
 @
 
