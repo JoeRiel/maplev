@@ -291,14 +291,14 @@ fflush(NULL);
 \subsubsection{Text Callback}
 \label{sec:text-callback}
 
-This function is called by Maple for typical (non-exceptional) output.
+The function \texttt{textCallBack} is called by Maple for typical (non-exceptional) output.
 The [[tag]] parameter indicates the type of Maple output.
 The [[output]] parameter contains the string of text.
 
 Print the text to [[stdout]].
 
 <<functions>>=
-static void M_DECL textCallBack( void *data, int tag, const char *output )
+static void textCallBack( void *data, int tag, const char *output )
 {
   printf("%s\n", output);
 }
@@ -307,9 +307,12 @@ static void M_DECL textCallBack( void *data, int tag, const char *output )
 \subsubsection{Plot Callback}
 \label{sec:plot-callback}
 
+The function \texttt{plotCallBack} is called
+when attempting to display a plot with the default plot driver.
+Inform the user to use the procedure [[maplev:-Plot]] to display a plot.
 
 <<functions>>=
-static void M_DECL plotCallBack( void *data, void *mplot )
+static void plotCallBack( void *data, void *mplot )
 {
   printf("Use maplev:-Plot to display plots.  See its help page.\n");
 }
