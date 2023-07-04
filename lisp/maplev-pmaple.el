@@ -17,9 +17,8 @@
 (require 'maplev-custom)
 
 (eval-when-compile
-  (defvar maplev-mint-error-level)
   (defvar maplev-startup-directory)
-  (defvar maplev-load-path))
+  (defvar maplev-load-path nil "Used to assign environment variable LD_LIBRARY_PATH."))
 
 (declare-function maplev-mint-region "maplev-mint")
 (declare-function maplev-current-defun "maplev-common")
@@ -122,7 +121,10 @@ and the options to pass to pmaple."
   "Start a pmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it.  If variable `maplev-config' is assigned, use it, otherwise create
-one by calling function `maplev-config'."
+one by calling function `maplev-config'.  If variable `maplev-startup-directory' 
+is assigned, change to that directory before starting maple.  If variable 
+`maplev-load-path' is assigned, assign to the environment variable LD_LIBRARY_PATH."
+  
   (let* ((config (or maplev-config (maplev-config)))
 	 (process-environment (maplev-pmaple--process-environment))
 	 (pmaple-and-opts (maplev-pmaple--get-pmaple-and-options))
@@ -135,6 +137,8 @@ one by calling function `maplev-config'."
       (if process (delete-process process))
       (if maplev-startup-directory
           (cd (expand-file-name maplev-startup-directory)))
+      (if maplev-load-path
+          (setenv "LD_LIBRARY_PATH" maplev-load-path))
       (set-process-filter
        (setq process (apply #'start-process
                             "Maple"
