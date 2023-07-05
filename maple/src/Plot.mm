@@ -110,7 +110,6 @@ export
 ##- maplev:-Plot('plt', 'opts')
 ##PARAMETERS
 ##- 'plt'  : plot
-##opts
 ##RETURNS
 ##- ::string::; path to generated png
 ##OPTIONS
