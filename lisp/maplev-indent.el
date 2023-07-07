@@ -44,7 +44,8 @@ The default value is taken from `maplev-indent-declaration-level'.")
 (defvar maplev-indent-use-info-flag t
   "Non-nil means use `maplev-indent-info' to speed-up indentation.
 May interfere with some modes (e.g. noweb).")
-(make-variable-buffer-local 'maplev-indent-use-info-flag)
+
+;; (make-variable-buffer-local 'maplev-indent-use-info-flag)
 
 
 (defvar maplev-indent-info nil
@@ -61,6 +62,8 @@ is the indentation for the closing keyword associated with
 KEYWORD.  INDENT-FOLLOW is the indentation for source between
 KEYWORD and its closing keyword.  Indentation is measured in
 characters, with 0 being the left margin.")
+
+(make-variable-buffer-local 'maplev-indent-info)
 
 ;; Procedures for accessing the contents of `maplev-indent-info'.
 
