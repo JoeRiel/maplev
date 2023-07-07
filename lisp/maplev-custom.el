@@ -325,8 +325,9 @@ The features enabled are release dependent."
   :type 'boolean
   :group 'maplev-executables)
 
-(defcustom maplev-load-path t
-  "If non-nil used to assign environment variable LD_LIBRARY_PATH."
+(defcustom maplev-load-path nil
+  "If non-nil used to assign environment variable LD_LIBRARY_PATH when pmaple is started;
+see the function `maplev-pmaple--start-process'."
   :type 'string
   :group 'maplev-executables)
 

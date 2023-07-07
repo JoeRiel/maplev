@@ -115,11 +115,13 @@ and the options to pass to pmaple."
 
 (defun maplev-pmaple--start-process ()
   "Start a pmaple process associated with the current buffer.
-Return the process.  If such a process already exists, kill it and
-restart it.  If variable `maplev-config' is assigned, use it, otherwise create
-one by calling function `maplev-config'.  If variable `maplev-startup-directory'
-is assigned, change to that directory before starting maple.  If variable
-`maplev-load-path' is assigned, assign to the environment variable LD_LIBRARY_PATH."
+Return the process.  If such a process already exists, kill it
+and restart it.  If variable `maplev-config' is assigned, use it,
+otherwise create one by calling function `maplev-config'.  If
+variable `maplev-startup-directory' is assigned, change to that
+directory before starting maple.  If variable `maplev-load-path'
+is assigned, use it to assign to the environment variable
+LD_LIBRARY_PATH."
 
   (let* ((config (or maplev-config (maplev-config)))
 	 (process-environment (maplev-pmaple--process-environment))
