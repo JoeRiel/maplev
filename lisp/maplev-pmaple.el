@@ -16,10 +16,6 @@
 (require 'maplev-config)
 (require 'maplev-custom)
 
-(eval-when-compile
-  (defvar maplev-startup-directory)
-  (defvar maplev-load-path nil "Used to assign environment variable LD_LIBRARY_PATH."))
-
 (declare-function maplev-mint-region "maplev-mint")
 (declare-function maplev-current-defun "maplev-common")
 
@@ -109,7 +105,7 @@ and the options to pass to pmaple."
       (error "The pmaple file, '%s', does not exist" pmaple))
      ((not (file-exists-p pmaple))
       (error "The pmaple file, '%s', is not executable" pmaple))
-     ((not (file-exists-p maple))
+     ((not (or (file-exists-p maple) (executable-find maple)))
       (error "The specified maple, '%s', does not exist" maple))
      (t
       (cons pmaple (cons maple (maplev-get-option-with-include maplev-config
@@ -121,10 +117,10 @@ and the options to pass to pmaple."
   "Start a pmaple process associated with the current buffer.
 Return the process.  If such a process already exists, kill it and
 restart it.  If variable `maplev-config' is assigned, use it, otherwise create
-one by calling function `maplev-config'.  If variable `maplev-startup-directory' 
-is assigned, change to that directory before starting maple.  If variable 
+one by calling function `maplev-config'.  If variable `maplev-startup-directory'
+is assigned, change to that directory before starting maple.  If variable
 `maplev-load-path' is assigned, assign to the environment variable LD_LIBRARY_PATH."
-  
+
   (let* ((config (or maplev-config (maplev-config)))
 	 (process-environment (maplev-pmaple--process-environment))
 	 (pmaple-and-opts (maplev-pmaple--get-pmaple-and-options))
@@ -177,7 +173,7 @@ If ECHO is non-nil, print MAPLE-INPUT to the output buffer."
 		      (concat (if (string-match "\\s-+$" maple-input)
 				  (replace-match "" nil nil maple-input)
 				maple-input)
-			      (string ?\0))))
+			      (string ?\0)))) ; null character
 
 (defun maplev-pmaple-send-region (beg end)
   "Send the region from BEG to END to pmaple.

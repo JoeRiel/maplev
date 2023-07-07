@@ -218,7 +218,7 @@ See `maplev-find-include-file'."
   :type 'boolean
   :group 'maplev-misc)
 
-(defcustom maplev-load-config-file-flag t
+(defcustom maplev-load-config-file-flag nil
   "Non-nil means load a configuration file when starting `maplev-mode'.
 The configuration file is named .maplev and is searched for in
 the current directory and its ancestors.  The file is loaded as
@@ -323,6 +323,11 @@ Otherwise use the default directory of `maplev-pmaple-buffer'."
   "If non-nil, use the new language features of Maple.
 The features enabled are release dependent."
   :type 'boolean
+  :group 'maplev-executables)
+
+(defcustom maplev-load-path t
+  "If non-nil used to assign environment variable LD_LIBRARY_PATH."
+  :type 'string
   :group 'maplev-executables)
 
 ;;}}}
