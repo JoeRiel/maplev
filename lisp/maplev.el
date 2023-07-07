@@ -1824,7 +1824,7 @@ file if one was found, nil otherwise."
     (when maplev-config-file
       (condition-case err
 	  (progn
-	    (load maplev-config-file)
+	    (load-file maplev-config-file)
 	    maplev-config-file)
 	(error
 	 (error "Problem loading config file %s: %s" maplev-config-file err))))))
