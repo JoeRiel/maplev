@@ -30,7 +30,8 @@
 
 (defun maplev--pmaple-buffer ()
   "Return the name of the pmaple buffer associated with the current buffer.
-Use the buffer-local variable `maplev-config'."
+The name is the string \"Maple (<maple>)\", with <maple> being the
+the 'maple' slot-value of `maple-config'."
   (concat "Maple" (and maplev-config
 		       (format " (%s)" (slot-value maplev-config 'maple)))))
 
@@ -119,9 +120,9 @@ Return the process.  If such a process already exists, kill it
 and restart it.  If variable `maplev-config' is assigned, use it,
 otherwise create one by calling function `maplev-config'.  If
 variable `maplev-startup-directory' is assigned, change to that
-directory before starting maple.  If variable `maplev-load-path'
-is assigned, use it to assign to the environment variable
-LD_LIBRARY_PATH."
+directory before starting maple.  If custom variable
+`maplev-load-path' is non-nil, assign it to the environment
+variable LD_LIBRARY_PATH."
 
   (let* ((config (or maplev-config (maplev-config)))
 	 (process-environment (maplev-pmaple--process-environment))
