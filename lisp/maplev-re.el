@@ -1,7 +1,7 @@
 ;;; maplev-re.el --- Regular expressions for maplev
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 ;;
@@ -94,7 +94,7 @@ The second group corresponds to the name of the defun.")
   (concat "^\\(" maplev--name-re "\\)[ \t\n]*:=[ \t\n]*"
 	  "\\(?:" maplev--comment-re "\\)?"
 	  "[ \t\f\n]*" maplev--defun-re)
-  "Regular expression for top-level Maple defun assignments.
+  "Regular expression for top level Maple defun assignments.
 The first group corresponds to the name of the defun.
 This requires that the procedure is flush-left.")
 
@@ -168,8 +168,8 @@ For example, given \"begin\" the regular expression matches \"gin\"."
 	  (maplev--make-suffix-regexp "module")
 	  "\\)\\>")
   "Regular expression that matches a suffix of the end of a procedure or module
- assignment; this assumes that a naked \"end\" is not used (may have to rethink
- that, as they are used).")
+assignment; this assumes that a naked \"end\" is not used (may have to rethink
+that, as they are used).")
 
 
 (provide 'maplev-re)

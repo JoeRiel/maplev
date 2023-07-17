@@ -1,7 +1,7 @@
 ;;; maplev-help.el --- Maple help
 
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 
@@ -470,7 +470,7 @@ The title is the phrase following the function name."
 	(while (re-search-forward "^# .*$" nil t)
 	  (put-text-property (match-beginning 0) (match-end 0)
 			     'face 'font-lock-comment-face))
-	
+
 
 
 	;; Activate hyperlinks following "See Also" and "Pages That Link to This Page".
@@ -502,7 +502,7 @@ The title is the phrase following the function name."
 	    (beginning-of-line)
 	    (unless (looking-at "> ")
 	      (maplev--activate-hyperlink (match-beginning 1) (match-end 1)))))
-	
+
 
 	;; Activate hyperlinks following "Multiple matches:".
 	(goto-char (point-min))
