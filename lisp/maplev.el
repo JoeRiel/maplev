@@ -552,7 +552,7 @@ Prefix JUSTIFY means justify as well."
 			  "maple/toolbox/maplev/info/maplev.html")))
 	(if (file-exists-p html)
 	    (browse-url (concat "file://" html))
-	  (error "html file not found: %s" html))))))
+	  (error "HTML file not found: %s" html))))))
 
 ;;}}}
 
@@ -1100,7 +1100,7 @@ For the meaning of args see Info node `(elisp)Programmed Completion'."
 	  ((eq mode 'lambda)
 	   (assoc word possibilities)))))
 
-(defun maplev-complete-symbol (&optional prefix)
+(defun maplev-complete-symbol ()
   "Perform completion on maple symbol preceding point.
 Compare that symbol against `maplev-completions'."
   ;; Code borrowed from lisp-complete-symbol.
