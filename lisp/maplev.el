@@ -1675,7 +1675,7 @@ If nil then `font-lock-maximum-decoration' selects the level."
   "Open the include file at point.
 If found, the file is opened either in this window or the other
 window, depending on the exclusive-or of TOGGLE with
-`maplev-include-file-other-window-flag'.  The :include-path slot
+`maplev-include-file-other-window-flag'.  The `:include-path' slot
 of variable `maplev-config' specifies the search paths.  If the file
 cannot be found, but the proper directory exists, query user to
 create the file."
