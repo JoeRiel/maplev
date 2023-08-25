@@ -220,7 +220,7 @@ See `maplev-find-include-file'."
 
 (defcustom maplev-load-config-file-flag nil
   "Non-nil means load a configuration file when starting `maplev-mode'.
-The configuration file is named .maplev and is searched for in
+The configuration file is named `.maplev' and is searched for in
 the current directory and its ancestors.  The file is loaded as
 an elisp file.  No error occurs if the file does not exist."
   :type 'boolean
