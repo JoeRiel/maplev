@@ -180,7 +180,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 
 (defun maplev-view-goto-source ()
   "Goto the source of the current Maple procedure."
-  (interactive "P")
+  (interactive)
   (let* ((proc (maplev-history--stack-current))
 	 (file-line (maplev-view--get-source-and-line proc)))
     (if file-line
@@ -200,14 +200,14 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 	    (if (eq major-mode 'fundamental-mode)
 		(maplev-mode))
 	    (goto-char (point-min))
-	    (forward-line (1- line)))
-	  (error "No line-info data for %s" proc)))))
+	    (forward-line (1- line))))
+      (error "No line-info data for %s" proc))))
 
 (defun maplev-view--get-source-and-line (proc)
   "Return the filename and line number of the source for Maple procedure PROC.
 If found, they are returned as a cons-cell \(file \. line\),
 otherwise nil is returned."
-  (let* ((cmd (format "lprint(maplev:-GetSource(\"%s\")):" proc))
+  (let* ((cmd (format "printf(\"%%a\",maplev:-GetSource(\"%s\")):" proc))
 	 (res (maplev-pmaple-direct cmd 'delete))
 	  file line)
     (when (and (not (string= res "NULL"))
