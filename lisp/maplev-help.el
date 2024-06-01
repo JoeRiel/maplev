@@ -120,8 +120,7 @@ The optional CONFIG argument is an object of type
 
 (defun maplev--help-buffer ()
   "Return the name of the Maple help buffer."
-  (concat "Maple help" (and maplev-config
-			    (format " (%s)" (slot-value maplev-config 'maple)))))
+    (format "Maple help %s)" (slot-value (or maplev-config maplev-config-default) 'maple)))
 
 (defun maplev-help-follow-mouse (click)
   "Display the Maple help page of the topic at the mouse CLICK."
@@ -160,7 +159,7 @@ If HIDE is non-nil, do not bring buffer to front."
   (unless
       (and maplev-help-use-standard-flag
 	   (maplev-help-standard-help topic))
-      (let ((config maplev-config))
+      (let ((config (or maplev-config maplev-config-default)))
 	(with-current-buffer (get-buffer-create (maplev--help-buffer))
 	  (maplev-help-setup config)
 	  ;; Push TOPIC onto history stack
