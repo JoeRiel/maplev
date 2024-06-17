@@ -83,8 +83,7 @@ Optional CONFIG is an object of type `maplev-config-class'."
 
 (defun maplev--proc-buffer ()
   "Return the name of the Maple procedure listing buffer."
-  (format "Maple proc (%s)" (slot-value maplev-config 'maple)))
-
+  (format "Maple proc (%s)" (slot-value (or maplev-config maplev-config-default) 'maple)))
 
 ;;; Define functions for displaying a Maple procedure from the Maple
 ;;; library in a buffer.
@@ -110,7 +109,7 @@ If optional arg HIDE is non-nil do not display buffer."
   ;; Do not try to display builtin procedures.
   (if (member proc maplev-builtin-functions)
       (message "Procedure \`%s\' builtin." proc)
-    (let ((config maplev-config))
+    (let ((config (or maplev-config maplev-config-default)))
       (with-current-buffer (get-buffer-create (maplev--proc-buffer))
 	(maplev-view-setup config)
 	(maplev-history--stack-process proc hide)))))
