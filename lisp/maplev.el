@@ -1767,7 +1767,10 @@ nil."
 ;;{{{ Links
 
 (defun maplev-buttonize-links ()
-  "Buttonize the link statements."
+  "Buttonize the link statements.
+The link points to a file of interest; the action opens the file.
+For example, '#LINK ../../Makefile', with the pound symbol as the
+first character in the line."
   (button-lock-mode t)
   (button-lock-set-button maplev--link-re
 			  'maplev-find-link-file-at-point
