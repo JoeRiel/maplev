@@ -37,8 +37,8 @@
 ;; Define variables and functions for handling indentation information.
 
 (defvar maplev-indent-declaration 0
-  "Buffer-local variable that sets the indentation declarations.
-Declarations are Maple local, global, and export statements.
+  "Buffer-local variable that sets the indentation of declarations.
+Declarations are Maple `local', `global', and `export' statements.
 The default value is taken from `maplev-indent-declaration-level'.")
 
 (defvar maplev-indent-use-info-flag t

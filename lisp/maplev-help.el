@@ -207,6 +207,12 @@ PROCESS calls this filter.  STRING is the output."
     (when (looking-at "(\\*\\*) ")
       (delete-region (point) (match-end 0))))
   (maplev-help-fontify-node)
+  ;;; Doesn't work.  What is preventing the displayed point from moving?
+  ;;; There are save-excursion calls in maplev--help-filter, but removing
+  ;;; them doesn't help.  Maybe the external process ...
+  ;; (goto-char (point-min))
+  ;; (when (looking-at "No exact matches found. Please try one of the following")
+  ;;   (search-forward "\n\n1. " nil t)
   (set-buffer-modified-p nil))
 
 (defun maplev-switch-buffer-help ()
@@ -258,7 +264,7 @@ PROCESS calls this filter.  STRING is the output."
 If successful, return t, otherwise return nil."
   (condition-case nil
       (let ((tcp-proc (open-network-stream "tcp-proc" nil "localhost" maplev-help-port))
-	    (request (format "help(%s)" topic)))
+	    (request topic))
 	(process-send-string tcp-proc request)
 	(delete-process tcp-proc)
 	(message "Help sent to Maple GUI")

@@ -136,7 +136,7 @@ either `maplev-add-declaration-leading-comma' or
   :group 'maplev-indentation)
 
 (defcustom maplev-auto-break-strings-flag t
-  "Non-nil means strings in code will be automatically broken when they pass the `current-fill-column'."
+  "Non-nil means break strings that exceed `current-fill-column'."
   :type 'boolean
   :group 'maplev-indentation)
 
@@ -149,7 +149,7 @@ either `maplev-add-declaration-leading-comma' or
 ;;{{{ (*) templates
 
 (defcustom maplev-copyright-owner "John Q. Public"
-  "Copyright owner inserted in the copyright string by `maplev--template-proc-module'."
+  "Copyright owner inserted in the copyright by `maplev--template-proc-module'."
   :type 'string
   :group 'maplev-templates)
 
@@ -214,9 +214,14 @@ See `maplev-find-include-file'."
 ;; Configuration
 
 (defcustom maplev-buttonize-includes-flag t
-  "Non-nil means use function `button-lock-mode' to hyperlink include statements."
+  "Non-nil means use `button-lock-mode' to hyperlink include statements."
   :type 'boolean
   :group 'maplev-misc)
+
+;; (defcustom maplev-buttonize-module-exports-flag nil
+;;   "Non-nil means use function `button-lock-mode' to hyperlink module-exports (e.g. foo:-bar)."
+;;   :type 'boolean
+;;   :group 'maplev-misc)
 
 (defcustom maplev-load-config-file-flag nil
   "Non-nil means load a configuration file when starting `maplev-mode'.
@@ -326,8 +331,8 @@ The features enabled are release dependent."
   :group 'maplev-executables)
 
 (defcustom maplev-load-path nil
-  "If non-nil used to assign environment variable LD_LIBRARY_PATH when pmaple is started;
-see the function `maplev-pmaple--start-process'."
+  "If non-nil, assign value to env. variable LD_LIBRARY_PATH when pmaple starts.
+See the function `maplev-pmaple--start-process'."
   :type 'string
   :group 'maplev-executables)
 

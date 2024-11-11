@@ -122,7 +122,7 @@ It matches from the \"end\" to the terminating colon or semicolon.")
 	  "\\|"                         ; or
 	  maplev--top-defun-begin-re "[^#\n]*" ; one line proc
 	  maplev--defun-end-re-colon)
-  "Regular expression for \"end\" statement in a top level Maple procedure assignment.
+  "Regex for \"end\" statement in a top level Maple procedure assignment.
 It matches either a flush left \"end\" or a one line procedure assignment.")
 
 (defconst maplev--space-dot-quote-re "\\s-*\\.[`\"]") ; space could be allowed 'twixt dot and quote
@@ -142,8 +142,8 @@ including double-quotes.")
 
 (defconst maplev--compile-error-re
   "^on line \\([0-9]+\\) of[ \n]\"\\([^\"]*\\)"
-  "Regular expression that matches the output of a Maple load time error message.
-This is intended to be assigned to an element of `compilation-error-regexp-alist-alist'.
+  "Regular expression that matches the output of a Maple load time error.
+Intended to be assigned to an element of `compilation-error-regexp-alist-alist'.
 The first group matches the line number, the second group the file name.")
 
 (defconst maplev--link-re
@@ -171,6 +171,10 @@ For example, given \"begin\" the regular expression matches \"gin\"."
 assignment; this assumes that a naked \"end\" is not used (may have to rethink
 that, as they are used).")
 
+(defconst maplev--module-export-re
+  (concat "\\(?:" maplev--symbol-re "\\(?::-" maplev--symbol-re "\\)+\\)")
+  "Regular expression that matches a module export designation.
+An example is foo:-bar.")
 
 (provide 'maplev-re)
 

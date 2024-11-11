@@ -666,6 +666,10 @@ Key bindings:
     (maplev-buttonize-includes)
     (maplev-buttonize-links))
 
+  ;; experimental,
+  ;; (when maplev-buttonize-module-exports-flag
+  ;;    (maplev-buttonize-module-exports))
+
   ;; Create configuration object
   (if maplev-load-config-file-flag (maplev-load-config-file))
   (unless maplev-config
@@ -812,7 +816,7 @@ This is a hack and is hardly robust."
 	t)
        ((looking-at maplev--expr-re)
 	(goto-char (match-end 0)))
-       ((looking-at "\\s-*\\(?:#.*\\)?$") ; inline-comment
+       ((looking-at "\\s-*\\(?:#.*\\)$") ; inline-comment
 	(forward-line)
 	(not (eobp))))
       (maplev-forward-expr)))
@@ -950,7 +954,7 @@ Prompt for the NAME, ARGS, and DESCRIPTION.  See `maplev-template'."
   (maplev--template-proc-module "module" name args description))
 
 (defun maplev-template-use-statement (exprseq)
-  "Insert a template for a Maple use statement and move point to its first statement.
+  "Insert a template for a Maple use-statement and move to its first statement.
 Prompt for the EXPRSEQ."
   (interactive "*sExpression Sequence: ")
   (insert "use " exprseq " in")
@@ -1802,6 +1806,20 @@ window, depending on the exclusive-or of
 	    (find-file-other-window file)
 	  (find-file file))))))
 
+(defun maplev-buttonize-module-exports ()
+  "Buttonize module-exports."
+  (button-lock-mode t)
+  (button-lock-set-button maplev--module-export-re
+			  'maplev-find-module-export-at-point
+			  :face 'link
+			  :face-policy 'prepend
+			  :grouping 0
+			  :keyboard-binding "C-c C-o"
+			  :help-text "open file"))
+
+(defun maplev-find-module-export-at-point (toggle)
+  (interactive "P")
+  (point))
 
 ;;}}}
 
@@ -1885,7 +1903,7 @@ if `maplev-leading-comma-flag' is non-nil, remove space before a comma."
 ;; Functions for aiding maple debugging
 
 (defun maplev-stopat ()
-  "Push onto the kill ring a Maple stopat command for the current position in the source file."
+  "Push onto the kill ring a stopat command in the source file."
   (interactive)
   (let ((filename (buffer-file-name))
 	(linenum (line-number-at-pos)))

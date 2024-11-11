@@ -180,7 +180,7 @@ export
             pltfile := plotfile;
         end if;
 
-        if plt? :: 'specfunc({INTERFACE_PLOT,INTERFACE_PLOT3D,PLOT,PLOT3D,_PLOTARRAY})' then
+        if plt? :: 'specfunc'({'INTERFACE_PLOT','INTERFACE_PLOT3D','PLOT','PLOT3D',cat(``,"_PLOTARRAY")}) then
             plt := plt?;
         else
             plt := plot(plt?, _rest);

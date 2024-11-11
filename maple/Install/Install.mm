@@ -7,7 +7,7 @@
 ##CALLINGSEQUENCE
 ##- Install('opts')
 ##DESCRIPTION
-##- The `Install` command installs the "Emacs" lisp and info files for MapleV.
+##- The `Install` command installs the "Emacs" lisp and **info** files for MapleV.
 ##  It also byte compiles the lisp files.
 ##
 ##- The lisp files are extracted from the Maple workbook to ~$HOME/maple/toolbox/maplev/lisp/~,

@@ -1,11 +1,6 @@
-(let ((proj-root "/home/joe/emacs/maplev")
-      (maple-root "/opt/maple2022"))
+(let* ((pkg "maplev")
+       (proj-root "/home/joe/emacs/maplev"))
   (maplev-config
-   :mapledir maple-root
-   :bindir (concat maple-root "/bin.X86_64_LINUX")
-   :maple-options "-B -A2 -e2"
-   :maple (concat maple-root "/bin/maple")
-   :include-path (concat proj-root "/maple")
-   :pmaple "/home/joe/maple/toolbox/maplev/bin.X86_64_LINUX/pmaple"
-   :project-source (concat proj-root "/maple/src/maplev.mpl")
+   :include-path (format "%s/maple" proj-root)
+   :project-source (concat proj-root "/maple/src/" pkg ".mpl")
    :compile (format "make -C %s mla-install" proj-root)))

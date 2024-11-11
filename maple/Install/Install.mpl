@@ -11,22 +11,21 @@ local Copy;
 $include <Install/Copy.mm>
 
 export
-    ModuleApply := proc( { data :: truefalse := false }
+    ModuleApply := proc( { doc :: truefalse := false }
                          , { emacs :: truefalse := false }
                          , { emacs_init :: truefalse := false }
+                         , { maple :: truefalse := false }
                        )
 
-    local bindir, book, dir, dst, file, join, lisp, maple, mapledir, mint, numchars, numlines, pixheight, pixwidth, platform, pmaple, src, systype, tboxdir;
+    local book, dir, dst, file, files, lisp, numchars, numlines, pixheight, pixwidth, src, tboxdir;
 
-    uses FT = FileTools;
-
-        join := proc()
-            FileTools:-JoinPath([_passed]);
-        end proc;
+    uses  FT = FileTools
+        , JoinPath = FileTools:-JoinPath
+        ;
 
         tboxdir := kernelopts('toolboxdir' = 'TOOLBOX');
 
-        book := join(tboxdir, "lib", sprintf("%a.maple", 'TOOLBOX'));
+        book := JoinPath([tboxdir, "lib", sprintf("%a.maple", 'TOOLBOX')]);
 
         if not FT:-Exists(book) then
             error "Maple book %1 does not exist", book;
@@ -34,24 +33,37 @@ export
 
         book := sprintf("maple://%s", book);
 
-        #{{{ data
+        #{{{ doc
 
-        if data then
+        if doc then
 
-            printf("\nextracting data\n");
+            printf("\nextracting the doc files\n");
 
-            src := FT:-ListDirectory(FT:-JoinPath([book, "data"]), 'returnonly' = "*.mpl");
-            if src = [] then
-                error "no data found";
-            end if;
-            dir := join(tboxdir, "data");
-            if not FT:-Exists(dir) then
-                FT:-MakeDirectory(dir);
-            end if;
-            for file in src do
-                dst  := join(dir, file);
-                file := join(book, "data", file);
-                Copy(file, dst, 'force', 'verbose');
+            dir := JoinPath([book, "doc"]);
+            files := FT:-ListDirectory(dir);
+
+            for file in files do
+                dst := JoinPath([tboxdir, file]);
+                src := JoinPath([book, file]);
+                Copy(src, dst, 'force', 'verbose');
+            end do;
+
+        end if;
+
+        #}}}
+        #{{{ maple
+
+        if maple then
+
+            printf("\nextracting maple source files\n");
+
+            dir := JoinPath([book, "maple"]);
+            files := FT:-ListDirectory(dir, 'recurse');
+
+            for file in files do
+                dst := JoinPath([tboxdir, file]);
+                src := JoinPath([book, file]);
+                Copy(src, dst, 'force', 'verbose');
             end do;
 
         end if;
@@ -70,64 +82,20 @@ export
                 src := src[1];
             end if;
 
-            dst := join(tboxdir, src);
-            src := join(book, src);
+            dst := JoinPath([tboxdir, src]);
+            src := JoinPath([book, src]);
             Copy(src, dst, 'force', 'verbose');
 
         end if;
 
         #}}}
-
-
         #{{{ emacs_init
 
         if emacs_init then
 
-            (bindir,mapledir,platform) := kernelopts(':-bindir',':-mapledir',':-platform');
-
-            systype := FileTools:-Filename(kernelopts('bindir'));
-
-            maple  := join(bindir, "cmaple");
-            mint   := join(bindir, "mint");
-            pmaple := join(kernelopts('toolboxdir' = 'maplev'), systype, "pmaple");
-
-            if platform = "windows" then
-                maple  := cat(maple , ".exe");
-                mint   := cat(mint   , ".exe");
-                pmaple := cat(pmaple , ".exe");
-            elif platform = "unix" then
-                # use scripts so environment is properly set
-                for file in ["maple", "smaple"] do
-                    file := join(mapledir, "bin", file);
-                    if FileTools:-Exists(file) then
-                        maple := file;
-                        break;
-                    end if;
-                end do;
-            end if;
-
-            if not FileTools:-Exists(maple)  then maple  := 'nil'; end if;
-            if not FileTools:-Exists(pmaple) then pmaple := 'nil'; end if;
-            if not FileTools:-Exists(mint)   then mint   := 'nil'; end if;
-
-            lisp := sprintf(";; Open files with extension .mpl with maplev-mode\n"
-                            "(add-to-list 'auto-mode-alist `(\"\\\\.mpl\\\\'\" . maplev-mode))\n"
-                            "\n"
-                            ";; Assign maplev-config-default; it can also be customized with M-x customize-group RET maplev\n"
-                            "(eval-after-load 'maplev-config\n"
-                            "  '(setq maplev-config-default\n"
-                            "       (make-instance 'maplev-config-class\n"
-                            "                      :bindir   %a\n"
-                            "                      :mapledir %a\n"
-                            "                      :maple    %a\n"
-                            "                      :mint     %a\n"
-                            "                      :pmaple   %a)))"
-                            , bindir
-                            , mapledir
-                            , maple
-                            , mint
-                            , pmaple
-                           );
+            lisp := ("(use-package maplev\n"
+                     "  :commands maplev-mode)"
+                    );
 
             numlines := 1 + StringTools:-CountCharacterOccurrences(lisp, "\n");
             numchars := max(map(numelems, StringTools:-Split(lisp,"\n")));

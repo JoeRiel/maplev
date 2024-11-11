@@ -58,10 +58,10 @@ This is only used if `maplev-mint-rerun-flag' is non-nil."
   "Buffer containing source code that was passed to Mint.")
 
 (defvar maplev-mint--code-beginning nil
-  "Marker at beginning of region in `maplev-mint--code-buffer' that was passed to Mint.")
+  "Marker at beginning of region in `maplev-mint--code-buffer' passed to Mint.")
 
 (defvar maplev-mint--code-end nil
-  "Marker at end of region in `maplev-mint--code-buffer' that was passed to Mint.")
+  "Marker at end of region in `maplev-mint--code-buffer' passed to Mint.")
 
 (defvar maplev--declaration-history nil
   "History list used for type declarations.")
@@ -742,7 +742,7 @@ as in `re-search-forward'."
 
 (defun maplev--re-search-backward (regexp &optional bound noerror count)
   "Search backward from point for regular expression REGEXP.
-This function is like `re-search-backward', but strings and comments are ignored.
+Similar to `re-search-backward', but strings and comments are ignored.
 Optional arguments BOUND, NOERROR, and COUNT have the same meaning
 as in `re-search-backward'."
   ;; See maplev--re-search-forward.

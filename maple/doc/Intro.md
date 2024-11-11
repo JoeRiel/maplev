@@ -1,13 +1,14 @@
+##INCLUDE ../include/version.mpi
 ##TOPIC(help,label="Intro") maplev[Intro]
 ##TITLE MapleV
-##HALFLINE An Emacs Package for Maple Developers
+##HALFLINE An Emacs Package for Maple Developers (version \PKG_VERSION)
 ##AUTHOR   Joe Riel
-##DATE     Dec 2022
+##DATE     Nov 2024
 ##DESCRIPTION
 ##-(nolead) **MapleV** is an Emacs package for developing source code for Maple.
-##  The complete source for MapleV is available at "github",
-##  however, building the package from source is not straightforward.
-##  This package provides a simpler method to install MapleV.
+###  The complete source for MapleV is available at "github",
+###  however, building the package from source is not straightforward.
+###  This package provides a simpler method to install MapleV.
 ##
 ##SECTION Requirements
 ##- "GNU Emacs" 27+.  Earlier versions may work
@@ -22,6 +23,17 @@
 ##
 ##> PackageTools:-Install("this://",'overwrite'):
 ##
+##- Install the doc directory, which contains a pdf and html of the documentation for maplev.
+##  This may be skipped; the documentation for maplev should be available in the Emacs info
+##  reader after the steps in the Emacs section, below, are completed.
+##
+##> maplev:-Install('doc'):
+##
+##- Install the Maple source files for maplev.
+##  This may be skipped as the source files
+##  are not needed for using the tool.
+##
+##> maplev:-Install('maple'):
 ##ENDSUBSECTION
 ##SUBSECTION Emacs
 ##- Unpack the tar file that contains the lisp and info files for MapleV

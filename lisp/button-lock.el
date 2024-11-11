@@ -644,7 +644,10 @@ argument, it enables the mode if the argument is positive and
 otherwise disables it.  When called from Lisp, it enables the
 mode if the argument is omitted or nil, and toggles the mode if
 the argument is 'toggle."
-  nil button-lock-mode-lighter nil
+  ;; nil button-lock-mode-lighter nil
+  :init-value nil
+  :lighter button-lock-mode-lighter
+  :keymap nil
   (cond
     ((and button-lock-mode
           (or noninteractive                    ; never turn on button-lock where
