@@ -177,7 +177,9 @@ If HIDE is non-nil, do not bring buffer to front."
     (let (buffer-read-only)
       (delete-region (point-min) (point-max)))
     (comint-simple-send process (concat
-				 "interface('screenheight=infinity'):"
+				 ;; The width is tricky.  Setting it to a normal size (say 80)
+				 ;; breaks some help pages, e.g. int (which has issues).
+				 "interface('screenheight=infinity','screenwidth=220'):"
 				 ;; "kernelopts('printbytes'=false):"
 				 "help(\"" topic "\");"
 				 (string ?\0)))))
