@@ -403,8 +403,9 @@ Each element is a list of the form \(REGEXP FACE PROP VAR\):
 - REGEXP is to be matched;
 - FACE is a face applied to the first regexp group;
 - PROP is a symbol applied as a text property to the first regexp group.
-- VAR is optional, if non-nil REGEXP is catenated with `maplev-mint-variables-re';
-  doing so causes the following variables to be in a regexp group.")
+- VAR is optional, if non-nil REGEXP is catenated with
+  `maplev-mint-variables-re'; doing so causes the following variables
+   to be in a regexp group.")
 
 (defun maplev-mint-fontify-buffer ()
   "Fontify the mint buffer.  Does not use font-lock mode."
