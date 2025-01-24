@@ -1512,7 +1512,7 @@ file (either < or \").  The second group matches the filename.")
      "Wrightomega" "xormap" "xorseq" "Zeta" "ztrans"
 
      ;; miscellaneous procedures
-     "interface" "readline" "with" "unwith"
+     "interface" "readline" "restart" "with" "unwith"
      )
     "List of some of the protected names in Maple.
 This is supposed to exclude the builtins and reserved words."))
