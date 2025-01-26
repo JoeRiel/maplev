@@ -63,7 +63,7 @@ export
 ##  sets options used by the "maplev:-Plot" command.
 ##  It returns an expression sequence of equations of the values of all options,
 ##  after applying any changes.
-##EXAMPLE
+##EXAMPLE(notest)
 ##> maplev:-Plot:-Options();
 ##> maplev:-Plot:-Options('embed' = true);
 ##SEEALSO
@@ -72,7 +72,7 @@ export
 ##XREFMAP
 ##- "Plot" : Help:maplev,Plot
 ##TEST
-## $include <include/test_macros.mi>
+## $include <maple/include/test_macros.mi>
 ## AssignFUNC(Plot:-Options):
 ### mdc(FUNC):
 ##
@@ -88,7 +88,7 @@ export
                    )
     option threadlock;
 
-        opts:-height  := height;
+       opts:-height  := height;
         opts:-width   := width;
         opts:-embed   := embed;
         opts:-viewer  := viewer;

@@ -1,7 +1,7 @@
 #LINK maplev.mpl
 
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE maplev:-GetSource
+##PROCEDURE(label="GetSource") maplev:-GetSource
 ##HALFLINE return the source file and line number of a procedure
 ##INDEXPAGE maplev[Exports],GetSource,return the source file and line number of a Maple procedure
 ##CALLINGSEQUENCE
@@ -104,12 +104,14 @@ local base,cmd,file,li,line,mroot,opacity,p,res,src;
     return src;
 end proc;
 
-##TEST
-## macro(FUNC = maplev:-GetSource):
+##TEST(notest)
+### These fail in tester; the call to debugopts(lineinfo) is returning NULL.
+### Stepping through the works.
+## $include <maple/include/test_macros.mi>
+## AssignFUNC(GetSource):
 ### mdc(FUNC):
-## Try("1", FUNC("maplev:-GetSource")
-##  , ["/home/joe/emacs/maplev/maple/GetSource.mm", 20]);
-## Try("2", map(whattype,FUNC("simplify")), [string,integer]);
+## Try("1.0", FUNC("maplev:-GetSource"), ["/home/joe/emacs/maplev/maple/GetSource.mm", 20]);
+## Try("2.0", map(whattype,FUNC("simplify")), [string,integer]);
 
 # (maplev-cmaple-direct "(maplev:-GetSource)(\"int:-Main\");")
 

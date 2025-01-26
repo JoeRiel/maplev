@@ -29,12 +29,12 @@ export Emacs, GetSource, Install, Plot, Print, Setup, _pexports;
 
 local pmaple_buffer := "unknown";  # assigned pmaple buffer by Setup
 
-$include <Install/Install.mpl>  # module used to install maplev
-$include <src/Emacs.mm>         # send lisp to Emacs
-$include <src/GetSource.mm>     # return source file and line number of a procedure
-$include <src/Plot.mm>          # display plots
-$include <src/Print.mm>         # used to display maple library code
-$include <src/Setup.mm>         # setup the pmaple kernel; called from Emacs
+$include <maple/Install/Install.mpl>  # module used to install maplev
+$include <maple/src/Emacs.mm>         # send lisp to Emacs
+$include <maple/src/GetSource.mm>     # return source file and line number of a procedure
+$include <maple/src/Plot.mm>          # display plots
+$include <maple/src/Print.mm>         # used to display maple library code
+$include <maple/src/Setup.mm>         # setup the pmaple kernel; called from Emacs
 
 end module:
 

@@ -1,6 +1,6 @@
 (let* ((pkg "maplev")
        (proj-root "/home/joe/emacs/maplev"))
   (maplev-config
-   :include-path (format "%s/maple" proj-root)
+   :include-path (format "%s" proj-root)
    :project-source (concat proj-root "/maple/src/" pkg ".mpl")
    :compile (format "make -C %s mla-install" proj-root)))

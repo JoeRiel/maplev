@@ -8,7 +8,7 @@ Install := module()
 
 local Copy;
 
-$include <Install/Copy.mm>
+$include <maple/Install/Copy.mm>
 
 export
     ModuleApply := proc( { doc :: truefalse := false }
