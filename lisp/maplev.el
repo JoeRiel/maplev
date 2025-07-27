@@ -1575,7 +1575,7 @@ minimum decoration keywords."
    (maplev-font-lock-keywords-1)
    (list
     (list maplev--special-words-re     '(0 font-lock-variable-name-face))
-    (list maplev--initial-variables-re '(0 font-lock-reference-face))
+    (list maplev--initial-variables-re '(0 font-lock-constant-face))
     (list maplev--ditto-operators-re   '(0 font-lock-variable-name-face)))))
 
 (defun maplev-font-lock-keywords-3 ()
