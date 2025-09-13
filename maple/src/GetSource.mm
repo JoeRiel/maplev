@@ -26,7 +26,8 @@
 ##- A leading `>` in the source name
 ##  is replaced with the value of the OS environment variable MAPLE_ROOT
 ##  followed by a directory separator.
-##  If MAPLE_ROOT is not assigned, an error is raised.
+##  If the "environment variable" MAPLE_ROOT is not assigned,
+##  an error is raised.
 ##
 ##OPTIONS
 ##opt(download,truefalse)
@@ -35,9 +36,12 @@
 ##  This only has an effect if the OS environment variable MAPLE_ROOT has `main`
 ##  as the child directory name.
 ##  The default is false.
+##
+##XREFMAP
+##- "environment variable" : Help:envvar
 
 GetSource := proc(p? :: string
-                  , { subs_maple_root :: truefalse := false }
+                  , { subs_maple_root :: truefalse := true }
                   , { download :: truefalse := false}
                   , $
                  )
@@ -106,12 +110,13 @@ end proc;
 
 ##TEST(notest)
 ### These fail in tester; the call to debugopts(lineinfo) is returning NULL.
-### Stepping through the works.
+### Stepping through them works.
 ## $include <maple/include/test_macros.mi>
 ## AssignFUNC(GetSource):
 ### mdc(FUNC):
 ## Try("1.0", FUNC("maplev:-GetSource"), ["/home/joe/emacs/maplev/maple/GetSource.mm", 20]);
 ## Try("2.0", map(whattype,FUNC("simplify")), [string,integer]);
+## Try("2.1", FUNC("simplify", 'subs_maple_root'), ["/home/joe/maplesoft/sandbox/main/lib/src/simplify.mpl", 40]);
 
 # (maplev-cmaple-direct "(maplev:-GetSource)(\"int:-Main\");")
 
