@@ -19,6 +19,7 @@ CLOUD-TITLE := An Emacs-based debugger for Maple
 
 BOOK  := true
 CLOUD := true
+USE-MAPLE := true
 
 BOOK-FILES := doc/${PKG}.html doc/${PKG}.pdf
 BOOK-FILES += $(wildcard maple/src/*.mm)
