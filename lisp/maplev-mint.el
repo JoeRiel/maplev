@@ -51,6 +51,34 @@ This is only used if `maplev-mint-rerun-flag' is non-nil."
   :type 'boolean
   :group 'maplev-mint)
 
+(defvar maplev-mint-options "-DMINT_ONLY -i2 -l -q -w120"
+  "String specifying the options passed to mint.
+The options have the form '-option [argument]'.
+Each option is a single character.
+
+See the mint help page in Maple.  The options are
+
+  -b libraryDir
+  -D macroDef
+  -i infoLevel
+  -I includePath
+  -k (Windows only)
+  -l (suppress library warnings)
+  -o outputFile
+  -q (quiet)
+  -s (suppress startup file)
+  -S (allow syntax error messages)
+  -t errorNumber (toggle specific errors)
+  -U macroName (undefine macro)
+  -w width (line width, in characters)
+  -x (cross reference; lists all functions called in the code)
+  -v (verbose; lists additional information such as the source files)
+
+  -a databaseFile (append  procedure information to databaseFile)
+  -A databaseFile
+  -d databaseFile (have mint use databaseFile as the procedure database)
+  -c ctagsFile (generate ctagsFile in ctags format)")
+
 ;;}}}
 ;;{{{ variables
 
@@ -507,7 +535,10 @@ ALL-VARS non-nil means handle all variables, not just the one clicked on."
 	 ;;
 	 ;; Remove unused local variables from local declaration.
 	 ((eq prop 'unused-local)
-	  (when (maplev-mint-query "Delete `%s' from local statements? " arg)
+	  (when (maplev-mint-query "Delete `%s' from local statements? "
+				   				   (if (and all-vars (> (length arg) 30))
+				       "all listed vars"
+				     arg))
 	    (maplev-delete-declarations "local" vars (maplev-mint--goto-source-and-get-region pos))))
 	 ;;
 	 ;; Remove unused exported variables from export declaration.
@@ -622,7 +653,9 @@ Return exit code of mint."
 
       (let ((mint (slot-value config 'mint))
 	    ;; N.B. mint occasionally generates nonsense output when screen width (-w) is large.
-	    (mint-args (append (maplev-get-option-with-include config 'mint-options))) ;;  "-w5000")))
+	    (mint-args (cons
+			(or (maplev-mint-read-options) "")
+			(maplev-get-option-with-include config 'mint-options))) ;;  "-w5000")))
 	    (process-environment (if maplev-use-new-language-features
 				     (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
 				   process-environment))
@@ -1227,6 +1260,22 @@ VARs is a list of undeclared globals."
 
 ;;}}}
 
+;;{{{ misc
+
+(defun maplev-mint-read-options ()
+  "Attempt to read a \"# mint-options:\" statement at the end of the file.
+Return the options as a string."
+  (interactive)
+  (save-excursion
+    ;; unfold?
+    (goto-char (point-max))
+    (beginning-of-line 0)
+    (if (looking-at "# mint-options: \\(.*\\)$")
+	(match-string-no-properties 1))))
+
+;;}}}
+
+;;{{{ Experimentation for a mint-ode
 
 (defvar maplev-mint-var-mode-map
   (let ((map tabulated-list-mode-map))
@@ -1281,7 +1330,7 @@ Return the edited list upon completion."
 ;; 	(config maple-config)
 ;; 	(file
 
-
+;;}}}
 
 (provide 'maplev-mint)
 
