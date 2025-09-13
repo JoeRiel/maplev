@@ -179,7 +179,7 @@ If HIDE is non-nil, do not bring buffer to front."
     (comint-simple-send process (concat
 				 ;; The width is tricky.  Setting it to a normal size (say 80)
 				 ;; breaks some help pages, e.g. int (which has issues).
-				 "interface('screenheight=infinity','screenwidth=220'):"
+				 "interface('screenheight=infinity','screenwidth=80'):"
 				 ;; "kernelopts('printbytes'=false):"
 				 "help(\"" topic "\");"
 				 (string ?\0)))))
