@@ -105,6 +105,7 @@
 ;;{{{ Requirements
 
 (require 'button-lock)
+(require 'wiki-nav)  ; Turn on navigation by bracketed [[WikString]].  Experimental.
 
 (require 'comint)
 (require 'font-lock)
@@ -1455,7 +1456,7 @@ file (either < or \").  The second group matches the filename.")
      "assume" "asympt" "BellB" "Berlekamp" "bernoulli" "bernstein" "BesselI" "BesselJ"
      "BesselJZeros" "BesselK" "BesselY" "BesselYZeros" "Beta" "binomial" "branches"
      "Cache" "ceil" "charfcn" "ChebyshevT" "ChebyshevU" "CheckArgs" "Chi" "chrem" "Ci"
-     "close" "coeftayl" "collect" "combine" "comparray" "compiletable" "CompleteBellB" "Complex"
+     "coeftayl" "collect" "combine" "comparray" "compiletable" "CompleteBellB" "Complex"
      "ComplexRange" "compoly" "conjugate" "Content" "content" "convergs" "copy" "cos"
      "cosh" "cot" "coth" "coulditbe" "CoulombF" "csc" "csch" "CylinderD" "CylinderU"
      "CylinderV" "D" "dataplot" "dawson" "define" "definemore" "depends" "Describe"
@@ -1465,8 +1466,8 @@ file (either < or \").  The second group matches the filename.")
      "EllipticModulus" "EllipticNome" "EllipticPi" "erf" "erfc" "erfi" "euler"
      "eulermac" "Eval" "evala" "evalapply" "evalc" "evalr" "evalrC" "example"
      "exists" "exp" "Expand" "Explore" "ExportVector" "extrema" "Factor"
-     "factor" "factorial" "Factors" "factors" "fclose" "fdiscont" "fixdiv" "floor"
-     "fnormal" "fopen" "forall" "forget" "fourier" "fouriercos" "fouriersin" "fprintf" "frac"
+     "factor" "factorial" "Factors" "factors" "fdiscont" "fixdiv" "floor"
+     "fnormal" "forall" "forget" "fourier" "fouriercos" "fouriersin" "frac"
      "Fraction" "freeze" "FresnelC" "Fresnelf" "Fresnelg" "FresnelS" "fsolve"
      "galois" "GAMMA" "GaussAGM" "Gausselim" "Gaussjord" "Gcd" "gcd" "Gcdex" "gcdex"
      "GegenbauerC" "GeneralizedPolylog" "getassumptions" "GF" "hankel" "HankelH1"
@@ -1494,7 +1495,7 @@ file (either < or \").  The second group matches the filename.")
      "MathieuSE" "MathieuSEPrime" "MathieuSPrime" "Matrix" "MatrixOptions" "max" "maximize"
      "MeijerG" "mellin" "min" "minimize" "modpol" "MOLS" "msolve" "mtaylor" "multinomial"
      "MultiPolylog" "MultiZeta" "nextprime" "NielsenPolylog" "norm" "Normal" "nprintf"
-     "Nullspace" "odetest" "open" "orseq" "packages" "patmatch" "piecewise" "plot" "plot3d"
+     "Nullspace" "odetest" "orseq" "packages" "patmatch" "piecewise" "plot" "plot3d"
      "plotsetup" "pochhammer" "poisson" "polylog" "Power" "Powmod" "powmod" "Prem"
      "prem" "prevprime" "Primfield" "Primitive" "primpart" "printf" "Product" "product"
      "proot" "protect" "Psi" "psqrt" "Quo" "quo" "radfield" "radnormal" "rand" "randomize"
@@ -1512,8 +1513,9 @@ file (either < or \").  The second group matches the filename.")
      "Wrightomega" "xormap" "xorseq" "Zeta" "ztrans"
 
      ;; miscellaneous procedures
-     "interface" "readline" "restart" "with" "unwith"
-     )
+     "Export"
+     "close" "fclose" "fopen" "fprintf" "interface" "iostatus" "open"
+     "readbytes" "readline" "restart" "unwith" "with" "writebytes"    )
     "List of some of the protected names in Maple.
 This is supposed to exclude the builtins and reserved words."))
 
