@@ -1,4 +1,3 @@
-$define AssignFUNC(P) FUNC := maplev:-P
-$define AssignLocalFUNC(P)   kernelopts('opaquemodules'=false): FUNC := maplev:-P: kernelopts('opaquemodules'=true);
-$define AssignLocalProc(f,P) kernelopts('opaquemodules'=false): f := maplev:-P: kernelopts('opaquemodules'=true);
+$define AssignLocalProc(f,P) kernelopts('opaquemodules'=false): f := maplev:-P: kernelopts('opaquemodules'=true)
+$define AssignFUNC(P) AssignLocalProc(FUNC,P)
 macro(NE=testnoerror, TE=testerror):
