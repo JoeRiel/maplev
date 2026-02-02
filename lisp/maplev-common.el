@@ -250,7 +250,7 @@ the Nth preceding defun."
   "Put mark at end of this defun, point at beginning.
 The defun marked is the one that contains point."
   (interactive)
-  (push-mark)
+  (push-mark (point) 'nomsg)
   (beginning-of-line)
   (with-syntax-table maplev-symbol-syntax-table
     (if (looking-at maplev--defun-begin-re) (goto-char (match-end 0)))
@@ -276,7 +276,7 @@ The defun marked is the one that contains point."
 	      (when (maplev--beginning-of-defun-pos)
 		(push-mark o-point nil t))))
 	;; at end of procedure
-	(push-mark (point) nil t) ; set mark after end of current procedure.
+	(push-mark (point) 'nomsg t) ; set mark after end of current procedure.
 	(when (re-search-backward maplev--defun-end-re-colon nil 'move)
 	  (setq count -1)
 	  (while (and (/= count 0)
