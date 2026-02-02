@@ -205,7 +205,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 (defun maplev-view--get-source-and-line (proc)
   "Return the filename and line number of the source for Maple procedure PROC.
 If found, they are returned as a cons-cell \(file \. line\),
-otherwise nil is returned."
+otherwise nil is returned.  FILE is a string.  LINE is a positive integer."
   (let* ((cmd (format "printf(\"%%a\",maplev:-GetSource(\"%s\")):" proc))
 	 (res (maplev-pmaple-direct cmd 'delete))
 	  file line)

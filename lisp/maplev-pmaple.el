@@ -109,10 +109,11 @@ and the options to pass to pmaple."
      ((not (or (file-exists-p maple) (executable-find maple)))
       (error "The specified maple, '%s', does not exist" maple))
      (t
-      (cons pmaple (cons maple (maplev-get-option-with-include maplev-config
-							       :maple-options
-							       "-q"
-							       (format "-c maplev:-Setup(\"%s\")" buffer))))))))
+      (cons pmaple (cons maple (maplev-get-option-with-include
+                                maplev-config
+				:maple-options
+				"-q"
+				(format "-c maplev:-Setup(\"%s\")" buffer))))))))
 
 (defun maplev-pmaple--start-process ()
   "Start a pmaple process associated with the current buffer.
@@ -125,8 +126,8 @@ directory before starting maple.  If custom variable
 variable LD_LIBRARY_PATH."
 
   (let* ((config (or maplev-config (maplev-config)))
-	 (process-environment (maplev-pmaple--process-environment))
-	 (pmaple-and-opts (maplev-pmaple--get-pmaple-and-options))
+         (process-environment (maplev-pmaple--process-environment))
+         (pmaple-and-opts (maplev-pmaple--get-pmaple-and-options))
          (buffer (get-buffer-create (maplev--pmaple-buffer)))
          (process (get-buffer-process buffer))
          ;; Just testing this.  Is there an advantage to a PTY process?
@@ -215,6 +216,7 @@ If optional argument DELETE is non-nil, delete the echoed Maple input
 from the output buffer."
   ;; This may not work on a Windows box; there, the input is not echoed
   ;; to the output buffer.
+  ;; The 5 appears to be width of the prompt ("(**) ").
   (interactive)
   (let ((proc (maplev--pmaple-process))) ; ensure Maple is started
     (with-current-buffer (maplev--pmaple-buffer)
@@ -385,7 +387,7 @@ additional commands for interacting with pmaple.
 
 (defun maplev-pmaple-setup (config)
   "Set `major-mode' to `maplev-pmaple-mode'.
-CONFIG is an object of type `maplev-config-class."
+CONFIG is an object of type `maplev-config-class'."
   (maplev-pmaple-mode)
   (setq maplev-config config))
 
