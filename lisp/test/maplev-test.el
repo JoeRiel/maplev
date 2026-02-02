@@ -1,0 +1,10 @@
+(require 'maplev)
+
+(ert-deftest maplev-split-shell-option-string-test ()
+    (cl-letf (((symbol-function 'func) #'maplev-split-shell-option-string))
+      (should (equal (func "") nil))
+      (should (equal (func " ") nil))
+      (should (equal (func "-w 10") '("-w10")))
+      (should (equal (func "-w 10 -x 10 -B") '("-w10" "-x10" "-B")))
+      (should (equal (func "-a -w 100") '("-a" "-w100")))
+      ))

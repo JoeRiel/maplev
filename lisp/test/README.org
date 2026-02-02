@@ -1,0 +1,81 @@
+<2026-01-26 Mon>
+
+Am considering putting further development of this directory on hold.
+A section in the manual, [[info:ERT#Useful][ERT]], gives a complicated test with
+non-existent ERT functions, such as  =ert-test-failed-backtrace=
+and =ert-test-failed-p=.
+
+The github source for ERT doesn't appear to accept issues.
+
+More to the point, I have no idea how the code is handled.
+What is, say =ert-test-failed-p=?  A function?  A macro?
+It appears in just one location.  How to link to an *el.gz* file?
+Linking to an *info.gz* file is simple, use =[[info:ert#Useful][ert]]=,
+i.e. [[info:ert#Useful][ert info]] .  Here is a link to [[file:/usr/share/emacs/28.2/lisp/emacs-lisp/ert.el.gz::ert-test-failed-p][ert-test-failed-p]].
+
+#+begin_src elisp
+(ert-deftest ert-test-record-backtrace-pass ()
+  (let ((test (make-ert-test :body (lambda () (ert-pass "foo")))))
+    (let ((result (ert-run-test test)))
+      (should (ert-test-failed-p result)))))
+#+end_src
+
+#+RESULTS:
+: ert-test-record-backtrace-pass
+
+Why does the following pass?
+
+#+begin_src elisp
+(ert-deftest ert-test-record-backtrace-fail ()
+  (let ((test (make-ert-test :body (lambda () (ert-fail "foo")))))
+    (let ((result (ert-run-test test)))
+      (should (ert-test-failed-p result)))))
+#+end_src
+
+#+RESULTS:
+: ert-test-record-backtrace-fail
+
+Return list of symbols of ert tests.
+I assume that org-mode is displaying the list as an org table.
+
+#+begin_src elisp
+(apropos-internal "" #'ert-test-boundp)
+#+end_src
+
+#+RESULTS:
+| ert-test-record-backtrace-fail | ert-test-record-backtrace-pass |
+
+Count the tests that passed.
+
+#+begin_src elisp
+(ert--stats-passed-expected (ert-run-tests 't (lambda (&rest args))))
+#+end_src
+
+#+RESULTS:
+: 2
+
+#+begin_src elisp
+(list 'a 'b 'c)
+#+end_src
+
+#+RESULTS:
+| a | b | c |
+
+
+#+begin_src elisp
+(and 1 3)
+#+end_src
+
+#+RESULTS:
+: 3
+
+
+It isn't clear how to create log files.  The method given in [[info:ERT::Running Tests in Batch Mode][ERT]] does not work.
+My current solution is implemented in [[file:testany::!/bin/bash][testany]], which uses =|& tee file.log=.
+
+The file [[file:maplev-common-test.el::;; (xt-deftest maplev--ident-around-point-test-2][maplev-common-test.el]] includes a test that fails.
+The idea was that clicking in text with a colon-dash operator (:-) should
+select the entire "expression", not just one component.
+
+
+

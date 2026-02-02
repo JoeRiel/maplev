@@ -1,0 +1,37 @@
+;;(require 'maplev)
+;; (require 'maplev-cmaple)
+(require 'maplev-pmaple)
+
+;; The following does nothing useful.
+;; The function maplev-config assigns a buffer-local
+;; variable (also maplev-config), but maplev-pmaple-direct
+;; uses its own buffer-local maplev-config.
+
+
+(let* ((maple "main")
+       (mapledir (concat (getenv "MAPLE_SANDBOX") "/" maple) )
+       (maplebin (concat mapledir "/internal.bin.X86_64_LINUX") )
+       )
+  (maplev-config
+   :maple (concat mapledir "/bin/maple")  ; a link named maple points to smaple
+   :bindir maplebin
+   )
+
+  (ert-deftest garbage ()
+    (should (equal "foo" (slot-value maplev-config 'maple))))
+
+  ;; (ert-deftest maplev-view--get-source-and-line-test ()
+  ;;   (cl-letf (((symbol-function 'func) #'maplev-view--get-source-and-line))
+  ;;     ;; (should (equal (func "simplify") '(">lib/src/simplify.mpl" . 40)))
+  ;;     (should (equal (func "simplify")
+  ;;                    '("/home/joe/maplesoft/sandbox/main/lib/simplify/src/simplify.mpl" . 38)))
+  ;;     ))
+
+  ;; (ert-deftest maple-test ()
+  ;;   (should (equal (maplev-pmaple-direct "kernelopts(mapledir);") "\"/opt/maple2020\"")))
+
+  )
+
+;; (maplev-view--get-source-and-line "simplify")
+;; (maplev-cmaple-direct "kernelopts(mapledir);")
+

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+for el in *-test.el; do
+    TST=${el%.el}
+    echo ${TST}
+    emacs --quick \
+	  --batch \
+	  --eval '(setq ert-batch-backtrace-right-margin 200)' \
+	  --load=test-init.el \
+	  --load=ert \
+	  --load=maplev \
+	  --load=${TST}.el \
+	  --funcall=ert-run-tests-batch-and-exit |& tee ${TST}.log
+done
+
