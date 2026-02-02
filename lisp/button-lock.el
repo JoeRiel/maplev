@@ -477,7 +477,8 @@ Returns nil if the current major mode is not a derived mode."
         buf))))
 
 (defun button-lock-maybe-unbuttonify-buffer ()
-  "This is a workaround for cperl mode, which clobbers `font-lock-unfontify-region-function'."
+  "This is a workaround for cperl mode.
+It clobbers `font-lock-unfontify-region-function'."
   (when (and (boundp 'font-lock-fontified)
              font-lock-fontified
              (not (eq font-lock-unfontify-region-function 'font-lock-default-unfontify-region)))
