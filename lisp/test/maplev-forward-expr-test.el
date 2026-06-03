@@ -30,8 +30,12 @@
               ("a+b" "a")
               ("a-b" "a")
               ("`a+b`" "`a+b`")
-	      ))
-    
+              ("[a]" "a")
+              ("{a,b,c}" "a")
+              ("foo(a)" "foo")
+              ("foo[a]" "foo")
+              ))
+
 
 
 (xt-deftest maplev-forward-expr-test

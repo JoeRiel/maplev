@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 TST=$1
 
 emacs --quick \

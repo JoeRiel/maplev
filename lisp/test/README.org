@@ -79,3 +79,18 @@ select the entire "expression", not just one component.
 
 
 
+<2026-02-03 Tue>
+
+What happened to =init-test.el=?  It is used by testall and testany.
+Recreated it.
+
+Add tests for the addition of [[file:~/.emacs.d/maple/maplev-pmaple.el::defun maplev-pmaple-status (][maplev-pmaple-status]] to maplev-pmaple.el.
+
+What is the syntax for overstriking/underlining?
+What does \r indicate? -->  Carriage-return.
+What about the regular expression [[file:~/.emacs.d/maple/maplev-pmaple.el::while (re-search-forward "\e\\\\\[\[0-9;\]+m" nil t) (replace-match "")]["\e\\[[0-9;]+m"]]?
+The \e is the escape character.  So it matches, say, "\e[123m".
+
+Added [[file:maplev-pmaple-test.el::ert-deftest maplev--cleanup-buffer-test (][maplev--cleanup-buffer-test]] to verify [[file:~/.emacs.d/maple/maplev-pmaple.el::defun maplev--cleanup-buffer (][maplev--cleanup-buffer]].
+
+How to test the other buffer modification that operate on =maplev--pmaple-buffer=?

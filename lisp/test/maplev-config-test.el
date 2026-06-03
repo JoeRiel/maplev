@@ -2,7 +2,7 @@
 
 ;; Test some of the functions used by mint
 (ert-deftest maplev-get-option-with-include-test ()
-  (cl-letf (((symbol-function 'func) #' maplev-get-option-with-include))
+  (cl-letf (((symbol-function 'func) #'maplev-get-option-with-include))
     (should (equal
 	     (func
 	      (maplev-config :mint-options "")
@@ -15,12 +15,12 @@
 	      :mint-options)
 	     '()))
     (should (equal
-	     (func 
+	     (func
 	      (maplev-config :mint-options "" :include-path "")
 	      :mint-options)
 	     '()))
     (should (equal
-	     (func 
+	     (func
 	      (maplev-config :mint-options "" :include-path '(""))
 	      :mint-options)
 	     '()))
@@ -34,7 +34,7 @@
 	      (maplev-config :mint-options "-q -x")
 	      :mint-options)
 	     '("-q" "-x")))
-    (should (equal 
+    (should (equal
 	     (func
 	      (maplev-config :mint-options "" :include-path "/dir")
 	      :mint-options)
