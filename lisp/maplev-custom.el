@@ -2,9 +2,9 @@
 
 ;;; Commentary:
 ;;
+;; This file contains customizable pararameters for maplev.
 
 ;;; Code:
-;;
 
 (require 'align)
 (require 'maplev-config)

@@ -307,6 +307,21 @@ from deleting the image when the history mechanism is used."
   (interactive)
   (remove-images (point-min) (point-max)))
 
+(defun maplev-pmaple-status (&optional nomsg)
+  "Return the status of the pmaple process.
+Display the result, unless optional NOMSG is non-nil."
+  (interactive)
+  (let ((proc (get-buffer-process (maplev--pmaple-buffer)))
+        msg status)
+    (if proc
+        (progn
+          (if (setq status (process-status proc))
+              (unless nomsg (message "pmaple status: %s" status)))
+          status)
+      (unless nomsg (message "buffer has no process"))
+      nil)))
+
+
 ;;}}}
 ;;{{{ mode map
 
