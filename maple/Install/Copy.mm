@@ -1,8 +1,8 @@
 #LINK Install.mpl
 
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE(help) MapleVInstaller:-Copy
-##HALFLINE copy file
+##PROCEDURE(nohelp) MapleVInstaller:-Copy
+##HALFLINE copy a file
 ##AUTHOR   Joe Riel
 ##DATE     Jun 2018
 ##CALLINGSEQUENCE
@@ -21,12 +21,18 @@
 ##  The default is false.
 ##DESCRIPTION
 ##- The `Copy` command copies a source file to a destination file.
+##SEEALSO
+##- "FileTools[Copy]"
+##TEST
+## $include <maple/include/test_macros.mi>
+## AssignFUNC(Install:-Copy):
+### mdc(FUNC):
+## Try[TE]("1.1", FUNC("foo","bar"));
 
 Copy := proc(src :: string
              , dst :: string
              , { force :: truefalse := false }
              , { verbose :: truefalse := false }
-             , $
             )
     FileTools:-Copy(src, dst, _options['force']);
     if verbose then

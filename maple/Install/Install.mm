@@ -81,7 +81,7 @@ uses FT = FileTools;
     for file in elfiles do
         src := cat(srcdir, "/", file);
         dst := cat(extractlispdir, "/", file);
-        FT:-Copy(src, dst, 'force');
+        FT:-Copy(src, dst, 1, 'force');
     end do;
 
     #}}}
@@ -124,7 +124,7 @@ uses FT = FileTools;
     for file in FT:-ListDirectory(extractlispdir) do
         src := cat(extractlispdir, "/", file);
         dst := cat(dstdir, "/", file);
-        FT:-Copy(src, dst, 'force');
+        FT:-Copy(src, dst, 2, 'force');
     end do;
 
     #}}}
@@ -150,7 +150,7 @@ uses FT = FileTools;
     end if;
     src := cat(tboxdir, "/info/maplev.info");
     dst := FT:-JoinPath([infodir, "maplev.info"]);
-    FT:-Copy(src, dst, 'force');
+    FT:-Copy(src, dst, 3, 'force');
 
     #}}}
     #{{{ (*) update dir file

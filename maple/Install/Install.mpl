@@ -1,4 +1,4 @@
-#LINK ../src/mdc.mpl
+#LINK ../src/maplev.mpl
 
 
 $define EMACS_PKG "maplev"
@@ -6,46 +6,94 @@ $define TOOLBOX maplev
 
 Install := module()
 
-local Copy;
+local Book, Copy, ToolboxDir;
+
 
 $include <maple/Install/Copy.mm>
 
+##PROCEDURE Install:-ModuleApply
+##CALLINGSEQUENCE
+##- Install('opts')
+##DESCRIPTION
+##- The `Install` command ...
+##OPTIONS
+##opt(binary,truefalse)
+##  True means install the Maple library and help.
+##  The default if false.
+##opt(doc,truefalse)
+##  True means install the 'doc' directory,
+##  which contains a pdf and html of the package.
+##  The default if false.
+##opt(emacs,truefalse)
+##  Unpack the tar file that contains the lisp and info files for the package.
+##  The default is false.
+##opt(emacs_init,truefalse)
+##  Display sample elisp code that can be copied into the "Emacs initialization file"
+##  to configure the package.
+##  The default is false.
+##opt(maple,truefalse)
+##  Install the source files for the Maple package.
+##  The default is false.
+##
+##XREFMAP
+##- "Emacs initialization file" : https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-File.html
+
+
 export
-    ModuleApply := proc( { doc :: truefalse := false }
+    ModuleApply := proc( { binary :: truefalse := false }
+                         , { doc  :: truefalse := false }
                          , { emacs :: truefalse := false }
                          , { emacs_init :: truefalse := false }
                          , { maple :: truefalse := false }
+                         , { rebuild :: truefalse := false }
                        )
 
-    local book, dir, dst, file, files, lisp, numchars, numlines, pixheight, pixwidth, src, tboxdir;
+    local cmd, dir, dst, file, files, lisp, numchars, numlines, pixheight, pixwidth, reply, src;
 
     uses  FT = FileTools
         , JoinPath = FileTools:-JoinPath
         ;
 
-        tboxdir := kernelopts('toolboxdir' = 'TOOLBOX');
 
-        book := JoinPath([tboxdir, "lib", sprintf("%a.maple", 'TOOLBOX')]);
+        #{{{ binary
 
-        if not FT:-Exists(book) then
-            error "Maple book %1 does not exist", book;
+        if binary then
+
+            # Install the system
+            PackageTools:-Install("this://", 'overwrite');
+
+            ToolboxDir := kernelopts('toolboxdir' = 'TOOLBOX');
+
+            Book := FileTools:-JoinPath(["maple:/", currentdir(), "maplev.maple" ]);
+
+            if not FT:-Exists(Book) then
+                error "Maple book %1 does not exist", Book;
+            end if;
+            # Make pmaple executable (for linux)
+            cmd := sprintf("chmod +x %s/bin.X86_64_LINUX/pmaple", ToolboxDir);
+            reply := ssystem(cmd);
+            if reply[1] <> 0 then
+                error "problem making pmaple executable: %1", reply[2];
+            end if;
+
         end if;
 
-        book := sprintf("maple://%s", book);
+        #}}}
 
         #{{{ doc
 
         if doc then
 
-            printf("\nextracting the doc files\n");
+            # Copy the pdf and html versions of mds.info to the base of the toolbox.
 
-            dir := JoinPath([book, "doc"]);
-            files := FT:-ListDirectory(dir);
+            printf("\nExtracting doc files\n");
+
+            files := FT:-ListDirectory("this:///doc");
 
             for file in files do
-                dst := JoinPath([tboxdir, file]);
-                src := JoinPath([book, file]);
-                Copy(src, dst, 'force', 'verbose');
+                dst := JoinPath([ToolboxDir, file]);
+                src := cat("this://", file);
+                Copy(src, dst, 1, 'force', 'verbose');
             end do;
 
         end if;
@@ -55,15 +103,21 @@ export
 
         if maple then
 
-            printf("\nextracting maple source files\n");
+            # Copy the maple subdirectory subdirectories to ToolboxDir/maple
 
-            dir := JoinPath([book, "maple"]);
-            files := FT:-ListDirectory(dir, 'recurse');
+            printf("\nExtracting maple source files\n");
+
+            files := FT:-ListDirectory("this:///maple", 'recurse');
+            files := map(substring, files, 9..-1);  # remove this:///
 
             for file in files do
-                dst := JoinPath([tboxdir, file]);
-                src := JoinPath([book, file]);
-                Copy(src, dst, 'force', 'verbose');
+                dst := JoinPath([ToolboxDir, "lib", file]);
+                dir := FT:-ParentDirectory(dst);
+                if not FT:-Exists(dir) then
+                    FT:-MakeDirectory(dir, 'recurse');
+                end if;
+                src := cat("this:///", file);
+                Copy(src, dst, 2, 'force', 'verbose');
             end do;
 
         end if;
@@ -73,18 +127,21 @@ export
 
         if emacs then
 
-            printf("\nextracting tar file\n");
+            printf("\nExtracting tar file\n");
 
-            src := FT:-ListDirectory(book, 'returnonly' = "*.tar");
+            # src := FT:-ListDirectory(FT:-JoinPath(["maple://", currentdir(), "maplev.maple"])
+            #                          , 'select' = "*.tar");
+            src := FT:-ListDirectory(Book, 'select' = "*.tar" );
+
             if src = [] then
                 error "missing tar file";
             else
                 src := src[1];
             end if;
 
-            dst := JoinPath([tboxdir, src]);
-            src := JoinPath([book, src]);
-            Copy(src, dst, 'force', 'verbose');
+            dst := JoinPath([ToolboxDir, src]);
+            src := cat("this:///", src);
+            Copy(src, dst, 3, 'force', 'verbose');
 
         end if;
 
@@ -105,11 +162,36 @@ export
             DocumentTools:-SetProperty("emacs_init", "value", lisp);
             DocumentTools:-SetProperty("emacs_init", "pixelheight", pixheight);
             DocumentTools:-SetProperty("emacs_init", "pixelwidth", pixwidth);
+            DocumentTools:-SetProperty("emacs_init", "codelanguage", `text/plain`);
 
         end if;
 
         #}}}
+        #{{{ rebuild
 
+        if rebuild then
+
+            local mla := FT:-JoinPath([ToolboxDir, "lib", "maplev.mla"]);
+
+            if FT:-Exists(mla) then
+                FT:-Remove(mla);
+            end if;
+
+            # cmd := ("mload --quiet --lineinfo --reindex --readonly "
+            #         "--log=maplev.log "
+            #         "--mla=maplev.mla "
+            #         "maple/src/maplev.mpl");
+            # reply := ssystem(cmd);
+            # if reply[1] <> 0 then
+            #     error "problem rebuilding maplev.mla: %1", reply[2];
+            # end if;
+
+            LibraryTools:-Create(mla, 100);
+            LibraryTools:-Save(maplev, mla);
+
+        end if;
+
+        #}}}
 
         return NULL;
 
