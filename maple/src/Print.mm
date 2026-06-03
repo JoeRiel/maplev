@@ -1,10 +1,14 @@
 #LINK maplev.mpl
 
-##MODULE Print
-##HALFLINE appliable module for printing a Maple expression
-##DESCRIPTION
-##- The `Print` module is used by the Emacs `maplev-view-mode` to display
-##  Maple library code in a buffer.
+##INCLUDE ../include/mpldoc_macros.mpi
+
+##DEFINE CommonParams 'indent','nomen','rel','keep_statement_numbers'
+##DEFINE COMMONPARAMDEFS
+##- 'indent'            : ::nonnegint::; the indentation of the procedure
+##- 'nomen'             : ::string::; the name of the expression; may also be of type name
+##- 'rel'               : ::string::; the assignment operator (~:=~ or ~:: static :=~)
+##- 'keep_statement_numbers' : ::truefalse::; true means keep the statement numbers
+##ENDDEFINE
 
 Print := module()
 
@@ -18,16 +22,57 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
         buf := StringTools:-StringBuffer();
     end proc;
 
-##PROCEDURE maplev:-Print:-ModuleApply
+##PROCEDURE(help,label="Print") maplev:-Print
+##HALFLINE appliable module for printing a Maple expression
+##INDEXPAGE maplev[Exports],Print,appliable module for printing a Maple expression
+##CALLINGSEQUENCE
+##- maplev:-Print('s','opts')
+##PARAMETERS
+##- 's'    : ::string::; string representation of a Maple expression to print
+##param_opts(Print)
+##RETURNS
+##- ::string:: or NULL
+##DESCRIPTION
+##- The `Print` command
+##  parses and prints a string of a Maple expression.
+##  This procedure is used by "mds", part of the mdcs debugger,
+##  to print requested procedures and modules.
+##SUBSECTION Exports
+##SHOWINDEX(table="maplev:-Print[Exports]")
+##ENDSUBSECTION
+##OPTIONS
+##opt(file,string)
+##  The name (path) of the file to write.
+##  The default is the empty string, which prints the output to the screen.
+##opt(return_string,truefalse)
+##  True means return the string that would otherwise be written or printed.
+##  The default is false.
+##opt(keep_statement_numbers,truefalse)
+##  True means keep (display) the statement numbers.
+##  The default is false.
+##EXAMPLES
+##>(noexecute) maplev:-Print("cos", 'keep_statement_numbers');
+##> maplev:-Print("proc(x) sin(x); end proc");
+##SEEALSO
+##- "mds"
+##XREFMAP
+##- "mdcs" : Help:mdc,Intro
+##TEST
+## $include <maple/include/test_macros.mi>
+## AssignFUNC(Print):
+## foo := module() end module:
+### mdc(FUNC):
+## Try("1.1", FUNC("proc(x) sin(x); end proc", 'return_string'), "expr := proc(x)\n    sin(x)\nend proc;" );
+## Try("1.2", FUNC("Record(a=1,b=2)", 'return_string'), "Record(a = 1,b = 2) := Record('a' = 1, 'b' = 2);" );
+## Try("1.3", FUNC("foo", 'return_string','keep_statement_numbers'), "foo := module ()\nend module;" );
+
 
     ModuleApply := proc(s :: string
                         , { file :: string := "" }
                         , { return_string :: truefalse := false }
-                        , { keep_line_numbers :: truefalse := false }
+                        , { keep_statement_numbers :: truefalse := false }
                        )
-
     local expr, opacity, str, width;
-
         try
             # Save and reset configuration.
             opacity := kernelopts('opaquemodules'=false);
@@ -35,7 +80,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
             buf:-clear();
             expr := parse(s);
-            Dispatch(0, expr, ":=", keep_line_numbers, expr);
+            Dispatch(0, expr, ":=", keep_statement_numbers, expr);
 
         finally
             # restore configuration
@@ -56,37 +101,66 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
     end proc;
 
 ##PROCEDURE maplev:-Print:-Dispatch
+##HALFLINE dispatch the given expression to the appropriate procedure
+##INDEXPAGE maplev:-Print[Exports],Dispatch,dispatch the given expression to the appropriate procedure
+##CALLINGSEQUENCE
+##- maplev:-Print:-Dispatch('indent','nomen','rel','keep_statement_numbers')
+##PARAMETERS
+##COMMONPARAMDEFS
+##RETURNS
+##- TBD
+##DESCRIPTION
+##- The `Dispatch` procedure
+##TEST
+## $include <maple/include/test_macros.mi>
+## AssignFUNC(Print:-Dispatch):
+### mdc(FUNC):
+## Try("1.1", FUNC(0,"nomen","=",false));
 
     Dispatch := proc(indent :: nonnegint
                      , nomen
                      , rel :: string # = or :=
-                     , keep_line_numbers :: truefalse
+                     , keep_statement_numbers :: truefalse
                     )
     local expr;
         expr := _rest;
         if expr :: procedure then
-            PrintProc(args);
+            PrintProc(_passed);
         elif expr :: 'record' then
-            PrintRecord(args);
+            PrintRecord(_passed);
         elif expr :: '`module`' then
-            PrintModule(args);
+            PrintModule(_passed);
         else
             buf:-appendf("%*s%a %s %q;", indent, "", nomen, rel, eval(expr));
         end if;
+        NULL;
     end proc;
 
-
 ##PROCEDURE maplev:-Print:-PrintModule
+##HALFLINE print a module
+##INDEXPAGE maplev:-Print[Exports],PrintModule,print a module
+##CALLINGSEQUENCE
+##- maplev:-Print:-PrintModule(\CommonParams,'m')
+##PARAMETERS
+##COMMONPARAMDEFS
+##- 'm' : a module or an object
 ##DESCRIPTION
 ##- The `PrintModule` commands prints module 'm',
 ##  which can be either a regular module, or an object.
 ##  A record is not handled.
+##TEST
+## $include <maple/include/test_macros.mi>
+## AssignFUNC(Print:-PrintModule):
+## M := module() export ex; local loc; end module:
+### mdc(FUNC):
+## Try[NE]("1.1.1", FUNC(1,foo,"::static :=",true,M), 'assign'='buf');
+## Try("1.1.2", buf:-value(), " foo ::static := module ()\n local loc;\n export ex;\n\n     ex := ex;\n end module;" );
 
 
     PrintModule := proc(indent :: nonnegint
                         , nomen
                         , rel :: string
-                        , keep_line_numbers :: truefalse
+                        , keep_statement_numbers :: truefalse
                         , m
                        )
     local em, ex, moddef, nm, obj;
@@ -117,11 +191,11 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
             # print exports
             for ex in exports(obj,'static','instance') do
                 buf:-newline();
-                Dispatch(indent + indent_amount
-                         , convert(convert(ex,string),name)
-                         , ":: static :="
-                         , ex
-                         , keep_line_numbers
+                Dispatch(indent + indent_amount             # indent
+                         , convert(convert(ex,string),name) # nomen
+                         , ":: static :="                   # rel
+                         , keep_statement_numbers           # keep_statement_numbers
+                         , ex                               # expr
                         );
                 buf:-newline();
             end do;
@@ -129,11 +203,11 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
             # print exports
             for ex in exports(m) do
                 buf:-newline();
-                Dispatch(indent + indent_amount
-                         , ex
-                         , ":="
-                         , keep_line_numbers
-                         , m[ex]
+                Dispatch(indent + indent_amount   # indent
+                         , ex                     # nomen
+                         , ":="                   # rel
+                         , keep_statement_numbers # keep_statement_numbers
+                         , m[ex]                  # expr
                         );
                 buf:-newline();
             end do;
@@ -142,11 +216,11 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
                 if ex :: '{procedure,`module`}' then
                     nm := convert(StringTools:-StringSplit(ex,":-")[-1],name);
                     buf:-newline();
-                    Dispatch(indent + indent_amount
-                             , nm
-                             , ":="
-                             , keep_line_numbers
-                             , ex
+                    Dispatch(indent + indent_amount   # indent
+                             , nm                     # nomen
+                             , ":="                   # rel
+                             , keep_statement_numbers # keep_statement_numbers
+                             , ex                     # expr
                             );
                     buf:-newline();
                 end if;
@@ -158,12 +232,24 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
 ##PROCEDURE maplev:-Print:-PrintProc
 ##HALFLINE print a procedure
-
+##INDEXPAGE maplev:-Print[Exports],PrintProc,print a procedure
+##CALLINGSEQUENCE
+##- maplev:-Print:-PrintProc(\CommonParams,'p')
+##PARAMETERS
+##COMMONPARAMDEFS
+##- 'p' : ::procedure::; the procedure to print
+##TEST
+## $include <maple/include/test_macros.mi>
+## AssignFUNC(Print:-PrintProc):
+## P := proc() end proc:
+### mdc(FUNC):
+## Try[NE]("1.1.1", FUNC(0,nomen,":=",false,P), 'assign' = 'buf');
+## Try("1.1.2", buf:-value(), "nomen := proc()\n    NULL\nend proc;" );
 
     PrintProc := proc(indent :: nonnegint
                       , nomen
                       , rel :: string
-                      , keep_line_numbers :: truefalse
+                      , keep_statement_numbers :: truefalse
                       , p
                      )
     description "Print like showstat, but without line numbers";
@@ -193,7 +279,7 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
                                (* the following are applied in reverse order *)
                                , "^[^ ]* :=" = rep
                                , "\n"      = sprintf("\n%*s", indent, "") # indent
-                               , ifelse(keep_line_numbers
+                               , ifelse(keep_statement_numbers
                                         , NULL
                                         , "\n (......)" = "\n    "  # remove numbers
                                        )
@@ -227,12 +313,26 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 
 
 ##PROCEDURE maplev:-Print:-PrintRecord
+##HALFLINE print a record
+##INDEXPAGE maplev:-Print[Exports],PrintRecord,print a record
+##CALLINGSEQUENCE
+##- maplev:-Print:-PrintRecord(\CommonParams,'rec')
+##PARAMETERS
+##COMMONPARAMDEFS
+##- 'rec' : ::record::
 ##DESCRIPTION
+##TEST
+## $include <maple/include/test_macros.mi>
+## AssignFUNC(Print:-PrintRecord):
+## R := Record(a=1,b=2):
+### mdc(FUNC):
+## Try[NE]("1.1.1", FUNC(0,nomen,":=",false,R), 'assign' = 'buf');
+## Try("1.1.2", buf:-value(), "nomen := record(\n    a = 1;\n    b = 2;\n);" );
 
     PrintRecord := proc(indent :: nonnegint
                         , nomen
                         , rel :: string
-                        , keep_line_numbers :: truefalse
+                        , keep_statement_numbers :: truefalse
                         , rec
                        )
     local ex;
@@ -243,13 +343,13 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
                 Dispatch(indent + indent_amount
                          , ex
                          , ""
-                         , keep_line_numbers
+                         , keep_statement_numbers
                         );
             else
                 Dispatch(indent + indent_amount
                          , ex
                          , "="
-                         , keep_line_numbers
+                         , keep_statement_numbers
                          , rec[ex]
                         );
             end if;

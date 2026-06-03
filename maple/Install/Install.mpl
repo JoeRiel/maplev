@@ -15,7 +15,8 @@ $include <maple/Install/Copy.mm>
 ##CALLINGSEQUENCE
 ##- Install('opts')
 ##DESCRIPTION
-##- The `Install` command ...
+##- The `Install` command installs parts of the `maplev` package.
+##
 ##OPTIONS
 ##opt(binary,truefalse)
 ##  True means install the Maple library and help.
@@ -34,6 +35,10 @@ $include <maple/Install/Copy.mm>
 ##opt(maple,truefalse)
 ##  Install the source files for the Maple package.
 ##  The default is false.
+##opt(rebuild,truefalse)
+##  Create or recreate the mla, ~lib/maplev.mla~ that contains
+##  the code for ~maplev~.
+##  The default is false.
 ##
 ##XREFMAP
 ##- "Emacs initialization file" : https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-File.html
@@ -49,6 +54,7 @@ export
                        )
 
     local cmd, dir, dst, file, files, lisp, numchars, numlines, pixheight, pixwidth, reply, src;
+    global maplev;
 
     uses  FT = FileTools
         , JoinPath = FileTools:-JoinPath

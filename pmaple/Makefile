@@ -31,7 +31,11 @@ BIN-DIR := $(HOME)/maple/toolbox/maplev/$(SYSTYPE)
 
 # {{{ noweb
 
-.PHONY: pdf
+.PHONY: pdf clean
+
+help: $(call print-help,clean,	Delete extracted noweb files)
+clean:
+	$(RM) pmaple.{aux,c,log,out,pdf,tex}
 
 pdf: $(call print-help,pdf,	Create pmaple.pdf)
 pdf: pmaple.pdf
@@ -79,8 +83,8 @@ linux:   $(SYSTYPE)/pmaple
 mac:     $(SYSTYPE)/pmaple
 windows: bin.X86_64_WINDOWS/pmaple.exe
 
-linux: $(call print-help,linux,	Create pmaple binary)
-mac:   $(call print-help,mac,	Create pmaple binary)
+linux:  $(call print-help,linux,	Create pmaple binary)
+mac:    $(call print-help,mac,	Create pmaple binary)
 windows: $(call print-help,windows,	Create pmaple.exe binary)
 
 

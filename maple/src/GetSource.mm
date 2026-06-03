@@ -1,7 +1,7 @@
 #LINK maplev.mpl
 
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE(label="GetSource") maplev:-GetSource
+##PROCEDURE(help,label="GetSource") maplev:-GetSource
 ##HALFLINE return the source file and line number of a procedure
 ##INDEXPAGE maplev[Exports],GetSource,return the source file and line number of a Maple procedure
 ##CALLINGSEQUENCE
@@ -17,35 +17,52 @@
 ##- The `GetSource` command returns a two-element list
 ##  containing the source file and line number
 ##  for the Maple procedure 'p'.
+##
+##- The parameter 'p', the name of a procedure,
+##  is a string that is parsed with ~kernelopts(opaquemodules)~
+##  temporarily assigned false so that a local procedure is handled.
+##
 ##- If no source is located, `NULL` is returned.
+##
 ##- If 'p' is an appliable module,
 ##  the source for ~p:-ModuleApply~ is used.
+##
 ##- If 'p' has been assigned with "overload"
 ##  using a list of procedures,
 ##  the source for the first procedure is returned.
+##
 ##- A leading `>` in the source name
-##  is replaced with the value of the OS environment variable MAPLE_ROOT
+##  is replaced with the value of ~kernelopts(mapledir)~
 ##  followed by a directory separator.
-##  If the "environment variable" MAPLE_ROOT is not assigned,
-##  an error is raised.
 ##
-##OPTIONS
-##opt(download,truefalse)
-##  True means download and install a source file from the perforce repository
-##  if the file currently does not exist.
-##  This only has an effect if the OS environment variable MAPLE_ROOT has `main`
-##  as the child directory name.
-##  The default is false.
+##EXAMPLE(noexecute)
+##- Load the package.
+##> with(maplev):
+##- Get the file name and starting line number for this procedure.
+##> src := GetSource("maplev:-GetSource");
 ##
-##XREFMAP
-##- "environment variable" : Help:envvar
+##SEEALSO
+##- "maplev"
+##- "ModuleApply"
+##- "kernelopts"
+##
+##TEST
+### These fail in tester because debugopts('lineinfo') returns NULL
+### (that is a feature of the tester).  They also fail here if the mla
+### was built with LINEINFO_RELPATH := true; that needs to be dealt with.
+##
+## $include <maple/include/test_macros.mi>
+## kernelopts('keepdebuginfo'=true):
+## AssignFUNC(GetSource):
+### mdc(FUNC):
+## Try("1.1", FUNC("maplev:-GetSource"), ["/home/joe/emacs/maplev/maple/src/GetSource.mm", 62] );
+## Try("2.1", map(whattype,FUNC("simplify")), [string,integer]);
+## Try("2.2", FUNC("simplify"), [FileTools:-JoinPath([kernelopts('mapledir'), "lib/simplify/src/simplify.mpl"]), 38]);
 
-GetSource := proc(p? :: string
-                  , { subs_maple_root :: truefalse := true }
-                  , { download :: truefalse := false}
-                  , $
-                 )
-local base,cmd,file,li,line,mroot,opacity,p,res,src;
+# (maplev-cmaple-direct "(maplev:-GetSource)(\"int:-Main\");")
+
+GetSource := proc(p? :: string )
+local base,file,li,line,mroot,opacity,p,src;
     opacity := kernelopts('opaquemodules'=false);
     try
         p := parse(p?);
@@ -69,7 +86,7 @@ local base,cmd,file,li,line,mroot,opacity,p,res,src;
             end try;
         end if;
 
-        # get the line/info data
+        # get the lineinfo data
         li := [debugopts(':-lineinfo' = p)];
 
         if li = [] then
@@ -79,26 +96,11 @@ local base,cmd,file,li,line,mroot,opacity,p,res,src;
             # extract file and line from first element in list
             (file,line) := op([1,1..2],li);
 
-            # expand a leading > to value of MAPLE_ROOT environment variable
-            if file[1] = ">" and subs_maple_root then
+            # expand a leading > to the value of kernelopts(mapledir)
+            if file[1] = ">" then
                 base := file[2..-1];
-                mroot := getenv("MAPLE_ROOT");
-                if mroot = NULL then
-                    error "environment variable MAPLE_ROOT is not assigned";
-                else
-                    file := FileTools:-JoinPath([mroot,base]);
-                    if download
-                    and FileTools:-Filename(mroot) = "main"
-                    and not FileTools:-Exists(file) then
-                        # download and install the file from perforce
-                        cmd := sprintf("p4 print -q //wmi/projects/mapleV/main/%s", base);
-                        res := ssystem(cmd);
-                        if res[1] = 0 then
-                            FileTools:-MakeDirectory(FileTools:-ParentDirectory(file),'recurse');
-                            FileTools:-Text:-WriteFile(file, res[2]);
-                        end if;
-                    end if;
-                end if;
+                mroot := kernelopts('mapledir');
+                file := FileTools:-JoinPath([mroot,base]);
             end if;
             src := [file,line];
         end if;
@@ -108,15 +110,4 @@ local base,cmd,file,li,line,mroot,opacity,p,res,src;
     return src;
 end proc;
 
-##TEST(notest)
-### These fail in tester; the call to debugopts(lineinfo) is returning NULL.
-### Stepping through them works.
-## $include <maple/include/test_macros.mi>
-## AssignFUNC(GetSource):
-### mdc(FUNC):
-## Try("1.0", FUNC("maplev:-GetSource"), ["/home/joe/emacs/maplev/maple/GetSource.mm", 20]);
-## Try("2.0", map(whattype,FUNC("simplify")), [string,integer]);
-## Try("2.1", FUNC("simplify", 'subs_maple_root'), ["/home/joe/maplesoft/sandbox/main/lib/src/simplify.mpl", 40]);
-
-# (maplev-cmaple-direct "(maplev:-GetSource)(\"int:-Main\");")
 
