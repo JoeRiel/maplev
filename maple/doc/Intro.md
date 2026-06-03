@@ -21,19 +21,22 @@
 ##- Install the Maple library and help files
 ##  by executing the following command:
 ##
-##> PackageTools:-Install("this://",'overwrite'):
+##> maplev:-Install('binary');
 ##
-##- Install the doc directory, which contains a pdf and html of the documentation for maplev.
-##  This may be skipped; the documentation for maplev should be available in the Emacs info
+##- Install the doc directory, which contains a pdf and html of the documentation for MapleV.
+##  This may be skipped; the documentation for MapleV should be available in the Emacs info
 ##  reader after the steps in the Emacs section, below, are completed.
 ##
 ##> maplev:-Install('doc'):
 ##
-##- Install the Maple source files for maplev.
+##- Install the Maple source files for MapleV.
 ##  This may be skipped as the source files
 ##  are not needed for using the tool.
 ##
 ##> maplev:-Install('maple'):
+##
+##> maplev:-Install('rebuild'):
+##
 ##ENDSUBSECTION
 ##SUBSECTION Emacs
 ##- Unpack the tar file that contains the lisp and info files for MapleV
@@ -42,13 +45,13 @@
 ##> maplev:-Install('emacs'):
 ##
 ##- To install the lisp and info files,
-##  launch Emacs, and in it execute the command  ~M-x package-install-file~,
+##  launch Emacs, and in it execute the command ~M-x package-install-file~,
 ##  then enter the path to the tar file,
 ##  shown in the printed output of ~maplev:-Install('emacs')~, above.
 ##
 ##- At this point you should be able to read the info pages
 ##  for MapleV from inside Emacs by executing ~C-h i~
-##  and selecting the **MapleV** entry.
+##  and selecting the MapleV entry.
 ##  ~C-h~ means hold down the control key and press ~h~.
 ##
 ##- Execute the following command to print
