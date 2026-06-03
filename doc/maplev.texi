@@ -1133,7 +1133,11 @@ Send the current procedure to the Maple engine
 Send the marked region to the Maple engine (@code{maplev-pmaple-send-region}).
 
 @item C-c C-c g
-Goto the Maple buffer (@code{maplev-pmaple-goto-buffer}).
+Display the Maple buffer (@code{maplev-pmaple-pop-to-buffer}).
+The buffer is named @code{Maple (path-to-maple)},
+where @code{path-to-maple}
+is the path to the tty Maple executable.
+The cursor is the string @samp{(**) }.
 
 @item C-c C-c i
 Interrupt the Maple engine (@code{maplev-pmaple-interrupt}).
