@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; maplev-custom.el --- Customizable parameters for maplev
 
 ;;; Commentary:
@@ -56,7 +58,7 @@
 ;;}}}
 ;;{{{ Configurable options
 
-(defcustom maplev-config-default (maplev-config-class "maplev-config")
+(defcustom maplev-config-default (maplev-config-class)
   "This variable holds default values for the variable `maplev-config';
 both are objects of class `maplev-config-class'."
   :type 'object

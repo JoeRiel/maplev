@@ -1,7 +1,9 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; maplev-history.el --- History mechanism for help and proc modes
 
 ;;; Commentary:
-;; 
+;;
 
 ;; History of history.
 ;;

@@ -1,7 +1,9 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; maplev-compat.el --- Compatibility functions
 
 ;;; Commentary:
-;; 
+;;
 
 ;; Define the functions needed for older versions of Emacs.
 

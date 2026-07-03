@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; ob-maple.el --- org-babel functions for Maple evaluation
 
 ;; Copyright (C) Joseph S. Riel
@@ -95,6 +97,7 @@ PARAMS is a list of cons-cells of the form \(:key . \"value\"\)."
 
 (defun org-babel-variable-assignments:maple (params)
   "Return a string of Maple statements assigning the header variables."
+  (ignore params)
   "\n")
   ;; (mapconcat
   ;;  (lambda (param)

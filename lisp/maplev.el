@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;; maplev.el --- Maple mode for GNU Emacs
 ;;
 ;; Copyright (C) 2001,2003,2008,2009,2015,2020 Joseph S. Riel
@@ -143,11 +145,10 @@
 ;; Reassign the functions maplev-release and maplev-git-release
 ;; if the file maplev-release.el is available.
 
-(let* ((maplev-dir (file-name-directory (or (locate-library "maplev") "")))
-       (maplev-release.el (concat maplev-dir "maplev-release.el")))
-  (when (require 'maplev-release  "maplev-release" 'noerror)
-    (autoload 'maplev-release     "maplev-release")
-    (autoload 'maplev-git-release "maplev-release")))
+;; (let* ((maplev-dir (file-name-directory (or (locate-library "maplev") ""))))
+(when (require 'maplev-release  "maplev-release" 'noerror)
+  (autoload 'maplev-release     "maplev-release")
+  (autoload 'maplev-git-release "maplev-release"))
 
 ;;;###autoload
 (defun maplev-version (&optional here full message)
@@ -410,6 +411,7 @@ This works with the function `folding-mode', but crudely.
 Folding mode appears to have an error; `folding-goto-char' does
 not work reliably.  Until that is fixed the solution is to open
 the entire buffer."
+  (ignore name position ignore)
   (and (or (< position (point-min))
            (> position (point-max)))
        (widen))
@@ -613,7 +615,8 @@ Key bindings:
   (set (make-local-variable 'tab-width)               maplev-indent-level)
   (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
 
-  (ad-activate 'fixup-whitespace)
+  ;; (ad-activate 'fixup-whitespace)
+  (advice-add 'fixup-whitespace :after #'maplev-fixup-whitespace)
 
   ;; comments
   (set (make-local-variable 'comment-start)            maplev-comment-start)
@@ -674,7 +677,7 @@ Key bindings:
   ;; Create configuration object
   (if maplev-load-config-file-flag (maplev-load-config-file))
   (unless maplev-config
-    (maplev-config))
+    (maplev-config-class))
 
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
@@ -850,8 +853,7 @@ This is a hack and is hardly robust."
   (cond
    ((looking-at maplev-wexp-statement-start-re)
     ;; move to end of statement
-    (let ((cnt (if (match-string 1) 1 0))
-	  keyword)
+    (let ((cnt (if (match-string 1) 1 0)))
       (goto-char (match-end 0))
       (while (progn
 	       (maplev--re-search-forward maplev-wexp-statement-cont-re)
@@ -1030,67 +1032,67 @@ The real work is done by `maplev-complete-on-module-exports'."
 (defun maplev--generate-initial-completions ()
   "Generate `maplev-completions' from maple help pages.
 If it already exists, do nothing."
-  (unless maplev-completions)
+  (unless maplev-completions
 
-  ;; To make it easy to pick out the package names from the
-  ;; index/package help page, set the interface variable
-  ;; `screenwidth' to infinity and save the original value in the
-  ;; elisp variable screenwidth.
+    ;; To make it easy to pick out the package names from the
+    ;; index/package help page, set the interface variable
+    ;; `screenwidth' to infinity and save the original value in the
+    ;; elisp variable screenwidth.
 
-  (let ((screenwidth (maplev-pmaple-direct
-		      "lprint(interface('screenwidth'=infinity));" t))
-	completions)
-    (unwind-protect
-	(with-current-buffer (get-buffer-create (maplev--help-buffer))
-	  ;; Process help node "index/function".
-	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
-	  (maplev-help-show-topic "index/function" 'hide)
-	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
-	  (save-restriction
-	    (narrow-to-region
-	     (re-search-forward "^    ")
-	     (save-excursion (goto-char (point-max))
-			     (search-backward "See Also")))
-	    (goto-char (point-max))
-	    (while (backward-word)
-	      (setq completions
-		    (cons (cons (buffer-substring-no-properties
-				 (point)
-				 (save-excursion (forward-word) (point)))
-				nil)
-			  completions))))
-
-	  ;; Process help node "index/package".
-	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
-	  (maplev-help-show-topic "index/package" 'hide)
-	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
-	  (save-restriction
-	    (narrow-to-region
-	     (progn (re-search-forward "^    \\w" nil t)
-		    (goto-char (match-beginning 0))) ; first package
-	     (progn (re-search-forward "^-" nil t)
-		    (goto-char (match-beginning 0)))) ; bullets after packages
-	    (goto-char (point-max))
-	    ;; Assign a regular expression to match each package name;
-	    ;; the name is matched by the first group in regexp.
-	    (let ((regexp (concat
-			   "^\\s-+"   ; whitespace at start of line
-			   "\\(" maplev--name-re "\\)"))) ; package name (first group)
-	      (while (re-search-backward regexp nil 'move)
-		(setq completions
+    (let ((screenwidth (maplev-pmaple-direct
+		        "lprint(interface('screenwidth'=infinity));" t))
+	  completions)
+      (unwind-protect
+	  (with-current-buffer (get-buffer-create (maplev--help-buffer))
+	    ;; Process help node "index/function".
+	    ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
+	    (maplev-help-show-topic "index/function" 'hide)
+	    ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
+	    (save-restriction
+	      (narrow-to-region
+	       (re-search-forward "^    ")
+	       (save-excursion (goto-char (point-max))
+			       (search-backward "See Also")))
+	      (goto-char (point-max))
+	      (while (backward-word)
+	        (setq completions
 		      (cons (cons (buffer-substring-no-properties
-				   (match-beginning 1) (match-end 1))
+				   (point)
+				   (save-excursion (forward-word) (point)))
 				  nil)
-			    completions)))))
-	  ;; Delete both help pages.
-	  (maplev-history-delete-item)
-	  ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
-	  (maplev-history-delete-item))
+			    completions))))
 
-      ;; Assign `maplev-completions'.  Sort the completions.
-      (setq maplev-completions (sort completions #'(lambda (a b) (string< (car a) (car b)))))
-      ;; Restore the original interface screenwidth.
-      (maplev-pmaple-direct (concat "interface('screenwidth'=" screenwidth ");") t))))
+	    ;; Process help node "index/package".
+	    ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
+	    (maplev-help-show-topic "index/package" 'hide)
+	    ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
+	    (save-restriction
+	      (narrow-to-region
+	       (progn (re-search-forward "^    \\w" nil t)
+		      (goto-char (match-beginning 0))) ; first package
+	       (progn (re-search-forward "^-" nil t)
+		      (goto-char (match-beginning 0)))) ; bullets after packages
+	      (goto-char (point-max))
+	      ;; Assign a regular expression to match each package name;
+	      ;; the name is matched by the first group in regexp.
+	      (let ((regexp (concat
+			     "^\\s-+"   ; whitespace at start of line
+			     "\\(" maplev--name-re "\\)"))) ; package name (first group)
+	        (while (re-search-backward regexp nil 'move)
+		  (setq completions
+		        (cons (cons (buffer-substring-no-properties
+				     (match-beginning 1) (match-end 1))
+				    nil)
+			      completions)))))
+	    ;; Delete both help pages.
+	    (maplev-history-delete-item)
+	    ;; (while (maplev-pmaple--locked-p) (maplev--short-delay))
+	    (maplev-history-delete-item))
+
+        ;; Assign `maplev-completions'.  Sort the completions.
+        (setq maplev-completions (sort completions #'(lambda (a b) (string< (car a) (car b)))))
+        ;; Restore the original interface screenwidth.
+        (maplev-pmaple-direct (concat "interface('screenwidth'=" screenwidth ");") t)))))
 
 
 (defun maplev--completion (word predicate mode)
@@ -1583,15 +1585,14 @@ minimum decoration keywords."
 (defun maplev-font-lock-keywords-3 ()
   "Compute the maximum decoration `font-lock-keywords' for MapleV mode.
 Add builtin functions to the medium decoration keywords."
-  (let ((max-specpdl-size 10000))       ; default 600 is too small
-    (append (maplev-font-lock-keywords-2)
-            (list (list (maplev--list-to-word-re (append maplev-builtin-functions
-							 maplev-builtin-types
-							 maplev-constructors))
-                        '(0 font-lock-builtin-face))
-                  (list maplev--deprecated-re '(0 font-lock-warning-face))
-                  (list maplev--protected-names-re '(0 maplev-protected-face))
-                  (list maplev--undocumented-names-re '(0 maplev-undocumented-face))))))
+  (append (maplev-font-lock-keywords-2)
+          (list (list (maplev--list-to-word-re (append maplev-builtin-functions
+						       maplev-builtin-types
+						       maplev-constructors))
+                      '(0 font-lock-builtin-face))
+                (list maplev--deprecated-re '(0 font-lock-warning-face))
+                (list maplev--protected-names-re '(0 maplev-protected-face))
+                (list maplev--undocumented-names-re '(0 maplev-undocumented-face)))))
 
 (defun maplev--font-lock-keywords ()
   "Return a list of symbols for font locking MapleV mode buffers."
@@ -1821,6 +1822,7 @@ window, depending on the exclusive-or of
 
 (defun maplev-find-module-export-at-point (toggle)
   (interactive "P")
+  (ignore toggle)
   (point))
 
 ;;}}}
@@ -1868,7 +1870,7 @@ file if one was found, nil otherwise."
 
 ;;{{{ leading-comma stuff
 
-(defadvice fixup-whitespace (after maplev-fixup-whitespace)
+(defun maplev-fixup-whitespace ()
   "Catenate adjacent Maple strings (separated by one space) or,
 if `maplev-leading-comma-flag' is non-nil, remove space before a comma."
   (if (and maplev-leading-comma-flag

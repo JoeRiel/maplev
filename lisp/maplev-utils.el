@@ -1,9 +1,9 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; maplev-utils.el --- Utility functions for maplev
 
-
-
 ;;; Commentary:
-;; 
+;;
 
 ;;; Code:
 
@@ -39,7 +39,7 @@ Add text string to the kill ring.  Interpret ARG as \\[yank] does."
     (kill-new (x-get-cut-buffer 0))
     (setq this-command 'yank)
     (yank arg))
-  
+
   ;; borrowed from mouse-yank-at-click
   (defun maplev-mouse-yank-cut-buffer (click arg)
     "Insert the value of the X server cut-buffer 0 at the position of CLICK.

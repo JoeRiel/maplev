@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; maplev-mint.el --- Syntax checking for Maple
 
 ;;; Commentary:
@@ -339,15 +341,14 @@ formal parameter list."
 The line number begins at character position POS."
   (goto-char pos)
   (beginning-of-line)
-  (let ((is_nested (looking-at "  ")))
-    (re-search-forward "line +\\([0-9]+\\)" (line-end-position))
-    (let ((line (1- (string-to-number (match-string 1)))))
+  (re-search-forward "line +\\([0-9]+\\)" (line-end-position))
+  (let ((line (1- (string-to-number (match-string 1)))))
     (maplev-mint--goto-source-pos
      line 0
      (and
-       (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)" nil t)
-       (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)" nil t)
-       (maplev-mint-get-source-file))))))
+      (re-search-backward "^\\(Nested \\)?\\(Anonymous \\)?\\(Procedure\\|Operator\\|Module\\)" nil t)
+      (re-search-forward "on\\s-*lines?\\s-*\\([0-9]+\\)" nil t)
+      (maplev-mint-get-source-file)))))
 
 (defun maplev-mint-get-source-file ()
   "Return the absolute path to the source file starting at current position."
@@ -994,8 +995,7 @@ Interactively, VAR defaults to identifier point is on."
       (let ((regex (concat "\\(\\<" keyword "\\>\\)"
 			   "\\|\\(" maplev--defun-re "\\)"
 			   "\\|\\(?:" maplev--defun-end-re "\\)"))
-	    (cnt 0) ; keep track whether in original procedure
-	    term)
+	    (cnt 0)) ; keep track whether in original procedure
 	(while (maplev--re-search-forward regex nil 'move)
 	  (if (match-string-no-properties 1)
 	      (when (zerop cnt)
@@ -1113,12 +1113,11 @@ C-r  enter recursive edit (C-M-c to get out)
   "Query to handle occurrences of VARS in the region between BEG and END.
 When DOFILE is non-nil, ...
 VARs is a list of undeclared globals."
-  (let (case-fold-search regexp reply start var)
+  (let (case-fold-search start)
     (save-excursion
       (save-restriction
 	(narrow-to-region beg end)
-	(let ((syntax-table maplev-quote-not-string-syntax-table)
-	      (cnt (if dofile 0 -1))
+	(let ((cnt (if dofile 0 -1))
 	      (message (apply 'propertize
 			      (substitute-command-keys
 			       "Query replacing %s with %s: (\\<maplev-mint-query-map>\\[help] for help) ")

@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; maplev-re.el --- Regular expressions for maplev
 
 ;;; Commentary:

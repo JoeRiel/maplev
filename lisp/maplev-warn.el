@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; maplev-warn.el --- highlight suspicious Maple constructions
 
 ;; Copyright (C) 2017 Alexander Kobel

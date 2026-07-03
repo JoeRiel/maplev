@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; maplev-help.el --- Maple help
 
 ;;; Commentary:
@@ -187,6 +189,7 @@ If HIDE is non-nil, do not bring buffer to front."
 (defun maplev--help-filter (process string)
   "Pipe the output of a help command into `maplev--help-buffer'.
 PROCESS calls this filter.  STRING is the output."
+  (ignore process)
   (with-current-buffer (maplev--help-buffer)
     (save-excursion
       (let (buffer-read-only)

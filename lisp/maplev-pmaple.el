@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 ;;; maplev-pmaple.el --- Communicate with Maple process
 
 ;;; Commentary:
@@ -24,6 +25,11 @@
 (defconst maplev-pmaple-prompt "(**) "
   "String inserted as prompt in Maple buffer.")
 
+(defconst maplev-pmaple-prompt-length (length maplev-pmaple-prompt)
+  "The length of `maplev-maple-prompt'.")
+
+(defconst maplev-pmaple-prompt-re (regexp-quote maplev-pmaple-prompt)
+  "Regular expression that matches `maplev-pmaple-prompt'.")
 
 ;;}}}
 ;;{{{ mode functions
@@ -31,7 +37,8 @@
 (defun maplev--pmaple-buffer ()
   "Return the name of the pmaple buffer associated with the current buffer.
 The name is the string \"Maple (<maple>)\", with <maple> being the
-the 'maple' slot-value of `maple-config'."
+the `maple' slot-value of `maple-config'."
+
   (concat "Maple" (and maplev-config
 		       (format " (%s)" (slot-value maplev-config 'maple)))))
 
@@ -58,7 +65,7 @@ Start one, if necessary."
 (defun maplev-pmaple--process-environment ()
   "Return a list of strings of equations that define the process environment."
   (unless maplev-config
-    (maplev-config))
+    (maplev-config-class))
   (let ((bindir   (slot-value maplev-config 'bindir))
 	(mapledir (slot-value maplev-config 'mapledir)))
     (cond
@@ -125,7 +132,7 @@ directory before starting maple.  If custom variable
 `maplev-load-path' is non-nil, assign it to the environment
 variable LD_LIBRARY_PATH."
 
-  (let* ((config (or maplev-config (maplev-config)))
+  (let* ((config (or maplev-config (maplev-config-class)))
          (process-environment (maplev-pmaple--process-environment))
          (pmaple-and-opts (maplev-pmaple--get-pmaple-and-options))
          (buffer (get-buffer-create (maplev--pmaple-buffer)))
@@ -216,18 +223,20 @@ If optional argument DELETE is non-nil, delete the echoed Maple input
 from the output buffer."
   ;; This may not work on a Windows box; there, the input is not echoed
   ;; to the output buffer.
-  ;; The 5 appears to be width of the prompt ("(**) ").
   (interactive)
   (let ((proc (maplev--pmaple-process))) ; ensure Maple is started
     (with-current-buffer (maplev--pmaple-buffer)
       (save-restriction
         (narrow-to-region (point-max) (point-max))
-	(let ((begin (+ 5 (point))))
+	(let* ((len-prompt (length maplev-pmaple-prompt))
+               (begin (+ len-prompt (point))))
 	  (maplev-pmaple--send-string proc input)
 	  (while (or (< (point) begin)
 		     (progn
-		       (goto-char (- (point-max) 5))
-		       (not (looking-at "(\\*\\*) "))))
+		       (goto-char (- (point-max) maplev-pmaple-prompt-length))
+                       (not (looking-at maplev-pmaple-prompt-re))))
+          ;;(not (looking-at (regexp-quote maplev-pmaple-prompt)))))
+		     ;;(not (looking-at "(\\*\\*) "))))
 	    (sleep-for 0.01)))
         (let ((output (buffer-substring-no-properties
 		       (point-min) (if (= (point) (point-min))
@@ -312,7 +321,7 @@ from deleting the image when the history mechanism is used."
 Display the result, unless optional NOMSG is non-nil."
   (interactive)
   (let ((proc (get-buffer-process (maplev--pmaple-buffer)))
-        msg status)
+        status)
     (if proc
         (progn
           (if (setq status (process-status proc))

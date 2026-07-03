@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 ;;; maplev-view.el --- mode for displaying Maple procedures
 
 ;;; Commentary:
@@ -128,6 +130,7 @@ If optional arg HIDE is non-nil do not display buffer."
 (defun maplev-view-filter (process string)
   "Pipe a Maple procedure listing into `maplev--proc-buffer'.
 PROCESS calls this filter.  STRING is the Maple procedure."
+  (ignore process)
   (with-current-buffer (maplev--proc-buffer)
     (save-excursion
       (let (buffer-read-only)
@@ -186,7 +189,7 @@ PROCESS calls this filter.  STRING is the Maple procedure."
 	(let* ((file (car file-line))
 	       (line (cdr file-line))
 	       (base file)
-	       mroot file-exists)
+	       mroot)
 	  (when (and (= (aref file 0) ?>)
 		     (setq mroot (getenv "MAPLE_ROOT"))
 		     (setq base (substring file 1)))

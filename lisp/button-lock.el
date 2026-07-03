@@ -427,7 +427,7 @@ in GNU Emacs 24.1 or higher."
 (unless (fboundp 'string-match-p)
   (defsubst string-match-p (regexp string &optional start)
     "Same as `string-match' except this function does not change the match data."
-    (let ((inhibit-changing-match-data t))
+    (save-match-data
       (string-match regexp string start))))
 
 ;;; utility functions
@@ -518,7 +518,7 @@ disabling button-lock."
   "Find the extent of a button-lock property around some point.
 
 POS defaults to the current point.  PROPERTY defaults to
-'button-lock.
+\='button-lock.
 
 Returns a cons in the form (START . END), or nil if there
 is no such PROPERTY around POS."
@@ -535,7 +535,7 @@ is no such PROPERTY around POS."
 
 When FORGET is set, tell `font-lock-keywords' to forget about
 the buttons in `button-lock-button-list', as well as any other
-keywords with the 'button-lock property."
+keywords with the \='button-lock property."
   (if forget
       (let ((keywords (copy-tree font-lock-keywords)))
         (when (eq t (car keywords))
@@ -573,7 +573,7 @@ keywords with the 'button-lock property."
 
 The regexp used by the button is checked against the existing
 data structure.  If the regexp duplicates that of an existing button,
-the existing duplicate is replaced.
+the existing duplicate is replaced.2
 
 If NO-REPLACE is set, no replacement is made for a duplicate button."
   (let ((conflict (catch 'hit
@@ -638,7 +638,7 @@ toggles the mode. When called interactively, with a prefix
 argument, it enables the mode if the argument is positive and
 otherwise disables it.  When called from Lisp, it enables the
 mode if the argument is omitted or nil, and toggles the mode if
-the argument is 'toggle."
+the argument is \='toggle."
   :init-value nil
   :lighter button-lock-mode-lighter
   :keymap nil
@@ -711,70 +711,70 @@ buffer."
                                  remove
                                  no-replace
 
-                                 mouse-2
-                                 mouse-3
-                                 mouse-4
-                                 mouse-5
-                                 wheel-down
-                                 wheel-up
+                                 _mouse-2
+                                 _mouse-3
+                                 _mouse-4
+                                 _mouse-5
+                                 _wheel-down
+                                 _wheel-up
 
-                                 down-mouse-1
-                                 down-mouse-2
-                                 down-mouse-3
-                                 down-mouse-4
-                                 down-mouse-5
+                                 _down-mouse-1
+                                 _down-mouse-2
+                                 _down-mouse-3
+                                 _down-mouse-4
+                                 _down-mouse-5
 
-                                 double-mouse-1
-                                 double-mouse-2
-                                 double-mouse-3
-                                 double-mouse-4
-                                 double-mouse-5
+                                 _double-mouse-1
+                                 _double-mouse-2
+                                 _double-mouse-3
+                                 _double-mouse-4
+                                 _double-mouse-5
 
-                                 triple-mouse-1
-                                 triple-mouse-2
-                                 triple-mouse-3
-                                 triple-mouse-4
-                                 triple-mouse-5
+                                 _triple-mouse-1
+                                 _triple-mouse-2
+                                 _triple-mouse-3
+                                 _triple-mouse-4
+                                 _triple-mouse-5
 
-                                 A-mouse-1
-                                 A-mouse-2
-                                 A-mouse-3
-                                 A-mouse-4
-                                 A-mouse-5
-                                 A-wheel-down
-                                 A-wheel-up
+                                 _A-mouse-1
+                                 _A-mouse-2
+                                 _A-mouse-3
+                                 _A-mouse-4
+                                 _A-mouse-5
+                                 _A-wheel-down
+                                 _A-wheel-up
 
-                                 C-mouse-1
-                                 C-mouse-2
-                                 C-mouse-3
-                                 C-mouse-4
-                                 C-mouse-5
-                                 C-wheel-down
-                                 C-wheel-up
+                                 _C-mouse-1
+                                 _C-mouse-2
+                                 _C-mouse-3
+                                 _C-mouse-4
+                                 _C-mouse-5
+                                 _C-wheel-down
+                                 _C-wheel-up
 
-                                 M-mouse-1
-                                 M-mouse-2
-                                 M-mouse-3
-                                 M-mouse-4
-                                 M-mouse-5
-                                 M-wheel-down
-                                 M-wheel-up
+                                 _M-mouse-1
+                                 _M-mouse-2
+                                 _M-mouse-3
+                                 _M-mouse-4
+                                 _M-mouse-5
+                                 _M-wheel-down
+                                 _M-wheel-up
 
-                                 S-mouse-1
-                                 S-mouse-2
-                                 S-mouse-3
-                                 S-mouse-4
-                                 S-mouse-5
-                                 S-wheel-down
-                                 S-wheel-up
+                                 _S-mouse-1
+                                 _S-mouse-2
+                                 _S-mouse-3
+                                 _S-mouse-4
+                                 _S-mouse-5
+                                 _S-wheel-down
+                                 _S-wheel-up
 
-                                 s-mouse-1
-                                 s-mouse-2
-                                 s-mouse-3
-                                 s-mouse-4
-                                 s-mouse-5
-                                 s-wheel-down
-                                 s-wheel-up)
+                                 _s-mouse-1
+                                 _s-mouse-2
+                                 _s-mouse-3
+                                 _s-mouse-4
+                                 _s-mouse-5
+                                 _s-wheel-down
+                                 _s-wheel-up)
 
 "Attach mouse actions to text via `font-lock-mode'.
 
@@ -805,25 +805,25 @@ By default, :FACE has no properties, and :FACE-POLICY is :APPEND.
 This means that other, existing text properties will take
 priority, and that clickable text will not be distinguished
 without a mouseover.  To change this, try adding the arguments
-\":face 'link :face-policy 'prepend.\" Alternatively,
+\":face \='link :face-policy \='prepend.\" Alternatively,
 `button-lock-face' may be customized.
 
 :MOUSE-FACE is the font face to set on mouseovers.  It defaults
 to `button-lock-mouse-face'.
 
 :FACE-POLICY sets the override policy for button faces.  Useful
-values are nil, 'keep, 'prepend, and 'append (the default).  See
+values are nil, \='keep, \='prepend, and \='append (the default).  See
 the documentation for OVERRIDE in `font-lock-keywords'.
 
-:HELP-ECHO is applied to the 'help-echo text property, and may
+:HELP-ECHO is applied to the \='help-echo text property, and may
 become visible in a tooltip depending on your Emacs setup.
 :HELP-TEXT is a deprecated synonym.
 
-:KBD-HELP is applied to the 'kbd-help text property, accessible
+:KBD-HELP is applied to the \='kbd-help text property, accessible
 to the user via `display-local-help',
 
 :KBD-HELP-MULTILINE is applied to the non-standard
-'kbd-help-multiline text property.
+\='kbd-help-multiline text property.
 
 :GROUPING designates a subgroup in the pattern match to receive
 the new text properties.  Subgroups, delimited by parentheses,
@@ -831,7 +831,7 @@ are numbered from 1.  The default :GROUPING is 0, indicating the
 entire match.
 
 :MOUSE-BINDING sets the mouse event which will invoke ACTION.
-The default is 'mouse-1.
+The default is \='mouse-1.
 
 :KEYBOARD-BINDING sets a keyboard event which will invoke ACTION.
 The format is as accepted by `kbd'.  The default is nil, meaning
@@ -848,7 +848,7 @@ where ACTION is dependent on the position of the mouse.
 
 :ADDITIONAL-PROPERTY defines an arbitrary text property which
 will be set to t in for text which matches PATTERN, as optionally
-modified by :GROUPING. The property 'button-lock will always be
+modified by :GROUPING. The property \='button-lock will always be
 set.
 
 As a convenience, :MOUSE-2 through :MOUSE-5 can be used to attach
@@ -879,70 +879,70 @@ The button value can be passed to `button-lock-extend-binding'."
       (define-key map `[,mouse-binding] action)
 
       (dolist (var '(
-                     mouse-2
-                     mouse-3
-                     mouse-4
-                     mouse-5
-                     wheel-down
-                     wheel-up
+                     _mouse-2
+                     _mouse-3
+                     _mouse-4
+                     _mouse-5
+                     _wheel-down
+                     _wheel-up
 
-                     down-mouse-1
-                     down-mouse-2
-                     down-mouse-3
-                     down-mouse-4
-                     down-mouse-5
+                     _down-mouse-1
+                     _down-mouse-2
+                     _down-mouse-3
+                     _down-mouse-4
+                     _down-mouse-5
 
-                     double-mouse-1
-                     double-mouse-2
-                     double-mouse-3
-                     double-mouse-4
-                     double-mouse-5
+                     _double-mouse-1
+                     _double-mouse-2
+                     _double-mouse-3
+                     _double-mouse-4
+                     _double-mouse-5
 
-                     triple-mouse-1
-                     triple-mouse-2
-                     triple-mouse-3
-                     triple-mouse-4
-                     triple-mouse-5
+                     _triple-mouse-1
+                     _triple-mouse-2
+                     _triple-mouse-3
+                     _triple-mouse-4
+                     _triple-mouse-5
 
-                     A-mouse-1
-                     A-mouse-2
-                     A-mouse-3
-                     A-mouse-4
-                     A-mouse-5
-                     A-wheel-down
-                     A-wheel-up
+                     _A-mouse-1
+                     _A-mouse-2
+                     _A-mouse-3
+                     _A-mouse-4
+                     _A-mouse-5
+                     _A-wheel-down
+                     _A-wheel-up
 
-                     C-mouse-1
-                     C-mouse-2
-                     C-mouse-3
-                     C-mouse-4
-                     C-mouse-5
-                     C-wheel-down
-                     C-wheel-up
+                     _C-mouse-1
+                     _C-mouse-2
+                     _C-mouse-3
+                     _C-mouse-4
+                     _C-mouse-5
+                     _C-wheel-down
+                     _C-wheel-up
 
-                     M-mouse-1
-                     M-mouse-2
-                     M-mouse-3
-                     M-mouse-4
-                     M-mouse-5
-                     M-wheel-down
-                     M-wheel-up
+                     _M-mouse-1
+                     _M-mouse-2
+                     _M-mouse-3
+                     _M-mouse-4
+                     _M-mouse-5
+                     _M-wheel-down
+                     _M-wheel-up
 
-                     S-mouse-1
-                     S-mouse-2
-                     S-mouse-3
-                     S-mouse-4
-                     S-mouse-5
-                     S-wheel-down
-                     S-wheel-up
+                     _S-mouse-1
+                     _S-mouse-2
+                     _S-mouse-3
+                     _S-mouse-4
+                     _S-mouse-5
+                     _S-wheel-down
+                     _S-wheel-up
 
-                     s-mouse-1
-                     s-mouse-2
-                     s-mouse-3
-                     s-mouse-4
-                     s-mouse-5
-                     s-wheel-down
-                     s-wheel-up))
+                     _s-mouse-1
+                     _s-mouse-2
+                     _s-mouse-3
+                     _s-mouse-4
+                     _s-mouse-5
+                     _s-wheel-down
+                     _s-wheel-up))
 
         (when (symbol-value var)
           (define-key map `[,var] (symbol-value var))))
