@@ -32,11 +32,11 @@
 ;; This package defines five major modes:
 ;;
 ;;   maplev-mode:        for editing Maple code
-;;   maplev-pmaple-mode: for running Maple
-;;   maplev-mint-mode:   for displaying the output of mint
+;;   maplev-pmaple-mode: for running Maple (requires a Maple engine)
+;;   maplev-mint-mode:   for displaying the output of mint (a syntax checker that is part of Maple)
 ;;   maplev-help-mode:   for displaying Maple help pages
 ;;   maplev-view-mode:   for displaying Maple procedures
-
+ 
 ;;; Features:
 
 ;; font-lock (highlighting) of Maple keywords
