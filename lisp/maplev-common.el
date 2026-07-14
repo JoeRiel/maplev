@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-common.el --- Common functions for maplev
+;;; maplev-common.el --- Common functions for maplev -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

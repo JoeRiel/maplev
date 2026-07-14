@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;; maplev.el --- Maple mode for GNU Emacs
+;; maplev.el --- Maple mode for GNU Emacs -*- lexical-binding: t -*-
 ;;
 ;; Copyright (C) 2001,2003,2008,2009,2015,2020 Joseph S. Riel
 

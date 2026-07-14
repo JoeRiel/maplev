@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-custom.el --- Customizable parameters for maplev
+;;; maplev-custom.el --- Customizable parameters for maplev -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

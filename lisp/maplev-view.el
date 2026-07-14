@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-view.el --- mode for displaying Maple procedures
+;;; maplev-view.el --- mode for displaying Maple procedures -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

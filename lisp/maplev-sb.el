@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-sb.el --- Speedbar for maplev
+;;; maplev-sb.el --- Speedbar for maplev -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 Joseph S. Riel
 

@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-compat.el --- Compatibility functions
+;;; maplev-compat.el --- Compatibility functions -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-config.el -- Assign class to configure Maple
+;;; maplev-config.el -- Assign class to configure Maple -*- lexical-binding: t -*-
 ;;
 ;; Copyright (C) 2016 Josephs S. Riel
 ;; Author: Joseph S. Riel <jriel@maplesoft.com>

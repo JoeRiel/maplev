@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-trace.el --- handle Maple trace output
+;;; maplev-trace.el --- handle Maple trace output -*- lexical-binding: t -*-
 
 ;;; Commentary:
 

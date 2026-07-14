@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-indent.el --- Indentation engine for MapleV
+;;; maplev-indent.el --- Indentation engine for MapleV -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

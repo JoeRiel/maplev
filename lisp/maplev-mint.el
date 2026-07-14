@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-mint.el --- Syntax checking for Maple
+;;; maplev-mint.el --- Syntax checking for Maple -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-utils.el --- Utility functions for maplev
+;;; maplev-utils.el --- Utility functions for maplev -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

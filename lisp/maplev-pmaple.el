@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t; -*-
-;;; maplev-pmaple.el --- Communicate with Maple process
+;;; maplev-pmaple.el --- Communicate with Maple process -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;

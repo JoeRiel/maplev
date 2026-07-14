@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; maplev-help.el --- Maple help
+;;; maplev-help.el --- Maple help -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;
