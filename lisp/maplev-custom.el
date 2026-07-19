@@ -214,14 +214,14 @@ See `maplev-find-include-file'."
 ;; Configuration
 
 (defcustom maplev-buttonize-includes-flag t
-  "Non-nil means use `button-lock-mode' to hyperlink include statements."
+  "Non-nil means use `button-mode' to hyperlink include statements."
   :type 'boolean
   :group 'maplev-misc)
 
-;; (defcustom maplev-buttonize-module-exports-flag nil
-;;   "Non-nil means use function `button-lock-mode' to hyperlink module-exports (e.g. foo:-bar)."
-;;   :type 'boolean
-;;   :group 'maplev-misc)
+(defcustom maplev-buttonize-links-flag t
+  "Non-nil means use `button-mode' to activate link statements."
+  :type 'boolean
+  :group 'maplev-misc)
 
 (defcustom maplev-load-config-file-flag nil
   "Non-nil means load a configuration file when starting `maplev-mode'.

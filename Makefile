@@ -1,11 +1,10 @@
 # Makefile - for the maplev distribution
 #
-# Maintainer: Joe Riel <jriel@maplesoft.com>
+# Maintainer: Joe Riel <joer@san.rr.com>
 
 # include version.mk
 
 PKG := maplev
-EXTRA_ELFLAGS := --eval "(add-to-list (quote load-path) (expand-file-name \".emacs.d/elpa/button-lock-1.0.2\" \"$(HOME)\"))"
 
 VERSION := 3.1.0
 
