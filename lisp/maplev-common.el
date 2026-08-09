@@ -144,7 +144,7 @@ The defun is a Maple procedure or module.  The beginning is the first
 character of the keyword.  Complete end-statements are not required."
   (interactive)
   (let ((count 0)
-	(regex (concat "\\_<\\(?:\\(proc\\|module\\)"    ; 1
+	(regex (concat "\\_<\\(?:\\(proc\\|module\\)"   ; 1
 		       "\\|\\(do\\|if\\|try\\|use\\)"   ; 2
 		       "\\|\\(end\\|fi\\|od\\|until\\)" ; 3
 		       "\\)\\_>"))

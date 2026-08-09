@@ -1,0 +1,87 @@
+
+Name: maple module
+
+The input is flush left, except the one-line comment.
+The output is the expected indentation.
+
+=-=
+module M()
+option package;
+$include "whatever.mi"
+export
+foo := proc(x :: integer)
+local i, lst;
+lst := [ item1
+, item2
+, item3
+];
+for item in lst do
+print(item)
+end do;
+try
+do_something()
+catch:
+error "hello"
+finally
+whatever
+end try;
+ # One way to enter a long string.
+S := ( "first part, "
+"second part, "
+"last part"
+);
+23
+end proc
+end module:
+=-=
+module M()
+option package;
+$include "whatever.mi"
+export
+    foo := proc(x :: integer)
+    local i, lst;
+        lst := [ item1
+                 , item2
+                 , item3
+               ];
+        for item in lst do
+            print(item)
+        end do;
+        try
+            do_something()
+        catch:
+            error "hello"
+        finally
+            whatever
+        end try;
+        # One way to enter a long string.
+        S := ( "first part, "
+               "second part, "
+               "last part"
+             );
+        23
+    end proc
+end module:
+=-=-=
+
+Name: comments
+
+=-=
+proc()
+# A flush-left one-line comment is never indented
+ # This is indented.
+         # So is this.
+(* The first line of A multi-line comment is indented,
+   but the remaining lines, including the matching close, are not.
+   *)
+end proc:
+=-=
+proc()
+# A flush-left one-line comment is never indented
+    # This is indented.
+    # So is this.
+    (* The first line of A multi-line comment is indented,
+   but the remaining lines, including the matching close, are not.
+   *)
+end proc:
+=-=-=
