@@ -104,13 +104,11 @@
 
 ;;{{{ Requirements
 
-(require 'button-lock)
-(require 'wiki-nav)  ; Turn on navigation by bracketed [[WikString]].  Experimental.
-
 (require 'comint)
 (require 'font-lock)
 (require 'imenu)
 (require 'info)
+(require 'rx)
 
 (require 'maplev-compat)                ; compatibility definitions for older Emacs
 (require 'maplev-pmaple)                ; interact with Maple
@@ -547,13 +545,10 @@ Prefix JUSTIFY means justify as well."
 (defun maplev-browse-info ()
   "Open the html version of the maplev documentation in a browser."
   (interactive)
-  (let ((home (getenv "HOME")))
-    (when home
-      (let ((html (concat (file-name-as-directory home)
-			  "maple/toolbox/maplev/info/maplev.html")))
-	(if (file-exists-p html)
-	    (browse-url (concat "file://" html))
-	  (error "HTML file not found: %s" html))))))
+  (let ((html (expand-file-name "maple/toolbox/maplev/info/maplev.html")))
+    (if (file-exists-p html)
+	(browse-url (concat "file://" html))
+      (error "HTML file not found: %s" html))))
 
 ;;}}}
 
@@ -783,15 +778,21 @@ The name of the procedure is inserted into the title of the fold."
              ":="
              ))
           ;; neutral operators
-          "\\|&\\(?:[~!@$^*-+=\"<>,./?]+\\|[a-zA-Z_][a-zA-Z_0-9]*\\)"
+          "\\|&\\(?:[~!@$^*+=\"<>,./?-]+\\|[a-zA-Z_][a-zA-Z_0-9]*\\)"
           "\\)")
   "Regular expression matching a Maple operator."
   )
+
+;; (xr-lint maplev--operator-re)
+
 
 (defconst maplev--number-re
   "[+-]?\\(?:[0-9]+\\(\\.[0-9]*\\)?\\|\\.[0-9]+\\)\\(?:[Ee][+-]?[0-9]*\\)?"
   "Regular expression matching a number.
 This is slightly too aggressive, it incorrectly matches, d.Ed, which is invalid.")
+
+;; (xr-lint maplev--number-re)
+
 
 (defconst maplev--expr-re
   (concat "\\s-*"

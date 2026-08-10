@@ -293,7 +293,7 @@ use the tty help browser, in an Emacs buffer."
   "Launch the Maple Standard GUI, opening a worksheet that starts the MapleServer.
 The MapleServer displays help pages and worksheets upon request."
   (interactive)
-  (let* ((mw (expand-file-name "~/maple/toolbox/MapleServer/data/MapleServer.mw"))
+  (let* ((mw (expand-file-name "maple/toolbox/MapleServer/data/MapleServer.mw"))
 	 (cmd (format "maple -x \"%s\" &" mw)))
     (if (file-exists-p mw)
 	(shell-command cmd))))

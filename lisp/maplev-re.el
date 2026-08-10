@@ -6,28 +6,37 @@
 ;;; Code:
 ;;
 
+(require 'rx)
+
 (defun maplev--list-to-word-re (words)
-  "Generate a regular expression that matches one of WORDS, a list."
-  (concat "\\<\\(" (regexp-opt words) "\\)\\>"))
+  "Generate a regular expression that matches one of WORDS, a list of strings."
+  (concat "\\<" (rx-to-string `(or ,@words)) "\\>"))
 
 (defconst maplev--declaration-re
-  "\\<\\(?:local\\|options?\\|global\\|description\\|export\\|uses\\)\\>"
+  (rx-to-string `(or "local" "option" "options" "global" "description" "export" "uses"))
   "Regular expression for a Maple procedure declaration statement.")
 
-(defconst maplev--simple-name-re  "\\_<[a-zA-Z_%~][a-zA-Z0-9_?]*\\_>"
+(defconst maplev--simple-name-re
+  (rx (seq symbol-start (any "A-Za-z" "%_~")
+           (zero-or-more (any "0-9A-Za-z" "?_")) symbol-end))
   "Regular expression for a simple name.")
 
-(defconst maplev--quoted-name-re  "`[^`\n\\\\]*\\(?:\\\\.[^`\n\\\\]*\\)*`"
+(defconst maplev--quoted-name-re
+  (rx (seq "`"
+           (zero-or-more (not (any "\n\\`")))
+           (zero-or-more "\\" nonl (zero-or-more (not (any "\n\\`"))))
+           "`"))
   "Regular expression for a Maple quoted name.
 It correctly handles escaped back-quotes in a name, but not
 doubled back-quotes.  It intentionally fails for the exceptional
 case where a name has a newline character.")
 
-(defconst maplev--symbol-re (concat "\\(?:"
-				    maplev--simple-name-re
-				    "\\|"
-				    maplev--quoted-name-re
-				    "\\)")
+(defconst maplev--symbol-re
+  (concat "\\(?:"
+          maplev--simple-name-re
+          "\\|"
+          maplev--quoted-name-re
+          "\\)")
   "Regular expression for a Maple symbol.")
 
 (defconst maplev--name-re
@@ -36,16 +45,6 @@ case where a name has a newline character.")
 	  "\\(?:[ \t\n\f]*\\[[^][]*\\]\\)*" ; optional indices
 	  "\\(?:[ \t\n\f]*([^)(]*)\\)*") ; optional arguments
   "Regular expression for Maple names.")
-
-;; (defconst maplev--var-with-optional-type (concat
-;;                                           "\\(" maplev--simple-name-re "\\)"
-;;                                           "\\(?:\\s-*::\\s-*"
-;;                                           "\\("
-;;                                           maplev--type-re
-;;                                           "\\)\\)?")
-;;   "Regular expression for a variable with optional type declaration.
-;; The variable matches group one, the type matches group 2.")
-
 
 (defconst maplev--comment-re "#.*$"
   "Regular expression for Maple comments.
@@ -61,13 +60,13 @@ A backslash at the end of the line does not continue the comment.")
   ;;  (concat "^\\s-*"
   ;;	  "\\(" maplev--name-re "\\)[ \t\n]*:=[ \t\n]*")
   ;;  "Regular expression that matches a Maple assignment.")
-  (concat "\\(?:^\\|\\s-\\|[,]\\)"
-	  "\\('?" maplev--name-re "'?\\)[ \t\n]*:?=[ \t\n]*")
+  (concat ;; "\\(?:^\\|\\s-\\|[,]\\)"
+   "\\('?" maplev--name-re "'?\\)[ \t\n]*:?=[ \t\n]*")
   "Regular expression that matches a Maple assignment.")
 
 (defconst maplev--possibly-typed-assignment-re
-  (concat "^\\s-*"
-	  "\\("
+  (concat "^\\s-*" ; beginning of line followed by whitespace
+	  "\\("    ;
 	  "\\(?:\\(?:local\\|global\\|export\\)?\\s-*\\)"
 	  "\\('?" maplev--name-re "'?\\)"
 	  "\\)"
@@ -83,8 +82,10 @@ a sequence.")
 (defconst maplev--defun-begin-re
   ;; This regular expression does not match a named module,
   ;; nor does it match a procedure/module that is not an
-  ;; assignment statement.
-  (concat maplev--possibly-typed-assignment-re ;; assignment-re
+  ;; assignment statement.  See `maplev--beginning-of-defun'.
+
+  (concat "\\(?:" maplev--assignment-re "\\|^\\s-*" "\\)?"
+          ;; maplev--possibly-typed-assignment-re ;; assignment-re
 	  "\\(?:" maplev--comment-re "\\)?"
 	  "[ \t\f\n]*" maplev--defun-re)
   "Regular expression for Maple defun assignments.
@@ -125,11 +126,15 @@ It matches from the \"end\" to the terminating colon or semicolon.")
   "Regex for \"end\" statement in a top level Maple procedure assignment.
 It matches either a flush left \"end\" or a one line procedure assignment.")
 
-(defconst maplev--space-dot-quote-re "\\s-*\\.[`\"]") ; space could be allowed 'twixt dot and quote
+(defconst maplev--space-dot-quote-re "\\s-*\\.[`\"]") ; space could be allowed between the dot and quote
 
 ;;;(defconst maplev--quote-re "\"[^\"]*\"\\|`[^`]*`")    ; fails when a quote contains a quote.
 
-(defconst maplev--string-re "\"[^\"\\\\]*\\(\\\\[[:ascii:]][^\"\\\\]*\\)*\""
+(defconst maplev--string-re
+  (rx (seq "\"" (zero-or-more (not (any "\"\\")))
+           (zero-or-more
+            (group "\\" ascii (zero-or-more (not (any "\"\\")))))
+           "\""))
   "Regular expression that matches a double-quoted Maple string.
 It matches even when a string contains newlines or escaped characters,
 including double-quotes.")
@@ -147,7 +152,8 @@ Intended to be assigned to an element of `compilation-error-regexp-alist-alist'.
 The first group matches the line number, the second group the file name.")
 
 (defconst maplev--link-re
-  "^#LINK\\s-+\\([^ \t\n]+*\\)"
+  (rx (seq bol "#LINK" (one-or-more (syntax whitespace))
+           (group (one-or-more (not (any "\t\n "))))))
   "Regular expression that matches a link statement.
 The first group is the linked file.")
 
@@ -160,19 +166,29 @@ For example, given \"begin\" the regular expression matches \"gin\"."
     re))
 
 (defconst maplev-partial-end-defun-re
-  (concat "\\("
+  (concat "\\_<\\("
 	  (maplev--make-suffix-regexp "end")
 	  "?\\s-+\\)?\\(?:"
 	  (maplev--make-suffix-regexp "proc")
 	  "\\|"
 	  (maplev--make-suffix-regexp "module")
-	  "\\)\\>")
+	  "\\)\\_>")
   "Regular expression that matches a suffix of the end of a procedure or module
 assignment; this assumes that a naked \"end\" is not used (may have to rethink
 that, as they are used).")
 
 (defconst maplev--module-export-re
-  (concat "\\(?:" maplev--symbol-re "\\(?::-" maplev--symbol-re "\\)+\\)")
+  (rx (seq (or (seq symbol-start (any "A-Za-z" "%_~")
+	            (zero-or-more (any "0-9A-Za-z" "?_")) symbol-end)
+	       (seq "`" (zero-or-more (not (any "\n\\`")))
+	            (zero-or-more "\\" nonl (zero-or-more (not (any "\n\\`")))) "`"))
+           (one-or-more ":-"
+		        (or (seq symbol-start (any "A-Za-z" "%_~")
+			         (zero-or-more (any "0-9A-Za-z" "?_")) symbol-end)
+		            (seq "`" (zero-or-more (not (any "\n\\`")))
+			         (zero-or-more "\\" nonl
+					       (zero-or-more (not (any "\n\\`"))))
+			         "`")))))
   "Regular expression that matches a module export designation.
 An example is foo:-bar.")
 
