@@ -397,9 +397,10 @@ The title is the phrase following the function name."
   "Regular expression for sections in a Maple help page.")
 
 (defconst maplev--help-subsection-re
-  (concat "^\\([A-Z][a-z-0-9-]+ ?\\([A-Za-z0-9-][a-z]* ?\\)?"
+  (concat "^\\([A-Z][a-z0-9-]+ ?\\([A-Za-z0-9-][a-z]* ?\\)?"
           "\\([A-Za-z][a-z-]*\\)?:?[ \t]*$"
-          "\\)")
+          "\\)"
+          )
   "Regular expression for subsections in a Maple help page.")
 
 (defconst maplev--help-definition-re

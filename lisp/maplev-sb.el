@@ -82,7 +82,7 @@ Markers allow the links to work as the file is edited."
 (defconst maplev-sb-keyword-re
   (concat "\\_<\\("
 	  "module\\|proc\\|do\\|end\\|fi\\|if\\|od\\|try\\|use"
-	  "\\|^\$\\([a-z]+\\)"  ; preprocessor macro
+	  "\\|^\\$\\([a-z]+\\)"  ; preprocessor macro
 	  "\\)\\_>")
   "Regular expression that matches Maple keywords.  Keyword is in group 1.")
 
