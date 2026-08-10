@@ -140,8 +140,6 @@ If optional arg HIDE is non-nil do not display buffer."
 
 ;;}}}
 
-
-
 (provide 'maplev-history)
 
 ;;; maplev-history.el ends here
