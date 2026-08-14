@@ -81,8 +81,8 @@ select the entire "expression", not just one component.
 
 <2026-02-03 Tue>
 
-What happened to =init-test.el=?  It is used by testall and testany.
-Recreated it.
+What happened to ~test-init.el~?  It is used by ~testall~ and ~testany~.
+Recreated it, [[file:test-init.el][init-test.el]].
 
 Add tests for the addition of [[file:~/.emacs.d/maple/maplev-pmaple.el::defun maplev-pmaple-status (][maplev-pmaple-status]] to maplev-pmaple.el.
 
@@ -94,3 +94,10 @@ The \e is the escape character.  So it matches, say, "\e[123m".
 Added [[file:maplev-pmaple-test.el::ert-deftest maplev--cleanup-buffer-test (][maplev--cleanup-buffer-test]] to verify [[file:~/.emacs.d/maple/maplev-pmaple.el::defun maplev--cleanup-buffer (][maplev--cleanup-buffer]].
 
 How to test the other buffer modification that operate on =maplev--pmaple-buffer=?
+
+
+<2026-07-17 Fri>
+
+The tests do nothing.  For example, [[file:maplev-re-test.el::(xt-deftest maplev--possibly-typed-assignment-re-test][maplev--possibly-tyqped-assignment-re-test]] passes even after
+modifying the expected results.  Similar for other tests in that file.
+What is happening?

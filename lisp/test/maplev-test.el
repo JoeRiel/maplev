@@ -8,3 +8,4 @@
       (should (equal (func "-w 10 -x 10 -B") '("-w10" "-x10" "-B")))
       (should (equal (func "-a -w 100") '("-a" "-w100")))
       ))
+

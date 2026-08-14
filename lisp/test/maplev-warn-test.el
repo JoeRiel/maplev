@@ -8,17 +8,18 @@
 	   (foo     . maplev-warn-font-lock-foo-keywords)
 	   (bar     . maplev-warn-font-lock-bar-keywords))))
     (should (equal
-	     (maplev-warn-is-enabled 'maplev-mode) t))
+             (maplev-warn-is-enabled 'maplev-mode) t))
     (should (equal
-	     (maplev-warn-is-enabled 'maplev-mode 'unequal) t))
+             (maplev-warn-is-enabled 'maplev-mode 'unequal) t))
     (should (equal
-	     (maplev-warn-is-enabled 'maplev-mode 'equal) t))
+             (maplev-warn-is-enabled 'maplev-mode 'equal) t))
     (should (equal
-	     (maplev-warn-is-enabled 'mpldoc-mode 'equal) t))
+             (maplev-warn-is-enabled 'mpldoc-mode 'equal) t))
     (should (equal
-	   (maplev-warn-is-enabled 'mpldoc-mode 'foo) t))
+           (maplev-warn-is-enabled 'mpldoc-mode 'foo) t))
     (should (equal
-	     (maplev-warn-is-enabled 'mpldoc-mode 'bar) nil))
+             (maplev-warn-is-enabled 'mpldoc-mode 'bar) nil))
     (should (equal
-	     (maplev-warn-is-enabled 'nada-mode) nil))))
+             (maplev-warn-is-enabled 'nada-mode) nil))
+    ))
 

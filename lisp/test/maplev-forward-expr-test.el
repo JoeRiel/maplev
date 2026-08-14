@@ -22,24 +22,10 @@
       "-0.1e-4")))
   )
 
-(xt-deftest maplev--symbol-re-test
-  (xtd-should (lambda (str match)
-		(string-match maplev--symbol-re str)
-		(equal (match-string 0 str) match))
-              ("a" "a")
-              ("a+b" "a")
-              ("a-b" "a")
-              ("`a+b`" "`a+b`")
-              ("[a]" "a")
-              ("{a,b,c}" "a")
-              ("foo(a)" "foo")
-              ("foo[a]" "foo")
-              ))
 
 
 
 (xt-deftest maplev-forward-expr-test
-  ;; (xt-note "Testing the insert procedure.")
   (xtd-setup= (lambda (dummy)
 		(with-syntax-table maplev-mode-syntax-table
 		  (maplev-forward-expr)))
@@ -52,4 +38,7 @@
               ("-!-a++" "a++-!-")
 	      ("-!-a*b/c^d^3" "a*b/c^d^3-!-")
 	      ("-!-a,b,c" "a-!-,b,c")
+	      ("-!-(a,b,c)" "(a,b,c)-!-")
+	      ("-!-[a,b,c]" "[a,b,c]-!-")
+	      ("-!-{a,b,c}" "{a,b,c}-!-")
 	      ))
