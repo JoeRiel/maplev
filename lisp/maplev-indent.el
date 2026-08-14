@@ -428,7 +428,7 @@ beyond \(point\)."
 ;;{{{ commands
 
 (defun maplev-indent-compute (indent-info)
-  "Return the indentation required for a Maple code line.
+  "Return the indentation required for the current line of Maple code.
 INDENT-INFO is the indentation information applicable to this line;
 it is a list of three items: \(KEYWORD INDENT-CLOSE INDENT-FOLLOW\).
 See `maplev-indent-info' for details.  If INDENT-INFO is nil then 0
