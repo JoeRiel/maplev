@@ -49,7 +49,7 @@
 ##- "maplev"
 
 
-#LINK maplev.mpl
+#LINK ../src/maplev.mpl
 
 Install := proc( { bytecompile :: truefalse := true }
                  , { emacs :: string := "emacs" }
