@@ -34,7 +34,7 @@
 ;;   maplev-mint-mode:   for displaying the output of mint (a syntax checker that is part of Maple)
 ;;   maplev-help-mode:   for displaying Maple help pages
 ;;   maplev-view-mode:   for displaying Maple procedures
- 
+
 ;;; Features:
 
 ;; font-lock (highlighting) of Maple keywords
@@ -82,11 +82,11 @@
 ;;{{{ To Do
 
 ;; High Priority:
-;; - make `maplev-beginning-of-proc' and `maplev-end-of-proc' more reliable.
+;; - make `maplev-beginning-of-defun' and `maplev-end-of-defun' more reliable.
 ;;
 ;; Medium Priority:
 ;; - add comment-out functions
-;; - pass `maplev-beginning-of-proc' (or faster) to `font-lock-defaults'.
+;; - pass `maplev-beginning-of-defun' (or faster) to `font-lock-defaults'.
 ;;   That should speed up fontification with lazy(?) lock.  Testing.
 ;; - add clean up routine to kill buffers and processes
 ;;   when exiting maplev-mode
@@ -183,6 +183,8 @@ When MESSAGE is non-nil, display a message with the version."
 ;;}}}
 ;;{{{ Syntax table
 
+;; See info for Elisp, Syntax Tables
+
 (defvar maplev-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?_  "_"  table) ; symbol constituent
@@ -200,24 +202,24 @@ When MESSAGE is non-nil, display a message with the version."
 
     (modify-syntax-entry ?*  ". 23b"  table) ; punctuation and used in multiline comments (* ... *)
 
-    (modify-syntax-entry ?/  "."  table)
-    (modify-syntax-entry ?+  "."  table)
-    (modify-syntax-entry ?-  "."  table)
-    (modify-syntax-entry ?=  "."  table)
-    (modify-syntax-entry ?>  "."  table)
-    (modify-syntax-entry ?<  "."  table)
-    (modify-syntax-entry ?.  "."  table)
-    (modify-syntax-entry ?|  "."  table)
+    (modify-syntax-entry ?/  "."  table) ; punctuation
+    (modify-syntax-entry ?+  "."  table) ; punctuation
+    (modify-syntax-entry ?-  "."  table) ; punctuation
+    (modify-syntax-entry ?=  "."  table) ; punctuation
+    (modify-syntax-entry ?>  "."  table) ; punctuation
+    (modify-syntax-entry ?<  "."  table) ; punctuation
+    (modify-syntax-entry ?.  "."  table) ; punctuation
+    (modify-syntax-entry ?|  "."  table) ; punctuation
 
     (modify-syntax-entry ?\" "\"" table) ; string quote
     (modify-syntax-entry ?\' "\"" table) ; string quote
     (modify-syntax-entry ?\` "\"" table) ; string quote
     (modify-syntax-entry ?\{ "(}" table) ; balanced brackets
     (modify-syntax-entry ?\[ "(]" table)
-    (modify-syntax-entry ?\( "()1n" table)
+    (modify-syntax-entry ?\( "()1n" table)  ; also start of (*, which may be nested
     (modify-syntax-entry ?\} "){" table)
     (modify-syntax-entry ?\] ")[" table)
-    (modify-syntax-entry ?\) ")(4n" table)
+    (modify-syntax-entry ?\) ")(4n" table)  ; also end of *), which may be nested
 
     ;; Entries for R5 and later
     (modify-syntax-entry ?\" "\"" table)
@@ -248,7 +250,8 @@ When MESSAGE is non-nil, display a message with the version."
     (modify-syntax-entry ?\' "." table)
     (modify-syntax-entry ?\` "_" table)
     table)
-  "Syntax table used by `maplev--re-search-forward'.")
+  "Syntax table used by `maplev--re-search-forward'.
+Also used by `maplev--re-search-backward'.")
 
 
 ;;}}}
@@ -270,8 +273,8 @@ When MESSAGE is non-nil, display a message with the version."
     (define-key map [(control j)]                'maplev-indent-newline)
     (define-key map [(control return)]           'maplev-newline-and-comment)
     (define-key map [(meta control h)]           'maplev-mark-defun)
-    ;;  (define-key map [(meta control a)]           'maplev-beginning-of-proc)
-    ;;  (define-key map [(meta control e)]           'maplev-end-of-proc)
+    (define-key map [(meta control a)]           'maplev--beginning-of-defun)
+    (define-key map [(meta control e)]           'maplev--end-of-defun)
     (define-key map [(control x) ?n ?d]          'maplev-narrow-to-defun)
 
 
@@ -660,17 +663,17 @@ Key bindings:
   (maplev-reset-font-lock)
 
   (when maplev-buttonize-includes-flag
-    (maplev-buttonize-includes)
+    (maplev-buttonize-includes))
+
+  (when maplev-buttonize-links-flag
     (maplev-buttonize-links))
 
-  ;; experimental,
-  ;; (when maplev-buttonize-module-exports-flag
-  ;;    (maplev-buttonize-module-exports))
 
   ;; Create configuration object
   (if maplev-load-config-file-flag (maplev-load-config-file))
   (unless maplev-config
-    (maplev-config-class))
+    (setq maplev-config maplev-config-default))
+  ;; (maplev-config-class))
 
   ;; Set hooks
   (if maplev-clean-buffer-before-saving-flag
@@ -783,16 +786,10 @@ The name of the procedure is inserted into the title of the fold."
   "Regular expression matching a Maple operator."
   )
 
-;; (xr-lint maplev--operator-re)
-
-
 (defconst maplev--number-re
   "[+-]?\\(?:[0-9]+\\(\\.[0-9]*\\)?\\|\\.[0-9]+\\)\\(?:[Ee][+-]?[0-9]*\\)?"
   "Regular expression matching a number.
 This is slightly too aggressive, it incorrectly matches, d.Ed, which is invalid.")
-
-;; (xr-lint maplev--number-re)
-
 
 (defconst maplev--expr-re
   (concat "\\s-*"
@@ -1268,34 +1265,31 @@ otherwise use `maplev-tab-width'."
 ;;}}}
 
 (defconst maplev--deprecated-re
-  (eval-when-compile
-    (maplev--list-to-word-re
-     (list "queue" "stack" "traperror" "linalg" "solvefor" "ERROR")))
+  (rx word-start (or "queue" "stack" "traperror" "linalg" "solvefor" "ERROR") word-end)
   "Regex of deprecated keywords and procedures.")
 
 (defconst maplev--special-words-re
-  (maplev--list-to-word-re maplev-special-words)
+  (let ((words maplev-special-words))
+    (concat "\\<" (rx-to-string `(or ,@words)) "\\>"))
   "Regex of special words in Maple.")
 
 (defconst maplev--initial-variables-re
-  (maplev--list-to-word-re maplev-initial-variables)
+  (let ((words maplev-initial-variables))
+    (concat "\\<" (rx-to-string `(or ,@words)) "\\>"))
   "Regexp of global, environmental variables and constants.")
 
 (defconst maplev--preprocessor-directives-re
-  (eval-when-compile
-    (concat "^\\$\\("
-	    (regexp-opt (list
-			 "define" "elif" "elifdef" "elifndef" "else" "endif"
-			 "file" "ifdef" "ifndef" "include" "undef"
-			 ))
-	    "\\)"))
+  (rx line-start "$" (or "define" "elif" "elifdef" "elifndef" "else" "endif"
+		         "file" "ifdef" "ifndef" "include" "undef")
+      word-end)
   "Regex of preprocessor directives.")
 
 (defconst maplev--include-directive-re
-  "^\\(?:## \\)?\\$include\\s-*\\([<\"]\\)\\(.*\\)[>\"]"
+  (rx line-start "$include" whitespace (group (or ?< ?\")) (group (1+ not-newline)) (or ?> ?\"))
   "Regex of an include directive.
 The first group matches the character used to delimit the
 file (either < or \").  The second group matches the filename.")
+;; "^\\$include[[:space:]]\\([\"<]\\)\\(.+\\)[\">]"
 
 (defconst maplev-constructors
   (list "Complex" "Float" "Fraction" "HFloat" "Integer" "SFloat")
@@ -1657,25 +1651,35 @@ If nil then `font-lock-maximum-decoration' selects the level."
 
 ;;{{{ Includes
 
-(defface maplev-find-include-file
+(defface maplev-external-file ;; maplev-find-include-file
   '((((class grayscale) (background light)) (:foreground "LightGray" :underline t))
     (((class grayscale) (background dark))  (:foreground "DarkGray" :underline t))
     (((class color)     (background light)) (:foreground "DarkBlue" :underline t))
     (((class color)     (background dark))  (:foreground "LightBlue" :underline t))
     (t (:underline t)))
-  "Font lock face used for include filenames, indicates hyperlink."
+  "Font lock face used for external filenames; indicates hyperlink."
   :group 'maplev-faces)
 
 (defun maplev-buttonize-includes ()
-  "Buttonize the include statements."
-  (button-lock-mode t)
-  (button-lock-set-button maplev--include-directive-re
-			  'maplev-find-include-file-at-point
-			  :face 'link
-			  :face-policy 'prepend
-			  :grouping 2
-			  :keyboard-binding "C-c C-o"
-			  :help-text "open file ([C-u] C-c C-o)"))
+  "Buttonize the standard Maple include statements."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward maplev--include-directive-re (point-max) t)
+      (let ((ov (make-button (match-beginning 2) (match-end 2)
+                             :type 'maplev-find-include-file)))
+        (overlay-put ov 'evaporate t)))))
+
+(define-button-type
+  'maplev-find-include-file
+  'help-echo "open include file (C-c C-o)"
+  'action 'maplev-find-include-file-at-point
+  'follow-link t
+  'face 'maplev-external-file
+  'keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "C-c C-o") 'maplev-find-include-file-at-point)
+            (define-key map [mouse-2]       'maplev-find-include-file-at-point)
+            map))
+
 
 (defun maplev-find-include-file-at-point (toggle)
   "Open the include file at point.
@@ -1690,6 +1694,7 @@ create the file."
     (beginning-of-line)
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
+    (unless maplev-config (error "maplev-config is not assigned"))
     (let* ((inc-file (match-string-no-properties 2))
 	   (path (slot-value maplev-config 'include-path))
 	   (inc-first (string= "<" (match-string-no-properties 1)))
@@ -1763,28 +1768,32 @@ nil."
 	    (setq dir parent)))) ; check parent
     abs-file))
 
-(define-button-type 'maplev-find-include-file
-  'help-echo "Find include file"
-  'action 'maplev-find-include-file-at-point
-  'follow-link t
-  'face 'maplev-include-file)
 
 ;;}}}
 ;;{{{ Links
 
+(define-button-type
+  'maplev-link
+  'help-echo "open external file (C-c C-o)"
+  'action 'maplev-find-link-file-at-point
+  'follow-link t
+  'face 'maplev-external-file
+  'keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "C-c C-o") 'maplev-find-link-file-at-point)
+            (define-key map [mouse-2]       'maplev-find-link-file-at-point)
+            map))
+
 (defun maplev-buttonize-links ()
-  "Buttonize the link statements.
+  "Buttonize LINK statements.
 The link points to a file of interest; the action opens the file.
 For example, '#LINK ../../Makefile', with the pound symbol as the
 first character in the line."
-  (button-lock-mode t)
-  (button-lock-set-button maplev--link-re
-			  'maplev-find-link-file-at-point
-			  :face 'link
-			  :face-policy 'prepend
-			  :grouping 1
-			  :keyboard-binding "C-c C-o"
-			  :help-text "open file"))
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward maplev--link-re (point-max) t)
+      (let ((ov (make-button (match-beginning 1) (match-end 1)
+                             :type 'maplev-link)))
+        (overlay-put ov 'evaporate t)))))
 
 
 (defun maplev-find-link-file-at-point (toggle)
@@ -1808,22 +1817,6 @@ window, depending on the exclusive-or of
 	    (find-file-other-window file)
 	  (find-file file))))))
 
-(defun maplev-buttonize-module-exports ()
-  "Buttonize module-exports."
-  (button-lock-mode t)
-  (button-lock-set-button maplev--module-export-re
-			  'maplev-find-module-export-at-point
-			  :face 'link
-			  :face-policy 'prepend
-			  :grouping 0
-			  :keyboard-binding "C-c C-o"
-			  :help-text "open file"))
-
-(defun maplev-find-module-export-at-point (toggle)
-  (interactive "P")
-  (ignore toggle)
-  (point))
-
 ;;}}}
 
 ;;{{{ Config file (.maplev)
@@ -1845,13 +1838,14 @@ directory and its ancestors.  Return the path to the configuration
 file if one was found, nil otherwise."
   (interactive)
   (let ((maplev-config-file (maplev-include--find-file-up-path ".maplev")))
-    (when maplev-config-file
-      (condition-case err
-	  (progn
-	    (load-file maplev-config-file)
-	    maplev-config-file)
-	(error
-	 (error "Problem loading config file %s: %s" maplev-config-file err))))))
+    (if maplev-config-file
+        (condition-case err
+	    (progn
+	      (load-file maplev-config-file)
+	      maplev-config-file)
+	  (error
+	   (error "Problem loading config file %s: %s" maplev-config-file err)))
+      (message "No .maplev file associated with this file"))))
 
 ;;}}}
 ;;{{{ Project source file
