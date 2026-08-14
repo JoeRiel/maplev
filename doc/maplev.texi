@@ -99,8 +99,8 @@ Indices
 
 Introduction
 
-* Summary::
-* Requirements::
+* Summary::                     Features
+* Requirements::                Maple and Emacs versions
 
 Indentation
 
@@ -123,6 +123,7 @@ Miscellaneous features
 * Include statements::          Active include statements.
 * LINK::                        Hyperlink to a file.
 * Indent trace output::         Hierarchically indent Maple trace output.
+* Speedbar::                    Display a frame for viewing modules and procedures of a Maple source file.
 
 Configuration
 
@@ -177,8 +178,8 @@ under the GNU General Public License.
 @end iftex
 
 @menu
-* Summary::
-* Requirements::
+* Summary::                     Features
+* Requirements::                Maple and Emacs versions
 @end menu
 
 @node Summary, Requirements, Introduction, Introduction
@@ -243,8 +244,8 @@ provides a convenient means to return to previously displayed code.
 @section Requirements
 @cindex Requirements for MapleV
 
-MapleV has been used with Maple version from 4 to 2015,
-with GNU Emacs 22 to 24, and on Linux, Mac, and Windows machines.
+MapleV has been used with Maple version from 4 to 2026,
+with GNU Emacs 22 to 30, and on Linux, Mac, and Windows machines.
 
 @node Basics, Indentation, Introduction, top
 @chapter Basics
@@ -539,7 +540,7 @@ reparsed.
 
 The amount of syntactical highlighting, or ``decoration'', is controlled
 by the global variable @code{font-lock-maximum-decoration}, which you
-may set in your @file{.emacs} file.  @inforef{Font Lock,,emacs}, for
+may set in your @file{.emacs} file.  @xref{Font Lock,,,emacs}, for
 information.  MapleV mode provides three levels of decoration:
 
 @enumerate
@@ -581,8 +582,7 @@ decoration in a MapleV buffer.  @code{LEVEL} is an integer from 1 to 3.
 
 
 MapleV uses standard Emacs commands to enter, align and fill Maple
-comments.  @inforef{Comments,,emacs}. The commands are reproduced here
-for convenience.
+comments.  The commands are reproduced here for convenience.
 
 @table @kbd
 @item M-;
@@ -725,6 +725,7 @@ Only the first macro in a @code{macro} assignment is indexed.
 * Include statements::          Active include statements.
 * LINK::                        Hyperlink to a file.
 * Indent trace output::         Hierarchically indent Maple trace output.
+* Speedbar::                    Display a frame for viewing modules and procedures of a Maple source file.
 @end menu
 
 @node Include statements, LINK, Miscellaneous features, Miscellaneous features
@@ -734,7 +735,7 @@ Only the first macro in a @code{macro} assignment is indexed.
 @findex maplev-find-include-file-at-point
 Maple include statements, such as @code{$include <somefile>},
 are font-locked and active.
-Clicking on them, or typing @kbd{C-c C-o},
+Clicking on them, or typing @kbd{C-c C-o} with point in the text,
 calls @kbd{maplev-find-include-file-at-point},
 which searches for the file and, if successful, opens it.
 If the path exists, but the file does not, the user is
@@ -756,14 +757,20 @@ another window.
 @cindex LINK
 
 A flush-left Maple comment @code{#LINK @file{filename}}
-inserts a hyper link to the filename.  For example,
+inserts a hyperlink to the filename, if the file is found.
+For example,
 
 @example
-#LINK Bark.mpl
+#LINK ../Bark.mpl
 @end example
 
+@findex maplev-find-link-file-at-point
+@vindex maplev-external-file
+The hyperlink has face @code{maplev-external-file}.
+Clicking on it, or typing @kbd{C-c C-o} with point in the text,
+calls @kbd{maplev-find-link-file-at-point} which opens the file.
 
-@node Indent trace output,  , LINK, Miscellaneous features
+@node Indent trace output, Speedbar, LINK, Miscellaneous features
 @section Indent trace output
 @cindex Indent trace
 
@@ -791,6 +798,34 @@ The default is four spaces.
 
 @end table
 
+
+@node Speedbar,  , Indent trace output, Miscellaneous features
+@section Speedbar
+@cindex Speedbar
+
+When the Emacs Speedbar is active,
+Maple source files are listed in the speedbar frame.
+When the Maple source file for this package is edited,
+the speedbar frame looks like @ref{fig:speedbar}.
+Clicking on a procedure opens its source file at the appropriate position.
+
+@float Figure,fig:speedbar
+@verbatim
+~/emacs/maplev/maple/src/
+[+] Emacs.mm
+[+] GetSource.mm
+[-] Plot.mm
+  -> Plot
+   => ModuleApply
+   => ModuleLoad
+   => ModuleUnload
+   => Options
+[+] Print.mm
+[+] Setup.mm
+[-] maplev.mpl
+  => maplev
+@end verbatim
+@end float
 
 @node Configuration, Mint, Miscellaneous features, top
 @chapter Configuration
@@ -843,7 +878,7 @@ The function @code{maplev-config} constructs
 an @code{eieio} object of class @code{maplev-config-class}
 and assigns it to the eponymous buffer-local variable @code{maplev-config}.
 For details about objects, see @ref{Top,,, eieio, The EIEIO Manual}.
-The following fields are defined.
+The following fields are defined:
 
 @table @kbd
 
@@ -1119,7 +1154,7 @@ archives.
 
 The following commands,
 available through the menubar, @kbd{MapleV -> Maple},
-interact with @command{pmaple}.
+interact with @command{pmaple}:
 
 @table @kbd
 @item C-c C-c b
@@ -1154,7 +1189,7 @@ Kill the Maple engine (@code{maplev-pmaple-kill}).
 
 The @command{pmaple} binary can be used interactively in a buffer
 with the mode @code{maplev-pmaple-mode} that is based on @code{comint-mode}.
-@inforef{Shell Mode,,emacs} for more information.
+@xref{Shell Mode,,,emacs} for more information.
 In addition to the normal @code{comint} commands,
 the following commands are available:
 
@@ -1485,7 +1520,7 @@ to it.  I add the following menu item to my @file{dir} file:
 If you encounter a bug in this package, wish to suggest an enhancement,
 or want to make a smart remark, then send an email to me:
 
-   Joseph S. Riel (Joe Riel) @email{jriel@@maplesoft.com}
+   Joseph S. Riel (Joe Riel) @email{joer@san.rr.com}
 
 
 @node Acknowledgments,  , Bugs, Evolution
