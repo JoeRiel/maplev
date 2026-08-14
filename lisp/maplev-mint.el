@@ -641,7 +641,7 @@ Return exit code of mint."
       ;; (That's why mint-buffer is used as a temp buffer for mint input.)
       (if (not (bolp)) (newline))
       ;; remember end-of-input
-      (setq eoi (point-max))
+      (setq eoi (point-max)) ; eoi means (I think) "end of input"
       ;; Run Mint
       ;; To get this to work on Windows, the mint options passed to
       ;; call-process-region must be a sequence of strings, one string
@@ -652,9 +652,13 @@ Return exit code of mint."
 
       (let ((mint (slot-value config 'mint))
 	    ;; N.B. mint occasionally generates nonsense output when screen width (-w) is large.
-	    (mint-args (cons
-			(or (maplev-mint-read-options) "")
-			(maplev-get-option-with-include config 'mint-options))) ;;  "-w5000")))
+            ;; Dropped the handling of maplev-mint-read-options below.
+            ;; It isn't documented in the info and is rarely used.
+            ;; More to the point, the implementation (below) is flawed.
+
+	    (mint-args ;;(cons
+		       ;; (or (maplev-mint-read-options) "")
+			(maplev-get-option-with-include config 'mint-options)) ;;  "-w5000")))
 	    (process-environment (if maplev-use-new-language-features
 				     (cons "MAPLE_NEW_LANGUAGE_FEATURES=1" process-environment)
 				   process-environment))
@@ -795,15 +799,18 @@ as in `re-search-backward'."
       pos)))
 
 (defun maplev-safe-position (&optional to)
-  "Search for safe buffer position before point \(a position not in a comment\).
-Optional arg TO initializes the search.  It defaults to point.
-FIXME.  THIS IS NOT ROBUST."
+  "Search for a safe buffer position before point.
+A safe position is not in a comment or string.  Optional arg TO is the
+point from which to search; it defaults to the current point."
   (unless to (setq to (point)))
   (save-excursion
     (save-match-data
-      (goto-char to)
-      (while (and (= 0 (forward-line -1))
-                  (looking-at "#")))
+      (let (state)
+        (goto-char to)
+        (while (and (= 0 (forward-line -1))
+                    (setq state (syntax-ppss))
+                    (or (nth 3 state)     ; string/quote
+                        (nth 4 state))))) ; comment
       (point))))
 
 (defun maplev--scan-lists (count &optional from)
@@ -827,10 +834,12 @@ If optional arg BACK is non-nil, delete whitespace characters before point."
           (delete-region (match-beginning 0) (match-end 0))))))
 
 (defun maplev--statement-terminator ()
-  "Return position after the next statement terminator."
+  "Return position after the next statement terminator.
+Raise an error if no statement terminator is found."
   (save-excursion
-    (maplev--re-search-forward "[^:]\\(;\\|:[^-:=]\\)" nil t)
-    (+ 1 (match-beginning 1))))
+    (if (maplev--re-search-forward "[^:]\\(;\\|:[^-:=]\\)" nil t)
+        (+ 1 (match-beginning 1))
+      (error "no statement terminator found"))))
 
 (defun maplev--goto-declaration (keyword)
   "Move point to after KEYWORD in the KEYWORD declaration in a Maple procedure.
@@ -838,7 +847,7 @@ Return nil if there no such statement.  Point must be to the right of
 the closing parenthesis in the formal parameter list."
   (let ((bound (save-excursion
                  (maplev--re-search-forward maplev--defun-re
-                                            ;; (maplev-end-of-proc) 'move)
+                                            ;; (maplev-end-of-defun) 'move)
                                             (maplev--end-of-defun-pos) 'move)
                  (point))))
     (if (save-excursion
