@@ -58,90 +58,61 @@
 ;;}}}
 ;;{{{ Mark Maple procedures
 
-(defun maplev--beginning-of-defun-pos (&optional top n)
+(defun maplev--beginning-of-defun-pos-0 ()
   "Return character position of beginning of previous defun.
-If optional argument TOP is non-nil, search for top level defun.
-With optional argument N, do it that many times.  Negative
-argument -N means search forward to Nth preceding end of defun.
 Return nil if search fails."
-  (let ((regexp (if top maplev--top-defun-begin-re maplev--defun-begin-re))
+  (let ((regexp maplev--defun-begin-re)
         pos)
-    (setq n (or n 1))
     (save-excursion
-      (cond ((> n 0)
-             (and (setq pos
-                        ;; Assign pos the position of the previous beginning statement.
-                        ;; Because point could be in the middle of the statement,
-                        ;; first search backwards, then forwards.  If the beginning position
-                        ;; of the forwards search is before the original point (orig),
-                        ;; then use it, otherwise use the beginning position of the backwards search.
-                        (let* ((orig (point))
-                               (beg (maplev--re-search-backward regexp nil 'move)))
-                          (if beg (goto-char (match-end 0)))
-                          (or (and (maplev--re-search-forward regexp nil t)
-                                   (< (setq pos (match-beginning 0)) orig)
-                                   pos)
-                              beg)))
-                  ;; If n=1 then pos is the character position,
-                  (if (= n 1)
-                      pos
-                    ;; otherwise, search backwards n-1 times.
-                    ;; Because we are starting at the end of a defun,
-                    ;; we don't have to do the backwards search.
-                    (goto-char pos)
-                    (maplev--re-search-backward regexp nil t (1- n)))))
-            ((< n 0)
-             (and (maplev--re-search-backward regexp nil t n)
-                  (match-beginning 0)))
-            ((point))))))
+      (while
+          (and (setq pos (maplev--re-search-backward regexp nil 'move))
+               (if (looking-back "end\\s-+" (line-beginning-position))
+                   (not (setq pos nil)))))
+      pos)))
 
-(defun maplev--end-of-defun-pos (&optional top n)
-  "Return character position of next end of defun.
-If optional argument TOP is non-nil, search for top level defun.
-With optional argument N, do it that many times.  Negative
-argument -N means search back to Nth preceding end of defun.
+(defun maplev--beginning-of-defun-pos ()
+  "Return character position of beginning of previous defun.
 Return nil if search fails."
-
-  ;; The search algorithm is asymmetric with respect to direction.
-  ;; Searching backwards (-N) for an end of defun is easy, just search
-  ;; and move to the end of the match.  Searching forward is more
-  ;; complicated because point could lie within an end statement.
-
-  (let ((regexp (if top maplev--top-defun-end-re-colon maplev--defun-end-re-colon))
+  (let ((regexp maplev--defun-begin-re)
         pos)
-    (setq n (or n 1))
+    (while
+        (and (maplev--re-search-backward regexp nil 'move)
+             (setq pos (point))
+             (when (looking-back "end\\s-+" (line-beginning-position))
+                 (not (setq pos nil)))))
+    pos))
+
+
+
+(defun maplev--end-of-defun-pos ()
+  "Return character position of next end of defun."
+
+  (let ((regexp maplev--defun-end-re-colon)
+        pos)
     (save-excursion
-      (cond ((> n 0)
-             (and (setq pos
-                        ;; Assign pos the position of the next end statement.
-                        ;; Because point could be in the middle of the statement,
-                        ;; first search forward, then backwards.  If the end position
-                        ;; of the backwards search is past the original point (orig),
-                        ;; then use it, otherwise use the end position of the forward search.
-                        (let* ((orig (point))
-                               (end (maplev--re-search-forward regexp nil 'move)))
-                          (if end (goto-char (match-beginning 0)))
-                          (or (and (maplev--re-search-backward regexp nil t)
-                                   (> (setq pos (match-end 0)) orig)
-                                   pos)
-                              end)))
-                  ;; If n=1 then pos is the character position,
-                  (if (= n 1)
-                      pos
-                    ;; otherwise, search forward n-1 times.
-                    ;; Because we are starting at the end of a defun,
-                    ;; we don't have to do the backwards search.
-                    (goto-char pos)
-                    (maplev--re-search-forward regexp nil t (1- n)))))
-            ((< n 0)
-             (and (maplev--re-search-forward regexp nil t n)
-                  (match-end 0)))
-            ((point))))))
+      (and (setq pos
+                 ;; Assign pos the position of the next end statement.
+                 ;; Because point could be in the middle of the statement,
+                 ;; first search forward, then backwards.  If the end position
+                 ;; of the backwards search is past the original point (orig),
+                 ;; then use it, otherwise use the end position of the forward search.
+                 (let* ((orig (point))
+                        (end (maplev--re-search-forward regexp nil 'move)))
+                   (if end (goto-char (match-beginning 0)))
+                   (or (and (maplev--re-search-backward regexp nil t)
+                            (> (setq pos (match-end 0)) orig)
+                            pos)
+                       end)))
+           pos))))
+
+;; (goto-char (maplev--end-of-defun-pos))
+;; foo := proc() proc() end proc; end proc;
+
 
 (defun maplev--beginning-of-defun ()
   "Move point backwards to the beginning of the current defun.
 The defun is a Maple procedure or module.  The beginning is the first
-character of the keyword.  Complete end-statements are not required."
+character of the keyword.  Complete end-statements are required."
   (interactive)
   (let ((count 0)
 	(regex (concat "\\_<\\(?:\\(proc\\|module\\)"   ; 1
@@ -166,11 +137,12 @@ character of the keyword.  Complete end-statements are not required."
 		  (looking-at " *\\(proc\\|module\\)"))
 	    (goto-char start)))))
     (while (and (>= count 0)
-		(re-search-backward regex))
+		(re-search-backward regex nil 'move))
       (let ((state (syntax-ppss))) ; FIXME: speed this up
 	(unless (or (nth 3 state)  ; string/quoted
 		    (nth 4 state)) ; comment
-	  (if (match-string-no-properties 3)
+	  (if (and (match-string-no-properties 3)
+                   (not (looking-at "end\\s-+proc")))
 	      (setq count (1+ count))
 	    (unless (looking-back "end\\s-+" nil)
 	      (if (or (match-string-no-properties 1)
@@ -199,16 +171,18 @@ THIS ASSUMES EACH END STATEMENT IS FOLLOWED BY AN APPROPRIATE KEYWORD."
 
   (interactive)
   (let ((count 0)
-	(regex "\\(end\\s-+\\)?\\_<\\(?:proc\\|module\\)\\_>")
+        (regex (if current-prefix-arg
+                   "\\_<\\(proc\\)\\|end\\(?:\\s-+proc\\)?\\_>"
+                 "\\_<end\\(?:\\s-+proc\\)?\\_>"))
 	(state (syntax-ppss))
 	(start (point)))
-    (unless (or (nth 3 state)
-		(nth 4 state)
+    (unless (or (nth 3 state) ; non-nil = inside a string
+		(nth 4 state) ; non-nil = inside a comment
 		(not (looking-at maplev-partial-end-defun-re)))
       ;; Handle point in keywords by repositioning point
       ;; so algorithm correctly handles them.
       (goto-char (match-end 0))
-      (if (looking-back "\\_<end\\s-\\(proc\\|module\\)" nil)
+      (if (looking-back "\\_<end\\s-+\\(proc\\|module\\)" nil)
 	  ;; point is in ending keywords.  Move before them.
 	  (goto-char (match-beginning 0))
 	(goto-char start)
@@ -217,41 +191,41 @@ THIS ASSUMES EACH END STATEMENT IS FOLLOWED BY AN APPROPRIATE KEYWORD."
 	    (goto-char (match-end 0)))))
     ;; Standard algorithm
     (while (and (>= count 0)
-		(re-search-forward regex))
+		(re-search-forward regex nil 'move))
       (setq state (parse-partial-sexp start (point) nil nil state)
 	    start (point))
       (unless (or (nth 3 state)  ; string/quoted
 		  (nth 4 state)) ; comment
-	(setq count (if (match-string-no-properties 1)
-			(1- count)
-		      (1+ count)))))))
+        (unless (looking-at (rx (1+ space (or "do" "if") symbol-end)))
+	  (setq count (if (and current-prefix-arg
+                              (match-string-no-properties 1))
+			  (1+ count)
+		        (1- count))))))))  ; maplev--end-of-defun
 
-(defun maplev-beginning-of-defun (&optional n)
-  "Move point backward to the beginning of defun.
-With optional argument N, move to the beginning of the Nth
-preceding defun.  Negative argument -N means move forward to the
-end of the Nth following defun."
-  (interactive)
-  (setq n (or n 1))
-  (goto-char (or (maplev--beginning-of-defun-pos nil n)
-                 (if (> n 0) (point-min) (point-max)))))
+;; (maplev--end-of-defun)
+;; (re-search-forward  "\\(\\_<end\\>\\s-+\\)\\_<\\(?:proc\\|module\\)\\_>")
+;; (re-search-forward "\\_<end\\_>" nil 'move)
+;; proc() end proc;
 
-(defun maplev-end-of-defun (&optional n)
-  "Move point forward to the end of defun.
-With optional argument N, move to the end of the Nth following
-defun.  Negative argument -N means move backwards to the end of
-the Nth preceding defun."
+(defun maplev-beginning-of-defun ()
+  "Move point backward to the beginning of defun."
   (interactive)
-  (setq n (or n 1))
-  (goto-char (or (maplev--end-of-defun-pos nil n)
-                 (if (> n 0) (point-max) (point-min)))))
+  (goto-char (or (maplev--beginning-of-defun-pos)
+                 (point-min))))
+
+(defun maplev-end-of-defun ()
+  "Move point forward to the end of defun."
+  (interactive)
+  (goto-char (or (maplev--end-of-defun-pos)
+                 (point-max))))
 
 (defun maplev-mark-defun ()
   "Put mark at end of this defun, point at beginning.
-The defun marked is the one that contains point."
+The defun marked is the one that contains point.
+Return non-nil unless something dumb happens."
   (interactive)
   (push-mark (point) 'nomsg)
-  (beginning-of-line)
+  ;;(beginning-of-line)
   (with-syntax-table maplev-symbol-syntax-table
     (if (looking-at maplev--defun-begin-re) (goto-char (match-end 0)))
     (let ((count 1) ; decrement for each end statement, increment for each proc
@@ -266,6 +240,7 @@ The defun marked is the one that contains point."
 	      p-point (point))
 	(unless (or (nth 3 state) ; string/quote
 		    (nth 4 state)) ; comment
+          ;; update count: increment if the match was the begining of a procedure, decrement otherwise
 	  (setq count (+ count (if (match-beginning 1) 1 -1)))))
       (forward-line)
       (if (/= count 0)
@@ -305,15 +280,14 @@ Retun nil if current defun not found."
 
 
 (defun maplev-what-proc (&optional nodisplay)
-  "Display and return the name of the current procedure.
-If optional NODISPLAY is non-nil, just return the string."
+  "Display the name of the current procedure.
+If optional NODISPLAY is non-nil, just return the name."
   (interactive)
   (save-restriction
     (save-excursion
       (widen)
-      (end-of-line)
       (maplev-beginning-of-defun)
-      (re-search-forward maplev--assignment-re)
+      (re-search-backward maplev--assignment-re)
       (let ((proc (match-string-no-properties 1)))
       (if nodisplay
           proc
