@@ -68,20 +68,6 @@
                 (equal (maplev--make-suffix-regexp word) regex))
               ("abc" "\\(?:\\(?:a?b\\)?c\\)")))
 
-
-
-;;   ;; (string-match "\\(proc\\|modules\\)\\>" "procx")
-
-;; (maplev--make-suffix-regexp "abd")
-
-  ;; (let ((str "abc"))
-  ;;   (and (string-match maplev-partial-end-defun-re str)
-  ;;        (match-string 0 str)))
-
-;; (let ((regex "abcdef"))
-;;   (maplev--make-suffix-regexp regex))
-
-
 (xt-deftest maplev--symbol-re-test
   (xtd-should (lambda (str match)
 		(string-match maplev--symbol-re str)
@@ -94,4 +80,13 @@
               ("{a,b,c}" "a")
               ("foo(a)" "foo")
               ("foo[a]" "foo")
+              ))
+
+(xt-deftest maplev--defun-assignment-re-test
+  (xtd-should (lambda (str match)
+		(string-match maplev--defun-assignment-re str)
+		(equal (match-string 1 str) match))
+              ("foo := proc" "foo")
+              ("foo := # whatever\n proc" "foo")
+              ("foo := module" "foo")
               ))
