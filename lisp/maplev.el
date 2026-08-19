@@ -1194,7 +1194,7 @@ moved to be before it."
 ;;{{{ files
 
 (defun maplev-expand->file-name (>file mroot)
-  "If the string >FILE starts with >, replace it with MROOT."
+  "If the string >FILE begins with >, replace it with MROOT."
   (if (= (aref >file 0) ?>)
       (concat (file-name-as-directory mroot)
 	      (substring >file 1))
@@ -1209,10 +1209,10 @@ If assigned it is passed the name of the file and should return
 the desired tab width.")
 
 (defun maplev-set-tab-width (&optional file)
-  "Return the value of tab width required by optional FILE, or if nil,
-the file name given be `buffer-file-name'.  If the function
-`maplev-get-tab-width-function' is assigned, call it with FILE,
-otherwise use `maplev-tab-width'."
+  "Return the value of tab width required by optional FILE.
+The default for FILE is the file name returned by function
+`buffer-file-name'.  If the function `maplev-get-tab-width-function' is
+assigned, call it with FILE, otherwise use `maplev-tab-width'."
   (setq tab-width (if (functionp 'maplev-get-tab-width-function)
 		      (funcall maplev-get-tab-width-function (or file (buffer-file-name)))
 		    maplev-tab-width)))
@@ -1698,7 +1698,7 @@ create the file."
     (beginning-of-line)
     (unless (looking-at maplev--include-directive-re)
       (error "Not at an include statement"))
-    (unless maplev-config (error "maplev-config is not assigned"))
+    (unless maplev-config (error "The object maplev-config is not assigned"))
     (let* ((inc-file (match-string-no-properties 2))
 	   (path (slot-value maplev-config 'include-path))
 	   (inc-first (string= "<" (match-string-no-properties 1)))
@@ -1719,7 +1719,7 @@ create the file."
 		      (not (setq file (maplev-find-include-file inc-dir path inc-first)))))
 	  (if (not file)
 	      (error "Include file %s does not exist " inc-file)
-	    (when (yes-or-no-p (format "Create include file %s "
+	    (when (yes-or-no-p (format "Create include file %s?"
 				       (setq file (concat file base))))
 	      (if other-window-flag
 		  (find-file-other-window file)
@@ -1868,8 +1868,9 @@ file if one was found, nil otherwise."
 ;;{{{ leading-comma stuff
 
 (defun maplev-fixup-whitespace ()
-  "Catenate adjacent Maple strings (separated by one space) or,
-if `maplev-leading-comma-flag' is non-nil, remove space before a comma."
+  "Catenate adjacent Maple strings (separated by one space).
+If `maplev-leading-comma-flag' is non-nil, remove space before a comma."
+  
   (if (and maplev-leading-comma-flag
 	   (looking-at " ,"))
       (delete-char 1)

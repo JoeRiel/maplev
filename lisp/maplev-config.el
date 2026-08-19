@@ -232,5 +232,4 @@ is empty."
    options))
 
 (provide 'maplev-config)
-
-;;; maplev-config ends here
+;;; maplev-config.el ends here

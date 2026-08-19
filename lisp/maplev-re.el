@@ -72,18 +72,25 @@ A backslash at the end of the line does not continue the comment.")
 	  "\\)"
 	  "\\(?:[ \t\n]*::[ \t\n]*\\(" maplev--name-re "\\)\\)?"
 	  "[ \t\n]*:?=[ \t\n]*")
-  "Regular expression that matches a Maple assignment that may
-include a type declaration.  The first group contains the keyword
+  "Regular expression that matches a Maple assignment.
+The assignee may have a type declaration.  The first group contains the keyword
 local, global, or export, if present, and the second group, which
 is the assignee.  This third group is the type.  This only works
 with an assignment to a name, it does not match an assignment to
 a sequence.")
 
+(defconst maplev--defun-assignment-re
+  (concat "\\(?:" maplev--assignment-re "\\)"
+	  "\\(?:" maplev--comment-re "\\)?"
+	  "[ \t\f\n]*" maplev--defun-re)
+  "Regular expression for a Maple defun assignment.
+The first group corresponds to the name of the defun.")
+
+
 (defconst maplev--defun-begin-re
   ;; This regular expression does not match a named module,
   ;; nor does it match a procedure/module that is not an
   ;; assignment statement.  See `maplev--beginning-of-defun'.
-
   (concat "\\(?:" maplev--assignment-re "\\|^\\s-*" "\\)?"
           ;; maplev--possibly-typed-assignment-re ;; assignment-re
 	  "\\(?:" maplev--comment-re "\\)?"

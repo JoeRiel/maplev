@@ -160,8 +160,8 @@ See Info node `(speedbar)Creating a display'."
 
 
 (defun maplev-sb-mark-defuns ()
-  "Add markers to modules and procedures in the current buffer,
-update the buffer-local variable `maplev-sb-markers', and return a
+  "Add markers to modules and procedures in the current buffer.
+Update the buffer-local variable `maplev-sb-markers', and return a
 list (a stack) of items consisting of either a cons cell, \(id . marker\),
 or the symbol \='end."
 

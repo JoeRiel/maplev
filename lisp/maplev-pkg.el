@@ -4,3 +4,6 @@
   "GNU Emacs package for Maple developers"
   :url "https://github.com/JoeRiel/maplev")
 
+(provide 'maple-pkg)
+
+;;; maplev-pkg.el ends here

@@ -241,7 +241,8 @@ PROCESS calls this filter.  STRING is the output."
       (message "No buffer \"%s\"." buffer))))
 
 (defun maplev-help-to-source (code-only)
-  "Convert a help page to a Maple source file."
+  "Convert a help page to a Maple source file.
+If CODE-ONLY is non-nil, only convert the example code."
   (interactive "P")
   (let (buffer-read-only)
     (goto-char (point-min))

@@ -12,7 +12,7 @@
 ;;{{{ Group definitions
 
 (defgroup maplev nil
-  "Major mode for editing Maple source in Emacs"
+  "Major mode for editing Maple source in Emacs."
   :group 'languages)
 
 (defgroup maplev-declarations nil
@@ -331,7 +331,7 @@ The features enabled are release dependent."
   :group 'maplev-executables)
 
 (defcustom maplev-load-path nil
-  "If non-nil, assign value to env. variable LD_LIBRARY_PATH when pmaple starts.
+  "If non-nil, assign value to LD_LIBRARY_PATH when pmaple starts.
 See the function `maplev-pmaple--start-process'."
   :type 'string
   :group 'maplev-executables)

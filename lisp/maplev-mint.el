@@ -839,7 +839,7 @@ Raise an error if no statement terminator is found."
   (save-excursion
     (if (maplev--re-search-forward "[^:]\\(;\\|:[^-:=]\\)" nil t)
         (+ 1 (match-beginning 1))
-      (error "no statement terminator found"))))
+      (error "No statement terminator found"))))
 
 (defun maplev--goto-declaration (keyword)
   "Move point to after KEYWORD in the KEYWORD declaration in a Maple procedure.
