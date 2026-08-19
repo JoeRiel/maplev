@@ -392,16 +392,20 @@ Also used by `maplev--re-search-backward'.")
 ;;}}}
 ;;{{{ Imenu support
 
-;; Index all the procedure assignments.  Other possiblities to index
-;; are global variable assignments, macros and aliases; however,
-;; selecting them is difficult.
+;; Index all the procedure and modules assignments.  Other
+;; possiblities to index are global variable assignments, macros and
+;; aliases; however, selecting them is difficult.
 
 (defvar maplev-imenu-generic-expression
-  `(("Procedures" ,maplev--defun-begin-re 2)
-    ("Modules" ,(concat "^\\(" maplev--name-re "\\)"
+  `(("Procedures" ,(concat "\\(?:" maplev--assignment-re "\\)"
+	                   "\\(?:" maplev--comment-re "\\)?" ; Is this necessary?  Useful?
+	                   "[ \t\f\n]*" "\\<proc\\>") 1)
+    ("Modules" ,(concat "\\(" maplev--name-re "\\)"
 			"[ \t\n]*:=[ \t\n]*"
 			"module") 1)
-    ("Macros" ,(concat "^macro([ \t]*\\([^ \t=]*\\)") 1))
+    ("$defines" "^\\$define[ \t\f]+\\([A-Za-z_][A-Za-z0-9_]*\\)" 1)
+    ;; ("Macros" ,(concat "^[ \t]*macro([ \t]*\\([^ \t=]*\\)") 1)
+    )
   "Imenu expression for MapleV mode.  See `imenu-generic-expression'.")
 
 (defun maplev--imenu-goto-function (name position &rest ignore)
@@ -425,7 +429,7 @@ the entire buffer."
 
 (defun maplev--imenu-create-index-function ()
   "Create an index for `imenu'.
-Check whether command `folding-mode' is active."
+Unfold the buffer if `folding-mode' is active."
   (if folding-mode (folding-open-buffer))
   (imenu-default-create-index-function))
 

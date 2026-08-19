@@ -708,13 +708,14 @@ The default value is @samp{ := }.
 @findex maplev-add-imenu
 
 Executing @kbd{maplev-add-imenu} or selecting @kbd{MapleV -> Add Index}
-from the menubar creates an indexed menu of the top-level Maple
-procedures, global variables, and macro assignments.  The menu appears
-under the @samp{Index} heading in the menubar.  Clicking on an item in
-the menu moves point to the assignment of that item.
+from the menubar creates an indexed menu of the preprocessor macro
+definitions (@kbd{$define}), and the Maple procedure and module
+assignments.  The menu appears under the @samp{Index} heading in the
+menubar.  Clicking on an item in the menu moves point to the assignment
+of that item.
 
-The assignments must be flush left to be indexed.
-Only the first macro in a @code{macro} assignment is indexed.
+@c The assignments must be flush left to be indexed.
+@c Only the first macro in a @code{macro} assignment is indexed.
 
 @node Miscellaneous features, Configuration, Imenu support, top
 @comment  node-name,  next,  previous,  up
@@ -1520,7 +1521,7 @@ to it.  I add the following menu item to my @file{dir} file:
 If you encounter a bug in this package, wish to suggest an enhancement,
 or want to make a smart remark, then send an email to me:
 
-   Joseph S. Riel (Joe Riel) @email{joer@san.rr.com}
+   Joseph S. Riel (Joe Riel) @email{joer@@san.rr.com}
 
 
 @node Acknowledgments,  , Bugs, Evolution
