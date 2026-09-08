@@ -35,7 +35,7 @@ Installation
 Download and unpack the latest [zip file](https://github.com/JoeRiel/maplev/archive/master.zip).
 
 For convenience, the file maplev-built.zip contains a pre-built Maple
-archive file (maplev.mla), help page re and documentation: doc/maplev.info,
+archive file (maplev.mla), help page, and documentation: doc/maplev.info,
 doc/maplev.html, and doc/maplev.pdf.  The doc files contain the same
 information but in different formats.  The maplev.info is the most
 useful as it can be accessed from Emacs if properly installed.  These
@@ -54,13 +54,13 @@ given by the value of the emacs variable `user-init-file`.
     (autoload 'maplev-mode "maplev" "Maple editing mode" 'interactive)
     (add-to-list 'auto-mode-alist '("\\.mpl\\'" . maplev-mode))
 
-The elisp variable `maplev-config-default` needs to be configured so that
-for example
+The elisp variable `maplev-config-default` needs to be configured.
+For example,
 
     (eval-after-load 'maplev-config
       '(setq maplev-config-default
          (make-instance 'maplev-config-class
-            :bindir "/opt/maple2021/bin.X96_64_LINUX"
+            :bindir "/opt/maple2026/bin.X86_64_LINUX"
             :mapledir
 
 

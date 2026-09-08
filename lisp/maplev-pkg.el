@@ -1,8 +1,14 @@
-;;; -*- no-byte-compile: t -*-
+;;; -*- no-byte-compile: t; lexical-binding: t; -*-
+
 (define-package
-  "maplev" "3.1.0"
+  "maplev" "3.2.0"
   "GNU Emacs package for Maple developers"
-  :url "https://github.com/JoeRiel/maplev")
+  'nil
+  :keywords '("languages" "tools")
+  :authors '(("Joseph Riel" . "joer@san.rr.com") ("Roland Winkler" . "Roland.Winkler@physik.uni-erlangen.de"))
+  :maintainer '("Joseph Riel" . "joer@san.rr.com")
+  :url "https://github.com/JoeRiel/maplev"
+  )
 
 (provide 'maple-pkg)
 

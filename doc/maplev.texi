@@ -17,7 +17,7 @@ Public License.
 
 This manual is for MapleV version @value{VERSION}.
 
-Copyright @copyright{} 2011, Joseph S. Riel
+Copyright @copyright{} 1999,2026, Joseph S. Riel
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -44,7 +44,7 @@ Texts.  A copy of the license is included in the section entitled
 @vskip 0pt plus 1filll
 Maple is a registered trademark of Waterloo Maple Inc.@*
 
-Copyright @copyright{} 1999, 2010 Joseph S. Riel@*
+Copyright @copyright{} 1999, 2026 Joseph S. Riel@*
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -200,7 +200,7 @@ close to the pretty printed output of Maple.
 Maple reserved words, special words, initial variables, built-in
 functions, and top-level procedure assignments are font locked.
 Comments and quotes are syntactically highlighted.  The amount of
-``decoration'' can be customized.
+decoration can be customized.
 
 @subsection Comments
 

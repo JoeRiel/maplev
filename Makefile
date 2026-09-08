@@ -6,7 +6,7 @@
 
 PKG := maplev
 
-VERSION := 3.1.0
+VERSION := 3.2.0
 
 CLOUD-ID := 4677254699810816
 CLOUD-DESCRIPTION := An Emacs mode for Maple developers
@@ -25,13 +25,19 @@ BOOK-FILES += $(wildcard maple/src/*.mm)
 BOOK-FILES += $(wildcard maple/src/*.mpl)
 BOOK-FILES += $(wildcard maple/include/*)
 
-# BOOK-MAP := , "bin.X86_64_LINUX/pmaple"        = "pmaple/bin.X86_64_LINUX/pmaple"\
-#             , "bin.X86_64_WINDOWS/pmaple.exe"  = "pmaple/bin.X86_64_WINDOWS/pmaple.exe"
-#	    , "bin.APPLE_UNIVERSAL_OSX/pmaple" = "pmaple/bin.APPLE_UNIVERSAL_OSX/pmaple"
+BOOK-MAP := , "bin.X86_64_LINUX/pmaple"        = "pmaple/bin.X86_64_LINUX/pmaple"\
+            , "bin.X86_64_WINDOWS/pmaple.exe"  = "pmaple/bin.X86_64_WINDOWS/pmaple.exe"
+#            , "bin.APPLE_UNIVERSAL_OSX/pmaple" = "pmaple/bin.APPLE_UNIVERSAL_OSX/pmaple"
 
-INSTALLER := true
+BOOK-EXECUTABLES := bin.X86_64_LINUX/pmaple
 
 MLA-DEPENDS := $(wildcard maple/Install/*)
+
+# LINEINFO_RELPATH := true
+
+PKG-EXTRA := README
+
+LISP-DIR := $(HOME)/.emacs.d/elpa/maplev-$(VERSION)
 
 include MapleLisp.mk
 

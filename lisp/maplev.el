@@ -1,12 +1,13 @@
 ;; maplev.el --- Maple mode for GNU Emacs -*- lexical-binding: t -*-
 ;;
-;; Copyright (C) 2001,2003,2008,2009,2015,2020 Joseph S. Riel
+;; Copyright (C) 2001,2003,2008,2009,2015,2020,2026 Joseph S. Riel
 
-;; Authors:    Joseph S. Riel <jriel@maplesoft.com>
-;;             and Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
+;; Author:     Joseph S. Riel <joer@san.rr.com>
+;;             Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
+;; Maintainer: Joseph S. Riel <joer@san.rr.com>
 ;; Created:    June 1999
-;; Version:    3.1.0
-;; Keywords:   Maple, languages
+;; Version:    3.2.0
+;; Keywords:   languages, tools
 
 ;;{{{ License
 
@@ -1870,7 +1871,7 @@ file if one was found, nil otherwise."
 (defun maplev-fixup-whitespace ()
   "Catenate adjacent Maple strings (separated by one space).
 If `maplev-leading-comma-flag' is non-nil, remove space before a comma."
-  
+
   (if (and maplev-leading-comma-flag
 	   (looking-at " ,"))
       (delete-char 1)
