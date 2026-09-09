@@ -64,7 +64,7 @@ Start one, if necessary."
 (defun maplev-pmaple--process-environment ()
   "Return a list of strings of equations that define the process environment."
   (unless maplev-config
-    (maplev-config-class))
+    (setq maplev-config maplev-config-default))
   (let ((bindir   (slot-value maplev-config 'bindir))
 	(mapledir (slot-value maplev-config 'mapledir)))
     (cond

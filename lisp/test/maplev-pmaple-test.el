@@ -2,7 +2,12 @@
 
 (ert-deftest maplev--pmaple-buffer-test ()
   (let ((mapledir "/opt/maple2025"))
-    (maplev-config :maple  (concat mapledir "/bin/maple"))
+    (maplev-config
+     :mapledir mapledir
+     :bindir (concat mapledir "/bin.X86_64_LINUX")
+     :maple  (concat mapledir "/bin/maple")
+     :maple-options "-B -A2 -e2"
+     :pmaple "foo")
     (should (equal
 	     (maplev--pmaple-buffer)
 	     "Maple (/opt/maple2025/bin/maple)"))))
@@ -53,14 +58,24 @@
                "-c maplev:-Setup(\"Maple (maple)\")")))
     ))
 
-(ert-deftest maplev-pmaple-status-test ()
-  (should (equal (maplev-pmaple-status 'nomsg) nil)))
+(ert-deftest maplev--cleanup-buffer-test ()
+  "Test with a buffer with an escape character and a naked carriage return."
+  (with-temp-buffer
+    (insert "Here is a weird string\e[123m.\r\r")
+    (maplev--cleanup-buffer)
+    (let ((content (buffer-substring-no-properties (point-min) (point-max))))
+      (should (equal content "Here is a weird string.\n")))))
 
-;; (ert-deftest maplev-pmaple-direct-test ()
-;;   ; (let ((maplev-config (clone maplev-config-default)))
-;;   ; (set-slot-value maplev-config :maple "maple")
-;;   (should (equal
-;;            (maplev-pmaple-direct "1+1;")
-;;            "33"))
-;;   )
-
+(ert-deftest maplev-pmaple--clear-buffer-test ()
+  (let ((mapledir "/opt/maple2025"))
+    (cl-letf ((maplev-config (make-instance
+                              'maplev-config-class
+                              :mapledir mapledir
+                              :bindir   (file-name-concat mapledir "bin.X86_64_LINUX")
+                              :maple    (file-name-concat mapledir "/bin/maple")
+                              )))
+      (with-temp-buffer
+        (maplev--pmaple-process)
+        (maplev-pmaple--clear-buffer)
+        (let ((content (buffer-substring-no-properties (point-min) (point-max))))
+          (should (equal content "")))))))

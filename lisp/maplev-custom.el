@@ -56,6 +56,9 @@
 ;;}}}
 ;;{{{ Configurable options
 
+;; The user default values for maplev-config-default
+;; are typically set in user-init-file.
+
 (defcustom maplev-config-default (make-instance 'maplev-config-class)
   "This variable holds default values for the variable `maplev-config';
 both are objects of class `maplev-config-class'."
