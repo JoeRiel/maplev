@@ -319,7 +319,7 @@ See the documentation for `align-exclude-rules-list' for more info."
   :group 'maplev-misc)
 
 ;;}}}
-;;{{{ (*) maple setup
+;;{{{ (*) Maple setup
 
 (defcustom maplev-startup-directory nil
   "If non-nil, change to this directory before running Maple.

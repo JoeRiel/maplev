@@ -694,13 +694,13 @@ Return exit code of mint."
                             (point) (line-end-position))))
             ((> lines 1)
              (display-buffer (current-buffer))))
-      ;; If error in maple source (should be identical to status > 0)
+      ;; If error in Maple source (should be identical to status > 0)
       ;; locate position of error
       (goto-char (point-min))
       (if (re-search-forward "^[ \t]*\\^" nil t)
           (setq errpos (maplev-mint--goto-error (point)))))
 
-    ;; If there is an error in the maple source and a window displays it,
+    ;; If there is an error in the Maple source and a window displays it,
     ;; move point in this window
     (when (and code-window errpos)
       (set-window-point code-window errpos)

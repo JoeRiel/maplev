@@ -5,7 +5,7 @@
 ;; Author: Joseph S. Riel <jriel@maplesoft.com>
 ;; Maintainer: Joseph S. Riel <jriel@maplesoft.com>
 ;; Created: August 2015
-;; Keywords: maple speedbar
+;; Keywords: Maple speedbar
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as

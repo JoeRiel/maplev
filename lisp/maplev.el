@@ -1,4 +1,4 @@
-;; maplev.el --- Maple mode for GNU Emacs -*- lexical-binding: t -*-
+1;; maplev.el --- Maple mode for GNU Emacs -*- lexical-binding: t -*-
 ;;
 ;; Copyright (C) 2001,2003,2008,2009,2015,2020,2026 Joseph S. Riel
 
@@ -55,7 +55,7 @@
 ;; the following to your `.emacs':
 ;;
 ;;   (autoload 'maplev-mode "maplev" "Maple editing mode" t)
-;;   (autoload 'pmaple      "maplev" "Start maple process" t)
+;;   (autoload 'pmaple      "maplev" "Start Maple process" t)
 ;;
 ;; To have Emacs automagically start in MapleV mode when editing Maple
 ;; source, add the following to your .emacs, modifying the regexp
@@ -93,7 +93,7 @@
 ;;   when exiting maplev-mode
 ;; - indent continued assignments (this could be tricky)
 ;; - more complete definition of maplev-completions based on
-;;   the maple help node `index[package]'
+;;   the Maple help node `index[package]'
 ;;
 ;; Low Priority:
 ;; - font lock local variables
@@ -120,7 +120,7 @@
 (require 'maplev-indent)                ; indentation engine
 (require 'maplev-mint)                  ; maplev-mint-mode (view mint output)
 (require 'maplev-re)                    ; regular expressions
-(require 'maplev-speedbar "maplev-sb")  ; speedbar for maple source
+(require 'maplev-speedbar "maplev-sb")  ; speedbar for Maple source
 (require 'maplev-trace)                 ; functions for indenting trace output
 (require 'maplev-utils)                 ; not much here just yet
 (require 'maplev-version)               ; assign version
@@ -1031,7 +1031,7 @@ The real work is done by `maplev-complete-on-module-exports'."
       (delete-region (point-min) (point-max)))))
 
 (defun maplev--generate-initial-completions ()
-  "Generate `maplev-completions' from maple help pages.
+  "Generate `maplev-completions' from Maple help pages.
 If it already exists, do nothing."
   (unless maplev-completions
 
@@ -1097,7 +1097,7 @@ If it already exists, do nothing."
 
 
 (defun maplev--completion (word predicate mode)
-  "Generate minibuffer completion using maple function names.
+  "Generate minibuffer completion using Maple function names.
 For the meaning of args see Info node `(elisp)Programmed Completion'."
   (maplev--generate-initial-completions)
   (let ((possibilities maplev-completions))
@@ -1109,7 +1109,7 @@ For the meaning of args see Info node `(elisp)Programmed Completion'."
 	   (assoc word possibilities)))))
 
 (defun maplev-complete-symbol ()
-  "Perform completion on maple symbol preceding point.
+  "Perform completion on Maple symbol preceding point.
 Compare that symbol against `maplev-completions'."
   ;; Code borrowed from lisp-complete-symbol.
   (interactive)
@@ -1827,7 +1827,7 @@ window, depending on the exclusive-or of
 ;;{{{ Config file (.maplev)
 
 (defun maplev-find-config-file ()
-  "Find and open the maple configuration file.
+  "Find and open the Maple configuration file.
 The file is named .maplev and is searched for in the current
 directory and its ancestors."
   (interactive)
@@ -1903,7 +1903,7 @@ If `maplev-leading-comma-flag' is non-nil, remove space before a comma."
 
 ;;{{{ Debug
 
-;; Functions for aiding maple debugging
+;; Functions for aiding Maple debugging
 
 (defun maplev-stopat ()
   "Push onto the kill ring a stopat command in the source file."
