@@ -49,15 +49,15 @@
 ;; Test reconfiguring the buffer-local variable maplev-config.
 
 (ert-deftest maplev-config-test ()
-    (cl-letf ((maplev-config nil))
-      (let ((mapledir "/opt/maple2025"))
-        (maplev-config :mapledir mapledir
-                       :maple (file-name-concat mapledir "bin" "maple")
-                       :mint  (file-name-concat mapledir "bin" "mint")
-                       :maple-options "-B -A -e2 -c 'interface(prettyprint=0)'"
-                       :bindir nil))
-      (should (equal (slot-value maplev-config :maple)  "/opt/maple2025/bin/maple"))
-      (should (equal (slot-value maplev-config :mint)   "/opt/maple2025/bin/mint"))
-      (should (equal (slot-value maplev-config :bindir) "/opt/maple2025/bin.X86_64_LINUX"))
-      ))
+  (cl-letf ((maplev-config nil))
+    (let ((mapledir "/opt/maple2025"))
+      (maplev-config :mapledir mapledir
+                     :maple (file-name-concat mapledir "bin" "maple")
+                     :mint  (file-name-concat mapledir "bin" "mint")
+                     :maple-options "-B -A -e2 -c 'interface(prettyprint=0)'"
+                     :bindir nil))
+    (should (equal (slot-value maplev-config :maple)  "/opt/maple2025/bin/maple"))
+    (should (equal (slot-value maplev-config :mint)   "/opt/maple2025/bin/mint"))
+    (should (equal (slot-value maplev-config :bindir) "/opt/maple2025/bin.X86_64_LINUX"))
+    ))
 

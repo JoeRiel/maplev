@@ -120,7 +120,7 @@ The optional CONFIG argument is an object of type
 
 (defun maplev--help-buffer ()
   "Return the name of the Maple help buffer."
-    (format "Maple help %s)" (slot-value (or maplev-config maplev-config-default) 'maple)))
+  (format "Maple help (%s)" (slot-value (or maplev-config maplev-config-default) 'maple)))
 
 (defun maplev-help-follow-mouse (click)
   "Display the Maple help page of the topic at the mouse CLICK."
