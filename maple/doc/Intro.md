@@ -3,7 +3,7 @@
 ##TITLE MapleV
 ##HALFLINE An Emacs Package for Maple Developers (version \PKG_VERSION)
 ##AUTHOR   Joe Riel
-##DATE     Nov 2024
+##DATE     Sep 2026
 ##DESCRIPTION
 ##-(nolead) **MapleV** is an Emacs package for developing source code for Maple.
 ###  The complete source for MapleV is available at "github",
@@ -11,8 +11,8 @@
 ###  This package provides a simpler method to install MapleV.
 ##
 ##SECTION Requirements
-##- "GNU Emacs" 27+.  Earlier versions may work
-##- "Maple" 2022+.  Earlier versions are supported but may lack some features.
+##- "GNU Emacs" 30+.  Earlier versions may work.
+##- "Maple" 2026+.  Earlier versions are supported but may lack some features.
 ##
 ##SECTION Installation
 ##SET(noexecute)
