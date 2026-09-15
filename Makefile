@@ -33,7 +33,7 @@ BOOK-EXECUTABLES := bin.X86_64_LINUX/pmaple
 
 MLA-DEPENDS := $(wildcard maple/Install/*)
 
-# LINEINFO_RELPATH := true
+LINEINFO_RELPATH := true
 
 PKG-EXTRA := README
 
