@@ -6,8 +6,7 @@ $define TOOLBOX maplev
 
 Install := module()
 
-local Book, Copy, ToolboxDir;
-
+local Copy;
 
 $include <maple/Install/Copy.mm>
 
@@ -53,13 +52,20 @@ export
                          , { rebuild :: truefalse := false }
                        )
 
+    local Book, ToolboxDir;
     local cmd, dir, dst, file, files, lisp, numchars, numlines, pixheight, pixwidth, reply, src;
-    global maplev;
+    global TOOLBOX;
 
     uses  FT = FileTools
         , JoinPath = FileTools:-JoinPath
         ;
 
+        ToolboxDir := kernelopts('toolboxdir' = 'TOOLBOX');
+        Book := FileTools:-JoinPath(["maple:/", currentdir(), "maplev.maple" ]);
+
+        if not FT:-Exists(Book) then
+            error "Maple book %1 does not exist", Book;
+        end if;
 
         #{{{ binary
 
@@ -68,13 +74,6 @@ export
             # Install the system
             PackageTools:-Install("this://", 'overwrite');
 
-            ToolboxDir := kernelopts('toolboxdir' = 'TOOLBOX');
-
-            Book := FileTools:-JoinPath(["maple:/", currentdir(), "maplev.maple" ]);
-
-            if not FT:-Exists(Book) then
-                error "Maple book %1 does not exist", Book;
-            end if;
             # Make pmaple executable (for linux)
             cmd := sprintf("chmod +x %s/bin.X86_64_LINUX/pmaple", ToolboxDir);
             reply := ssystem(cmd);
@@ -135,8 +134,6 @@ export
 
             printf("\nExtracting tar file\n");
 
-            # src := FT:-ListDirectory(FT:-JoinPath(["maple://", currentdir(), "maplev.maple"])
-            #                          , 'select' = "*.tar");
             src := FT:-ListDirectory(Book, 'select' = "*.tar" );
 
             if src = [] then
