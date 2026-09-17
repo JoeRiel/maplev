@@ -53,7 +53,7 @@
   :syntax-table maplev-mode-syntax-table
   :abbrev-table nil
 
-  (set (make-local-variable 'maplev--process-item) #'maplev--proc-process)
+  (setq-local maplev--process-item #'maplev--proc-process)
 
   (make-local-variable 'maplev-history--stack) ; set up the stack
   (maplev-history-clear)

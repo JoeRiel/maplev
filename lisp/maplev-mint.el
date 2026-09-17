@@ -146,8 +146,8 @@ See the mint help page in Maple.  The options are
   (setq mode-name "Mint"
 	buffer-read-only t)
   (make-local-variable 'maplev-mint--code-buffer)
-  (set (make-local-variable 'paragraph-start) "[^ ]")
-  (set (make-local-variable 'paragraph-separate) paragraph-start)
+  (setq-local paragraph-start "[^ ]")
+  (setq-local paragraph-separate paragraph-start)
   (setq truncate-lines nil))
 
 (defun maplev-mint-setup (code-buffer config)

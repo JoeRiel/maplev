@@ -94,13 +94,13 @@
 
 \\{maplev-help-mode-map}"
 
-  (set (make-local-variable 'maplev--process-item) #'maplev--help-process)
+  (setq-local maplev--process-item #'maplev--help-process)
 
   (make-local-variable 'maplev-history--stack) ; set up the stack
   (maplev-history-clear)
 
   ;; for maplev--activate-hyperlinks
-  (set (make-local-variable 'parse-sexp-lookup-properties) t)
+  (setq-local parse-sexp-lookup-properties t)
 
   (maplev-help-fontify-node)
   (setq buffer-read-only t))

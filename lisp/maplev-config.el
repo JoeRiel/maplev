@@ -177,7 +177,7 @@ Return the object."
 	file)
     (with-slots (bindir compile include-path maple mapledir mint pmaple) maplev-config
       (when compile
-	(set (make-local-variable 'compile-command) compile))
+	(setq-local compile-command compile))
       (when (stringp include-path)
 	;; convert string to list
 	(setq include-path (list include-path)))

@@ -593,17 +593,17 @@ Key bindings:
   ;; `paragraph-start' violates the explicit warning in the docstring
   ;; about not anchoring this value.  Not a big deal.
 
-  (set (make-local-variable 'paragraph-start)         (concat page-delimiter "\\|$"))
-  (set (make-local-variable 'paragraph-separate)       paragraph-start)
-  (set (make-local-variable 'fill-paragraph-function) 'maplev-fill-paragraph)
-  (set (make-local-variable 'paragraph-ignore-fill-prefix) t)
-  (set (make-local-variable 'adaptive-fill-mode)       nil)
-  (set (make-local-variable 'auto-fill-inhibit-regexp) (concat "[ \t]*[^  \t#]"))
+  (setq-local paragraph-start         (concat page-delimiter "\\|$"))
+  (setq-local paragraph-separate       paragraph-start)
+  (setq-local fill-paragraph-function 'maplev-fill-paragraph)
+  (setq-local paragraph-ignore-fill-prefix t)
+  (setq-local adaptive-fill-mode       nil)
+  (setq-local auto-fill-inhibit-regexp (concat "[ \t]*[^  \t#]"))
 
-  (set (make-local-variable 'beginning-of-defun-function) #'maplev-beginning-of-defun)
-  (set (make-local-variable 'end-of-defun-function)       #'maplev-end-of-defun)
+  (setq-local beginning-of-defun-function #'maplev-beginning-of-defun)
+  (setq-local end-of-defun-function       #'maplev-end-of-defun)
 
-  (set (make-local-variable 'require-final-newline) t)
+  (setq-local require-final-newline t)
 
   (auto-fill-mode (if maplev-auto-fill-comment-flag 1 0))
   (setq auto-fill-function 'maplev-auto-fill)
@@ -611,22 +611,22 @@ Key bindings:
   ;; indentation
   (setq indent-tabs-mode maplev-indent-tabs-mode)
 
-  (set (make-local-variable 'indent-line-function)   #'maplev-indent-line)
-  (set (make-local-variable 'indent-region-function) #'maplev-indent-region)
-  (set (make-local-variable 'tab-width)               maplev-indent-level)
-  (set (make-local-variable 'maplev-indent-declaration) maplev-indent-declaration-level)
+  (setq-local indent-line-function   #'maplev-indent-line)
+  (setq-local indent-region-function #'maplev-indent-region)
+  (setq-local tab-width                maplev-indent-level)
+  (setq-local maplev-indent-declaration maplev-indent-declaration-level)
 
   ;; (ad-activate 'fixup-whitespace)
   (advice-add 'fixup-whitespace :after #'maplev-fixup-whitespace)
 
   ;; comments
-  (set (make-local-variable 'comment-start)            maplev-comment-start)
+  (setq-local comment-start            maplev-comment-start)
   ;;  (if (< emacs-major-version 22)
-  ;;      (set (make-local-variable 'block-comment-start)      maplev-block-comment-start))
-  (set (make-local-variable 'comment-end)              "")
-  (set (make-local-variable 'comment-start-skip)       "#+[ \t]*")
-  (set (make-local-variable 'comment-column)           maplev-comment-column)
-  (set (make-local-variable 'comment-indent-function) 'maplev-indent-comment-indentation)
+  ;;      (setq-local block-comment-start      maplev-block-comment-start))
+  (setq-local comment-end              "")
+  (setq-local comment-start-skip       "#+[ \t]*")
+  (setq-local comment-column           maplev-comment-column)
+  (setq-local comment-indent-function 'maplev-indent-comment-indentation)
 
   (maplev-set-tab-width)
 
@@ -634,13 +634,13 @@ Key bindings:
   ;; (and maplev-menu (easy-menu-add maplev-menu))
 
   ;; imenu
-  (set (make-local-variable 'imenu-create-index-function)
+  (setq-local imenu-create-index-function
        #'maplev--imenu-create-index-function)
-  (set (make-local-variable 'imenu-default-goto-function)
+  (setq-local imenu-default-goto-function
        'maplev--imenu-goto-function)
-  (set (make-local-variable 'imenu-generic-expression)
+  (setq-local imenu-generic-expression
        maplev-imenu-generic-expression)
-  (set (make-local-variable 'imenu-case-fold-search) nil)
+  (setq-local imenu-case-fold-search nil)
 
   ;; aligning rules
 
@@ -658,9 +658,9 @@ Key bindings:
   (make-local-variable 'maplev-mint--code-end)
 
   ;; Is this what one wants??
-  ;; (set (make-local-variable 'beginning-of-defun-function) #'(lambda () (maplev-view-beginning 1 t)))
-  ;; (set (make-local-variable 'end-of-defun-function)       #'(lambda () (maplev-view-end 1 t)))
-  ;; (set (make-local-variable 'add-log-current-defun-function)
+  ;; (setq-local beginning-of-defun-function #'(lambda () (maplev-view-beginning 1 t)))
+  ;; (setq-local end-of-defun-function       #'(lambda () (maplev-view-end 1 t)))
+  ;; (setq-local add-log-current-defun-function
   ;;      #'maplev-current-defun-name) ;; not yet available
 
   (maplev-add-maple-to-compilation)

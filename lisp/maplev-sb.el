@@ -174,9 +174,9 @@ or the symbol \='end."
     ;; Set `speedbar-tag-hierarchy-method' to nil so that
     ;; `speedbar-create-tag-hierarchy' won't reorder the list.
     ;; Make it buffer local so that the global value is not touched.
-    (set (make-local-variable 'speedbar-tag-hierarchy-method) nil)
-    (set (make-local-variable 'speedbar-generic-list-group-expand-button-type) 'expandtag)
-    (set (make-local-variable 'speedbar-generic-list-tag-button-type) 'statictag)
+    (setq-local speedbar-tag-hierarchy-method nil)
+    (setq-local speedbar-generic-list-group-expand-button-type 'expandtag)
+    (setq-local speedbar-generic-list-tag-button-type 'statictag)
 
     (goto-char (point-min))     ; start at top of buffer
 

@@ -403,9 +403,9 @@ additional commands for interacting with pmaple.
   (make-local-variable 'maplev-mint--code-end)
 
   ;; font lock support
-  ;; (set (make-local-variable 'font-lock-defaults)
+  ;; (setq-local font-lock-defaults
   ;;      '(maplev-input-line-keyword))
-  (set (make-local-variable 'comint-process-echoes) t)
+  (setq-local comint-process-echoes t)
   (font-lock-mode 1))
 
 (defun maplev-pmaple-setup (config)
