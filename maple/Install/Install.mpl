@@ -7,6 +7,9 @@ $define TOOLBOX maplev
 Install := module()
 
 local Copy;
+local ToolboxDir;
+
+uses FT = FileTools;
 
 $include <maple/Install/Copy.mm>
 
@@ -52,13 +55,9 @@ export
                          , { rebuild :: truefalse := false }
                        )
 
-    local Book, ToolboxDir;
+    local Book;
     local cmd, dir, dst, file, files, lisp, numchars, numlines, pixheight, pixwidth, reply, src;
     global TOOLBOX;
-
-    uses  FT = FileTools
-        , JoinPath = FileTools:-JoinPath
-        ;
 
         ToolboxDir := kernelopts('toolboxdir' = 'TOOLBOX');
         Book := FileTools:-JoinPath(["maple:/", currentdir(), "maplev.maple" ]);
@@ -89,17 +88,11 @@ export
 
         if doc then
 
-            # Copy the pdf and html versions of mds.info to the base of the toolbox.
+            # Copy the doc subdirectory, with mds.pdf and mds.html, to ToolboxDir.
 
             printf("\nExtracting doc files\n");
 
-            files := FT:-ListDirectory("this:///doc");
-
-            for file in files do
-                dst := JoinPath([ToolboxDir, file]);
-                src := cat("this://", file);
-                Copy(src, dst, 1, 'force', 'verbose');
-            end do;
+            InstallDir("doc", "");
 
         end if;
 
@@ -112,18 +105,7 @@ export
 
             printf("\nExtracting maple source files\n");
 
-            files := FT:-ListDirectory("this:///maple", 'recurse');
-            files := map(substring, files, 9..-1);  # remove this:///
-
-            for file in files do
-                dst := JoinPath([ToolboxDir, "lib", file]);
-                dir := FT:-ParentDirectory(dst);
-                if not FT:-Exists(dir) then
-                    FT:-MakeDirectory(dir, 'recurse');
-                end if;
-                src := cat("this:///", file);
-                Copy(src, dst, 2, 'force', 'verbose');
-            end do;
+            InstallDir("maple", "lib");
 
         end if;
 
@@ -142,9 +124,9 @@ export
                 src := src[1];
             end if;
 
-            dst := JoinPath([ToolboxDir, src]);
+            dst := FT:-JoinPath([ToolboxDir, src]);
             src := cat("this:///", src);
-            Copy(src, dst, 3, 'force', 'verbose');
+            Copy(src, dst, 'force', 'verbose');
 
         end if;
 
@@ -180,15 +162,6 @@ export
                 FT:-Remove(mla);
             end if;
 
-            # cmd := ("mload --quiet --lineinfo --reindex --readonly "
-            #         "--log=maplev.log "
-            #         "--mla=maplev.mla "
-            #         "maple/src/maplev.mpl");
-            # reply := ssystem(cmd);
-            # if reply[1] <> 0 then
-            #     error "problem rebuilding maplev.mla: %1", reply[2];
-            # end if;
-
             LibraryTools:-Create(mla, 100);
             LibraryTools:-Save(maplev, mla);
 
@@ -199,6 +172,31 @@ export
         return NULL;
 
     end proc;
+
+    #{{{ InstallDir
+
+    # Install, recursively, files in srcdir into dstdir.
+    # The srcdir is relative to the .maplev file (this:///).
+
+local
+    InstallDir := proc(srcdir :: string, dstdir :: string)
+    local dir, dst, file, files, src;
+
+        files := FT:-ListDirectory(cat("this:///", srcdir), 'recurse');
+        files := map(substring, files, 9..-1);  # remove leading this:///
+
+        for file in files do
+            dst := FT:-JoinPath([ToolboxDir, dstdir, file]);
+            dir := FT:-ParentDirectory(dst);
+            if not FT:-Exists(dir) then
+                FT:-MakeDirectory(dir, 'recurse');
+            end if;
+            src := cat("this:///", file);
+            Copy(src, dst, 'force', 'verbose');
+        end do;
+    end proc
+
+    #}}}
 
 
 end module:

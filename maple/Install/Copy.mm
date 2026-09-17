@@ -1,7 +1,7 @@
 #LINK Install.mpl
 
 ##INCLUDE ../include/mpldoc_macros.mpi
-##PROCEDURE(nohelp) MapleVInstaller:-Copy
+##PROCEDURE(nohelp) Install:-Copy
 ##HALFLINE copy a file
 ##AUTHOR   Joe Riel
 ##DATE     Jun 2018

@@ -5,7 +5,8 @@
 ##AUTHOR   Joe Riel
 ##DATE     Sep 2026
 ##DESCRIPTION
-##-(nolead) **MapleV** is an Emacs package for developing source code for Maple.
+##SET(nolead)
+##- **MapleV** is an Emacs package for developing source code for Maple.
 ###  The complete source for MapleV is available at "github",
 ###  however, building the package from source is not straightforward.
 ###  This package provides a simpler method to install MapleV.
@@ -18,10 +19,16 @@
 ##SET(noexecute)
 ##
 ##SUBSECTION Maple
+##
+##SUBSUBSECTION Library and Help
+##
 ##- Install the Maple library and help files
 ##  by executing the following command:
 ##
 ##> maplev:-Install('binary');
+##
+##ENDSUBSUBSECTION
+##SUBSUBSECTION PDF and HTML
 ##
 ##- Install the doc directory, which contains a pdf and html of the documentation for MapleV.
 ##  This may be skipped; the documentation for MapleV should be available in the Emacs info
@@ -29,20 +36,35 @@
 ##
 ##> maplev:-Install('doc'):
 ##
+##ENDSUBSUBSECTION
+##SUBSUBSECTION Maple Source Files
+##
 ##- Install the Maple source files for MapleV.
 ##  This may be skipped as the source files
 ##  are not needed for using the tool.
 ##
 ##> maplev:-Install('maple'):
 ##
+##ENDSUBSUBSECTION
+##SUBSUBSECTION Rebuild the Maple Archive
+##
+##- Rebuild the ~maplev.mla~ file.
+##
 ##> maplev:-Install('rebuild'):
 ##
+##ENDSUBSUBSECTION
 ##ENDSUBSECTION
+##
 ##SUBSECTION Emacs
+##
+##SUBSUBSECTION Tar File
 ##- Unpack the tar file that contains the lisp and info files for MapleV
 ##  by executing the following command:
 ##
 ##> maplev:-Install('emacs'):
+##
+##ENDSUBSUBSECTION
+##SUBSUBSECTION Install Lisp and Info
 ##
 ##- To install the lisp and info files,
 ##  launch Emacs, and in it execute the command ~M-x package-install-file~,
@@ -54,6 +76,9 @@
 ##  and selecting the MapleV entry.
 ##  ~C-h~ means hold down the control key and press ~h~.
 ##
+##ENDSUBSUBSECTION
+##SUBSUBSECTION Update Emacs Initialization
+##
 ##- Execute the following command to print
 ##  elisp code that can be added to your "Emacs InitFile"
 ##  to configure MapleV.
@@ -63,6 +88,7 @@
 ##CODEEDITREGION(name="emacs_init",display="code",autofit="false")
 ##ENDCODEEDITREGION
 ##
+##ENDSUBSUBSECTION
 ##ENDSUBSECTION
 ##
 ##SUBSECTION(collapsed) Maintainance
