@@ -685,7 +685,7 @@ Key bindings:
       (add-hook 'write-file-functions 'maplev-remove-trailing-spaces))
   ;;(make-local-hook 'before-change-functions)
   (add-hook 'before-change-functions 'maplev-indent-before-change-function nil t)
-  (run-hooks 'maplev-mode-hook))
+  (run-hooks 'maplev-mode-hook)) ; end of maplev-mode
 
 ;;}}}
 
@@ -696,9 +696,9 @@ Key bindings:
 Current line is not indented if it is a comment.  Remove trailing
 whitespace."
   (interactive "*")
-  (or (maplev--comment-line-indentation) ; nil if a comment
+  (or (maplev--comment-line-indentation) ; nil if not a comment
       (maplev-indent-line))
-  (delete-horizontal-space)             ; remove trailing whitespace
+  (delete-horizontal-space)              ; remove trailing whitespace
   (newline)
   (maplev-indent-line))
 
@@ -1599,11 +1599,6 @@ Add builtin functions to the medium decoration keywords."
     maplev-font-lock-keywords-2
     maplev-font-lock-keywords-3))
 
-(defun maplev--syntax-begin ()
-  "Move backwards to start of a Maple procedure.
-This is passed to `font-lock-defaults' as the SYNTAX-BEGIN argument."
-  (re-search-backward maplev--top-defun-begin-re nil 'move))
-
 (defun maplev-reset-font-lock (&optional decoration)
   "Reset the font lock patterns for MapleV mode.  Fontify the buffer.
 The optional argument DECORATION selects the level of font lock.
@@ -1614,9 +1609,11 @@ If nil then `font-lock-maximum-decoration' selects the level."
   (if decoration
       (setq font-lock-maximum-decoration decoration))
   (setq font-lock-defaults `(,(maplev--font-lock-keywords)
-                             nil nil
-                             ((?_ . "w")) ; make underscore a word constituent
-                             maplev--syntax-begin))
+                             nil ; keywords-only
+                             nil ; case-fold
+                             ((?_ . "w")) ; syntax-alist: make underscore a word constituent
+                             nil ; syntax-begin: deprecated, was maplev--syntax-begin
+                             ))
   (font-lock-set-defaults)
   (font-lock-ensure))
 
