@@ -6,11 +6,11 @@ MapleV is an Emacs package for developing Maple code.  Maple is the
 computer algebra system sold by Maplesoft [1].  MapleV provides several
 major modes:
 
--  maplev-mode : edit Maple source files
--  maplev-mint : view the output of mint, the Maple syntax checker, and
-   use it to correct the source
--  maplev-help : view Maple help pages
--  maplev-view : view archived Maple modules and procedures
+-  maplev-mode 	 : edit Maple source files
+-  maplev-mint 	 : view the output of mint, the Maple syntax checker, and
+               	   use it to correct the source
+-  maplev-help 	 : view Maple help pages
+-  maplev-view 	 : view archived Maple modules and procedures
 -  maplev-pmaple : interact with a Maple engine
 
 Requirements
@@ -37,7 +37,7 @@ is the most useful as it can be accessed from Emacs if properly
 installed.  These files can be built from the source.
 
 Instructions for installing MapleV are given in its info manual,
-maplev.info, of which there is an html version, maplev.html.
+maplev.info.
 
 Configuration
 

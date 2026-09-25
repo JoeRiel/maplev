@@ -1,17 +1,18 @@
 <!--*- markdown -*-->
+
 MapleV:  An Emacs Package for Maple Developers
 ==============================================
 
-**Version 3.1.0**
+**Version 3.2.0**
 
 MapleV is an Emacs package for developing Maple code.
 Maple is computer algebra system sold by [Maplesoft](http://www.maplesoft.com/).
 MapleV provides several major modes:
 
- - maplev-mode : edit Maple source files
- - maplev-mint : view the output of mint, the Maple syntax checker, and use it to correct the source
- - maplev-help : view Maple help pages
- - maplev-view : view archived Maple modules and procedures
+ - maplev-mode   : edit Maple source files
+ - maplev-mint   : view the output of mint, the Maple syntax checker, and use it to correct the source
+ - maplev-help   : view Maple help pages
+ - maplev-view   : view archived Maple modules and procedures
  - maplev-cmaple : interact with a Maple engine
 
 Requirements
