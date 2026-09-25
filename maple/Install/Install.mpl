@@ -14,6 +14,7 @@ uses FT = FileTools;
 $include <maple/Install/Copy.mm>
 
 ##PROCEDURE Install:-ModuleApply
+##HALFLINE install the Maple library and help for **maplev**
 ##CALLINGSEQUENCE
 ##- Install('opts')
 ##DESCRIPTION
@@ -22,11 +23,11 @@ $include <maple/Install/Copy.mm>
 ##OPTIONS
 ##opt(binary,truefalse)
 ##  True means install the Maple library and help.
-##  The default if false.
+##  The default is false.
 ##opt(doc,truefalse)
 ##  True means install the 'doc' directory,
 ##  which contains a pdf and html of the package.
-##  The default if false.
+##  The default is false.
 ##opt(emacs,truefalse)
 ##  Unpack the tar file that contains the lisp and info files for the package.
 ##  The default is false.
@@ -41,7 +42,6 @@ $include <maple/Install/Copy.mm>
 ##  Create or recreate the mla, ~lib/maplev.mla~ that contains
 ##  the code for ~maplev~.
 ##  The default is false.
-##
 ##XREFMAP
 ##- "Emacs initialization file" : https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-File.html
 
@@ -56,7 +56,7 @@ export
                        )
 
     local Book;
-    local cmd, dir, dst, file, files, lisp, numchars, numlines, pixheight, pixwidth, reply, src;
+    local cmd, dst, lisp, numchars, numlines, pixheight, pixwidth, reply, src;
     global TOOLBOX;
 
         ToolboxDir := kernelopts('toolboxdir' = 'TOOLBOX');
