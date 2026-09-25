@@ -106,11 +106,16 @@ local Dispatch, ModuleLoad, PrintModule, PrintProc, PrintRecord
 ##CALLINGSEQUENCE
 ##- maplev:-Print:-Dispatch('indent','nomen','rel','keep_statement_numbers')
 ##PARAMETERS
-##COMMONPARAMDEFS
+##- 'indent'                 : ::nonnegint::; indentation in character spaces
+##- 'nomen'                  :
+##- 'rel'                    : ::string::
+##- 'keep_statement_numbers' : ::truefalse::
 ##RETURNS
-##- TBD
+##- NULL
 ##DESCRIPTION
-##- The `Dispatch` procedure
+##- The `Dispatch` procedure sends the given expression
+##  to the appropriate procedure, depending whether the expression is
+##  a procedure, a record, a module, or anything else.
 ##TEST
 ## $include <maple/include/test_macros.mi>
 ## AssignFUNC(Print:-Dispatch):
