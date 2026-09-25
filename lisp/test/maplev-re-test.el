@@ -11,8 +11,6 @@
               (("ab" "cd" "ab") "\\<\\(?:ab\\|cd\\)\\>")
               ))
 
-;; (maplev--list-to-word-re '())
-
 (xt-deftest maplev--simple-name-re-test
   (xtd-should (lambda (str match)
 		(with-syntax-table maplev-mode-syntax-table
