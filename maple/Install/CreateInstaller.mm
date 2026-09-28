@@ -12,7 +12,7 @@ global Installer;
     local Install
         , MakePath
         , ToolboxDir
-        , UpdateDir := UpdateDir
+        , UpdateDir
         ;
 
     uses %FT = FileTools, %ST = StringTools;
@@ -69,12 +69,17 @@ global Installer;
                 error;
             end try;
 
-        end proc;
+        end proc; (* ByteCompile *)
 
         #}}}
 
         #{{{ Install
-        Install := proc(srcdir, dstdir, files :: list, { clear :: truefalse := false } )
+
+        Install := proc(srcdir :: string
+                        , dstdir :: string
+                        , files :: list(string)
+                        , { clear :: truefalse := false }
+                       )
         local content, file, src, dst;
         uses %FT=FileTools;
             if not %FT:-Exists(dstdir) then
@@ -94,7 +99,8 @@ global Installer;
                 printf("Copying %s --> %s\n", src, dst);
                 %FT:-Copy(src,dst,'force'=true);
             end do;
-        end proc;
+        end proc; (* Install *)
+
         #}}}
         #{{{ MakePath
 
@@ -111,10 +117,11 @@ global Installer;
             is_system := ToolboxInstaller:-Data:-Get("system_installation");
             pdir := ToolboxInstaller:-Tools:-GetInstallDirectory(is_system);
             ToolboxDir := MakePath(pdir, ToolboxInstaller:-Data:-Get("toolbox_name"));
-        end proc;
+        end proc; (* Installer:-ModuleLoad *)
 
         #}}}
         #{{{ ModuleApply
+
         ModuleApply := proc()
         local cmd
             , config
@@ -138,6 +145,7 @@ global Installer;
 
             #}}}
             #{{{ Read configuration file
+
             config := MakePath(ToolboxDir, "config.mpl");
             if FileTools:-Exists(config) then
                 printf("Reading configuration file %s\n", config);
@@ -219,9 +227,11 @@ global Installer;
 
             NULL;
 
-        end proc:
+        end proc; (* Installer:-ModuleApply *)
+
         #}}}
         #{{{ UpdateDir
+
         UpdateDir := proc(dirfile::string, file::string)
         local cmd,result;
             cmd := sprintf("ginstall-info --dir-file=%s %s"
@@ -232,14 +242,22 @@ global Installer;
             if result[1] <> 0 then
                 error "problem executing '%1':/n%2", cmd, result[2];
             end if;
-        end proc;
+        end proc; (* UpdateDir *)
+
         #}}}
 
         ModuleLoad();
 
-    end module:
+$ifdef MINTONLY
+        UpdateDir();
+$endif
+
+    end module: (* Installer *)
+
     Installer();
-end proc:
+
+end proc: (* InstallScript *)
+
 #}}}
 #{{{ CreateInstaller
 
@@ -277,7 +295,7 @@ uses %FT = FileTools;
                 ];
 
 
-    InstallerBuilder:-Build(
+    (InstallerBuilder:-Build)(
         "emacs"
         , ':-target' = installer
         , ':-version' = vers
@@ -319,8 +337,9 @@ uses %FT = FileTools;
                        ]
 
         , ':-width' = 1000 );
-end proc:
+end proc: (* CreateInstaller *)
 
 #}}}
 
+# mdc([InstallerBuilder:-Build,-129]):
 (CreateInstaller)();

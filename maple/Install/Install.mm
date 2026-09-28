@@ -186,4 +186,4 @@ uses FT = FileTools;
     #}}}
     #}}}
 
-end proc:
+end proc: (* Install *)
