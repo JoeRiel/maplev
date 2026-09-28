@@ -4,9 +4,13 @@ SHELL := /bin/bash
 
 UNAME := $(shell uname)
 
-MAPLE := /opt/maple2020
+MAPLE ?= /opt/maple2020
 
-include help-system.mk
+-include help-system.mk
+ifndef print-help
+include ../help-system.mak
+endif
+
 
 CC 	:= gcc
 MINGW   := x86_64-w64-mingw32-gcc
