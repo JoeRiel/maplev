@@ -209,8 +209,8 @@ The command buffer must hold the complete configuration string;
 [[snprintf]] guards against overflow and truncation is treated as a fatal error.
 
 <<main: vars>>=
-char cmd[512];
-int n;
+char cmd[512];  /* Maple statement to parse and evaluate */
+int n;          /* length of cmd */
 @
 
 Assign Maple commands that
