@@ -14,14 +14,18 @@
 ##  to assign appropriate settings for interfacing with
 ##  Emacs **maplev-mode**.
 ##
-##- The module-local variable 'pmaple_buffer' is assigned the value of 'buffer'.
+##- This command is not intended to be directly called by the user.
+##  It is used by the lisp code for "pmaple".
+##
+##- The module-local variable 'pmaple_buffer' is assigned
+##  the value of the argument 'buffer'.
 ##
 ##- The "kernelopts" command is called with argument ~'printbytes' = false~,
-##  which supresses the garbage collection messages.
+##  which suppresses the garbage collection messages.
 ##
 ##- The "interface" command is called with the following assignments:
 ##
-##TABLE(width="70%",colwidth="3|2|5")
+##TABLE(width="70%",colwidth="3|3|5")
 ##ROW **Name**     | **Value** |**Purpose**
 ##ROW errorbreak   | 0         | Continue if an error occurs while reading
 ##ROW errorcursor  | false     | Do not place cursor on location of syntax error
@@ -47,6 +51,7 @@
 ##- "interface"
 ##- "kernelopts"
 ##- "maplev"
+##- "pmaple"
 ##TEST
 ## $include <maple/include/test_macros.mi>
 ## AssignFUNC(Setup):
@@ -60,7 +65,7 @@ Setup := proc( buffer :: string )
 
     pmaple_buffer := buffer;
 
-    kernelopts('printbytes' = false);      # supress garbage collection messages (bytes used...)
+    kernelopts('printbytes' = false);      # suppress garbage collection messages (bytes used...)
     interface(NULL
               , 'errorbreak'   = 0         # continue if Maple encounters an error while reading
               , 'errorcursor'  = false     # do not place cursor with a syntax error

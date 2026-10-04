@@ -44,6 +44,7 @@ $include <maple/src/GetSource.mm>     # return source file and line number of a 
 $include <maple/src/Plot.mm>          # display plots
 $include <maple/src/Print.mm>         # used to display maple library code
 $include <maple/src/Setup.mm>         # setup the pmaple kernel; called from Emacs
+$include <maple/src/pmaple.md>        # help page for pmaple
 
 end module:
 

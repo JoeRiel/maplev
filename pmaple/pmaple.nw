@@ -5,7 +5,6 @@
 
 \usepackage{mathptmx}
 \usepackage[smallcode,longchunks,shortxref]{knoweb}
-%\usepackage{noweb}
 \usepackage{syntax,xspace,paralist}
 \usepackage{color}
 \usepackage{ifpdf}
@@ -29,12 +28,13 @@
 
 
 \title{\texttt{pmaple}}
-\author{Joseph S. Riel\quad\href{mailto:joer@san.rr.com}{\texttt{joer@san.rr.com}}}
+%\author{Joseph S. Riel\quad\href{mailto:joer@san.rr.com}{\texttt{joer@san.rr.com}}}
+\author{Joseph S. Riel\quad{\texttt{joer@san.rr.com}}}
 \date{8 February 2026 \\[1ex] 0.2.1}
 
 \begin{document}
 
-% \maketitle
+\maketitle
 
 % (knoweb-setup)
 
@@ -64,7 +64,10 @@ that makes it difficult to determine when a computation is complete.
 \subsection{Include Files}
 \label{sec:include-files}
 
-The [[maplec.h]] file lies in [[$MAPLE_ROOT/extern/include]].
+The [[maplec.h]] file lies in [[$MAPLE_ROOT/extern/include]]\footnote{
+[[$MAPLE_ROOT]] is an environment variable that is
+the path to the root of the Maple installation.
+The Maple statement [[kernelopts('mapledir')]] returns that string.}.
 
 <<includes>>=
 #include <ctype.h>
@@ -175,7 +178,7 @@ for ( i=2; i < argc ; i++ ) {
 Call [[StartMaple]] to assign the kernel vector used in subsequent
 calls to OpenMaple functions.  Drop the first argument in [[argv]]
 (the [[pmaple]] executable path) so that the first (0-th) element is
-the path to cmaple and decrement [[argc]] accordingly.
+the path to \cmaple{} and decrement [[argc]] accordingly.
 
 <<main: vars>>=
 MKernelVector kv; /* kernel vector handle used in OpenMaple calls */
