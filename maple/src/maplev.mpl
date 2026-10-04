@@ -2,18 +2,16 @@
 #LINK ../.maplev
 
 ##PACKAGE(help) maplev
-##TITLE Overview of the maplev Package
-###HALFLINE module used with Emacs maplev-mode
+##TITLE Overview of the maplev package
+##HALFLINE module used with Emacs maplev-mode
 ##DESCRIPTION
 ##- The `maplev` package
 ##  provides the Maple code for "maplev",
 ##  an "Emacs" major-mode for editing Maple source files.
 ##
-##
 ##SUBSECTION Exports
 ##SHOWINDEX(table="maplev[Exports]")
 ##ENDSUBSECTION
-##
 ##
 ##SEEALSO
 ##- "mdc"

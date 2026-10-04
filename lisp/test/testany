@@ -4,7 +4,8 @@ TST=$1
 
 emacs --quick \
       --batch \
-      --eval '(setq ert-batch-backtrace-right-margin 200)' \
+      --eval='(package-initialize)' \
+      --eval='(setq ert-batch-backtrace-right-margin 200)' \
       --load=test-init.el \
       --load=ert \
       --load=maplev \

@@ -11,6 +11,6 @@ for el in *-test.el; do
 	  --load=ert \
 	  --load=maplev \
 	  --load=${TST}.el \
-	  --funcall=ert-run-tests-batch-and-exit |& tee ${TST}.log
+	  --funcall=ert-run-tests-batch-and-exit
 done
 

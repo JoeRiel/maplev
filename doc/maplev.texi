@@ -501,7 +501,7 @@ the comments and so matches the initial @code{if} to the final
 
 
 
-
+@page
 @node Indentation Details,  , Indentation Tricks, Indentation
 @section Indentation Details
 @cindex Indentation details
@@ -799,7 +799,7 @@ The default is four spaces.
 
 @end table
 
-
+@page
 @node Speedbar,  , Indent trace output, Miscellaneous features
 @section Speedbar
 @cindex Speedbar
