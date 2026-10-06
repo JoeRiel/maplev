@@ -137,11 +137,18 @@ sed $sed_opt "/VERSION := \"/${sed_cmd}" "$file"
 
 #}}}
 
-#{{{ * makefile
+#{{{ * Makefile
 
-file="makefile"
+file="Makefile"
 [ -z "$version" ] && echo -ne "$file:\t"
 sed $sed_opt "/^VERSION := /$sed_cmd" "$file"
+
+file="_Makefile"
+
+if [[ -e "$file" ]]; then
+    [ -z "$version" ] && echo -ne "$file:\t"
+    sed $sed_opt "/^VERSION := /$sed_cmd" "$file"
+fi
 
 #}}}
 
