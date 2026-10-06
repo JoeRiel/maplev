@@ -72,9 +72,11 @@ VERSION-REGEX := \([0-9]\+\.\)\+[0-9]\+
 BROWSER := x-www-browser
 CP    := cp --archive --verbose
 EMACS ?= emacs
+HAVE-MLOAD := $(shell command -v mload 2> /dev/null)
 INFO  := info
 INFOVIEWER := info
-MAPLE := maple
+MAKEINFO ?= makeinfo
+MAPLE ?= maple
 MHELP := mhelp  # custom script
 MINT  := mint
 MKDIR := mkdir --parents
@@ -140,78 +142,24 @@ mla-installed := $(TBOX-DIR)/lib/$(mla)
 %.mla: maple/src/%.mpl $(mms) $(version) $(MLA-DEPENDS)
 	@$(RM) $@
 	@echo "Building Maple archive $@"
+ifneq ($(HAVE-MLOAD),)
 	mload --quiet --lineinfo --reindex --readonly \
-	  --log=${MPL-PKG}.log \
-	  $(if ${LINEINFO_RELPATH},--relpath,--include=$(CURDIR)) \
-	  --mla=$@ $<
+	--log=${MPL-PKG}.log \
+	$(if ${LINEINFO_RELPATH},--relpath,--include=$(CURDIR)) \
+	--mla=$@ $<
+else
+	@printf '%s\n' 'read "$<":' \
+	'LibraryTools:-Create("$@"):' \
+	'LibraryTools:-Save(`$*`, "$@"):' \
+	| $(MAPLE) -q -B -I $(CURDIR) > ${MPL-PKG}.log 2>&1
+	@if grep -q 'rror' ${MPL-PKG}.log || [ ! -s $@ ]; then cat ${MPL-PKG}.log; $(RM) $@; exit 1; fi
+endif
 
 help: $(call print-help,mla-install,Install mla into $(MAPLE-LIB-DIR))
 mla-install: $(mla-installed)
 
 $(mla-installed): $(mla)
 	@$(MKDIR) $(MAPLE-LIB-DIR)
-	@$(CP) --verbose $+ $@
-
-# }}}
-# {{{ hlp
-
-help: $(call print-separator)
-
-.PHONY: hlp hlp-clean hlp-install remove-preview hlp-version
-
-VERSION-MPI := maple/include/version.mpi
-
-help: $(call print-help,hlp-version,Update $(VERSION-MPI))
-
-hlp-version: hlp-version-clear $(VERSION-MPI)
-
-hlp-version-clear:
-	$(RM) $(VERSION-MPI)
-
-$(VERSION-MPI):
-	echo "##DEFINE PKG_VERSION $(VERSION)" > $(VERSION-MPI)
-	echo "##DEFINE PKG_DATE $(PKG-DATE) $$(date '+%B %Y')" >> $(VERSION-MPI)
-	echo "##DEFINE CLOUD_ID $(CLOUD-ID)" >> $(VERSION-MPI)
-	echo "##DEFINE CLOUD_VERSION $(CLOUD-VERSION)" >> $(VERSION-MPI)
-
-remove-preview :
-	@$(RM) maple/src/_preview_.mm
-
-hlp := $(MPL-PKG).help
-help: $(call print-help,hlp,	Create Maple help database: $(hlp))
-hlp: $(mla-installed) remove-preview $(MPL-PKG).help
-
-hlp-dirs ?= maple/mhelp
-
-help: $(call print-help,hlp-clean,Delete extracted help sources)
-hlp-clean:
-	@$(RM) $(addsuffix /*,$(hlp-dirs)) $(hlp)
-
-hlp-installed := $(TBOX-DIR)/lib/$(hlp)
-
-$(MPLDOC-INDEX) $(MPL-PKG).help : maple/src/$(MPL-PKG).mpl $(mms) $(mds) $(wildcard maple/doc/*.md) maple/include/mpldoc_macros.mpi $(VERSION-MPI) $(examples-installed)
-	echo $+
-	@$(RM) maple/src/_preview_.mm
-	@echo "Extracting mw files"
-	@$(call showerr,mpldoc --verbose --config nightly --indextable-only --save-indextable=$(MPLDOC-INDEX) $+ 2>&1 | sed --quiet '/Warning/{p;n};/Error/p')
-	@$(call showerr,mpldoc --verbose --config nightly --load-indextable=$(MPLDOC-INDEX) $+ 2>&1 | sed --quiet '/Warning/{p;n};/Error/p')
-	@if [ -n "${ACTIVATE-MWS}" ]; then sed '/Metadata-attribute name="Active"/s/false/true/' --in-place ${ACTIVATE-MWS}; fi
-	@if [ -n "${STARTUP-CODE}" ]; then sed "/<Metadata-table>/i <Startup-Code startupcode=\"${STARTUP-CODE}\"/>" --in-place ${ACTIVATE-MWS}; fi
-	@echo "Creating help database: $@"
-	@$(MHELP) $(addprefix --dir=,$(hlp-dirs)) --replace $(MPL-PKG)
-
-# [ -n "..." ] is true when string is not null, see p 118. of "Learning the bash shell".
-
-
-help: $(call print-help,hlp-install,Install $(hlp) in $(MAPLE-INSTALL-DIR))
-hlp-install: $(hlp-installed)
-
-help: $(call print-help,hlp-remove,Remove $(hlp) and $(MAPLE-INSTALL-DIR)/$(hlp))
-hlp-remove:
-	$(RM) --verbose $(MAPLE-INSTALL-DIR)/$(hlp) $(hlp)
-
-$(hlp-installed): $(hlp)
-	@$(MKDIR) $(MAPLE-INSTALL-DIR)
 	@$(CP) --verbose $+ $@
 
 # }}}

@@ -102,7 +102,11 @@ local base,file,li,line,mroot,opacity,p,src;
                 mroot := kernelopts('mapledir');
                 file := FileTools:-JoinPath([mroot,base]);
             end if;
-            src := [file,line];
+
+            src := ifelse(FileTools:-Exists(file)
+                          , [file,line]
+                          , NULL
+                         );
         end if;
     finally
         kernelopts('opaquemodules' = opacity);
