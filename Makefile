@@ -4,7 +4,7 @@
 
 PKG := maplev
 
-VERSION := 3.2.1
+VERSION := 3.2.2
 
 # Activate selected make sections
 
@@ -91,8 +91,8 @@ TEXI2PDF := $(MAKEINFO) --pdf
 
 # install directories
 
-INFO-DIR := $(HOME)/share/info
-LISP-DIR ?= $(HOME)/.emacs.d/maple
+INFO-DIR ?= $(HOME)/share/info
+LISP-DIR ?= $(HOME)/.emacs.d/elpa
 TBOX-DIR := $(HOME)/maple/toolbox/$(PKG)
 
 # where the maple archive and help database go
@@ -160,7 +160,28 @@ mla-install: $(mla-installed)
 
 $(mla-installed): $(mla)
 	@$(MKDIR) $(MAPLE-LIB-DIR)
-	@$(CP) --verbose $+ $@
+	@$(CP) $+ $@
+
+# }}}
+# {{{ hlp
+
+# Install the help file.
+
+help: $(call print-separator)
+
+.PHONY: hlp hlp-install hlp-remove
+
+hlp := maple/$(MPL-PKG).help
+hlp-installed := $(TBOX-DIR)/lib/$(hlp)
+
+help: $(call print-help,hlp-install,Install $(hlp) in $(MAPLE-INSTALL-DIR))
+hlp-install: $(hlp)
+	@$(MKDIR) $(MAPLE-INSTALL-DIR)
+	@$(CP) $+ $(hlp-installed)
+
+help: $(call print-help,hlp-remove,Remove $(MAPLE-INSTALL-DIR)/$(hlp))
+hlp-remove:
+	$(RM) --verbose $(MAPLE-INSTALL-DIR)/$(hlp)
 
 # }}}
 
@@ -255,7 +276,7 @@ endif
 
 # }}}
 
-# Lisp
+# Emacs
 
 # {{{ elisp
 
@@ -332,7 +353,6 @@ lisp-test:
 
 # }}}
 # {{{ info
-
 help: $(call print-separator)
 
 TEXI-VERSION = doc/version.texi
@@ -505,15 +525,28 @@ help: $(call print-help,prebuilt,Build $(prebuilt-zip))
 
 prebuilt: $(prebuilt-zip)
 
-doc-files := $(addprefix doc/$(PKG).,html info pdf)
+doc-files := $(addprefix doc/$(PKG).,html info pdf) $(TEXI-VERSION)
 
-$(prebuilt-zip): $(prebuilt-files)
+$(prebuilt-zip):
 	$(RM) $@
 	zip $@ $(doc-files)
 	[ -d lib ] || mkdir lib
 	cp $(PKG).mla $(PKG).help lib
 	zip $@ lib/*
 	cd pmaple ; zip ../$@ bin*/*
+
+help: $(call print-help,prebuilt-upload,Upload $(prebuilt-zip))
+prebuilt-upload:
+	gh release create "release-$(VERSION)" $(prebuilt-zip) --title "Release $(VERSION)"
+
+help: $(call print-help,prebuilt-download,Download $(prebuilt-zip))
+prebuilt-download:
+	gh release download --clobber --repo JoeRiel/maplev "release-$(VERSION)"
+
+help: $(call print-help,prebuilt-unpack,Unpack $(prebuilt-zip))
+prebuilt-unpack:
+	unzip -o $(prebuilt-zip)
+
 
 # }}}
 

@@ -3,7 +3,7 @@
 MapleV:  An Emacs Package for Maple Developers
 ==============================================
 
-**Version 3.2.1**
+**Version 3.2.2**
 
 MapleV is an Emacs package for developing Maple code.
 Maple is computer algebra system sold by [Maplesoft](http://www.maplesoft.com/).
@@ -33,14 +33,13 @@ and Windows are available at
 Installation
 ------------
 
-Download and unpack the latest [zip file](https://github.com/JoeRiel/maplev/archive/master.zip).
-
-For convenience, the file maplev-built.zip contains a pre-built Maple
-archive file (maplev.mla), help page, and documentation: doc/maplev.info,
-doc/maplev.html, and doc/maplev.pdf.  The doc files contain the same
-information but in different formats.  The maplev.info is the most
-useful as it can be accessed from Emacs if properly installed.  These
-files can be built from the source.
+The release tag file maplev-built.zip in a release tag, a
+pre-built Maple archive file (maplev.mla), help database
+(maplev.help), and documentation: doc/maplev.info, doc/maplev.html,
+and doc/maplev.pdf.  The doc files contain the same information but in
+different formats.  The maplev.info is the most useful as it can be
+accessed from Emacs if properly installed.  These files can be built
+from the source.
 
 Instructions for installing MapleV are given in its info manual, `maplev.info`,
 of which there is an html version, `maplev.html`.
