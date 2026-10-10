@@ -1,6 +1,6 @@
 #LINK maplev.mpl
 
-##INCLUDE ../include/mpldoc/macros.mpi
+##INCLUDE ../include/mpldoc_macros.mpi
 ##PROCEDURE(help,label="IsAbsolutePath") maplev:-IsAbsolutePath
 ##HALFLINE determine whether a path is absolute or relative
 ##INDEXPAGE maplev[Exports],IsAbsolutePath,determine whether a path is absolute or relative
