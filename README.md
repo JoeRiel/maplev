@@ -33,45 +33,49 @@ and Windows are available at
 Installation
 ------------
 
-The release tag file maplev-built.zip in a release tag, a
-pre-built Maple archive file (maplev.mla), help database
-(maplev.help), and documentation: doc/maplev.info, doc/maplev.html,
-and doc/maplev.pdf.  The doc files contain the same information but in
-different formats.  The maplev.info is the most useful as it can be
+The release tag file `maplev-built.zip` in a release tag, a
+pre-built Maple archive file (`lib/maplev.mla`), help database
+(`lib/maplev.help`), and documentation: `doc/maplev.info`, `doc/maplev.html`,
+and `doc/maplev.pdf`.  The doc files contain the same information but in
+different formats.  The `doc/maplev.info` is the most useful as it can be
 accessed from Emacs if properly installed.  These files can be built
 from the source.
-
-Instructions for installing MapleV are given in its info manual, `maplev.info`,
-of which there is an html version, `maplev.html`.
 
 Configuration
 -------------
 
 Add the following lines to the Emacs initialization file, which is
-given by the value of the emacs variable `user-init-file`.
+given by the value of the emacs variable `user-init-file`:
 
-    (add-to-list 'load-path (concat user-emacs-directory "maple"))
-    (autoload 'maplev-mode "maplev" "Maple editing mode" 'interactive)
-    (add-to-list 'auto-mode-alist '("\\.mpl\\'" . maplev-mode))
+```
+(use-package maplev
+  :ensure nil
+  :load-path "elpa/maplev-3.2.2"
+  :commands maplev-mode
+  :mode (("\\.mpl'" . maplev-mode)))
 
-The elisp variable `maplev-config-default` needs to be configured.
-For example,
-
-    (eval-after-load 'maplev-config
-      '(setq maplev-config-default
-         (make-instance 'maplev-config-class
-            :bindir "/opt/maple2026/bin.X86_64_LINUX"
-            :mapledir
-
+(use-package maplev-config
+  :commands maplev-config
+  :config
+    (setq maplev-config-default
+	      (let* ((mapledir "/opt/maple2025"))
+	        (make-instance 'maplev-config-class
+				:bindir (file-name-concat mapledir "internal" "bin.X86_64_LINUX")
+				:mapledir mapledir
+				:maple (file-name-concat mapledir "bin" "maple")
+				:maple-options "-B -A2 -e2"
+				:mint (file-name-concat mapledir "bin" "mint")
+				:pmaple (file-name-concat (getenv "HOME") "maple/toolbox/maplev/bin.X86_64_LINUX/pmaple")))))
+```
 
 Use the Emacs custom group `maplev-group` to access MapleV's many customizations.
 
 Usage
 -----
 
-Fire up Emacs.  If you configured `auto-mode-alist`, as above, opening
-a Maple source file with extension `.mpl` should cause it to be opened
-in `maplev-mode`.  If the `maplev.info` file was installed where it
-can be found by Emacs, you can get help by calling
+Fire up Emacs.  If you configured `auto-mode-alist` via `use-package`,
+as above, opening a Maple source file with extension `.mpl` should
+cause it to be opened in `maplev-mode`.  If the `maplev.info` file was
+installed where it can be found by Emacs, you can get help by calling
 `maplev-goto-info-node`.  An html version of the help, `maplev.html`,
 is distributed with the source.
