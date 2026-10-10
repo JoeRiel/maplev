@@ -910,6 +910,8 @@ see the @code{:tester} entry, below.
 
 @item :maple
 Shell command to execute tty (command-line) Maple.
+This could a full path, such as @file{/opt/maple2025/bin/maple},
+or a short path, @file{maple}.
 @xref{Maple}.
 
 @item :mapledir
