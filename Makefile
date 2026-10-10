@@ -19,6 +19,8 @@ ELISP-PKG ?= $(PKG)
 
 SHELL := /bin/bash
 
+MAPLE_ROOT ?= /opt/maple2025
+
 # {{{ help
 
 help:
@@ -46,6 +48,7 @@ dash-f := $(if $(filter-out Makefile makefile GNUmakefile,\
 $(parent-makefile)), -f $(parent-makefile))
 
 .PHONY: help
+
 # }}}
 # {{{ aux-funcs
 
@@ -72,18 +75,17 @@ VERSION-REGEX := \([0-9]\+\.\)\+[0-9]\+
 BROWSER := x-www-browser
 CP    := cp --archive --verbose
 EMACS ?= emacs
-HAVE-MLOAD := $(shell command -v mload 2> /dev/null)
 INFO  := info
 INFOVIEWER := info
+INSTALL-INFO := ginstall-info
 MAKEINFO ?= makeinfo
-MAPLE ?= maple
+MAPLE ?= $(MAPLE_ROOT)/bin/maple  # executable shell file (tty maple)
 MHELP := mhelp  # custom script
-MINT  := mint
+MINT  ?= mint
 MKDIR := mkdir --parents
-MTAGS := mtags
+MTAGS := mtags  # custom script
 PDFVIEWER := xpdf
 TEXI2HTML := $(MAKEINFO) --html --number-sections
-# TEXI2PDF := texi2pdf
 TEXI2PDF := $(MAKEINFO) --pdf
 
 # }}}
@@ -142,18 +144,11 @@ mla-installed := $(TBOX-DIR)/lib/$(mla)
 %.mla: maple/src/%.mpl $(mms) $(version) $(MLA-DEPENDS)
 	@$(RM) $@
 	@echo "Building Maple archive $@"
-ifneq ($(HAVE-MLOAD),)
-	mload --quiet --lineinfo --reindex --readonly \
-	--log=${MPL-PKG}.log \
-	$(if ${LINEINFO_RELPATH},--relpath,--include=$(CURDIR)) \
-	--mla=$@ $<
-else
 	@printf '%s\n' 'read "$<":' \
 	'LibraryTools:-Create("$@"):' \
 	'LibraryTools:-Save(`$*`, "$@"):' \
 	| $(MAPLE) -q -B -I $(CURDIR) > ${MPL-PKG}.log 2>&1
 	@if grep -q 'rror' ${MPL-PKG}.log || [ ! -s $@ ]; then cat ${MPL-PKG}.log; $(RM) $@; exit 1; fi
-endif
 
 help: $(call print-help,mla-install,Install mla into $(MAPLE-LIB-DIR))
 mla-install: $(mla-installed)
@@ -165,13 +160,14 @@ $(mla-installed): $(mla)
 # }}}
 # {{{ hlp
 
-# Install the help file.
+# Install the help data file (maplev.help)
 
 help: $(call print-separator)
 
 .PHONY: hlp hlp-install hlp-remove
 
-hlp := maple/$(MPL-PKG).help
+# hlp := maple/$(MPL-PKG).help
+hlp := lib/$(MPL-PKG).help
 hlp-installed := $(TBOX-DIR)/lib/$(hlp)
 
 help: $(call print-help,hlp-install,Install $(hlp) in $(MAPLE-INSTALL-DIR))
@@ -407,7 +403,7 @@ info-install: $(INFO-FILE)
 	@$(MKDIR) $(INFO-DIR)
 	$(CP) $(INFO-FILE) $(INFO-DIR)
 	@echo Be sure to update 'dir' node
-	@for file in $(INFO-FILE); do ginstall-info --debug --info-dir=$(INFO-DIR) $${file}; done
+	@for file in $(INFO-FILE); do $(INSTALL-INFO) --debug --info-dir=$(INFO-DIR) $${file}; done
 
 .PHONY: doc html info pdf doc-clean doc-clean-all p i h info-install texi-version $(TEXI-VERSION)
 
@@ -547,6 +543,27 @@ help: $(call print-help,prebuilt-unpack,Unpack $(prebuilt-zip))
 prebuilt-unpack:
 	unzip -o $(prebuilt-zip)
 
+help: $(call print-help,prebuilt-install,Install the unpacked prebuilt)
+prebuilt-install:
+	@$(MKDIR) $(INFO-DIR)
+	$(CP) $(INFO-FILE) $(INFO-DIR)
+	@echo Be sure to update 'dir' node
+	@for file in $(INFO-FILE); do $(INSTALL-INFO) --debug --info-dir=$(INFO-DIR) $${file}; done
+	@$(MKDIR) --parents $(TBOX-DIR)/lib
+	@$(CP) --target-directory=$(TBOX-DIR)/lib lib/$(MPL-PKG).help lib/$(MPL-PKG).mla
+	@install --verbose -D --target-directory=$(BIN-DIR) $(SYSTYPE)/pmaple
+
+
+# }}}
+# {{{ pmaple
+
+# copy pmaple executable
+
+SYSTYPE := $(shell $(MAPLE_ROOT)/bin/maple.system.type)
+BIN-DIR := $(TBOX-DIR)/$(SYSTYPE)
+
+pmaple-install:
+	@install --verbose -D --target-directory=$(BIN-DIR) $(SYSTYPE)/pmaple
 
 # }}}
 
