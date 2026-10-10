@@ -4,7 +4,7 @@ SHELL := /bin/bash
 
 UNAME := $(shell uname)
 
-MAPLE ?= /opt/maple2020
+MAPLE_ROOT ?= /opt/maple2020  # directory in which Maple is installed
 
 -include help-system.mk
 ifndef print-help
@@ -15,10 +15,10 @@ endif
 CC 	:= gcc
 MINGW   := x86_64-w64-mingw32-gcc
 RM 	:= rm -rf
-SYSTYPE := $(shell $(MAPLE)/bin/maple.system.type)
-LIB     := $(MAPLE)/$(SYSTYPE)
+SYSTYPE := $(shell $(MAPLE_ROOT)/bin/maple.system.type)
+LIB     := $(MAPLE_ROOT)/$(SYSTYPE)
 LIBS 	:= -L $(LIB)
-INCLUDE := -I $(MAPLE)/extern/include
+INCLUDE := -I $(MAPLE_ROOT)/extern/include
 
 # $(info MAPLE=$(MAPLE))
 # $(info SYSTYPE=$(SYSTYPE))
@@ -75,7 +75,7 @@ ifeq ($(UNAME),Darwin)
 LIB-PATH-VAR := DYLD_LIBRARY_PATH
 endif
 
-ENV     := $(LIB-PATH-VAR)=$(MAPLE)/$(SYSTYPE)
+ENV     := $(LIB-PATH-VAR)=$(MAPLE_ROOT)/$(SYSTYPE)
 CFLAGS  := -g -D_GNU_SOURCE -pedantic-errors
 
 # $(info ENV=$(ENV), INCLUDE=$(INCLUDE))
@@ -87,8 +87,8 @@ linux:   $(SYSTYPE)/pmaple
 mac:     $(SYSTYPE)/pmaple
 windows: bin.X86_64_WINDOWS/pmaple.exe
 
-linux:  $(call print-help,linux,	Create pmaple binary)
-mac:    $(call print-help,mac,	Create pmaple binary)
+linux:   $(call print-help,linux,	Create pmaple binary)
+mac:     $(call print-help,mac,	Create pmaple binary)
 windows: $(call print-help,windows,	Create pmaple.exe binary)
 
 
