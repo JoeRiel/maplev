@@ -52,7 +52,7 @@ given by the value of the emacs variable `user-init-file`:
   :ensure nil
   :load-path "elpa/maplev-3.2.3"
   :commands maplev-mode
-  :mode (("\\.mpl'" . maplev-mode)))
+  :mode (("\\.mpl\\'" . maplev-mode)))
 
 (use-package maplev-config
   :commands maplev-config
