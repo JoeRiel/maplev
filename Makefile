@@ -4,7 +4,7 @@
 
 PKG := maplev
 
-VERSION := 3.2.2
+VERSION := 3.2.3
 
 # Activate selected make sections
 
