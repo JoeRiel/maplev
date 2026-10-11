@@ -559,9 +559,12 @@ prebuilt-install:
 
 # copy pmaple executable
 
+help: $(call print-separator)
+
 SYSTYPE := $(shell $(MAPLE_ROOT)/bin/maple.system.type)
 BIN-DIR := $(TBOX-DIR)/$(SYSTYPE)
 
+help: $(call print-help,pmaple-install,Install pmaple)
 pmaple-install:
 	@install --verbose -D --target-directory=$(BIN-DIR) $(SYSTYPE)/pmaple
 
