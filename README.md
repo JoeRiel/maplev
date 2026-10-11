@@ -41,6 +41,17 @@ different formats.  The `doc/maplev.info` is the most useful as it can be
 accessed from Emacs if properly installed.  These files can be built
 from the source.
 
+```
+git clone https://github.com/JoeRiel/maplev
+cd maplev
+make prebuilt-download # download maplev-built.zip
+make prebuilt-unpack   # unpack the zip file
+make prebuilt-install  # install maplev.info, maplev.help, and maplev.mla
+make mla-install       # recreate and install maplev.mla using installed lineinfo data
+make package-install   # install and byte-compile the lisp files and doc/dir
+```
+
+
 Configuration
 -------------
 
