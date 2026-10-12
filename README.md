@@ -48,6 +48,7 @@ make prebuilt-download # download maplev-built.zip
 make prebuilt-unpack   # unpack the zip file
 make prebuilt-install  # install maplev.info, maplev.help, and maplev.mla
 make mla-install       # recreate and install maplev.mla using installed lineinfo data
+make package           # create the tar file of .el files and dir
 make package-install   # install and byte-compile the lisp files and doc/dir
 ```
 
