@@ -152,15 +152,13 @@ Viewing
 
 Installation
 
-* Emacs Files::                 Installing and byte-compiling the lisp files
-* Maple Files::                 Installing the Maple archive
-* Customizing::                 Customizing the installation.
-* Info documentation::          Installing the Info documentation.
+* Makefile::                    Installing MapleV with the Makefile.
+* Customization::               Customizing MapleV.
 
 Evolution
 
-* Bugs::
-* Acknowledgments::
+* Bugs::                        What to when encountering a bug.
+* Acknowledgments::             People who have contributed to MapleV.
 
 @end detailmenu
 @end menu
@@ -1422,68 +1420,64 @@ busy}, is displayed in the message window.
 @node Installation, Evolution, Viewing, top
 @appendix Installation
 
-@cindex Installation
-@cindex @file{.emacs}
-@cindex Initialization
-@cindex Customization
-
-This section describes how to install MapleV into GNU Emacs.
+This appendix explains how to install and customize maplev.
 
 @menu
-* Emacs Files::                 Installing and byte-compiling the lisp files
-* Maple Files::                 Installing the Maple archive
-* Customizing::                 Customizing the installation.
-* Info documentation::          Installing the Info documentation.
+* Makefile::                    Installing MapleV with the Makefile.
+* Customization::               Customizing MapleV.
 @end menu
 
-@node Emacs Files, Maple Files, Installation, Installation
-@section Emacs Files
+@node Makefile, Customization, Installation, Installation
+@section Makefile
 
-Install the Emacs lisp files, those with extension @file{.el},
-into the directory @file{~/.emacs.d/maple}.
-The tilde, @file{~}, corresponds to your home directory.
+@cindex Installation
+@cindex @file{.emacs}
+@cindex Makefile
+@cindex Customization
+@cindex prebuilt
+@cindex mla-install
+@cindex package-install
 
-Byte-compile them from Emacs with the command
+Using the included @file{Makefile} run the following commands:
 
 @example
-@kbd{C-u 0 M-x byte-recompile-directory @key{RET} ~/emacs.d/maple @key{RET}}
+make prebuilt-download # download maplev-built.zip
+make prebuilt-unpack   # unpack the zip file
+make prebuilt-install  # install info, help, and maplev.mla
+make mla-install       # recreate and install maplev.mla
+make package           # create the tar file of .el files and dir
+make package-install   # install and byte-compile the lisp files
 @end example
 
 Add the following line to your @file{.emacs} file@footnote{Be careful
 copying and pasting any of the elisp code in this section from a PDF document,
 the forward quotes may be rendered incorrectly.}
 
-
 @example
-(add-to-list 'load-path (concat user-emacs-directory "maple"))
-(autoload 'maplev-mode "maplev" "Maple editing mode" 'interactive)
+(use-package maplev
+  :ensure nil
+  :load-path "elpa/maplev-@value{VERSION}"
+  :commands maplev-mode
+  :mode (("\\.mpl\\'" . maplev-mode)))
+(use-package maplev-config
+  :commands maplev-config
+  :config
+    (setq maplev-config-default
+          (let* ((mapledir "/opt/maple2025"))
+            (make-instance 'maplev-config-class
+                :bindir (file-name-concat mapledir "internal"
+                                                   "bin.X86_64_LINUX")
+                :mapledir mapledir
+                :maple (file-name-concat mapledir "bin" "maple")
+                :maple-options "-B -A2 -e2"
+                :mint (file-name-concat mapledir "bin" "mint")
+                :pmaple (file-name-concat (getenv "HOME")
+                    "maple/toolbox/maplev/bin.X86_64_LINUX/pmaple")))))
 @end example
 
-To have Emacs auto-magically start in MapleV mode when editing Maple
-source, add the following to your @file{.emacs} file, modifying the
-regular expression as needed.
-
-@example
-(setq auto-mode-alist
-      (cons `("\\.mpl\\'" . maplev-mode) auto-mode-alist))
-@end example
-
-@node Maple Files, Customizing, Emacs Files, Installation
-@section Maple Files
-
-A Maple archive file, @file{maplev.mla}, containing code
-used by @code{maplev-view}, is provided with the distribution.
-If desired it can be rebuilt from source by removing the existing file
-and executing
-
-@example
-maple maple/maplev.mpl
-@end example
-
-The file @file{maplev.mla} should be installed at @file{~/maple/toolbox/emacs/lib}.
-
-@node Customizing, Info documentation, Maple Files, Installation
-@section Customizing
+@node Customization,  , Makefile, Installation
+@section Customization
+@cindex Customization
 
 The default settings for MapleV can can be customized
 by executing, in Emacs, the following commands.
@@ -1494,27 +1488,13 @@ M-x customize-group @key{RET} maplev @key{RET}
 @end example
 
 
-@node Info documentation,  , Customizing, Installation
-@section Info documentation
-
-Install the included @file{maplev.info} file to a directory
-in the Info load path and then edit the @file{dir} to point
-to it.  I add the following menu item to my @file{dir} file:
-
-@example
-* MapleV: (maplev).       MapleV reference manual.
-@end example
-
-
-
-
 @node Evolution, Key Index, Installation, top
 @appendix Evolution
 
 
 @menu
-* Bugs::
-* Acknowledgments::
+* Bugs::                        What to when encountering a bug.
+* Acknowledgments::             People who have contributed to MapleV.
 @end menu
 
 @node Bugs, Acknowledgments, Evolution, Evolution
