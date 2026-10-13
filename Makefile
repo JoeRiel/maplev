@@ -537,7 +537,7 @@ prebuilt-upload:
 
 help: $(call print-help,prebuilt-download,Download $(prebuilt-zip))
 prebuilt-download:
-	gh release download --clobber --repo JoeRiel/maplev "release-$(VERSION)"
+	gh release download --clobber --repo JoeRiel/maplev "release-$(VERSION)" --archive=zip
 
 help: $(call print-help,prebuilt-unpack,Unpack $(prebuilt-zip))
 prebuilt-unpack:
