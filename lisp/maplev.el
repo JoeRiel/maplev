@@ -6,7 +6,7 @@
 ;;             Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Maintainer: Joseph S. Riel <joer@san.rr.com>
 ;; Created:    June 1999
-;; Version:    3.2.3
+;; Version:    3.2.4
 ;; Keywords:   languages, tools
 
 ;;{{{ License

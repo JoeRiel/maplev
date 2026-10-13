@@ -3,7 +3,7 @@
 MapleV:  An Emacs Package for Maple Developers
 ==============================================
 
-**Version 3.2.3**
+**Version 3.2.4**
 
 MapleV is an Emacs package for developing Maple code.
 Maple is computer algebra system sold by [Maplesoft](http://www.maplesoft.com/).
@@ -62,7 +62,7 @@ given by the value of the emacs variable `user-init-file`:
 ```
 (use-package maplev
   :ensure nil
-  :load-path "elpa/maplev-3.2.3"
+  :load-path "elpa/maplev-3.2.4"
   :commands maplev-mode
   :mode (("\\.mpl\\'" . maplev-mode)))
 
