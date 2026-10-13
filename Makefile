@@ -532,8 +532,8 @@ $(prebuilt-zip):
 	cd pmaple ; zip ../$@ bin*/*
 
 help: $(call print-help,prebuilt-upload,Upload $(prebuilt-zip))
-prebuilt-upload:
-	gh release create "release-$(VERSION)" $(prebuilt-zip) --title "Release $(VERSION)"
+prebuilt-upload: $(prebuilt.zip)
+	gh release create "release-$(VERSION)" '$(prebuilt-zip)#info, help, mla, and pmaple' --title "Release $(VERSION)"
 
 help: $(call print-help,prebuilt-download,Download $(prebuilt-zip))
 prebuilt-download:
