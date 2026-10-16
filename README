@@ -38,9 +38,33 @@ properly installed. These files can be built from the source.
     make prebuilt-download # download maplev-built.zip
     make prebuilt-unpack   # unpack the zip file
     make prebuilt-install  # install maplev.info, maplev.help, and maplev.mla
-    make mla-install       # recreate and install maplev.mla using installed lineinfo data
+    make mla-install       # Optional for developing maplev:
+                             recreate and install maplev.mla using installed lineinfo data
     make package           # create the tar file of .el files and dir
     make package-install   # install and byte-compile the lisp files and doc/dir
+
+
+make package-install runs a batch Emacs that ignores your init file
+and installs the package into ~/.emacs.d/elpa/maplev-<version>.
+If you have customized package-user-dir, start Emacs with --init-directory,
+or do not use package.el, use one of the following options instead.
+
+Install from within your own Emacs (custom settings apply):
+
+
+Install from within your own Emacs (custom settings apply):
+
+    M-x package-install-file RET /path/to/maplev-<version>.tar RET
+
+Or unpack the tar file wherever you like and add it to load-path:
+
+    tar xf maplev-<version>.tar -C ~/some/dir
+
+    (add-to-list 'load-path "~/some/dir/maplev-<version>")
+    (add-to-list 'Info-additional-directory-list "~/some/dir/maplev-<version>")
+    (require 'maplev)
+
+In that case, use the absolute directory as the :load-path.
 
 Configuration
 
@@ -49,7 +73,7 @@ by the value of the emacs variable user-init-file:
 
     (use-package maplev
       :ensure nil
-      :load-path "elpa/maplev-3.2.3"
+      :load-path "elpa/maplev-3.2.4"
       :commands maplev-mode
       :mode (("\\.mpl\\'" . maplev-mode)))
 
@@ -59,7 +83,7 @@ by the value of the emacs variable user-init-file:
         (setq maplev-config-default
               (let* ((mapledir "/opt/maple2025"))
                 (make-instance 'maplev-config-class
-                    :bindir (file-name-concat mapledir "internal" "bin.X86_64_LINUX")
+                    :bindir (file-name-concat mapledir "bin.X86_64_LINUX")
                     :mapledir mapledir
                     :maple (file-name-concat mapledir "bin" "maple")
                     :maple-options "-B -A2 -e2"
