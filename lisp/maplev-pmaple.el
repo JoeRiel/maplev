@@ -64,7 +64,7 @@ Start one, if necessary."
 (defun maplev-pmaple--process-environment ()
   "Return a list of strings of equations that define the process environment."
   (unless maplev-config
-    (setq maplev-config maplev-config-default))
+    (setq maplev-config (maplev-config)))
   (let ((bindir   (slot-value maplev-config 'bindir))
 	(mapledir (slot-value maplev-config 'mapledir)))
     (cond
@@ -131,7 +131,7 @@ directory before starting maple.  If custom variable
 `maplev-load-path' is non-nil, assign it to the environment
 variable LD_LIBRARY_PATH."
 
-  (let* ((config (or maplev-config (maplev-config-class)))
+  (let* ((config (or maplev-config (maplev-config)))
          (process-environment (maplev-pmaple--process-environment))
          (pmaple-and-opts (maplev-pmaple--get-pmaple-and-options))
          (buffer (get-buffer-create (maplev--pmaple-buffer)))
@@ -276,6 +276,7 @@ from the output buffer."
   (pop-to-buffer (maplev--pmaple-buffer))
   (goto-char (point-max)))
 
+;;;###autoload
 (defalias 'pmaple 'maplev-pmaple-pop-to-buffer)
 
 (defun maplev--pmaple-filter (process maple-output)
