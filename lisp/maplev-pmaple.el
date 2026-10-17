@@ -269,9 +269,13 @@ from the output buffer."
     (delete-region (point-min) (point-max))))
 
 
+;;;###autoload
 (defun maplev-pmaple-pop-to-buffer ()
   "Pop up a buffer with command line Maple.  Start Maple, if necessary."
   (interactive)
+  ;; Load the rest of maplev (mint, help, view), which the pmaple
+  ;; buffer uses, in case this was called via the autoload.
+  (require 'maplev)
   (maplev--pmaple-process)
   (pop-to-buffer (maplev--pmaple-buffer))
   (goto-char (point-max)))
