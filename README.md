@@ -89,11 +89,7 @@ given by the value of the emacs variable `user-init-file`:
 (use-package maplev
   :ensure nil
   :load-path "elpa/maplev-3.2.4"
-  :commands maplev-mode
-  :mode (("\\.mpl\\'" . maplev-mode)))
-
-(use-package maplev-config
-  :commands maplev-config
+  :mode (("\\.mpl\\'" . maplev-mode))
   :config
     (setq maplev-config-default
 	      (let* ((mapledir "/opt/maple2025"))
@@ -117,3 +113,10 @@ cause it to be opened in `maplev-mode`.  If the `maplev.info` file was
 installed where it can be found by Emacs, you can get help by calling
 `maplev-goto-info-node`.  An html version of the help, `maplev.html`,
 is distributed with the source.
+
+Org Mode
+--------
+
+The <https://github/JoeRiel/ob-maple> package provides functions to interact with
+Maple in an Org file.
+
