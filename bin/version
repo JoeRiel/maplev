@@ -134,8 +134,10 @@ sed $sed_opt "/VERSION=/$sed_cmd" "$file"
 #{{{ * maple/installer/config.mpl
 
 file="maple/installer/config.mpl"
-[ -z "$version" ] && echo -ne "$file:\t"
-sed $sed_opt "/VERSION := \"/${sed_cmd}" "$file"
+if [ -f "$file" ]; then
+     [ -z "$version" ] && echo -ne "$file:\t"
+     sed $sed_opt "/VERSION := \"/${sed_cmd}" "$file"
+fi
 
 #}}}
 
