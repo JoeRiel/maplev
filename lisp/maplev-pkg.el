@@ -1,7 +1,7 @@
 ;;; -*- no-byte-compile: t; lexical-binding: t; -*-
 
 (define-package
-  "maplev" "3.2.4"
+  "maplev" "3.2.5"
   "GNU Emacs package for Maple developers"
   'nil
   :keywords '("languages" "tools")
