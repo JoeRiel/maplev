@@ -548,12 +548,6 @@ prebuilt-unpack:
 
 help: $(call print-help,prebuilt-install,Install the unpacked prebuilt into $(TBOX-DIR) and $(INFO-DIR))
 prebuilt-install:
-#	Ensure directory ~/share/info exists.
-#	Copy maplev.info to it.
-	@$(MKDIR) $(INFO-DIR)
-	@$(CP) $(INFO-FILE) $(INFO-DIR)
-#	Update the installed dir.
-	$(INSTALL-INFO) --info-dir=$(INFO-DIR) $(INFO-FILE)
 #	Ensure directory ~/maple/toolbox/maplev/lib exists.
 #	Copy maplev.help and maplev.info to it.
 	@$(MKDIR) --parents $(TBOX-DIR)/lib
