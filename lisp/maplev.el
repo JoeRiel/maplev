@@ -6,7 +6,7 @@
 ;;             Roland Winkler <Roland.Winkler@physik.uni-erlangen.de>
 ;; Maintainer: Joseph S. Riel <joer@san.rr.com>
 ;; Created:    June 1999
-;; Version:    3.2.4
+;; Version:    3.2.5
 ;; Keywords:   languages, tools
 
 ;;{{{ License
@@ -553,7 +553,7 @@ Prefix JUSTIFY means justify as well."
 (defun maplev-browse-info ()
   "Open the html version of the maplev documentation in a browser."
   (interactive)
-  (let ((html (expand-file-name "maple/toolbox/maplev/info/maplev.html")))
+  (let ((html (expand-file-name "~/maple/toolbox/maplev/info/maplev.html")))
     (if (file-exists-p html)
 	(browse-url (concat "file://" html))
       (error "HTML file not found: %s" html))))

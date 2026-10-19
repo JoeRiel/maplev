@@ -4,7 +4,7 @@
 
 PKG := maplev
 
-VERSION := 3.2.4
+VERSION := 3.2.5
 
 # Activate selected make sections
 
@@ -124,7 +124,7 @@ mla-version: $(VERSION-MI)
 
 help: $(call print-help,mla-version,Update $(VERSION-MI))
 
-$(VERSION-MI): maple/src/$(MPL-PKG).mpl $(filter-out $(VERSION-MI),$(mms)) maple/include/About.mi
+$(VERSION-MI): maple/src/$(MPL-PKG).mpl $(filter-out $(VERSION-MI),$(mms))
 	@echo "Updating $@" ; \
 	 echo '$$define __GIT_HASH__' "\"$$(git rev-parse HEAD)\"" > $@ ; \
 	 echo '$$define __GIT_BUILD__' "\"$$(git describe --match=release\* 2> /dev/null)\"" >> $@ ; \
@@ -349,6 +349,7 @@ lisp-test:
 
 # }}}
 # {{{ info
+
 help: $(call print-separator)
 
 TEXI-VERSION = doc/version.texi
@@ -362,6 +363,7 @@ $(TEXI-VERSION):
 	@echo @set DATE $$(date "+$d %B %Y") >> $@
 	@echo @comment $@ ends here. >> $@
 
+DIR-FILE   = doc/dir
 INFO-FILE  = doc/$(ELISP-PKG).info
 PDF-FILE   = doc/$(ELISP-PKG).pdf
 TEXI-FILES = doc/$(ELISP-PKG).texi $(TEXI-VERSION)
@@ -402,8 +404,7 @@ help: $(call print-help,info-install,Install info files in $(INFO-DIR))
 info-install: $(INFO-FILE)
 	@$(MKDIR) $(INFO-DIR)
 	$(CP) $(INFO-FILE) $(INFO-DIR)
-	@echo Be sure to update 'dir' node
-	@for file in $(INFO-FILE); do $(INSTALL-INFO) --debug --info-dir=$(INFO-DIR) $${file}; done
+	@$(INSTALL-INFO) --debug --info-dir=$(INFO-DIR) $<
 
 .PHONY: doc html info pdf doc-clean doc-clean-all p i h info-install texi-version $(TEXI-VERSION)
 
@@ -479,7 +480,7 @@ install-all := $(addsuffix -install,hlp mla data)
 
 install-all: $(install-all)
 
-help: $(call print-help,install	,Install everything)
+help: $(call print-help,install	,Install mla/help/data into $(TBOX-DIR))
 install: install-all
 
 
@@ -536,21 +537,26 @@ prebuilt-upload: $(prebuilt.zip)
 	gh release create "release-$(VERSION)" '$(prebuilt-zip)#info, help, mla, and pmaple' --title "Release $(VERSION)"
 
 help: $(call print-help,prebuilt-download,Download $(prebuilt-zip))
+prebuilt-url := https://github.com/JoeRiel/$(PKG)/releases/download/release-$(VERSION)/$(prebuilt-zip)
+
 prebuilt-download:
-	gh release download --clobber --repo JoeRiel/maplev "release-$(VERSION)" --archive=zip
+	curl --fail --location --output $(prebuilt-zip) $(prebuilt-url)
 
 help: $(call print-help,prebuilt-unpack,Unpack $(prebuilt-zip))
 prebuilt-unpack:
 	unzip -o $(prebuilt-zip)
 
-help: $(call print-help,prebuilt-install,Install the unpacked prebuilt)
+help: $(call print-help,prebuilt-install,Install the unpacked prebuilt into $(TBOX-DIR) and $(INFO-DIR))
 prebuilt-install:
-	@$(MKDIR) $(INFO-DIR)
-	$(CP) $(INFO-FILE) $(INFO-DIR)
-	@echo Be sure to update 'dir' node
-	@for file in $(INFO-FILE); do $(INSTALL-INFO) --debug --info-dir=$(INFO-DIR) $${file}; done
+#	Ensure directory ~/maple/toolbox/maplev/lib exists.
+#	Copy maplev.help and maplev.info to it.
 	@$(MKDIR) --parents $(TBOX-DIR)/lib
 	@$(CP) --target-directory=$(TBOX-DIR)/lib lib/$(MPL-PKG).help lib/$(MPL-PKG).mla
+#	Ensure ~/maple/toolbox/maplev/info exists.
+#	Copy maplev.html to it.
+	@$(MKDIR) $(TBOX-DIR)/info
+	@$(CP) --target-directory=$(TBOX-DIR)/info doc/$(ELISP-PKG).html
+#	Install pmaple.
 	@install --verbose -D --target-directory=$(BIN-DIR) $(SYSTYPE)/pmaple
 
 
@@ -564,7 +570,7 @@ help: $(call print-separator)
 SYSTYPE := $(shell $(MAPLE_ROOT)/bin/maple.system.type)
 BIN-DIR := $(TBOX-DIR)/$(SYSTYPE)
 
-help: $(call print-help,pmaple-install,Install pmaple)
+help: $(call print-help,pmaple-install,Install pmaple into $(BIN-DIR))
 pmaple-install:
 	@install --verbose -D --target-directory=$(BIN-DIR) $(SYSTYPE)/pmaple
 

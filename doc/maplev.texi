@@ -1465,8 +1465,7 @@ the forward quotes may be rendered incorrectly.}
     (setq maplev-config-default
           (let* ((mapledir "/opt/maple2025"))
             (make-instance 'maplev-config-class
-                :bindir (file-name-concat mapledir "internal"
-                                                   "bin.X86_64_LINUX")
+                :bindir (file-name-concat mapledir "bin.X86_64_LINUX")
                 :mapledir mapledir
                 :maple (file-name-concat mapledir "bin" "maple")
                 :maple-options "-B -A2 -e2"
