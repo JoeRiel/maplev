@@ -404,8 +404,7 @@ help: $(call print-help,info-install,Install info files in $(INFO-DIR))
 info-install: $(INFO-FILE)
 	@$(MKDIR) $(INFO-DIR)
 	$(CP) $(INFO-FILE) $(INFO-DIR)
-	@echo Be sure to update 'dir' node
-	@for file in $(INFO-FILE); do $(INSTALL-INFO) --debug --info-dir=$(INFO-DIR) $${file}; done
+	@$(INSTALL-INFO) --debug --info-dir=$(INFO-DIR) $<
 
 .PHONY: doc html info pdf doc-clean doc-clean-all p i h info-install texi-version $(TEXI-VERSION)
 

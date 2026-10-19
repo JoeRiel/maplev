@@ -35,6 +35,7 @@ properly installed. These files can be built from the source.
 
     git clone https://github.com/JoeRiel/maplev
     cd maplev
+    export MAPLE_ROOT=/opt/maple2026/    # set to current maple root
     make prebuilt-download # download maplev-built.zip
     make prebuilt-unpack   # unpack the zip file
     make prebuilt-install  # install maplev.info, maplev.help, and maplev.mla
@@ -43,14 +44,10 @@ properly installed. These files can be built from the source.
     make package           # create the tar file of .el files and dir
     make package-install   # install and byte-compile the lisp files and doc/dir
 
-
-make package-install runs a batch Emacs that ignores your init file
-and installs the package into ~/.emacs.d/elpa/maplev-<version>.
-If you have customized package-user-dir, start Emacs with --init-directory,
-or do not use package.el, use one of the following options instead.
-
-Install from within your own Emacs (custom settings apply):
-
+make package-install runs a batch Emacs that ignores your init file and
+installs the package into ~/.emacs.d/elpa/maplev-<version>. If you have
+customized package-user-dir, start Emacs with --init-directory, or do
+not use package.el, use one of the following options instead.
 
 Install from within your own Emacs (custom settings apply):
 
@@ -74,11 +71,7 @@ by the value of the emacs variable user-init-file:
     (use-package maplev
       :ensure nil
       :load-path "elpa/maplev-3.2.4"
-      :commands maplev-mode
-      :mode (("\\.mpl\\'" . maplev-mode)))
-
-    (use-package maplev-config
-      :commands maplev-config
+      :mode (("\\.mpl\\'" . maplev-mode))
       :config
         (setq maplev-config-default
               (let* ((mapledir "/opt/maple2025"))
@@ -101,3 +94,8 @@ to be opened in maplev-mode. If the maplev.info file was installed where
 it can be found by Emacs, you can get help by calling
 maplev-goto-info-node. An html version of the help, maplev.html, is
 distributed with the source.
+
+Org Mode
+
+The https://github/JoeRiel/ob-maple package provides functions to
+interact with Maple in an Org file.
